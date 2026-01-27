@@ -523,7 +523,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           var id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block);
           responseBuilder.addBlocks(RegistryEntry.newBuilder()
             .setId(id.toString())
-            .setDisplayName(block.getName().getString())
+            .setDisplayName(formatRegistryId(id.toString()))
             .build());
         }
       }
@@ -534,7 +534,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           var id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
           responseBuilder.addEntities(RegistryEntry.newBuilder()
             .setId(id.toString())
-            .setDisplayName(entityType.getDescription().getString())
+            .setDisplayName(formatRegistryId(id.toString()))
             .build());
         }
       }
@@ -545,7 +545,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
           responseBuilder.addItems(RegistryEntry.newBuilder()
             .setId(id.toString())
-            .setDisplayName(item.getDescription().getString())
+            .setDisplayName(formatRegistryId(id.toString()))
             .build());
         }
       }
@@ -572,13 +572,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           "minecraft:end_midlands", "minecraft:small_end_islands", "minecraft:end_barrens", "minecraft:the_void"
         );
         for (var biomeId : biomeKeys) {
-          var displayName = biomeId.replace("minecraft:", "").replace("_", " ");
-          displayName = java.util.Arrays.stream(displayName.split(" "))
-            .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
-            .collect(java.util.stream.Collectors.joining(" "));
           responseBuilder.addBiomes(RegistryEntry.newBuilder()
             .setId(biomeId)
-            .setDisplayName(displayName)
+            .setDisplayName(formatRegistryId(biomeId))
             .build());
         }
       }
@@ -1090,5 +1086,15 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return Value.newBuilder().setStructValue(structBuilder.build()).build();
     }
     return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+  }
+
+  /// Formats a registry ID (e.g., "minecraft:diamond_ore") into a display name (e.g., "Diamond Ore").
+  private String formatRegistryId(String id) {
+    // Remove namespace prefix (e.g., "minecraft:")
+    var name = id.contains(":") ? id.substring(id.indexOf(':') + 1) : id;
+    // Replace underscores with spaces and capitalize each word
+    return java.util.Arrays.stream(name.split("_"))
+      .map(word -> word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1))
+      .collect(java.util.stream.Collectors.joining(" "));
   }
 }

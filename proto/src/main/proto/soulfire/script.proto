@@ -581,6 +581,53 @@ message GetNodeTypesResponse {
   // List of all categories with their metadata.
   // Useful for building category filters and palette sections in the UI.
   repeated CategoryDefinition categories = 2;
+  // Metadata for each port type including colors and compatibility.
+  // Clients should use this instead of hardcoded port type info.
+  repeated PortTypeMetadata port_type_metadata = 3;
+}
+
+// Metadata for a port type, enabling data-driven port rendering.
+message PortTypeMetadata {
+  // The port type this metadata applies to.
+  PortType port_type = 1;
+  // Display color for this port type (hex color code, e.g., "#22c55e").
+  string color = 2;
+  // Human-readable name for this port type.
+  string display_name = 3;
+  // List of port types that can be implicitly converted to this type.
+  // Used for connection validation. Empty means only exact matches allowed.
+  repeated PortType compatible_from = 4;
+}
+
+// Request to get Minecraft registry data for autocomplete and validation.
+message GetRegistryDataRequest {
+  // Optional: specific registry to fetch. If empty, returns all registries.
+  // Valid values: "blocks", "entities", "items", "biomes"
+  optional string registry = 1;
+}
+
+// A single registry entry (block, entity, item, or biome).
+message RegistryEntry {
+  // The namespaced identifier (e.g., "minecraft:diamond_ore").
+  string id = 1;
+  // Human-readable display name.
+  string display_name = 2;
+  // Optional icon or texture identifier.
+  string icon = 3;
+  // Optional category/group for organizing in UI.
+  string category = 4;
+}
+
+// Response containing Minecraft registry data.
+message GetRegistryDataResponse {
+  // Block types (e.g., "minecraft:stone", "minecraft:diamond_ore").
+  repeated RegistryEntry blocks = 1;
+  // Entity types (e.g., "minecraft:zombie", "minecraft:player").
+  repeated RegistryEntry entities = 2;
+  // Item types (e.g., "minecraft:diamond", "minecraft:stick").
+  repeated RegistryEntry items = 3;
+  // Biome types (e.g., "minecraft:plains", "minecraft:forest").
+  repeated RegistryEntry biomes = 4;
 }
 
 // ScriptService provides management and execution capabilities for visual node-based
@@ -684,4 +731,9 @@ service ScriptService {
   // display names, and all other information needed to render and validate nodes.
   // This endpoint is cacheable - node types only change between server versions.
   rpc GetNodeTypes (GetNodeTypesRequest) returns (GetNodeTypesResponse) {}
+
+  // Gets Minecraft registry data for autocomplete and validation.
+  // Returns blocks, entities, items, and biomes that can be used in scripts.
+  // This endpoint is cacheable - registry data only changes between server versions.
+  rpc GetRegistryData (GetRegistryDataRequest) returns (GetRegistryDataResponse) {}
 }
