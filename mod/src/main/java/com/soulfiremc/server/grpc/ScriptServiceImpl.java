@@ -497,12 +497,174 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         responseBuilder.addCategories(categoryToProto(category));
       }
 
+      // Add port type metadata for data-driven port rendering
+      for (var portTypeMeta : getPortTypeMetadata()) {
+        responseBuilder.addPortTypeMetadata(portTypeMeta);
+      }
+
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting node types", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
+  }
+
+  @Override
+  public void getRegistryData(GetRegistryDataRequest request, StreamObserver<GetRegistryDataResponse> responseObserver) {
+    // No authentication required - registry data is public metadata
+    try {
+      var responseBuilder = GetRegistryDataResponse.newBuilder();
+      var specificRegistry = request.hasRegistry() ? request.getRegistry() : null;
+
+      // Add blocks
+      if (specificRegistry == null || "blocks".equals(specificRegistry)) {
+        for (var block : net.minecraft.core.registries.BuiltInRegistries.BLOCK) {
+          var id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block);
+          responseBuilder.addBlocks(RegistryEntry.newBuilder()
+            .setId(id.toString())
+            .setDisplayName(block.getName().getString())
+            .build());
+        }
+      }
+
+      // Add entities
+      if (specificRegistry == null || "entities".equals(specificRegistry)) {
+        for (var entityType : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE) {
+          var id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+          responseBuilder.addEntities(RegistryEntry.newBuilder()
+            .setId(id.toString())
+            .setDisplayName(entityType.getDescription().getString())
+            .build());
+        }
+      }
+
+      // Add items
+      if (specificRegistry == null || "items".equals(specificRegistry)) {
+        for (var item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
+          var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
+          responseBuilder.addItems(RegistryEntry.newBuilder()
+            .setId(id.toString())
+            .setDisplayName(item.getDescription().getString())
+            .build());
+        }
+      }
+
+      // Add biomes - these require a registry access from a level, use built-in keys
+      if (specificRegistry == null || "biomes".equals(specificRegistry)) {
+        // Use the built-in biome keys since we don't have level access here
+        var biomeKeys = List.of(
+          "minecraft:plains", "minecraft:sunflower_plains", "minecraft:snowy_plains", "minecraft:ice_spikes",
+          "minecraft:desert", "minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:forest",
+          "minecraft:flower_forest", "minecraft:birch_forest", "minecraft:dark_forest", "minecraft:old_growth_birch_forest",
+          "minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga", "minecraft:taiga", "minecraft:snowy_taiga",
+          "minecraft:savanna", "minecraft:savanna_plateau", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills",
+          "minecraft:windswept_forest", "minecraft:windswept_savanna", "minecraft:jungle", "minecraft:sparse_jungle",
+          "minecraft:bamboo_jungle", "minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands",
+          "minecraft:meadow", "minecraft:cherry_grove", "minecraft:grove", "minecraft:snowy_slopes",
+          "minecraft:frozen_peaks", "minecraft:jagged_peaks", "minecraft:stony_peaks", "minecraft:river",
+          "minecraft:frozen_river", "minecraft:beach", "minecraft:snowy_beach", "minecraft:stony_shore",
+          "minecraft:warm_ocean", "minecraft:lukewarm_ocean", "minecraft:deep_lukewarm_ocean", "minecraft:ocean",
+          "minecraft:deep_ocean", "minecraft:cold_ocean", "minecraft:deep_cold_ocean", "minecraft:frozen_ocean",
+          "minecraft:deep_frozen_ocean", "minecraft:mushroom_fields", "minecraft:dripstone_caves", "minecraft:lush_caves",
+          "minecraft:deep_dark", "minecraft:nether_wastes", "minecraft:warped_forest", "minecraft:crimson_forest",
+          "minecraft:soul_sand_valley", "minecraft:basalt_deltas", "minecraft:the_end", "minecraft:end_highlands",
+          "minecraft:end_midlands", "minecraft:small_end_islands", "minecraft:end_barrens", "minecraft:the_void"
+        );
+        for (var biomeId : biomeKeys) {
+          var displayName = biomeId.replace("minecraft:", "").replace("_", " ");
+          displayName = java.util.Arrays.stream(displayName.split(" "))
+            .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
+            .collect(java.util.stream.Collectors.joining(" "));
+          responseBuilder.addBiomes(RegistryEntry.newBuilder()
+            .setId(biomeId)
+            .setDisplayName(displayName)
+            .build());
+        }
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting registry data", t);
+      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+    }
+  }
+
+  /// Returns port type metadata for data-driven port rendering.
+  private List<PortTypeMetadata> getPortTypeMetadata() {
+    return List.of(
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_EXEC)
+        .setColor("#ffffff")
+        .setDisplayName("Execution")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_NUMBER)
+        .setColor("#22c55e")
+        .setDisplayName("Number")
+        .addCompatibleFrom(PortType.PORT_TYPE_STRING)
+        .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_BOOLEAN)
+        .setColor("#ef4444")
+        .setDisplayName("Boolean")
+        .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
+        .addCompatibleFrom(PortType.PORT_TYPE_STRING)
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_STRING)
+        .setColor("#eab308")
+        .setDisplayName("String")
+        .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
+        .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_VECTOR3)
+        .setColor("#3b82f6")
+        .setDisplayName("Vector3")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_ENTITY)
+        .setColor("#a855f7")
+        .setDisplayName("Entity")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_BOT)
+        .setColor("#f97316")
+        .setDisplayName("Bot")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_BLOCK)
+        .setColor("#06b6d4")
+        .setDisplayName("Block")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_ITEM)
+        .setColor("#ec4899")
+        .setDisplayName("Item")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_LIST)
+        .setColor("#8b5cf6")
+        .setDisplayName("List")
+        .build(),
+      PortTypeMetadata.newBuilder()
+        .setPortType(PortType.PORT_TYPE_ANY)
+        .setColor("#6b7280")
+        .setDisplayName("Any")
+        .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
+        .addCompatibleFrom(PortType.PORT_TYPE_STRING)
+        .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
+        .addCompatibleFrom(PortType.PORT_TYPE_VECTOR3)
+        .addCompatibleFrom(PortType.PORT_TYPE_ENTITY)
+        .addCompatibleFrom(PortType.PORT_TYPE_BOT)
+        .addCompatibleFrom(PortType.PORT_TYPE_BLOCK)
+        .addCompatibleFrom(PortType.PORT_TYPE_ITEM)
+        .addCompatibleFrom(PortType.PORT_TYPE_LIST)
+        .build()
+    );
   }
 
   private CategoryDefinition categoryToProto(NodeCategory category) {
