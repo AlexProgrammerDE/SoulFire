@@ -21,6 +21,7 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
+import java.util.Set;
 
 /// Represents the graph structure of a visual script.
 /// Contains nodes and edges that define the execution flow and data connections.
@@ -133,12 +134,14 @@ public final class ScriptGraph {
 
   /// Resolves input values for a node by following data edges.
   /// Returns a map of input names to their values from connected nodes.
+  /// Multi-input ports collect all connected values into a list.
   ///
   /// @param nodeId  the node to resolve inputs for
   /// @param context the execution context containing node outputs
   /// @return map of input handle names to resolved values
   public Map<String, NodeValue> resolveInputs(String nodeId, ScriptContext context) {
     var inputs = new HashMap<String, NodeValue>();
+    var multiInputs = new HashMap<String, List<NodeValue>>();
 
     // First, apply default values from the node (convert from Object to NodeValue)
     var node = nodes.get(nodeId);
@@ -148,7 +151,7 @@ public final class ScriptGraph {
       }
     }
 
-    // Then, override with values from connected data edges
+    // Then, collect values from connected data edges
     // Port IDs have format "type-name" but nodes store outputs/lookup inputs by simple name
     for (var edge : edges) {
       if (edge.edgeType == EdgeType.DATA && edge.targetNodeId.equals(nodeId)) {
@@ -157,9 +160,24 @@ public final class ScriptGraph {
         var targetKey = extractPortName(edge.targetHandle);
         var value = sourceOutputs.get(sourceKey);
         if (value != null) {
-          inputs.put(targetKey, value);
+          // Check if this is a multi-input port by looking at port metadata
+          var isMultiInput = node != null && node.multiInputPorts != null
+            && node.multiInputPorts.contains(targetKey);
+
+          if (isMultiInput) {
+            // Collect into list for multi-input ports
+            multiInputs.computeIfAbsent(targetKey, k -> new ArrayList<>()).add(value);
+          } else {
+            // Single input - last connection wins
+            inputs.put(targetKey, value);
+          }
         }
       }
+    }
+
+    // Convert multi-input lists to NodeValue.List
+    for (var entry : multiInputs.entrySet()) {
+      inputs.put(entry.getKey(), NodeValue.ofList(entry.getValue()));
     }
 
     return inputs;
@@ -227,14 +245,23 @@ public final class ScriptGraph {
 
   /// Represents a node in the graph.
   ///
-  /// @param id            unique node identifier
-  /// @param type          node type identifier (e.g., "action.pathfind")
-  /// @param defaultInputs default values for input ports
+  /// @param id              unique node identifier
+  /// @param type            node type identifier (e.g., "action.pathfind")
+  /// @param defaultInputs   default values for input ports
+  /// @param multiInputPorts set of port names that accept multiple connections
+  /// @param muted           whether the node is muted (bypassed during execution)
   public record GraphNode(
     String id,
     String type,
-    @Nullable Map<String, Object> defaultInputs
-  ) {}
+    @Nullable Map<String, Object> defaultInputs,
+    @Nullable Set<String> multiInputPorts,
+    boolean muted
+  ) {
+    /// Creates a graph node with defaults for new fields.
+    public GraphNode(String id, String type, @Nullable Map<String, Object> defaultInputs) {
+      this(id, type, defaultInputs, null, false);
+    }
+  }
 
   /// Represents an edge connecting two nodes.
   ///

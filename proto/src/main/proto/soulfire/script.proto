@@ -97,6 +97,17 @@ message PortDefinition {
   // For list ports, the type of elements in the list.
   // Only applicable when port_type is PORT_TYPE_LIST.
   optional PortType element_type = 7;
+  // Whether this input accepts multiple connections (Blender-style multi-input).
+  // When true, all connected values are collected into a list.
+  // Visually rendered as a pill/ellipsis shaped socket.
+  bool multi_input = 8;
+  // For polymorphic ports, the list of accepted types.
+  // If non-empty, this port can accept any of these types and will
+  // adapt its behavior based on the connected type.
+  repeated PortType accepted_types = 9;
+  // For dynamic output ports, the ID of the input port to inherit type from.
+  // Used for polymorphic nodes where output type depends on input type.
+  string infer_type_from = 10;
 }
 
 // Complete definition of a node type.
@@ -137,6 +148,14 @@ message NodeTypeDefinition {
   bool deprecated = 11;
   // If deprecated, message explaining what to use instead.
   string deprecation_message = 12;
+  // Whether this is a layout node (reroute, frame, etc.).
+  // Layout nodes have special minimal rendering and don't execute logic.
+  bool is_layout_node = 13;
+  // Whether this node can be muted (bypassed during execution).
+  // When muted, inputs pass through to outputs unchanged.
+  bool supports_muting = 14;
+  // Whether this node supports inline preview of its output.
+  bool supports_preview = 15;
 }
 
 // Represents a single node in the visual script graph.
@@ -157,6 +176,28 @@ message ScriptNode {
   // Contains node-specific settings and parameter values.
   // The structure depends on the node type.
   map<string, google.protobuf.Value> data = 4;
+  // Whether this node is muted (bypassed during execution).
+  // When muted, the node passes inputs directly to outputs without processing.
+  // Visually shown as grayed out with pass-through indicator.
+  bool muted = 5;
+  // Whether this node is collapsed (showing only header).
+  // Collapsed nodes still function normally but take less visual space.
+  bool collapsed = 6;
+  // For frame nodes: the width of the frame.
+  optional double width = 7;
+  // For frame nodes: the height of the frame.
+  optional double height = 8;
+  // For frame nodes: IDs of nodes contained within this frame.
+  // Updated automatically based on node positions.
+  repeated string contained_nodes = 9;
+  // Optional label override for this node instance.
+  // If set, displayed instead of the node type's default label.
+  string label = 10;
+  // For reroute nodes: the resolved port type based on connections.
+  // Dynamically updated when connections change.
+  optional PortType resolved_type = 11;
+  // Parent frame node ID, if this node is inside a frame.
+  string parent_frame_id = 12;
 }
 
 // Represents a connection between two nodes in the visual script graph.

@@ -524,7 +524,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setIsTrigger(metadata.isTrigger())
       .addAllKeywords(metadata.keywords())
       .setDeprecated(metadata.deprecated())
-      .setIcon(metadata.icon());
+      .setIcon(metadata.icon())
+      .setIsLayoutNode(metadata.isLayoutNode())
+      .setSupportsMuting(metadata.supportsMuting())
+      .setSupportsPreview(metadata.supportsPreview());
 
     if (metadata.color() != null) {
       builder.setColor(metadata.color());
@@ -549,7 +552,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setDisplayName(port.displayName())
       .setPortType(portTypeToProto(port.type()))
       .setRequired(port.required())
-      .setDescription(port.description());
+      .setDescription(port.description())
+      .setMultiInput(port.multiInput());
 
     if (port.defaultValue() != null) {
       builder.setDefaultValue(port.defaultValue());

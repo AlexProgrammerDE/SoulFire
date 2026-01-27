@@ -127,4 +127,24 @@ public interface PortDefinition {
 
   @Nullable
   PortType elementType();
+
+  /// Whether this input accepts multiple connections (Blender-style multi-input).
+  /// When true, all connected values are collected into a list.
+  @Value.Default
+  default boolean multiInput() {
+    return false;
+  }
+
+  /// Creates a multi-input port that accepts multiple connections.
+  /// All connected values are collected into a list.
+  static PortDefinition multiInput(String id, String displayName, PortType type, String description) {
+    return ImmutablePortDefinition.builder()
+      .id(type.name().toLowerCase() + "-" + id)
+      .displayName(displayName)
+      .type(type)
+      .required(false)
+      .multiInput(true)
+      .description(description)
+      .build();
+  }
 }

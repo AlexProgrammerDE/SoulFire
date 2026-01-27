@@ -100,4 +100,24 @@ public interface NodeMetadata {
   /// If deprecated, what to use instead.
   @Nullable
   String deprecationMessage();
+
+  /// Whether this is a layout node (reroute, frame, etc.).
+  /// Layout nodes have special minimal rendering and don't execute logic.
+  @Value.Default
+  default boolean isLayoutNode() {
+    return false;
+  }
+
+  /// Whether this node can be muted (bypassed during execution).
+  /// When muted, inputs pass through to outputs unchanged.
+  @Value.Default
+  default boolean supportsMuting() {
+    return true;
+  }
+
+  /// Whether this node supports inline preview of its output.
+  @Value.Default
+  default boolean supportsPreview() {
+    return false;
+  }
 }
