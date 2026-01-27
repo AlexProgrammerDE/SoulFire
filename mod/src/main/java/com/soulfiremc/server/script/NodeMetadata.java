@@ -25,6 +25,7 @@ import java.util.List;
 /// Complete metadata for a node type.
 /// Contains all information needed to render the node in a client
 /// without hardcoded knowledge of specific node types.
+/// Supports Blender-style features: dynamic socket groups and mode-based visibility.
 @Value.Immutable
 public interface NodeMetadata {
   /// Convenience builder starting point.
@@ -100,4 +101,39 @@ public interface NodeMetadata {
   /// If deprecated, what to use instead.
   @Nullable
   String deprecationMessage();
+
+  /// Dynamic socket group definitions (Blender-style add/remove sockets).
+  /// Allows nodes to have variable numbers of inputs/outputs.
+  @Value.Default
+  default List<DynamicSocketGroup> dynamicGroups() {
+    return List.of();
+  }
+
+  /// Whether this node supports mode-based socket visibility.
+  /// When true, some sockets may be hidden based on node data values.
+  @Value.Default
+  default boolean hasDynamicVisibility() {
+    return false;
+  }
+
+  /// The data field that controls socket visibility (e.g., "operation", "mode").
+  /// Used with visibleWhen conditions on port definitions.
+  @Nullable
+  String visibilityControlField();
+
+  /// Finds an input port by its ID.
+  default PortDefinition findInput(String portId) {
+    return inputs().stream()
+      .filter(p -> p.id().equals(portId))
+      .findFirst()
+      .orElse(null);
+  }
+
+  /// Finds an output port by its ID.
+  default PortDefinition findOutput(String portId) {
+    return outputs().stream()
+      .filter(p -> p.id().equals(portId))
+      .findFirst()
+      .orElse(null);
+  }
 }

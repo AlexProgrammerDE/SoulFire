@@ -97,6 +97,53 @@ message PortDefinition {
   // For list ports, the type of elements in the list.
   // Only applicable when port_type is PORT_TYPE_LIST.
   optional PortType element_type = 7;
+  // Maximum connections allowed on this port.
+  // Default is 1 for inputs (single connection like Blender), 0 (unlimited) for outputs.
+  // Set to 0 for unlimited connections.
+  uint32 max_connections = 8;
+  // Whether this is a multi-input socket (pill-shaped in Blender style).
+  // When true, accepts multiple ordered connections that are merged into a list.
+  // The engine collects all connected values into an ordered list.
+  bool multi_input = 9;
+  // Visibility condition - port only shown when node data field matches.
+  // Format: "field=value" or "field!=value" or "field=value1,field!=value2"
+  // Example: "operation=SCALE" means only visible when data.operation == "SCALE"
+  // Example: "operation!=ABS,operation!=NEGATE" means hidden for ABS and NEGATE operations
+  optional string visible_when = 10;
+  // For dynamic socket groups - the group identifier.
+  // Sockets with same group_id can be added/removed together at runtime.
+  optional string dynamic_group = 11;
+  // Sort order within the port list (for dynamic sockets ordering).
+  int32 sort_order = 12;
+}
+
+// Defines a group of sockets that can be dynamically added/removed at runtime.
+// Used for nodes like "Combine List" where users can add arbitrary number of inputs.
+message DynamicSocketGroup {
+  // Unique identifier for this group (e.g., "inputs", "elements").
+  string id = 1;
+  // Human-readable name for UI (e.g., "Input", "Element").
+  string display_name = 2;
+  // Template port definition for new sockets in this group.
+  // New sockets are created based on this template with unique IDs.
+  PortDefinition socket_template = 3;
+  // Minimum number of sockets in this group (default 0).
+  uint32 min_count = 4;
+  // Maximum number of sockets (0 = unlimited).
+  uint32 max_count = 5;
+  // Whether this group is for inputs (true) or outputs (false).
+  bool is_input = 6;
+}
+
+// Defines how types can be implicitly converted (Blender-style).
+message TypeConversion {
+  // The source port type.
+  PortType from_type = 1;
+  // The target port type.
+  PortType to_type = 2;
+  // Human-readable hint about how the conversion works.
+  // Examples: "false→0, true→1", "Average of x,y,z", "Parsed as number"
+  string conversion_hint = 3;
 }
 
 // Complete definition of a node type.
@@ -137,6 +184,28 @@ message NodeTypeDefinition {
   bool deprecated = 11;
   // If deprecated, message explaining what to use instead.
   string deprecation_message = 12;
+  // Dynamic socket group definitions for this node type.
+  // Allows nodes to have variable numbers of inputs/outputs.
+  repeated DynamicSocketGroup dynamic_groups = 13;
+  // Whether this node supports mode-based socket visibility.
+  // When true, some sockets may be hidden based on node data values.
+  bool has_dynamic_visibility = 14;
+  // The data field that controls socket visibility (e.g., "operation", "mode").
+  // Used with visible_when conditions on port definitions.
+  optional string visibility_control_field = 15;
+}
+
+// Represents an instance of a dynamic socket on a specific node.
+// Used when a node has dynamic socket groups that allow adding/removing sockets.
+message DynamicSocketInstance {
+  // The dynamic group this socket belongs to.
+  string group_id = 1;
+  // Unique socket ID within the node (e.g., "input-0", "input-1").
+  string socket_id = 2;
+  // Display name for this specific instance (can be customized by user).
+  string display_name = 3;
+  // Sort order for rendering (determines position in the socket list).
+  int32 sort_order = 4;
 }
 
 // Represents a single node in the visual script graph.
@@ -157,6 +226,9 @@ message ScriptNode {
   // Contains node-specific settings and parameter values.
   // The structure depends on the node type.
   map<string, google.protobuf.Value> data = 4;
+  // Dynamic socket instances for this node.
+  // Only populated for nodes with dynamic socket groups.
+  repeated DynamicSocketInstance dynamic_sockets = 5;
 }
 
 // Represents a connection between two nodes in the visual script graph.
@@ -540,6 +612,58 @@ message GetNodeTypesResponse {
   // List of all categories with their metadata.
   // Useful for building category filters and palette sections in the UI.
   repeated CategoryDefinition categories = 2;
+  // Type compatibility rules for implicit conversions (Blender-style).
+  // Clients can use this to show which connections are valid and what conversions apply.
+  repeated TypeConversion implicit_conversions = 3;
+}
+
+// Types of validation errors that can occur.
+enum ValidationErrorType {
+  // Unknown or unspecified error.
+  VALIDATION_ERROR_TYPE_UNKNOWN = 0;
+  // Multiple edges connected to a single-input socket.
+  VALIDATION_ERROR_TYPE_MULTIPLE_CONNECTIONS = 1;
+  // Source type cannot be converted to target type.
+  VALIDATION_ERROR_TYPE_TYPE_INCOMPATIBLE = 2;
+  // Required input port has no connection and no default value.
+  VALIDATION_ERROR_TYPE_REQUIRED_UNCONNECTED = 3;
+  // Graph contains cycles in execution flow.
+  VALIDATION_ERROR_TYPE_CYCLE_DETECTED = 4;
+  // Unknown or unregistered node type.
+  VALIDATION_ERROR_TYPE_INVALID_NODE_TYPE = 5;
+}
+
+// A single validation error found in a script.
+message ValidationError {
+  // The type of validation error.
+  ValidationErrorType error_type = 1;
+  // Human-readable description of the error.
+  string message = 2;
+  // The edge ID that caused the error (if applicable).
+  optional string edge_id = 3;
+  // The node ID that caused the error (if applicable).
+  optional string node_id = 4;
+  // The port ID that caused the error (if applicable).
+  optional string port_id = 5;
+}
+
+// Request to validate a script without saving it.
+message ValidateScriptRequest {
+  // The instance context for validation.
+  string instance_id = 1;
+  // The script data to validate.
+  ScriptData script = 2;
+}
+
+// Response containing validation results.
+message ValidateScriptResponse {
+  // Whether the script is valid (no errors).
+  bool valid = 1;
+  // List of validation errors found.
+  repeated ValidationError errors = 2;
+  // Edge IDs that would be auto-removed due to single-connection policy.
+  // Clients can use this to show which connections will be replaced.
+  repeated string edges_to_remove = 3;
 }
 
 // ScriptService provides management and execution capabilities for visual node-based
@@ -643,4 +767,16 @@ service ScriptService {
   // display names, and all other information needed to render and validate nodes.
   // This endpoint is cacheable - node types only change between server versions.
   rpc GetNodeTypes (GetNodeTypesRequest) returns (GetNodeTypesResponse) {}
+
+  // Validates a script without saving it.
+  // Returns validation errors and warnings including:
+  // - Multiple connections to single-input sockets
+  // - Type incompatibilities between connected ports
+  // - Required inputs without connections or defaults
+  // - Cycles in execution flow
+  // - Unknown node types
+  // Clients can use this to provide real-time feedback in the editor.
+  // Errors: NOT_FOUND if instance does not exist
+  // Errors: PERMISSION_DENIED if user lacks script read permission
+  rpc ValidateScript (ValidateScriptRequest) returns (ValidateScriptResponse) {}
 }

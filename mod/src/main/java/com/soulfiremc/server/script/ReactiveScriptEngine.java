@@ -23,9 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /// Reactive execution engine for visual scripts.
@@ -142,6 +140,7 @@ public final class ReactiveScriptEngine {
 
   /// Executes a node after waiting for all its DATA dependencies.
   /// This is the key improvement: proper fan-in synchronization.
+  /// Handles type conversions and multi-input sockets (Blender-style).
   ///
   /// @param graph   the script graph
   /// @param nodeId  the node to execute
@@ -167,6 +166,7 @@ public final class ReactiveScriptEngine {
     }
 
     var nodeImpl = NodeRegistry.create(graphNode.type());
+    var metadata = nodeImpl.getMetadata();
 
     // Collect all DATA edges targeting this node
     var incomingDataEdges = graph.getIncomingDataEdges(nodeId);
@@ -184,20 +184,67 @@ public final class ReactiveScriptEngine {
       return executeNode(nodeImpl, nodeId, baseInputs, graph, context);
     }
 
-    // Wait for all upstream nodes to complete and merge their outputs
-    // Port IDs have format "type-name" but nodes store outputs/lookup inputs by simple name
-    var upstreamMonos = incomingDataEdges.stream()
-      .map(edge -> context.awaitNodeOutputs(edge.sourceNodeId())
-        .map(outputs -> {
-          var sourceKey = extractPortName(edge.sourceHandle());
-          var targetKey = extractPortName(edge.targetHandle());
-          var value = outputs.get(sourceKey);
-          return value != null ? Map.entry(targetKey, value) : null;
-        })
-        .filter(entry -> entry != null))
-      .toList();
+    // Group edges by target port for multi-input handling
+    var edgesByPort = incomingDataEdges.stream()
+      .collect(Collectors.groupingBy(ScriptGraph.GraphEdge::targetHandle));
 
-    return Flux.merge(upstreamMonos)
+    var portMonos = new ArrayList<Mono<Map.Entry<String, NodeValue>>>();
+
+    for (var entry : edgesByPort.entrySet()) {
+      var targetHandle = entry.getKey();
+      var edges = entry.getValue();
+      var targetPortName = extractPortName(targetHandle);
+      var targetPort = metadata.findInput(targetHandle);
+
+      if (targetPort != null && targetPort.multiInput()) {
+        // Multi-input: collect all values into an ordered list
+        var valueMonos = edges.stream()
+          .map(edge -> context.awaitNodeOutputs(edge.sourceNodeId())
+            .map(outputs -> {
+              var sourceKey = extractPortName(edge.sourceHandle());
+              var value = outputs.get(sourceKey);
+              // Apply type conversion if element type is specified
+              if (value != null && targetPort.elementType() != null) {
+                var sourcePort = getSourcePort(graph, edge);
+                if (sourcePort != null && sourcePort.type() != targetPort.elementType()) {
+                  value = TypeConverter.convert(value, sourcePort.type(), targetPort.elementType());
+                }
+              }
+              return value;
+            })
+            .filter(Objects::nonNull))
+          .toList();
+
+        portMonos.add(
+          Flux.merge(valueMonos)
+            .collectList()
+            .map(values -> Map.entry(targetPortName, NodeValue.of(values)))
+        );
+      } else {
+        // Single-input: take the last value (per Blender behavior - new connection replaces old)
+        var edge = edges.get(edges.size() - 1);
+        portMonos.add(
+          context.awaitNodeOutputs(edge.sourceNodeId())
+            .map(outputs -> {
+              var sourceKey = extractPortName(edge.sourceHandle());
+              var value = outputs.get(sourceKey);
+
+              // Apply type conversion if needed
+              if (value != null && targetPort != null) {
+                var sourcePort = getSourcePort(graph, edge);
+                if (sourcePort != null && sourcePort.type() != targetPort.type()) {
+                  value = TypeConverter.convert(value, sourcePort.type(), targetPort.type());
+                }
+              }
+
+              return value != null ? Map.entry(targetPortName, value) : null;
+            })
+            .filter(Objects::nonNull)
+        );
+      }
+    }
+
+    return Flux.merge(portMonos)
       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b))
       .map(resolvedInputs -> {
         var merged = new HashMap<>(baseInputs);
@@ -205,6 +252,17 @@ public final class ReactiveScriptEngine {
         return merged;
       })
       .flatMap(inputs -> executeNode(nodeImpl, nodeId, inputs, graph, context));
+  }
+
+  /// Gets the source port definition for an edge.
+  /// Returns null if the source node or port is not found.
+  private PortDefinition getSourcePort(ScriptGraph graph, ScriptGraph.GraphEdge edge) {
+    var sourceNode = graph.getNode(edge.sourceNodeId());
+    if (sourceNode == null || !NodeRegistry.isRegistered(sourceNode.type())) {
+      return null;
+    }
+    var sourceMetadata = NodeRegistry.create(sourceNode.type()).getMetadata();
+    return sourceMetadata.findOutput(edge.sourceHandle());
   }
 
   /// Executes a single node with resolved inputs.
