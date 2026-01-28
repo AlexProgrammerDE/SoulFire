@@ -34,6 +34,13 @@ import com.soulfiremc.server.script.nodes.math.*;
 import com.soulfiremc.server.script.nodes.string.*;
 import com.soulfiremc.server.script.nodes.trigger.*;
 import com.soulfiremc.server.script.nodes.util.*;
+import com.soulfiremc.server.script.nodes.network.*;
+import com.soulfiremc.server.script.nodes.ai.*;
+import com.soulfiremc.server.script.nodes.json.*;
+import com.soulfiremc.server.script.nodes.encoding.*;
+import com.soulfiremc.server.script.nodes.state.*;
+import com.soulfiremc.server.script.nodes.integration.*;
+import com.soulfiremc.server.script.nodes.variable.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -100,6 +107,8 @@ public final class NodeRegistry {
     register(StringContainsNode::new);
     register(FormatNode::new);
     register(IndexOfNode::new);
+    register(RegexMatchNode::new);
+    register(RegexReplaceNode::new);
 
     // List Nodes
     register(ListLengthNode::new);
@@ -117,6 +126,7 @@ public final class NodeRegistry {
     register(IsEmptyNode::new);
     register(CreateVector3Node::new);
     register(SplitVector3Node::new);
+    register(TimestampNode::new);
 
     // Action Nodes
     register(SetRotationNode::new);
@@ -176,6 +186,43 @@ public final class NodeRegistry {
     register(SequenceNode::new);
     register(GateNode::new);
     register(DebounceNode::new);
+    register(DelayNode::new);
+    register(RateLimitNode::new);
+
+    // Network Nodes
+    register(WebFetchNode::new);
+
+    // AI Nodes
+    register(LLMChatNode::new);
+
+    // JSON Nodes
+    register(JsonParseNode::new);
+    register(JsonStringifyNode::new);
+    register(JsonGetNode::new);
+    register(JsonSetNode::new);
+    register(JsonArrayNode::new);
+    register(JsonObjectNode::new);
+
+    // Encoding Nodes
+    register(HashNode::new);
+    register(Base64EncodeNode::new);
+    register(Base64DecodeNode::new);
+    register(EncryptNode::new);
+    register(DecryptNode::new);
+    register(CompressionNode::new);
+
+    // State Nodes
+    register(CacheNode::new);
+    register(StateNode::new);
+
+    // Integration Nodes
+    register(DiscordWebhookNode::new);
+
+    // Variable Nodes
+    register(SetPersistentBotVariableNode::new);
+    register(GetPersistentBotVariableNode::new);
+    register(SetSessionBotVariableNode::new);
+    register(GetSessionBotVariableNode::new);
   }
 
   private NodeRegistry() {

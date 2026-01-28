@@ -48,6 +48,20 @@ public final class CategoryRegistry {
     NodeCategory.of("constants", "Constants", "hash", "Constant value nodes", 8));
   public static final NodeCategory UTILITY = register(
     NodeCategory.of("utility", "Utility", "tool", "Utility and conversion nodes", 9));
+  public static final NodeCategory NETWORK = register(
+    NodeCategory.of("network", "Network", "globe", "HTTP requests and web operations", 10));
+  public static final NodeCategory AI = register(
+    NodeCategory.of("ai", "AI", "brain", "AI/LLM operations", 11));
+  public static final NodeCategory JSON = register(
+    NodeCategory.of("json", "JSON", "braces", "JSON parsing and manipulation", 12));
+  public static final NodeCategory ENCODING = register(
+    NodeCategory.of("encoding", "Encoding", "lock", "Hashing, encryption, compression", 13));
+  public static final NodeCategory STATE = register(
+    NodeCategory.of("state", "State", "database", "Caching and state management", 14));
+  public static final NodeCategory INTEGRATION = register(
+    NodeCategory.of("integration", "Integration", "plug", "External service integrations", 15));
+  public static final NodeCategory VARIABLE = register(
+    NodeCategory.of("variable", "Variables", "variable", "Bot variable storage", 16));
 
   private CategoryRegistry() {
     // Prevent instantiation

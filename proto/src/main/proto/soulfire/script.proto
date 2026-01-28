@@ -248,9 +248,11 @@ message ScriptData {
   // Scripts are always associated with a specific instance.
   // Format: UUID string.
   string instance_id = 7;
-  // Whether this script should automatically start when the instance starts.
-  // Auto-start scripts begin execution without manual intervention.
-  bool auto_start = 8;
+  // Reserved field 8 was auto_start (replaced by paused)
+  reserved 8;
+  // Whether this script is paused.
+  // Paused scripts do not execute their triggers.
+  bool paused = 9;
 }
 
 // Summary information about a script for listing purposes.
@@ -272,8 +274,11 @@ message ScriptInfo {
   google.protobuf.Timestamp created_at = 6;
   // Timestamp when the script was last modified.
   google.protobuf.Timestamp updated_at = 7;
-  // Whether this script auto-starts when the instance starts.
-  bool auto_start = 8;
+  // Reserved field 8 was auto_start (replaced by paused)
+  reserved 8;
+  // Whether this script is paused.
+  // Paused scripts do not execute their triggers.
+  bool paused = 9;
 }
 
 // Runtime status information for a script.
@@ -410,8 +415,11 @@ message CreateScriptRequest {
   // Initial edges for the script graph.
   // Can be empty to create a blank script.
   repeated ScriptEdge edges = 6;
-  // Whether the script should auto-activate when the instance starts.
-  bool auto_start = 7;
+  // Reserved field 7 was auto_start (replaced by paused)
+  reserved 7;
+  // Whether the script should start paused.
+  // Paused scripts do not execute their triggers.
+  bool paused = 8;
 }
 
 // Response after successfully creating a script.
@@ -464,9 +472,11 @@ message UpdateScriptRequest {
   bool update_nodes = 8;
   // Whether the edges field should be updated (allows setting to empty list).
   bool update_edges = 9;
-  // Updated auto-start setting.
-  // If not set, the auto-start setting remains unchanged.
-  optional bool auto_start = 10;
+  // Reserved field 10 was auto_start (replaced by paused)
+  reserved 10;
+  // Updated paused setting.
+  // If not set, the paused setting remains unchanged.
+  optional bool paused = 11;
 }
 
 // Response after successfully updating a script.
