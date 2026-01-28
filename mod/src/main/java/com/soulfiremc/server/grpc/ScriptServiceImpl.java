@@ -1031,6 +1031,19 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       @Override
       public void onLog(String level, String message) {
         log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
+        if (!observer.isCancelled()) {
+          try {
+            observer.onNext(ScriptEvent.newBuilder()
+              .setScriptLog(ScriptLog.newBuilder()
+                .setLevel(level)
+                .setMessage(message)
+                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+                .build())
+              .build());
+          } catch (Exception e) {
+            log.debug("Error sending script log event", e);
+          }
+        }
       }
     };
   }

@@ -50,11 +50,18 @@ public final class PrintNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var message = getInput(inputs, "message", null);
+    // Get the raw NodeValue since this accepts "any" type
+    var messageValue = inputs.get("message");
     var level = getStringInput(inputs, "level", "info");
 
     // Convert message to string representation
-    var messageStr = message != null ? message.toString() : "null";
+    String messageStr;
+    if (messageValue == null || messageValue.isNull()) {
+      messageStr = "null";
+    } else {
+      // Use asString for proper conversion, falling back to toString
+      messageStr = messageValue.asString(messageValue.toString());
+    }
 
     // Log via runtime
     runtime.log(level, messageStr);

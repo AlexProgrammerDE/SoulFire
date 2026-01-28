@@ -338,6 +338,18 @@ message NodeError {
   google.protobuf.Timestamp timestamp = 3;
 }
 
+// Event emitted when a script logs a message (e.g., from Print node).
+message ScriptLog {
+  // The ID of the node that produced the log (if applicable).
+  optional string node_id = 1;
+  // The log level (debug, info, warn, error).
+  string level = 2;
+  // The log message content.
+  string message = 3;
+  // When the log was produced.
+  google.protobuf.Timestamp timestamp = 4;
+}
+
 // Event emitted when a trigger fires and begins executing a node chain.
 // Note: Scripts are reactive - this indicates a trigger event occurred,
 // not that the script "started running" in the traditional sense.
@@ -376,6 +388,8 @@ message ScriptEvent {
     ScriptCompleted script_completed = 4;
     // A trigger fired and began executing a chain.
     ScriptStarted script_started = 5;
+    // A script logged a message.
+    ScriptLog script_log = 6;
   }
 }
 
