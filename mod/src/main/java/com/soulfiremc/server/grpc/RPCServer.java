@@ -62,6 +62,8 @@ public final class RPCServer {
   private final int port;
   private final Server server;
   private final Server prometheusServer;
+  @Getter
+  private final ScriptServiceImpl scriptService;
 
   public RPCServer(
     String host,
@@ -69,6 +71,7 @@ public final class RPCServer {
     SoulFireServer soulFireServer) {
     this.host = host;
     this.port = port;
+    this.scriptService = new ScriptServiceImpl(soulFireServer);
 
     var meterRegistry = PrometheusMeterRegistries.defaultRegistry();
     var corsBuilder =
@@ -104,7 +107,7 @@ public final class RPCServer {
         .addService(new ProxyCheckServiceImpl(soulFireServer))
         .addService(new ServerServiceImpl(soulFireServer))
         .addService(new UserServiceImpl(soulFireServer))
-        .addService(new ScriptServiceImpl(soulFireServer))
+        .addService(scriptService)
         // Allow collecting info about callable methods.
         .addService(ProtoReflectionServiceV1.newInstance())
         .maxRequestMessageLength(Integer.MAX_VALUE)
@@ -204,6 +207,9 @@ public final class RPCServer {
       prometheusServer.start().join();
       log.info("Prometheus Server started, listening on {}", prometheusServer.activeLocalPort());
     }
+
+    // Start all non-paused scripts after the server is ready
+    scriptService.startAllNonPausedScripts();
   }
 
   public void shutdown() throws InterruptedException {

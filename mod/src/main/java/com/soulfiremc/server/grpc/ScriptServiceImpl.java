@@ -90,8 +90,182 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     boolean active,
     String activeNodeId,
     long activationCount,
+    ReactiveScriptContext context,
     ServerCallStreamObserver<ScriptEvent> observer
   ) {}
+
+  // ============================================================================
+  // Internal Script Lifecycle Methods
+  // ============================================================================
+
+  /// Starts a script without modifying the paused flag in the database.
+  /// Used for automatic script starting on create/update/server startup.
+  private void startScriptInternal(ScriptEntity scriptEntity) {
+    var scriptId = scriptEntity.id();
+    var instanceId = scriptEntity.instance().id();
+
+    // Check if already running
+    if (activeScripts.containsKey(scriptId)) {
+      log.debug("Script {} is already running", scriptId);
+      return;
+    }
+
+    try {
+      // Build the script graph from the entity
+      var graph = buildScriptGraph(scriptEntity);
+
+      // Get the instance manager
+      var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
+      if (instanceManager == null) {
+        log.warn("Instance {} not found, cannot start script {}", instanceId, scriptId);
+        return;
+      }
+
+      // Create internal event listener (no stream, just logging)
+      var eventListener = createInternalEventListener(scriptId);
+
+      // Create reactive context for trigger execution
+      var context = new ReactiveScriptContext(instanceManager, eventListener);
+
+      // Register triggers for event-driven execution
+      var engine = new ReactiveScriptEngine();
+      triggerService.registerTriggers(scriptId, graph, context, engine);
+
+      // Store active script state (no observer for internal scripts)
+      var activationState = new ScriptActivationState(
+        scriptId,
+        instanceId,
+        true,
+        null,
+        1,
+        context,
+        null
+      );
+      activeScripts.put(scriptId, activationState);
+
+      log.info("Started script {} with {} triggers", scriptId, graph.findTriggerNodes().size());
+    } catch (Exception e) {
+      log.error("Failed to start script {}", scriptId, e);
+    }
+  }
+
+  /// Stops a script without modifying the paused flag in the database.
+  /// Used for stopping scripts before restart or when pausing.
+  private void stopScriptInternal(UUID scriptId) {
+    var activationState = activeScripts.remove(scriptId);
+    if (activationState == null) {
+      return;
+    }
+
+    // Unregister triggers
+    triggerService.unregisterTriggers(scriptId);
+
+    // Cancel the context if it exists
+    if (activationState.context() != null) {
+      activationState.context().cancel();
+    }
+
+    // If there's a client observer, send completion event
+    if (activationState.observer() != null && !activationState.observer().isCancelled()) {
+      try {
+        activationState.observer().onNext(ScriptEvent.newBuilder()
+          .setScriptCompleted(ScriptCompleted.newBuilder()
+            .setScriptId(scriptId.toString())
+            .setSuccess(true)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+            .build())
+          .build());
+        activationState.observer().onCompleted();
+      } catch (Exception e) {
+        log.debug("Error completing script stream on stop", e);
+      }
+    }
+
+    log.info("Stopped script {}", scriptId);
+  }
+
+  /// Restarts a script by stopping it and starting it again.
+  /// Used when a script is updated to apply new configuration.
+  private void restartScriptInternal(ScriptEntity scriptEntity) {
+    var scriptId = scriptEntity.id();
+    log.info("Restarting script {}", scriptId);
+    stopScriptInternal(scriptId);
+    startScriptInternal(scriptEntity);
+  }
+
+  /// Starts all non-paused scripts for a given instance.
+  /// Called on server startup.
+  public void startAllNonPausedScripts(UUID instanceId) {
+    soulFireServer.sessionFactory().inTransaction(session -> {
+      var scripts = session.createQuery(
+          "FROM ScriptEntity WHERE instance.id = :instanceId AND paused = false",
+          ScriptEntity.class)
+        .setParameter("instanceId", instanceId)
+        .list();
+
+      for (var script : scripts) {
+        startScriptInternal(script);
+      }
+
+      log.info("Started {} non-paused scripts for instance {}", scripts.size(), instanceId);
+    });
+  }
+
+  /// Starts all non-paused scripts across all instances.
+  /// Called on server startup.
+  public void startAllNonPausedScripts() {
+    soulFireServer.sessionFactory().inTransaction(session -> {
+      var scripts = session.createQuery(
+          "FROM ScriptEntity WHERE paused = false",
+          ScriptEntity.class)
+        .list();
+
+      for (var script : scripts) {
+        startScriptInternal(script);
+      }
+
+      log.info("Started {} non-paused scripts on server startup", scripts.size());
+    });
+  }
+
+  /// Creates an internal event listener that just logs events (no streaming to client).
+  private ScriptEventListener createInternalEventListener(UUID scriptId) {
+    return new ScriptEventListener() {
+      @Override
+      public void onNodeStarted(String nodeId) {
+        log.debug("[Script {}] Node started: {}", scriptId, nodeId);
+      }
+
+      @Override
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
+        log.debug("[Script {}] Node completed: {}", scriptId, nodeId);
+      }
+
+      @Override
+      public void onNodeError(String nodeId, String error) {
+        log.warn("[Script {}] Node error {}: {}", scriptId, nodeId, error);
+      }
+
+      @Override
+      public void onScriptCompleted(boolean success) {
+        log.debug("[Script {}] Execution chain completed: {}", scriptId, success ? "success" : "failure");
+      }
+
+      @Override
+      public void onScriptCancelled() {
+        log.debug("[Script {}] Execution cancelled", scriptId);
+      }
+
+      @Override
+      public void onLog(String level, String message) {
+        log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
+      }
+    };
+  }
+
+  // ============================================================================
+  // gRPC Service Methods
+  // ============================================================================
 
   @Override
   public void createScript(CreateScriptRequest request, StreamObserver<CreateScriptResponse> responseObserver) {
@@ -112,11 +286,16 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         newScript.instance(instanceEntity);
         newScript.nodesJson(nodesToJson(request.getNodesList()));
         newScript.edgesJson(edgesToJson(request.getEdgesList()));
-        newScript.autoStart(request.getAutoStart());
+        newScript.paused(request.getPaused());
 
         session.persist(newScript);
         return newScript;
       });
+
+      // Start the script immediately if not paused
+      if (!scriptEntity.paused()) {
+        startScriptInternal(scriptEntity);
+      }
 
       responseObserver.onNext(CreateScriptResponse.newBuilder()
         .setScript(entityToScriptData(scriptEntity))
@@ -186,13 +365,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         if (request.getUpdateEdges()) {
           script.edgesJson(edgesToJson(request.getEdgesList()));
         }
-        if (request.hasAutoStart()) {
-          script.autoStart(request.getAutoStart());
+        if (request.hasPaused()) {
+          script.paused(request.getPaused());
         }
 
         session.merge(script);
         return script;
       });
+
+      // Restart the script if it's not paused (to apply new configuration)
+      if (!scriptEntity.paused()) {
+        restartScriptInternal(scriptEntity);
+      } else {
+        // Script is paused, make sure it's stopped
+        stopScriptInternal(scriptId);
+      }
 
       responseObserver.onNext(UpdateScriptResponse.newBuilder()
         .setScript(entityToScriptData(scriptEntity))
@@ -214,23 +401,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      // Deactivate the script if active - unregister triggers first
-      triggerService.unregisterTriggers(scriptId);
-      var activationState = activeScripts.remove(scriptId);
-      if (activationState != null && activationState.observer() != null) {
-        try {
-          activationState.observer().onNext(ScriptEvent.newBuilder()
-            .setScriptCompleted(ScriptCompleted.newBuilder()
-              .setScriptId(scriptId.toString())
-              .setSuccess(false)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-              .build())
-            .build());
-          activationState.observer().onCompleted();
-        } catch (Exception ignored) {
-          // Observer may already be closed
-        }
-      }
+      // Stop the script if it's running
+      stopScriptInternal(scriptId);
 
       soulFireServer.sessionFactory().inTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
@@ -241,6 +413,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         session.remove(script);
       });
 
+      log.info("Script {} deleted", scriptId);
       responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
@@ -292,47 +465,69 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.CHANGE_INSTANCE_STATE, instanceId));
 
     try {
-      // Check if script is already active
-      if (activeScripts.containsKey(scriptId)) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Script is already active"));
-      }
-
+      // Load and unpause the script in the database
       var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
           throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
         }
+        // Set paused=false to persist the resumed state
+        if (script.paused()) {
+          script.paused(false);
+          session.merge(script);
+        }
         return script;
       });
 
       var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
-      var activationState = new ScriptActivationState(
-        scriptId,
-        instanceId,
-        true,
-        null,
-        1,
-        serverObserver
-      );
 
-      activeScripts.put(scriptId, activationState);
-
-      // Set up cancellation handler
+      // Set up cancellation handler - client disconnect does NOT stop the script
+      // (scripts run independently of client connections in the pause-based model)
       serverObserver.setOnCancelHandler(() -> {
-        activeScripts.remove(scriptId);
-        triggerService.unregisterTriggers(scriptId);
-        log.info("Script {} deactivated by client disconnect", scriptId);
+        // Remove the observer from the active script but keep it running
+        var currentState = activeScripts.get(scriptId);
+        if (currentState != null && currentState.observer() == serverObserver) {
+          activeScripts.put(scriptId, new ScriptActivationState(
+            currentState.scriptId(),
+            currentState.instanceId(),
+            currentState.active(),
+            currentState.activeNodeId(),
+            currentState.activationCount(),
+            currentState.context(),
+            null // Remove the observer
+          ));
+        }
+        log.info("Client disconnected from script {} stream (script keeps running)", scriptId);
       });
 
-      // Send script started event
-      responseObserver.onNext(ScriptEvent.newBuilder()
-        .setScriptStarted(ScriptStarted.newBuilder()
-          .setScriptId(scriptId.toString())
-          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-          .build())
-        .build());
+      // Check if script is already running
+      var existingState = activeScripts.get(scriptId);
+      if (existingState != null) {
+        // Script is already running, just attach the observer
+        activeScripts.put(scriptId, new ScriptActivationState(
+          existingState.scriptId(),
+          existingState.instanceId(),
+          existingState.active(),
+          existingState.activeNodeId(),
+          existingState.activationCount() + 1,
+          existingState.context(),
+          serverObserver
+        ));
 
+        // Send script started event
+        responseObserver.onNext(ScriptEvent.newBuilder()
+          .setScriptStarted(ScriptStarted.newBuilder()
+            .setScriptId(scriptId.toString())
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+            .build())
+          .build());
+
+        log.info("Client attached to already-running script {}", scriptId);
+        return;
+      }
+
+      // Script is not running, start it
       // Build the script graph from the entity
       var graph = buildScriptGraph(scriptEntity);
 
@@ -347,16 +542,35 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var context = new ReactiveScriptContext(instanceManager, eventListener);
 
       // Register triggers for event-driven execution using reactive engine
-      // Scripts are now purely reactive - they only respond to trigger events
       var engine = new ReactiveScriptEngine();
       triggerService.registerTriggers(scriptId, graph, context, engine);
 
-      log.info("Script {} activated with {} triggers", scriptId, graph.findTriggerNodes().size());
+      // Store active script state
+      var activationState = new ScriptActivationState(
+        scriptId,
+        instanceId,
+        true,
+        null,
+        1,
+        context,
+        serverObserver
+      );
+      activeScripts.put(scriptId, activationState);
+
+      // Send script started event
+      responseObserver.onNext(ScriptEvent.newBuilder()
+        .setScriptStarted(ScriptStarted.newBuilder()
+          .setScriptId(scriptId.toString())
+          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+          .build())
+        .build());
+
+      log.info("Script {} resumed with {} triggers", scriptId, graph.findTriggerNodes().size());
 
     } catch (StatusRuntimeException e) {
       throw e;
     } catch (Throwable t) {
-      log.error("Error activating script", t);
+      log.error("Error resuming script", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
@@ -369,37 +583,27 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.CHANGE_INSTANCE_STATE, instanceId));
 
     try {
-      // Unregister any active triggers
-      triggerService.unregisterTriggers(scriptId);
-
-      var activationState = activeScripts.remove(scriptId);
-      if (activationState == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Script is not active"));
-      }
-
-      // Send completion event and close the stream
-      if (activationState.observer() != null && !activationState.observer().isCancelled()) {
-        try {
-          activationState.observer().onNext(ScriptEvent.newBuilder()
-            .setScriptCompleted(ScriptCompleted.newBuilder()
-              .setScriptId(scriptId.toString())
-              .setSuccess(true)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-              .build())
-            .build());
-          activationState.observer().onCompleted();
-        } catch (Exception e) {
-          log.debug("Error completing script stream on deactivation", e);
+      // Set paused=true in the database to persist the paused state
+      soulFireServer.sessionFactory().inTransaction(session -> {
+        var script = session.find(ScriptEntity.class, scriptId);
+        if (script == null || !script.instance().id().equals(instanceId)) {
+          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
         }
-      }
+        script.paused(true);
+        session.merge(script);
+      });
 
-      log.info("Script {} deactivated", scriptId);
+      // Stop the script if it's running
+      stopScriptInternal(scriptId);
+
+      log.info("Script {} paused", scriptId);
       responseObserver.onNext(DeactivateScriptResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
     } catch (Throwable t) {
-      log.error("Error deactivating script", t);
+      log.error("Error pausing script", t);
       throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
     }
   }
@@ -845,7 +1049,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setInstanceId(entity.instance().id().toString())
       .addAllNodes(jsonToNodes(entity.nodesJson()))
       .addAllEdges(jsonToEdges(entity.edgesJson()))
-      .setAutoStart(entity.autoStart())
+      .setPaused(entity.paused())
       .build();
   }
 
@@ -857,7 +1061,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setInstanceId(entity.instance().id().toString())
       .setCreatedAt(instantToTimestamp(entity.createdAt()))
       .setUpdatedAt(instantToTimestamp(entity.updatedAt()))
-      .setAutoStart(entity.autoStart())
+      .setPaused(entity.paused())
       .build();
   }
 

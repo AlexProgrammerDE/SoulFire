@@ -78,11 +78,13 @@ public final class ScriptEntity {
   private String edgesJson = "[]";
 
   /**
-   * Whether this script should automatically start when the instance starts.
+   * Whether this script is paused (not running).
+   * Scripts run by default; when paused, they won't be started on server startup
+   * or when created/updated.
    */
   @ColumnDefault("false")
   @Column(nullable = false)
-  private boolean autoStart = false;
+  private boolean paused = false;
 
   @CreationTimestamp
   @Column(nullable = false, updatable = false)
