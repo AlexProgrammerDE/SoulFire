@@ -162,7 +162,7 @@ public final class ScriptTriggerService {
           log.debug("Registered OnDeath trigger for script {} node {}", scriptId, node.id());
         }
 
-        case "trigger.on_join" -> {
+        case "trigger.on_bot_init" -> {
           var sinkKey = scriptId + ":" + node.id();
 
           var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
@@ -171,7 +171,7 @@ public final class ScriptTriggerService {
           var subscription = sink.asFlux()
             .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
               .onErrorResume(e -> {
-                log.error("Error in OnJoin trigger execution", e);
+                log.error("Error in OnBotInit trigger execution", e);
                 return Mono.empty();
               }), 1)
             .subscribe();
@@ -188,6 +188,44 @@ public final class ScriptTriggerService {
           };
           SoulFireAPI.registerListener(BotConnectionInitEvent.class, handler);
           listeners.add(new EventListenerHolder<>(BotConnectionInitEvent.class, handler));
+          log.debug("Registered OnBotInit trigger for script {} node {}", scriptId, node.id());
+        }
+
+        case "trigger.on_join" -> {
+          // Track which bots have already triggered OnJoin (to ensure it fires only once per bot)
+          var triggeredBots = ConcurrentHashMap.<String>newKeySet();
+          var sinkKey = scriptId + ":" + node.id();
+
+          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+          triggerSinks.put(sinkKey, sink);
+
+          var subscription = sink.asFlux()
+            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
+              .onErrorResume(e -> {
+                log.error("Error in OnJoin trigger execution", e);
+                return Mono.empty();
+              }), 1)
+            .subscribe();
+          triggerSubscriptions.put(sinkKey, subscription);
+
+          // Use tick event to detect when player is ready (fires once per bot when player becomes non-null)
+          Consumer<BotPreTickEvent> handler = event -> {
+            if (context.isCancelled()) return;
+
+            var connection = event.connection();
+            var botId = connection.accountName();
+
+            // Only fire once per bot, and only when player is ready
+            if (connection.minecraft().player != null && triggeredBots.add(botId)) {
+              var inputs = new HashMap<String, NodeValue>();
+              inputs.put("bot", NodeValue.ofBot(connection));
+              inputs.put("botName", NodeValue.ofString(connection.accountName()));
+
+              sink.tryEmitNext(inputs);
+            }
+          };
+          SoulFireAPI.registerListener(BotPreTickEvent.class, handler);
+          listeners.add(new EventListenerHolder<>(BotPreTickEvent.class, handler));
           log.debug("Registered OnJoin trigger for script {} node {}", scriptId, node.id());
         }
 
@@ -269,6 +307,28 @@ public final class ScriptTriggerService {
           log.debug("Registered OnInterval trigger for script {} node {} with interval {}ms",
             scriptId, node.id(), intervalMs);
         }
+
+        case "trigger.on_script_init" -> {
+          // Fire immediately when script starts
+          var inputs = new HashMap<String, NodeValue>();
+          inputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+          // Execute asynchronously to not block registration
+          engine.executeFromTrigger(graph, node.id(), context, inputs)
+            .onErrorResume(e -> {
+              log.error("Error in OnScriptInit trigger execution", e);
+              return Mono.empty();
+            })
+            .subscribe();
+          log.debug("Registered and fired OnScriptInit trigger for script {} node {}", scriptId, node.id());
+        }
+
+        case "trigger.on_script_end" -> {
+          // Store for later execution when script stops
+          var endTrigger = new ScriptEndTrigger(graph, node.id(), context, engine);
+          listeners.add(endTrigger);
+          log.debug("Registered OnScriptEnd trigger for script {} node {}", scriptId, node.id());
+        }
       }
     }
 
@@ -287,6 +347,14 @@ public final class ScriptTriggerService {
       return;
     }
 
+    // First, fire any OnScriptEnd triggers synchronously
+    for (var listener : listeners) {
+      if (listener instanceof ScriptEndTrigger endTrigger) {
+        endTrigger.fire();
+      }
+    }
+
+    // Then clean up all listeners
     for (var listener : listeners) {
       if (listener instanceof CancellableTask task) {
         task.cancel();
@@ -333,6 +401,31 @@ public final class ScriptTriggerService {
   private record CancellableTask(AtomicBoolean cancelled) {
     void cancel() {
       cancelled.set(true);
+    }
+  }
+
+  /// Holder for script end triggers that fire when the script is stopped.
+  private record ScriptEndTrigger(
+    ScriptGraph graph,
+    String nodeId,
+    ReactiveScriptContext context,
+    ReactiveScriptEngine engine
+  ) {
+    void fire() {
+      try {
+        var inputs = new HashMap<String, NodeValue>();
+        inputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+        // Execute synchronously (block) to ensure cleanup completes before script fully stops
+        engine.executeFromTrigger(graph, nodeId, context, inputs)
+          .onErrorResume(e -> {
+            log.error("Error in OnScriptEnd trigger execution", e);
+            return Mono.empty();
+          })
+          .block(java.time.Duration.ofSeconds(5));
+      } catch (Exception e) {
+        log.error("Error firing OnScriptEnd trigger", e);
+      }
     }
   }
 }

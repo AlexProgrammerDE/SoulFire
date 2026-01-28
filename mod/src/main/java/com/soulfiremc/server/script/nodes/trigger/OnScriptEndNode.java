@@ -22,26 +22,24 @@ import com.soulfiremc.server.script.*;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Trigger node that fires when the bot has fully joined and is ready to interact.
-/// This waits until the player object is initialized (unlike OnBotInit which fires earlier).
-/// Outputs: bot (the bot that joined), serverAddress, username
-public final class OnJoinNode extends AbstractScriptNode {
+/// Trigger node that fires when the script is being stopped.
+/// This fires once before the script stops execution, allowing cleanup.
+/// Outputs: timestamp
+public final class OnScriptEndNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("trigger.on_join")
-    .displayName("On Join")
+    .type("trigger.on_script_end")
+    .displayName("On Script End")
     .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
       PortDefinition.execOut(),
-      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that joined"),
-      PortDefinition.output("serverAddress", "Server Address", PortType.STRING, "The server address"),
-      PortDefinition.output("username", "Username", PortType.STRING, "The bot's username")
+      PortDefinition.output("timestamp", "Timestamp", PortType.NUMBER, "The timestamp when the script is ending")
     )
     .isTrigger(true)
-    .description("Fires when the bot has fully joined and the player is ready to interact")
-    .icon("log-in")
-    .color("#4CAF50")
-    .addKeywords("join", "connect", "login", "server", "spawn", "ready")
+    .description("Fires once when the script is being stopped")
+    .icon("square")
+    .color("#F44336")
+    .addKeywords("end", "stop", "finish", "script", "cleanup", "shutdown")
     .build();
 
   @Override
@@ -51,16 +49,8 @@ public final class OnJoinNode extends AbstractScriptNode {
 
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var bot = getBotInput(inputs);
-
-    var serverAddress = bot != null ? bot.serverAddress().toString() : "";
-    var username = bot != null ? bot.accountName() : "";
-
-    // Output data so it can be wired to downstream nodes
     return completed(results(
-      "bot", bot,
-      "serverAddress", serverAddress,
-      "username", username
+      "timestamp", System.currentTimeMillis()
     ));
   }
 }

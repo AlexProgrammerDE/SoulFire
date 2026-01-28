@@ -57,10 +57,13 @@ public final class NodeRegistry {
     // Trigger Nodes
     register(OnTickNode::new);
     register(OnJoinNode::new);
+    register(OnBotInitNode::new);
     register(OnChatNode::new);
     register(OnDamageNode::new);
     register(OnDeathNode::new);
     register(OnIntervalNode::new);
+    register(OnScriptInitNode::new);
+    register(OnScriptEndNode::new);
 
     // Math Nodes
     register(AddNode::new);

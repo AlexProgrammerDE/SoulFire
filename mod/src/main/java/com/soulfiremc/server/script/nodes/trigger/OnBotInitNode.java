@@ -22,26 +22,27 @@ import com.soulfiremc.server.script.*;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-/// Trigger node that fires when the bot has fully joined and is ready to interact.
-/// This waits until the player object is initialized (unlike OnBotInit which fires earlier).
-/// Outputs: bot (the bot that joined), serverAddress, username
-public final class OnJoinNode extends AbstractScriptNode {
+/// Trigger node that fires when the bot connection is initialized.
+/// This fires early during connection setup, before the player object is ready.
+/// Use OnJoin instead if you need to interact with the player.
+/// Outputs: bot (the bot), serverAddress, username
+public final class OnBotInitNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("trigger.on_join")
-    .displayName("On Join")
+    .type("trigger.on_bot_init")
+    .displayName("On Bot Init")
     .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
       PortDefinition.execOut(),
-      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that joined"),
+      PortDefinition.output("bot", "Bot", PortType.BOT, "The bot being initialized"),
       PortDefinition.output("serverAddress", "Server Address", PortType.STRING, "The server address"),
       PortDefinition.output("username", "Username", PortType.STRING, "The bot's username")
     )
     .isTrigger(true)
-    .description("Fires when the bot has fully joined and the player is ready to interact")
-    .icon("log-in")
-    .color("#4CAF50")
-    .addKeywords("join", "connect", "login", "server", "spawn", "ready")
+    .description("Fires early when the bot connection is initialized (before player is ready)")
+    .icon("power")
+    .color("#FF9800")
+    .addKeywords("init", "initialize", "start", "connect", "early")
     .build();
 
   @Override
@@ -56,7 +57,6 @@ public final class OnJoinNode extends AbstractScriptNode {
     var serverAddress = bot != null ? bot.serverAddress().toString() : "";
     var username = bot != null ? bot.accountName() : "";
 
-    // Output data so it can be wired to downstream nodes
     return completed(results(
       "bot", bot,
       "serverAddress", serverAddress,
