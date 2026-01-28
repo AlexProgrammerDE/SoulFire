@@ -41,14 +41,6 @@ public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
   private static final int MAX_PARALLEL_BRANCHES = 8;
 
-  /// Extracts the simple name from a port ID.
-  /// Port IDs have format "type-name" (e.g., "vector3-position" -> "position").
-  /// Execution ports use "exec-in"/"exec-out" which return "in"/"out".
-  private static String extractPortName(String portId) {
-    var dashIndex = portId.indexOf('-');
-    return dashIndex >= 0 ? portId.substring(dashIndex + 1) : portId;
-  }
-
   public ReactiveScriptEngine() {
     log.info("ReactiveScriptEngine initialized with {} registered node types", NodeRegistry.getRegisteredCount());
   }
@@ -108,7 +100,7 @@ public final class ReactiveScriptEngine {
           context.eventListener().onNodeError(triggerNodeId, message);
         })
         .onErrorResume(e -> Mono.just(Map.of()))
-        .flatMap(outputs -> executeDownstream(graph, triggerNodeId, "exec-out", context));
+        .flatMap(outputs -> executeDownstream(graph, triggerNodeId, StandardPorts.EXEC_OUT, context));
     }).subscribeOn(context.getReactorScheduler());
   }
 
@@ -185,12 +177,12 @@ public final class ReactiveScriptEngine {
     }
 
     // Wait for all upstream nodes to complete and merge their outputs
-    // Port IDs have format "type-name" but nodes store outputs/lookup inputs by simple name
+    // Port IDs are simple names that match the keys in node outputs
     var upstreamMonos = incomingDataEdges.stream()
       .map(edge -> context.awaitNodeOutputs(edge.sourceNodeId())
         .map(outputs -> {
-          var sourceKey = extractPortName(edge.sourceHandle());
-          var targetKey = extractPortName(edge.targetHandle());
+          var sourceKey = edge.sourceHandle();
+          var targetKey = edge.targetHandle();
           var value = outputs.get(sourceKey);
           return value != null ? Map.entry(targetKey, value) : null;
         })
@@ -235,7 +227,7 @@ public final class ReactiveScriptEngine {
         context.eventListener().onNodeError(nodeId, message);
       })
       .onErrorResume(e -> Mono.just(Map.of()))
-      .flatMap(outputs -> executeDownstream(graph, nodeId, "exec-out", context));
+      .flatMap(outputs -> executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context));
   }
 
   /// Executes the full graph (for testing/one-shot execution).

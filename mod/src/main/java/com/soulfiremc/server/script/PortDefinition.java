@@ -22,13 +22,15 @@ import org.immutables.value.Value;
 
 /// Definition of an input or output port on a node.
 /// Used to describe the node's interface for client rendering.
+/// Port IDs are simple names (e.g., "interval", "message", "bot").
+/// The port type is stored separately in the type() field.
 @Value.Immutable
 @Value.Style(stagedBuilder = true)
 public interface PortDefinition {
   /// Creates an execution input port.
   static PortDefinition execIn() {
     return ImmutablePortDefinition.builder()
-      .id("exec-in")
+      .id(StandardPorts.EXEC_IN)
       .displayName("In")
       .type(PortType.EXEC)
       .description("Execution input")
@@ -38,7 +40,7 @@ public interface PortDefinition {
   /// Creates an execution output port.
   static PortDefinition execOut() {
     return ImmutablePortDefinition.builder()
-      .id("exec-out")
+      .id(StandardPorts.EXEC_OUT)
       .displayName("Out")
       .type(PortType.EXEC)
       .description("Execution output")
@@ -46,10 +48,10 @@ public interface PortDefinition {
   }
 
   /// Creates a required input port.
-  /// Port ID format: "type-name" (e.g., "number-interval", "bot-target")
+  /// @param id simple port name (e.g., "interval", "target")
   static PortDefinition input(String id, String displayName, PortType type, String description) {
     return ImmutablePortDefinition.builder()
-      .id(type.name().toLowerCase() + "-" + id)
+      .id(id)
       .displayName(displayName)
       .type(type)
       .required(true)
@@ -58,10 +60,10 @@ public interface PortDefinition {
   }
 
   /// Creates an optional input port with a default value.
-  /// Port ID format: "type-name" (e.g., "number-interval", "string-message")
+  /// @param id simple port name (e.g., "interval", "message")
   static PortDefinition inputWithDefault(String id, String displayName, PortType type, String defaultValue, String description) {
     return ImmutablePortDefinition.builder()
-      .id(type.name().toLowerCase() + "-" + id)
+      .id(id)
       .displayName(displayName)
       .type(type)
       .required(false)
@@ -71,10 +73,10 @@ public interface PortDefinition {
   }
 
   /// Creates an output port.
-  /// Port ID format: "type-name" (e.g., "boolean-success", "number-count")
+  /// @param id simple port name (e.g., "success", "count")
   static PortDefinition output(String id, String displayName, PortType type, String description) {
     return ImmutablePortDefinition.builder()
-      .id(type.name().toLowerCase() + "-" + id)
+      .id(id)
       .displayName(displayName)
       .type(type)
       .description(description)
@@ -82,10 +84,10 @@ public interface PortDefinition {
   }
 
   /// Creates a list input port with element type.
-  /// Port ID format: "list-name" (e.g., "list-items", "list-targets")
+  /// @param id simple port name (e.g., "items", "targets")
   static PortDefinition listInput(String id, String displayName, PortType elementType, String description) {
     return ImmutablePortDefinition.builder()
-      .id("list-" + id)
+      .id(id)
       .displayName(displayName)
       .type(PortType.LIST)
       .required(true)
@@ -95,10 +97,10 @@ public interface PortDefinition {
   }
 
   /// Creates a list output port with element type.
-  /// Port ID format: "list-name" (e.g., "list-results", "list-bots")
+  /// @param id simple port name (e.g., "results", "bots")
   static PortDefinition listOutput(String id, String displayName, PortType elementType, String description) {
     return ImmutablePortDefinition.builder()
-      .id("list-" + id)
+      .id(id)
       .displayName(displayName)
       .type(PortType.LIST)
       .elementType(elementType)
@@ -137,9 +139,10 @@ public interface PortDefinition {
 
   /// Creates a multi-input port that accepts multiple connections.
   /// All connected values are collected into a list.
+  /// @param id simple port name
   static PortDefinition multiInput(String id, String displayName, PortType type, String description) {
     return ImmutablePortDefinition.builder()
-      .id(type.name().toLowerCase() + "-" + id)
+      .id(id)
       .displayName(displayName)
       .type(type)
       .required(false)

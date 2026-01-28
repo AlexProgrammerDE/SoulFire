@@ -117,7 +117,7 @@ public final class ScriptEngine {
         context.eventListener().onNodeCompleted(triggerNodeId, outputs);
 
         // Execute downstream nodes via the execution output
-        executeFromOutput(graph, triggerNodeId, "exec-out", context).join();
+        executeFromOutput(graph, triggerNodeId, StandardPorts.EXEC_OUT, context).join();
       } catch (Exception e) {
         var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
         log.error("Error executing trigger node {}: {}", triggerNodeId, message, e);
@@ -284,7 +284,7 @@ public final class ScriptEngine {
         context.eventListener().onNodeCompleted(nodeId, outputs);
 
         // Follow the default execution output
-        return executeFromOutput(graph, nodeId, "exec-out", context);
+        return executeFromOutput(graph, nodeId, StandardPorts.EXEC_OUT, context);
       })
       .exceptionally(error -> {
         var message = error.getCause() != null ? error.getCause().getMessage() : error.getMessage();
