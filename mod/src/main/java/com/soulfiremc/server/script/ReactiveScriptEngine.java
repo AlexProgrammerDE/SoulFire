@@ -178,15 +178,17 @@ public final class ReactiveScriptEngine {
 
     // Wait for all upstream nodes to complete and merge their outputs
     // Port IDs are simple names that match the keys in node outputs
+    // Use handle() instead of map().filter() because Reactor's map() doesn't allow null returns
     var upstreamMonos = incomingDataEdges.stream()
       .map(edge -> context.awaitNodeOutputs(edge.sourceNodeId())
-        .map(outputs -> {
+        .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
           var sourceKey = edge.sourceHandle();
           var targetKey = edge.targetHandle();
           var value = outputs.get(sourceKey);
-          return value != null ? Map.entry(targetKey, value) : null;
-        })
-        .filter(entry -> entry != null))
+          if (value != null) {
+            sink.next(Map.entry(targetKey, value));
+          }
+        }))
       .toList();
 
     return Flux.merge(upstreamMonos)
