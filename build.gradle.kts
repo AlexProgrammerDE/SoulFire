@@ -1,3 +1,11 @@
+plugins {
+    base
+}
+
+tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
+    languageVersion = JavaLanguageVersion.of(25)
+}
+
 allprojects {
   group = "com.soulfiremc"
   version = property("maven_version")!!
