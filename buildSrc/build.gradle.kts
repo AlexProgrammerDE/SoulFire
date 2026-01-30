@@ -25,3 +25,13 @@ dependencies {
   implementation("org.openrewrite:plugin:7.25.0")
   implementation("org.ow2.asm:asm:9.9.1")
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+    }
+}
+
+kotlin {
+    jvmToolchain(25)
+}
