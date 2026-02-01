@@ -39,13 +39,13 @@ jobs:
           distribution: 'zulu'
           check-latest: true
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # 5.0.0
+        uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # 5.0.1
       - name: Build with Gradle
         run: ./gradlew build test --stacktrace --scan
 
       - name: Build Changelog
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@439f79b5b5428107c7688c1d2b0e8bacc9b8792c # 6.0.1
+        uses: mikepenz/release-changelog-builder-action@6faf020194b7c8853f9e55c4fd92e40b02122a04 # 6.1.0
         with:
           mode: COMMIT
           toTag: ${{ github.ref }}

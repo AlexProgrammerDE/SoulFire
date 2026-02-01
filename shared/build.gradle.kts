@@ -20,7 +20,7 @@ dependencies {
 
   api("at.yawk.lz4:lz4-java:1.10.3")
   api("com.azure:azure-json:1.5.1")
-  api("com.github.oshi:oshi-core:6.9.2")
+  api("com.github.oshi:oshi-core:6.9.3")
   api("com.google.code.gson:gson:2.13.2")
   api("com.google.guava:failureaccess:1.0.3")
   api("com.google.guava:guava:33.5.0-jre")
@@ -34,7 +34,7 @@ dependencies {
   api("com.mojang:logging:1.6.11")
   api("com.mojang:patchy:2.2.10")
   api("com.mojang:text2speech:1.18.11")
-  api("commons-codec:commons-codec:1.20.0")
+  api("commons-codec:commons-codec:1.21.0")
   api("commons-io:commons-io:2.21.0")
   api("it.unimi.dsi:fastutil:8.5.18")
   api("net.java.dev.jna:jna-platform:5.18.1")
