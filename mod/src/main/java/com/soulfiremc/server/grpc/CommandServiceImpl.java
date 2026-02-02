@@ -22,7 +22,6 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +46,7 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error executing command", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -77,7 +76,7 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error tab completing", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 

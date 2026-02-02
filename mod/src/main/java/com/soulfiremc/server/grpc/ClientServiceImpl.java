@@ -26,7 +26,6 @@ import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
 import com.viaversion.viafabricplus.protocoltranslator.ProtocolTranslator;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,7 +97,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting client data", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -118,7 +117,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error generating WebDAV token", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -138,7 +137,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error generating API token", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -163,7 +162,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating self username", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -188,7 +187,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating self email", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -213,7 +212,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error invalidating self sessions", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }

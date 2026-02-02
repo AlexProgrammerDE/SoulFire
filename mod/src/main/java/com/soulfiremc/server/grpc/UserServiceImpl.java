@@ -25,7 +25,6 @@ import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +69,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error creating user", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -88,7 +87,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error deleting user", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -123,7 +122,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error listing users", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -156,7 +155,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting user info", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -183,7 +182,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting user info", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -216,7 +215,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating user", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -241,7 +240,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error generating user API token", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }

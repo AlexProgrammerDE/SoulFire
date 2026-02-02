@@ -27,7 +27,6 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.UserEntity;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +72,7 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error logging in", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -108,7 +107,7 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
       }
     } catch (Throwable t) {
       log.error("Error verifying email code", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 

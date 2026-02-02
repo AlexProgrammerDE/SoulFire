@@ -54,6 +54,7 @@ public final class GetBlockNode extends AbstractScriptNode {
     return METADATA;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);

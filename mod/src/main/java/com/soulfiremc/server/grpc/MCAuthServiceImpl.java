@@ -26,7 +26,6 @@ import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +48,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
 
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
-      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
     }
 
     var instance = optionalInstance.get();
@@ -119,7 +118,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
       });
     } catch (Throwable t) {
       log.error("Error authenticating account", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -131,7 +130,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
 
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
-      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
     }
 
     var instance = optionalInstance.get();
@@ -188,7 +187,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
 
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
-      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
     }
 
     var instance = optionalInstance.get();

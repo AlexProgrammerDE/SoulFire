@@ -26,7 +26,6 @@ import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.shared.SFLogAppender;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +96,7 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting previous logs", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -120,14 +119,14 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
       );
     } catch (Throwable t) {
       log.error("Error subscribing to logs", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
   private void validateScopeAccess(LogScope scope) {
     if (!hasScopeAccess(ServerRPCConstants.USER_CONTEXT_KEY.get(), scope)) {
-      throw new StatusRuntimeException(
-        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource"));
+      throw
+        Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource").asRuntimeException();
     }
   }
 

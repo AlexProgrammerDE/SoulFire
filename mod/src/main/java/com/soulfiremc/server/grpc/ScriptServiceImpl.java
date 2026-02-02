@@ -277,7 +277,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var newScript = new ScriptEntity();
@@ -305,7 +305,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error creating script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -320,8 +320,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
         return script;
       });
@@ -334,7 +334,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error getting script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -349,8 +349,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
 
         if (request.hasName()) {
@@ -389,7 +389,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error updating script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -407,8 +407,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       soulFireServer.sessionFactory().inTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
         session.remove(script);
       });
@@ -420,7 +420,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error deleting script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -434,7 +434,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var scripts = soulFireServer.sessionFactory().fromTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         return session.createQuery("FROM ScriptEntity WHERE instance = :instance ORDER BY createdAt DESC", ScriptEntity.class)
@@ -453,7 +453,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error listing scripts", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -469,8 +469,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
         // Set paused=false to persist the resumed state
         if (script.paused()) {
@@ -533,7 +533,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       // Get the instance manager
       var instanceManager = soulFireServer.getInstance(instanceId)
-        .orElseThrow(() -> new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance not found")));
+        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
 
       // Create event listener that streams events to the client
       var eventListener = createStreamingEventListener(scriptId, serverObserver);
@@ -571,7 +571,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error resuming script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -587,8 +587,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       soulFireServer.sessionFactory().inTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
         script.paused(true);
         session.merge(script);
@@ -604,7 +604,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error pausing script", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -620,8 +620,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       soulFireServer.sessionFactory().inTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
       });
 
@@ -643,7 +643,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error getting script status", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -659,8 +659,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       soulFireServer.sessionFactory().inTransaction(session -> {
         var script = session.find(ScriptEntity.class, scriptId);
         if (script == null || !script.instance().id().equals(instanceId)) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)));
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
       });
 
@@ -677,7 +677,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       throw e;
     } catch (Throwable t) {
       log.error("Error subscribing to script logs", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -710,7 +710,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting node types", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -787,7 +787,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting registry data", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 

@@ -31,7 +31,6 @@ import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +66,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error creating instance", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -79,7 +78,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var optionalDeletion = soulFireServer.deleteInstance(instanceId);
       if (optionalDeletion.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       optionalDeletion.get().join();
@@ -87,7 +86,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error deleting instance", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -109,7 +108,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error listing instance", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -121,7 +120,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var instanceEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(InstanceEntity.class, instanceId));
       if (instanceEntity == null) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var lastModified = instanceEntity.updatedAt();
@@ -147,7 +146,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
@@ -168,7 +167,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting instance info", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -181,7 +180,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         SFHelpers.mustSupply(() -> switch (request.getMetaCase()) {
@@ -197,7 +196,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance meta", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -210,7 +209,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         instanceEntity.settings(InstanceSettingsImpl.Stem.fromProto(request.getConfig()));
@@ -222,7 +221,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance config", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -235,7 +234,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -254,7 +253,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance config entry", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -267,7 +266,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -282,7 +281,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error adding instance account", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -296,7 +295,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -312,7 +311,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error removing instance account", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -325,7 +324,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var updatedAccount = MinecraftAccount.fromProto(request.getAccount());
@@ -342,7 +341,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance account", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -355,7 +354,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -372,7 +371,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error adding instance accounts batch", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -389,7 +388,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -405,7 +404,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error removing instance accounts batch", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -418,7 +417,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -433,7 +432,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error adding instance proxy", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -447,13 +446,13 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
         var newProxies = new ArrayList<>(currentSettings.proxies());
         if (index < 0 || index >= newProxies.size()) {
-          throw new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)));
+          throw Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)).asRuntimeException();
         }
         newProxies.remove(index);
         instanceEntity.settings(currentSettings.withProxies(newProxies));
@@ -465,7 +464,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error removing instance proxy", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -479,13 +478,13 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
         var newProxies = new ArrayList<>(currentSettings.proxies());
         if (index < 0 || index >= newProxies.size()) {
-          throw new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)));
+          throw Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)).asRuntimeException();
         }
         newProxies.set(index, SFProxy.fromProto(request.getProxy()));
         instanceEntity.settings(currentSettings.withProxies(newProxies));
@@ -497,7 +496,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating instance proxy", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -510,7 +509,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -527,7 +526,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error adding instance proxies batch", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -542,7 +541,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -558,7 +557,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error removing instance proxies batch", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -570,7 +569,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
@@ -579,7 +578,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error changing instance state", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -592,7 +591,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       var auditLogs = soulFireServer.sessionFactory().fromTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instance ORDER BY createdAt DESC", InstanceAuditLogEntity.class)
@@ -625,7 +624,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting audit logs", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -639,14 +638,14 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var account = instanceEntity.settings().accounts().stream()
           .filter(a -> a.profileId().equals(accountId))
           .findFirst()
-          .orElseThrow(() -> new StatusRuntimeException(
-            Status.NOT_FOUND.withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId))));
+          .orElseThrow(() ->
+            Status.NOT_FOUND.withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId)).asRuntimeException());
 
         responseObserver.onNext(GetAccountMetadataResponse.newBuilder()
           .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(account.persistentMetadata()))
@@ -655,7 +654,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       });
     } catch (Throwable t) {
       log.error("Error getting account metadata", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -671,7 +670,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -707,7 +706,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting account metadata entry", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -721,7 +720,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var currentSettings = instanceEntity.settings();
@@ -756,7 +755,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error deleting account metadata entry", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }

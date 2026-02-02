@@ -35,7 +35,6 @@ import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +62,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.CHECK_PROXY, instanceId));
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
-      throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+      throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
     }
 
     var instance = optionalInstance.get();
@@ -166,7 +165,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
       });
     } catch (Throwable t) {
       log.error("Error checking proxy", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }

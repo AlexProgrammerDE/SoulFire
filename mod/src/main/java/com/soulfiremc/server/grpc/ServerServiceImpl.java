@@ -24,7 +24,6 @@ import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting server info", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -84,7 +83,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating server config", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -123,7 +122,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating server config entry", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }

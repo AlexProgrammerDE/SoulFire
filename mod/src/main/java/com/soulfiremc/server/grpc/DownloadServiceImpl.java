@@ -23,7 +23,6 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -69,11 +68,11 @@ public final class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServi
           responseObserver.onCompleted();
         }, t -> {
           log.error("Error downloading data", t);
-          responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
+          responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
         });
     } catch (Throwable t) {
       log.error("Error downloading data", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }

@@ -26,12 +26,10 @@ import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
-import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.MouseClickHelper;
 import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +37,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.*;
-import net.minecraft.world.inventory.LecternMenu;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
@@ -198,7 +195,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
         if (instanceEntity == null) {
-          throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         instanceEntity.settings(instanceEntity.settings().withAccounts(instanceEntity.settings().accounts().stream()
@@ -225,7 +222,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error updating bot config entry", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -237,7 +234,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
@@ -266,7 +263,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting bot list", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -279,13 +276,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var account = instance.settingsSource().accounts().get(botId);
       if (account == null) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Bot '%s' not found in instance '%s'".formatted(botId, instanceId)));
+        throw Status.NOT_FOUND.withDescription("Bot '%s' not found in instance '%s'".formatted(botId, instanceId)).asRuntimeException();
       }
 
       var botInfoResponseBuilder = BotInfoResponse.newBuilder();
@@ -303,7 +300,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting instance info", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -316,20 +313,20 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       var level = minecraft.level;
       if (player == null || level == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player or level is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player or level is not available").asRuntimeException();
       }
 
       // Use provided dimensions or defaults
@@ -363,7 +360,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error rendering bot POV", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -376,20 +373,20 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       var gameMode = minecraft.gameMode;
       if (player == null || gameMode == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
       }
 
       // Map proto ClickType to Minecraft ClickType and mouse button
@@ -446,7 +443,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking inventory slot", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1214,19 +1211,19 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       if (player == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
       }
 
       var container = player.containerMenu;
@@ -1273,7 +1270,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting inventory state", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1286,19 +1283,19 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       if (player == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
       }
 
       // Close any open container
@@ -1310,7 +1307,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error closing container", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1323,19 +1320,19 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       if (player == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
       }
 
       // Open player inventory (sends inventory open packet to server)
@@ -1347,7 +1344,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error opening inventory", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1360,13 +1357,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
@@ -1374,7 +1371,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var level = minecraft.level;
       var gameMode = minecraft.gameMode;
       if (player == null || level == null || gameMode == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player, level, or gameMode is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player, level, or gameMode is not available").asRuntimeException();
       }
 
       switch (request.getButton()) {
@@ -1396,7 +1393,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error performing mouse click", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1409,20 +1406,20 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       var gameMode = minecraft.gameMode;
       if (player == null || gameMode == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
       }
 
       var container = player.containerMenu;
@@ -1461,7 +1458,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking container button", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1474,19 +1471,19 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
       if (player == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot player is not available"));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
       }
 
       var container = player.containerMenu;
@@ -1498,7 +1495,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         // Anvil rename - need to send packet to server
         var connection = minecraft.getConnection();
         if (connection == null) {
-          throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available"));
+          throw Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available").asRuntimeException();
         }
 
         // Send the rename packet
@@ -1522,7 +1519,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       }
     } catch (Throwable t) {
       log.error("Error setting container text", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1570,7 +1567,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
@@ -1589,7 +1586,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting dialog", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1602,13 +1599,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
@@ -1633,7 +1630,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error submitting dialog", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1646,13 +1643,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
@@ -1677,7 +1674,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking dialog button", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1690,13 +1687,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       // Just clear the dialog state locally - the server will handle cleanup
@@ -1708,7 +1705,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error closing dialog", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1732,13 +1729,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
@@ -1764,7 +1761,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting hotbar slot", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1777,13 +1774,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       // Apply movement state changes
@@ -1819,7 +1816,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting movement state", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1832,13 +1829,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       // Reset all movement
@@ -1853,7 +1850,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error resetting movement", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 
@@ -1866,13 +1863,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
       if (optionalInstance.isEmpty()) {
-        throw new StatusRuntimeException(Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)));
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
       var instance = optionalInstance.get();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot == null) {
-        throw new StatusRuntimeException(Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)));
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
       var minecraft = activeBot.minecraft();
@@ -1911,7 +1908,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting rotation", t);
-      throw new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t));
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
 }
