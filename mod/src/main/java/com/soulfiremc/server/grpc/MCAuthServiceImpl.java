@@ -58,51 +58,64 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
     var cancellationCollector = new CancellationCollector(responseObserver);
     try {
       instance.scheduler().execute(() -> {
-        var service = MCAuthService.convertService(request.getService());
-        var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
-              cancellationCollector.add(service.createDataAndLogin(
-                  payload,
-                  settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
-                  instance.scheduler()
-                ))
-                // Add timeout to prevent hanging forever on slow/unresponsive auth servers
-                .orTimeout(2, TimeUnit.MINUTES)
-                .thenApply(MinecraftAccount::toProto)
-                .exceptionally(t -> {
-                  log.error("Error authenticating account", t);
-                  return null;
-                }), result -> {
-              if (responseObserver.isCancelled()) {
-                return;
-              }
+        try {
+          var service = MCAuthService.convertService(request.getService());
+          var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
+                cancellationCollector.add(service.createDataAndLogin(
+                    payload,
+                    settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
+                    instance.scheduler()
+                  ))
+                  // Add timeout to prevent hanging forever on slow/unresponsive auth servers
+                  .orTimeout(2, TimeUnit.MINUTES)
+                  .thenApply(MinecraftAccount::toProto)
+                  .exceptionally(t -> {
+                    log.error("Error authenticating account", t);
+                    return null;
+                  }), result -> {
+                synchronized (responseObserver) {
+                  if (responseObserver.isCancelled()) {
+                    return;
+                  }
 
-              if (result == null) {
-                responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-                  .setOneFailure(CredentialsAuthOneFailure.newBuilder()
-                    .build())
-                  .build());
-              } else {
-                responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-                  .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
-                    .build())
-                  .build());
-              }
-            },
-            cancellationCollector)
-          .stream()
-          .filter(Objects::nonNull)
-          .toList();
+                  if (result == null) {
+                    responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                      .setOneFailure(CredentialsAuthOneFailure.newBuilder()
+                        .build())
+                      .build());
+                  } else {
+                    responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                      .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
+                        .build())
+                      .build());
+                  }
+                }
+              },
+              cancellationCollector)
+            .stream()
+            .filter(Objects::nonNull)
+            .toList();
 
-        if (responseObserver.isCancelled()) {
-          return;
+          synchronized (responseObserver) {
+            if (responseObserver.isCancelled()) {
+              return;
+            }
+
+            responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+              .setFullList(CredentialsAuthFullList.newBuilder()
+                .addAllAccount(results)
+                .build())
+              .build());
+            responseObserver.onCompleted();
+          }
+        } catch (Throwable t) {
+          log.error("Error during async account authentication", t);
+          synchronized (responseObserver) {
+            if (!responseObserver.isCancelled()) {
+              responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
+            }
+          }
         }
-
-        responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-          .setFullList(CredentialsAuthFullList.newBuilder()
-            .addAllAccount(results)
-            .build())
-          .build());
-        responseObserver.onCompleted();
       });
     } catch (Throwable t) {
       log.error("Error authenticating account", t);
@@ -111,7 +124,8 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
   }
 
   @Override
-  public void loginDeviceCode(DeviceCodeAuthRequest request, StreamObserver<DeviceCodeAuthResponse> responseObserver) {
+  public void loginDeviceCode(DeviceCodeAuthRequest request, StreamObserver<DeviceCodeAuthResponse> casted) {
+    var responseObserver = (ServerCallStreamObserver<DeviceCodeAuthResponse>) casted;
     var instanceId = UUID.fromString(request.getInstanceId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
@@ -126,35 +140,49 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
     var cancellationCollector = new CancellationCollector(responseObserver);
     var service = MCAuthService.convertService(request.getService());
     cancellationCollector.add(service.createDataAndLogin(
-        deviceCode ->
-          responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
-            .setDeviceCode(
-              DeviceCode.newBuilder()
-                .setDeviceCode(deviceCode.getDeviceCode())
-                .setUserCode(deviceCode.getUserCode())
-                .setVerificationUri(deviceCode.getVerificationUri())
-                .setDirectVerificationUri(deviceCode.getDirectVerificationUri())
-                .build()
-            ).build()
-          ),
+        deviceCode -> {
+          synchronized (responseObserver) {
+            if (responseObserver.isCancelled()) {
+              return;
+            }
+
+            responseObserver.onNext(DeviceCodeAuthResponse.newBuilder()
+              .setDeviceCode(
+                DeviceCode.newBuilder()
+                  .setDeviceCode(deviceCode.getDeviceCode())
+                  .setUserCode(deviceCode.getUserCode())
+                  .setVerificationUri(deviceCode.getVerificationUri())
+                  .setDirectVerificationUri(deviceCode.getDirectVerificationUri())
+                  .build()
+              ).build()
+            );
+          }
+        },
         settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
         instance.scheduler()
       ))
       // Microsoft device codes typically expire after 15 minutes
       .orTimeout(15, TimeUnit.MINUTES)
       .whenComplete((account, t) -> {
-        if (t != null) {
-          log.error("Error authenticating account", t);
-          responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
-        } else {
-          responseObserver.onNext(DeviceCodeAuthResponse.newBuilder().setAccount(account.toProto()).build());
-          responseObserver.onCompleted();
+        synchronized (responseObserver) {
+          if (responseObserver.isCancelled()) {
+            return;
+          }
+
+          if (t != null) {
+            log.error("Error authenticating account", t);
+            responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
+          } else {
+            responseObserver.onNext(DeviceCodeAuthResponse.newBuilder().setAccount(account.toProto()).build());
+            responseObserver.onCompleted();
+          }
         }
       });
   }
 
   @Override
-  public void refresh(RefreshRequest request, StreamObserver<RefreshResponse> responseObserver) {
+  public void refresh(RefreshRequest request, StreamObserver<RefreshResponse> casted) {
+    var responseObserver = (ServerCallStreamObserver<RefreshResponse>) casted;
     var instanceId = UUID.fromString(request.getInstanceId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
@@ -177,12 +205,18 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
       // Add timeout to prevent hanging forever on slow/unresponsive auth servers
       .orTimeout(2, TimeUnit.MINUTES)
       .whenComplete((account, t) -> {
-        if (t != null) {
-          log.error("Error refreshing account", t);
-          responseObserver.onError(new StatusRuntimeException(Status.INTERNAL.withDescription(t.getMessage()).withCause(t)));
-        } else {
-          responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
-          responseObserver.onCompleted();
+        synchronized (responseObserver) {
+          if (responseObserver.isCancelled()) {
+            return;
+          }
+
+          if (t != null) {
+            log.error("Error refreshing account", t);
+            responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
+          } else {
+            responseObserver.onNext(RefreshResponse.newBuilder().setAccount(account.toProto()).build());
+            responseObserver.onCompleted();
+          }
         }
       });
   }
