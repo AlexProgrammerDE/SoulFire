@@ -152,6 +152,13 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               .build());
             responseObserver.onCompleted();
           }
+        } catch (Throwable t) {
+          log.error("Error during async proxy check", t);
+          synchronized (responseObserver) {
+            if (!responseObserver.isCancelled()) {
+              responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
+            }
+          }
         } finally {
           proxyCheckEventLoopGroup.shutdownGracefully()
             .awaitUninterruptibly(5, TimeUnit.SECONDS);
