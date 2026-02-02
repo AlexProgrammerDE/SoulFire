@@ -58,8 +58,9 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
       instance.scheduler().execute(() -> {
         try {
           var service = MCAuthService.convertService(request.getService());
-          SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
-                cancellationCollector.add(service.createDataAndLogin(
+          SFHelpers.maxFutures(instance.scheduler(), settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload -> {
+              try {
+                var account = cancellationCollector.add(service.createDataAndLogin(
                     payload,
                     settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
                     instance.scheduler()
@@ -67,32 +68,34 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
                   // Add timeout to prevent hanging forever on slow/unresponsive auth servers
                   .orTimeout(2, TimeUnit.MINUTES)
                   .thenApply(MinecraftAccount::toProto)
-                  .handle((account, throwable) -> {
-                    if (throwable != null) {
-                      log.error("Error authenticating account", throwable);
-                    }
-                    return account;
-                  }), result -> {
+                  .join();
+
                 synchronized (responseObserver) {
                   if (responseObserver.isCancelled()) {
                     return;
                   }
 
-                  if (result == null) {
-                    responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-                      .setOneFailure(CredentialsAuthOneFailure.newBuilder()
-                        .build())
-                      .build());
-                  } else {
-                    responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-                      .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
-                        .setAccount(result)
-                        .build())
-                      .build());
-                  }
+                  responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                    .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
+                      .setAccount(account)
+                      .build())
+                    .build());
                 }
-              },
-              cancellationCollector);
+              } catch (Throwable t) {
+                log.error("Error authenticating account", t);
+                synchronized (responseObserver) {
+                  if (responseObserver.isCancelled()) {
+                    return;
+                  }
+
+                  responseObserver.onNext(CredentialsAuthResponse.newBuilder()
+                    .setOneFailure(CredentialsAuthOneFailure.newBuilder()
+                      .build())
+                    .build());
+                }
+              }
+            },
+            cancellationCollector);
 
           synchronized (responseObserver) {
             if (responseObserver.isCancelled()) {

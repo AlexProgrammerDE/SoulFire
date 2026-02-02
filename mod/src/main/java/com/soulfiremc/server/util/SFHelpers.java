@@ -19,6 +19,7 @@ package com.soulfiremc.server.util;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import com.soulfiremc.server.util.structs.SafeCloseable;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Phaser;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.*;
 import java.util.regex.Pattern;
@@ -104,31 +106,33 @@ public final class SFHelpers {
     }
   }
 
-  public static <S, T> List<T> maxFutures(int maxFutures, Collection<S> source, Function<S, CompletableFuture<T>> toFuture, Consumer<T> onProgress, CancellationCollector cancellationCollector) {
-    final var sourceIter = source.iterator();
-    final var futures = new ArrayList<CompletableFuture<Void>>(maxFutures);
-    final var result = new ArrayList<T>(source.size());
-    while (sourceIter.hasNext()) {
-      while (futures.size() < maxFutures && sourceIter.hasNext()) {
-        // Abort if cancelled
-        if (cancellationCollector.cancelled()) {
-          return List.of();
-        }
-
-        futures.add(toFuture.apply(sourceIter.next()).thenAccept(r -> {
-          onProgress.accept(r);
-          synchronized (result) {
-            result.add(r);
-          }
-        }));
+  public static <S> void maxFutures(SoulFireScheduler scheduler, int maxConcurrency, Collection<S> source, Consumer<S> task, CancellationCollector cancellationCollector) {
+    var semaphore = new Semaphore(maxConcurrency);
+    var phaser = new Phaser(1);
+    for (var item : source) {
+      if (cancellationCollector.cancelled()) {
+        break;
       }
 
-      CompletableFuture.anyOf(futures.toArray(CompletableFuture[]::new)).join();
-      futures.removeIf(CompletableFuture::isDone);
+      semaphore.acquireUninterruptibly();
+
+      if (cancellationCollector.cancelled()) {
+        semaphore.release();
+        break;
+      }
+
+      phaser.register();
+      scheduler.execute(() -> {
+        try {
+          task.accept(item);
+        } finally {
+          semaphore.release();
+          phaser.arriveAndDeregister();
+        }
+      });
     }
 
-    CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
-    return result;
+    phaser.arriveAndAwaitAdvance();
   }
 
   public static int getRandomInt(int min, int max) {

@@ -24,7 +24,6 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.OfflineAuthService;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
-import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.BotSettings;
@@ -41,10 +40,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
-import org.slf4j.event.Level;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -76,7 +74,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
         NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().execute(() -> {
         try {
-          SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
+          SFHelpers.maxFutures(instance.scheduler(), settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
               var proxy = SFProxy.fromProto(payload);
               var stopWatch = Stopwatch.createStarted();
               var factory = new BotConnectionFactory(
@@ -87,47 +85,45 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                 proxy,
                 proxyCheckEventLoopGroup
               );
-              var connectionHolder = new CompletableFuture<BotConnection>();
-              return instance.scheduler().supplyAsync(() -> {
-                  var future = cancellationCollector.add(new CompletableFuture<Void>());
-                  var connection = factory.prepareConnection(true);
-                  connectionHolder.complete(connection);
+              var valid = false;
+              var connection = factory.prepareConnection(true);
+              try {
+                var latch = new CountDownLatch(1);
 
-                  connection.shutdownHooks().add(() -> future.completeExceptionally(new RuntimeException("Connection closed")));
+                connection.shutdownHooks().add(latch::countDown);
 
-                  Consumer<BotPacketPreReceiveEvent> listener = event -> {
-                    if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
-                      future.complete(null);
-                    }
-                  };
-                  SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, listener);
+                Consumer<BotPacketPreReceiveEvent> listener = event -> {
+                  if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
+                    latch.countDown();
+                  }
+                };
+                SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, listener);
 
-                  // Ensure listener is unregistered when future completes (success, failure, or timeout)
-                  future.whenComplete((_, _) -> SoulFireAPI.unregisterListener(BotPacketPreReceiveEvent.class, listener));
-
+                try {
                   log.debug("Checking proxy: {}", proxy);
                   connection.connect().join();
 
-                  return future.join();
-                }, Level.TRACE)
-                .orTimeout(30, TimeUnit.SECONDS)
-                .whenComplete((_, _) -> {
-                  // Ensure connection resources are cleaned up after timeout or completion
-                  connectionHolder.thenAccept(conn ->
-                    conn.disconnect(Component.text("Proxy check completed")));
-                })
-                .handle((_, throwable) -> ProxyCheckResponseSingle.newBuilder()
-                  .setProxy(payload)
-                  .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                  .setValid(throwable == null)
-                  .build());
-            }, result -> {
+                  valid = latch.await(30, TimeUnit.SECONDS);
+                } finally {
+                  SoulFireAPI.unregisterListener(BotPacketPreReceiveEvent.class, listener);
+                }
+              } catch (Throwable t) {
+                log.trace("Proxy check error for {}", proxy, t);
+              } finally {
+                connection.disconnect(Component.text("Proxy check completed"));
+              }
+
+              var result = ProxyCheckResponseSingle.newBuilder()
+                .setProxy(payload)
+                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                .setValid(valid)
+                .build();
+
               synchronized (responseObserver) {
                 if (responseObserver.isCancelled()) {
                   return;
                 }
 
-                var proxy = SFProxy.fromProto(result.getProxy());
                 if (result.getValid()) {
                   log.debug("Proxy check successful for {}: {}ms", proxy, result.getLatency());
                 } else {
