@@ -25,6 +25,7 @@ import org.slf4j.event.Level;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
@@ -40,8 +41,8 @@ public final class SoulFireScheduler implements Executor {
     .factory());
   private final PriorityQueue<TimedRunnable> executionQueue = new ObjectHeapPriorityQueue<>();
   private final RunnableWrapper runnableWrapper;
-  private boolean blockNewTasks;
-  private boolean isShutdown;
+  private final AtomicBoolean blockNewTasks = new AtomicBoolean();
+  private final AtomicBoolean isShutdown = new AtomicBoolean();
 
   public SoulFireScheduler(RunnableWrapper runnableWrapper) {
     this.runnableWrapper = runnableWrapper;
@@ -50,12 +51,12 @@ public final class SoulFireScheduler implements Executor {
   }
 
   private void managementTask() {
-    if (isShutdown) {
+    if (isShutdown.get()) {
       return;
     }
 
     synchronized (executionQueue) {
-      while (!blockNewTasks && !executionQueue.isEmpty() && executionQueue.first().isReady()) {
+      while (!blockNewTasks.get() && !executionQueue.isEmpty() && executionQueue.first().isReady()) {
         schedule(executionQueue.dequeue().runnable());
       }
     }
@@ -64,7 +65,7 @@ public final class SoulFireScheduler implements Executor {
   }
 
   public void schedule(Runnable command) {
-    if (blockNewTasks) {
+    if (blockNewTasks.get()) {
       FinalizableRunnable.finalize(command);
       return;
     }
@@ -73,13 +74,13 @@ public final class SoulFireScheduler implements Executor {
   }
 
   public void schedule(Runnable command, long delay, TimeUnit unit) {
-    if (blockNewTasks) {
+    if (blockNewTasks.get()) {
       FinalizableRunnable.finalize(command);
       return;
     }
 
     synchronized (executionQueue) {
-      if (blockNewTasks) {
+      if (blockNewTasks.get()) {
         FinalizableRunnable.finalize(command);
         return;
       }
@@ -118,8 +119,11 @@ public final class SoulFireScheduler implements Executor {
   }
 
   public void shutdown() {
-    blockNewTasks = true;
-    isShutdown = true;
+    blockNewTasks.set(true);
+    if (!isShutdown.compareAndSet(false, true)) {
+      return;
+    }
+
     drainQueue();
   }
 
@@ -141,7 +145,7 @@ public final class SoulFireScheduler implements Executor {
 
   private Runnable wrapFuture(Runnable command, Level errorLevel) {
     return () -> {
-      if (blockNewTasks) {
+      if (blockNewTasks.get()) {
         FinalizableRunnable.finalize(command);
         throw new CompletionException(new CancellationException("Scheduler is shutting down"));
       }
@@ -157,7 +161,7 @@ public final class SoulFireScheduler implements Executor {
 
   private <T> Supplier<T> wrapFuture(Supplier<T> command, Level errorLevel) {
     return () -> {
-      if (blockNewTasks) {
+      if (blockNewTasks.get()) {
         return null;
       }
 
@@ -171,7 +175,7 @@ public final class SoulFireScheduler implements Executor {
   }
 
   private void runCommand(Runnable command) {
-    if (blockNewTasks) {
+    if (blockNewTasks.get()) {
       FinalizableRunnable.finalize(command);
       return;
     }
