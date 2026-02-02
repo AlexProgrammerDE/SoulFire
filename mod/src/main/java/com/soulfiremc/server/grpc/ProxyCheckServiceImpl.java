@@ -122,34 +122,38 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                 .setValid(throwable == null)
                 .build());
           }, result -> {
-            if (responseObserver.isCancelled()) {
-              return;
-            }
+            synchronized (responseObserver) {
+              if (responseObserver.isCancelled()) {
+                return;
+              }
 
-            var proxy = SFProxy.fromProto(result.getProxy());
-            if (result.getValid()) {
-              log.debug("Proxy check successful for {}: {}ms", proxy, result.getLatency());
-            } else {
-              log.debug("Proxy check failed for {}", proxy);
-            }
+              var proxy = SFProxy.fromProto(result.getProxy());
+              if (result.getValid()) {
+                log.debug("Proxy check successful for {}: {}ms", proxy, result.getLatency());
+              } else {
+                log.debug("Proxy check failed for {}", proxy);
+              }
 
-            responseObserver.onNext(ProxyCheckResponse.newBuilder()
-              .setSingle(result)
-              .build());
+              responseObserver.onNext(ProxyCheckResponse.newBuilder()
+                .setSingle(result)
+                .build());
+            }
           },
           cancellationCollector);
 
         proxyCheckEventLoopGroup.shutdownGracefully()
           .awaitUninterruptibly(5, TimeUnit.SECONDS);
 
-        if (responseObserver.isCancelled()) {
-          return;
-        }
+        synchronized (responseObserver) {
+          if (responseObserver.isCancelled()) {
+            return;
+          }
 
-        responseObserver.onNext(ProxyCheckResponse.newBuilder()
-          .setEnd(ProxyCheckEnd.getDefaultInstance())
-          .build());
-        responseObserver.onCompleted();
+          responseObserver.onNext(ProxyCheckResponse.newBuilder()
+            .setEnd(ProxyCheckEnd.getDefaultInstance())
+            .build());
+          responseObserver.onCompleted();
+        }
       });
     } catch (Throwable t) {
       log.error("Error checking proxy", t);
