@@ -24,12 +24,10 @@ import com.soulfiremc.bootstrap.client.cli.SFCommandDefinition;
 import com.soulfiremc.bootstrap.client.grpc.RPCClient;
 import com.soulfiremc.grpc.generated.AccountTypeCredentials;
 import com.soulfiremc.grpc.generated.CredentialsAuthRequest;
-import com.soulfiremc.grpc.generated.CredentialsAuthResponse;
 import com.soulfiremc.grpc.generated.InstanceConfig;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
-import com.soulfiremc.server.util.SFHelpers;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -156,15 +154,17 @@ public final class ClientSettingsManager {
           .setService(AccountTypeCredentials.valueOf(authType.name()))
           .addAllPayload(accounts);
 
-      return SFHelpers.awaitResultPredicate(
-          rpcClient.mcAuthServiceBlocking().loginCredentials(request.build()),
-          CredentialsAuthResponse::hasFullList)
-        .orElseThrow()
-        .getFullList()
-        .getAccountList()
-        .stream()
-        .map(MinecraftAccount::fromProto)
-        .toList();
+      var results = new java.util.ArrayList<MinecraftAccount>();
+      var responses = rpcClient.mcAuthServiceBlocking().loginCredentials(request.build());
+      while (responses.hasNext()) {
+        var response = responses.next();
+        if (response.hasOneSuccess()) {
+          results.add(MinecraftAccount.fromProto(response.getOneSuccess().getAccount()));
+        } else if (response.hasEnd()) {
+          break;
+        }
+      }
+      return List.copyOf(results);
     } catch (Exception e) {
       log.error("Failed to load account from string", e);
       throw new RuntimeException(e);

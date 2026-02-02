@@ -31,7 +31,6 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -59,7 +58,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
       instance.scheduler().execute(() -> {
         try {
           var service = MCAuthService.convertService(request.getService());
-          var results = SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
+          SFHelpers.maxFutures(settings.get(AccountSettings.ACCOUNT_IMPORT_CONCURRENCY), request.getPayloadList(), payload ->
                 cancellationCollector.add(service.createDataAndLogin(
                     payload,
                     settings.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH) ? SFHelpers.getRandomEntry(settings.proxies()) : null,
@@ -68,9 +67,11 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
                   // Add timeout to prevent hanging forever on slow/unresponsive auth servers
                   .orTimeout(2, TimeUnit.MINUTES)
                   .thenApply(MinecraftAccount::toProto)
-                  .exceptionally(t -> {
-                    log.error("Error authenticating account", t);
-                    return null;
+                  .handle((account, throwable) -> {
+                    if (throwable != null) {
+                      log.error("Error authenticating account", throwable);
+                    }
+                    return account;
                   }), result -> {
                 synchronized (responseObserver) {
                   if (responseObserver.isCancelled()) {
@@ -85,15 +86,13 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
                   } else {
                     responseObserver.onNext(CredentialsAuthResponse.newBuilder()
                       .setOneSuccess(CredentialsAuthOneSuccess.newBuilder()
+                        .setAccount(result)
                         .build())
                       .build());
                   }
                 }
               },
-              cancellationCollector)
-            .stream()
-            .filter(Objects::nonNull)
-            .toList();
+              cancellationCollector);
 
           synchronized (responseObserver) {
             if (responseObserver.isCancelled()) {
@@ -101,9 +100,7 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
             }
 
             responseObserver.onNext(CredentialsAuthResponse.newBuilder()
-              .setFullList(CredentialsAuthFullList.newBuilder()
-                .addAllAccount(results)
-                .build())
+              .setEnd(CredentialsAuthEnd.getDefaultInstance())
               .build());
             responseObserver.onCompleted();
           }

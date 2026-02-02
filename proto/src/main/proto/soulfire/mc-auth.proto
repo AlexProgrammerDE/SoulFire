@@ -30,44 +30,41 @@ message CredentialsAuthRequest {
   repeated string payload = 3;
 }
 
-// Final response containing all successfully authenticated accounts.
-// Sent as the last message in the stream after all individual results.
-message CredentialsAuthFullList {
-  // List of all successfully authenticated Minecraft accounts.
-  // Failed authentications are excluded from this list.
-  repeated MinecraftAccountProto account = 1;
-}
-
-// Progress indicator sent when an individual account authentication succeeds.
-// This is a streaming progress update, not the final result.
-// The actual account data is included in the final CredentialsAuthFullList.
+// Result of a single account authentication attempt.
+// Includes the authenticated account data on success.
 message CredentialsAuthOneSuccess {
+  // The successfully authenticated Minecraft account.
+  MinecraftAccountProto account = 1;
 }
 
-// Progress indicator sent when an individual account authentication fails.
-// This is a streaming progress update indicating that one payload could not
-// be authenticated. The failure is logged server-side with detailed error info.
+// Result sent when an individual account authentication fails.
+// The failure is logged server-side with detailed error info.
 message CredentialsAuthOneFailure {
 }
 
+// Sentinel message indicating that all account authentications have completed.
+// This is the final message sent in the response stream, signaling
+// that no more result messages will follow.
+message CredentialsAuthEnd {
+}
+
 // Streaming response message for credentials-based authentication.
-// The stream sends progress updates (one_success/one_failure) for each
-// payload being processed, followed by a final full_list with all
-// successfully authenticated accounts.
+// Each message contains either a single authentication result or an end marker.
 message CredentialsAuthResponse {
   oneof data {
-    // Final response containing all successfully authenticated accounts.
-    // This is the last message in the stream.
-    CredentialsAuthFullList full_list = 1;
-
-    // Progress indicator: one account was successfully authenticated.
-    // Sent for each successful authentication as they complete.
+    // A single successful authentication result. Multiple of these will be
+    // streamed as each account authentication completes, allowing the client
+    // to process results incrementally.
     CredentialsAuthOneSuccess one_success = 2;
 
-    // Progress indicator: one account authentication failed.
-    // Sent for each failed authentication as they complete.
-    // Errors are logged server-side (e.g., invalid credentials, network issues).
+    // A single failed authentication result. Streamed as each failed
+    // authentication completes. Errors are logged server-side
+    // (e.g., invalid credentials, network issues).
     CredentialsAuthOneFailure one_failure = 3;
+
+    // End-of-stream marker indicating all authentications are complete.
+    // This is always the last message in the stream before it closes.
+    CredentialsAuthEnd end = 4;
   }
 }
 
@@ -161,9 +158,12 @@ service MCAuthService {
   // Authenticates one or more Minecraft accounts using credentials or tokens.
   // Supports bulk authentication with concurrent processing.
   //
-  // The stream sends progress updates (one_success/one_failure) as each
-  // account is processed, allowing clients to show real-time progress.
-  // The final message contains the full list of successfully authenticated accounts.
+  // Results are streamed back as each authentication completes:
+  // 1. For each account, either a one_success (with account data) or
+  //    one_failure message is sent
+  // 2. A CredentialsAuthEnd message is sent when all checks are complete
+  //
+  // Concurrency is controlled by the instance's ACCOUNT_IMPORT_CONCURRENCY setting.
   //
   // Errors:
   // - NOT_FOUND: The specified instance does not exist
