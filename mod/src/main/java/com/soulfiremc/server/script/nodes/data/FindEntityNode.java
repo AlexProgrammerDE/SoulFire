@@ -76,10 +76,14 @@ public final class FindEntityNode extends AbstractScriptNode {
     double nearestDistSq = Double.MAX_VALUE;
 
     for (var entity : level.entitiesForRendering()) {
-      if (entity == player) continue; // Skip self
+      if (entity == player) {
+        continue; // Skip self
 
+      }
       var distSq = entity.distanceToSqr(playerPos);
-      if (distSq > maxDistSq || distSq >= nearestDistSq) continue;
+      if (distSq > maxDistSq || distSq >= nearestDistSq) {
+        continue;
+      }
 
       if (!"any".equalsIgnoreCase(entityTypeInput)) {
         var entityTypeId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();

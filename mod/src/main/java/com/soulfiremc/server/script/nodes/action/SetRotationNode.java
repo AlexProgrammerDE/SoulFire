@@ -60,8 +60,12 @@ public final class SetRotationNode extends AbstractScriptNode {
     pitch = Math.max(-90f, Math.min(90f, pitch));
 
     // Normalize yaw to -180 to 180 range
-    while (yaw > 180f) yaw -= 360f;
-    while (yaw < -180f) yaw += 360f;
+    while (yaw > 180f) {
+      yaw -= 360f;
+    }
+    while (yaw < -180f) {
+      yaw += 360f;
+    }
 
     var finalYaw = yaw;
     var finalPitch = pitch;

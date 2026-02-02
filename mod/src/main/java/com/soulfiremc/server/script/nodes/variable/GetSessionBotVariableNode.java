@@ -82,7 +82,7 @@ public final class GetSessionBotVariableNode extends AbstractScriptNode {
         "value", value,
         "found", true
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false

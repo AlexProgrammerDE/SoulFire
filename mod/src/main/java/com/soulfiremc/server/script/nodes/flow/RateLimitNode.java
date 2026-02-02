@@ -63,7 +63,7 @@ public final class RateLimitNode extends AbstractScriptNode {
     var refillRate = getDoubleInput(inputs, "refillRate", 1.0);
     var tokensRequired = getDoubleInput(inputs, "tokensRequired", 1.0);
 
-    var bucket = BUCKETS.computeIfAbsent(key, k -> new TokenBucket(maxTokens, refillRate));
+    var bucket = BUCKETS.computeIfAbsent(key, _ -> new TokenBucket(maxTokens, refillRate));
 
     // Update bucket parameters if changed
     bucket.updateParams(maxTokens, refillRate);

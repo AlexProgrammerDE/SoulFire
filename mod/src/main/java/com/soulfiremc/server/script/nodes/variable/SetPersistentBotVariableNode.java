@@ -69,7 +69,7 @@ public final class SetPersistentBotVariableNode extends AbstractScriptNode {
       }
       bot.persistentMetadata().set(namespace, key, jsonValue);
       return completed(result("success", true));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(result("success", false));
     }
   }

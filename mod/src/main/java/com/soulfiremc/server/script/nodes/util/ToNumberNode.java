@@ -65,7 +65,7 @@ public final class ToNumberNode extends AbstractScriptNode {
       try {
         var parsed = Double.parseDouble(value.asString("").trim());
         return completed(results("result", parsed, "success", true));
-      } catch (NumberFormatException ignored) {
+      } catch (NumberFormatException _) {
         // Fall through to default
       }
     }

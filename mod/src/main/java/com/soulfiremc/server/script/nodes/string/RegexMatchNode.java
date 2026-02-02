@@ -70,9 +70,15 @@ public final class RegexMatchNode extends AbstractScriptNode {
 
     try {
       int regexFlags = 0;
-      if (flags.contains("i")) regexFlags |= Pattern.CASE_INSENSITIVE;
-      if (flags.contains("m")) regexFlags |= Pattern.MULTILINE;
-      if (flags.contains("s")) regexFlags |= Pattern.DOTALL;
+      if (flags.contains("i")) {
+        regexFlags |= Pattern.CASE_INSENSITIVE;
+      }
+      if (flags.contains("m")) {
+        regexFlags |= Pattern.MULTILINE;
+      }
+      if (flags.contains("s")) {
+        regexFlags |= Pattern.DOTALL;
+      }
 
       var compiledPattern = Pattern.compile(patternStr, regexFlags);
       var matcher = compiledPattern.matcher(input);
@@ -108,7 +114,7 @@ public final class RegexMatchNode extends AbstractScriptNode {
         "groups", List.of(),
         "allMatches", List.of()
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "matches", false,
         "fullMatch", "",

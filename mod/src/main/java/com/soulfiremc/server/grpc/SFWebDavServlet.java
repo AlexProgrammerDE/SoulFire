@@ -308,10 +308,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
         for (var i = 0; i < childList.getLength(); i++) {
           var currentNode = childList.item(i);
-          switch (currentNode.getNodeType()) {
-            case Node.TEXT_NODE -> {
-            }
-            case Node.ELEMENT_NODE -> {
+          if (currentNode.getNodeType() != Node.TEXT_NODE) {
+            if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
               if (currentNode.getNodeName().endsWith("prop")) {
                 type = FIND_BY_PROPERTY;
                 propNode = currentNode;
@@ -339,10 +337,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
       for (var i = 0; i < childList.getLength(); i++) {
         var currentNode = childList.item(i);
-        switch (currentNode.getNodeType()) {
-          case Node.TEXT_NODE -> {
-          }
-          case Node.ELEMENT_NODE -> {
+        if (currentNode.getNodeType() != Node.TEXT_NODE) {
+          if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
             var nodeName = currentNode.getNodeName();
             String propertyName;
             if (nodeName.indexOf(':') != -1) {
@@ -679,10 +675,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
       for (var i = 0; i < childList.getLength(); i++) {
         var currentNode = childList.item(i);
-        switch (currentNode.getNodeType()) {
-          case Node.TEXT_NODE -> {
-          }
-          case Node.ELEMENT_NODE -> {
+        if (currentNode.getNodeType() != Node.TEXT_NODE) {
+          if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
             var nodeName = currentNode.getNodeName();
             if (nodeName.endsWith("lockscope")) {
               lockScopeNode = currentNode;
@@ -702,10 +696,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         childList = lockScopeNode.getChildNodes();
         for (var i = 0; i < childList.getLength(); i++) {
           var currentNode = childList.item(i);
-          switch (currentNode.getNodeType()) {
-            case Node.TEXT_NODE -> {
-            }
-            case Node.ELEMENT_NODE -> {
+          if (currentNode.getNodeType() != Node.TEXT_NODE) {
+            if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
               var tempScope = currentNode.getNodeName();
               if (tempScope.indexOf(':') != -1) {
                 lock.scope = tempScope.substring(tempScope.indexOf(':') + 1);
@@ -731,10 +723,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         childList = lockTypeNode.getChildNodes();
         for (var i = 0; i < childList.getLength(); i++) {
           var currentNode = childList.item(i);
-          switch (currentNode.getNodeType()) {
-            case Node.TEXT_NODE -> {
-            }
-            case Node.ELEMENT_NODE -> {
+          if (currentNode.getNodeType() != Node.TEXT_NODE) {
+            if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
               var tempType = currentNode.getNodeName();
               if (tempType.indexOf(':') != -1) {
                 lock.type = tempType.substring(tempType.indexOf(':') + 1);
@@ -760,14 +750,13 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         childList = lockOwnerNode.getChildNodes();
         for (var i = 0; i < childList.getLength(); i++) {
           var currentNode = childList.item(i);
-          switch (currentNode.getNodeType()) {
-            case Node.TEXT_NODE -> lock.owner += currentNode.getNodeValue();
-            case Node.ELEMENT_NODE -> {
-              strWriter = new StringWriter();
-              domWriter = new DOMWriter(strWriter);
-              domWriter.print(currentNode);
-              lock.owner += strWriter.toString();
-            }
+          if (currentNode.getNodeType() == Node.TEXT_NODE) {
+            lock.owner += currentNode.getNodeValue();
+          } else if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
+            strWriter = new StringWriter();
+            domWriter = new DOMWriter(strWriter);
+            domWriter.print(currentNode);
+            lock.owner += strWriter.toString();
           }
         }
 
@@ -1907,22 +1896,17 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
   }
 
-  private static class WebdavResolver implements EntityResolver {
-    private final ServletContext context;
-
-    WebdavResolver(ServletContext theContext) {
-      context = theContext;
-    }
+  private record WebdavResolver(ServletContext context) implements EntityResolver {
 
     @Override
-    public InputSource resolveEntity(String publicId, String systemId) {
-      context.log(sm.getString("webdavservlet.externalEntityIgnored", publicId, systemId));
-      return new InputSource(new StringReader("Ignored external entity"));
+      public InputSource resolveEntity(String publicId, String systemId) {
+        context.log(sm.getString("webdavservlet.externalEntityIgnored", publicId, systemId));
+        return new InputSource(new StringReader("Ignored external entity"));
+      }
     }
-  }
 }
 
-class WebdavStatus {
+final class WebdavStatus {
   public static final int SC_OK = HttpServletResponse.SC_OK;
   public static final int SC_CREATED = HttpServletResponse.SC_CREATED;
   public static final int SC_NO_CONTENT = HttpServletResponse.SC_NO_CONTENT;

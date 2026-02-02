@@ -23,7 +23,6 @@ import com.google.gson.JsonParser;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
@@ -90,7 +89,7 @@ public final class WebFetchNode extends AbstractScriptNode {
     JsonObject headers;
     try {
       headers = JsonParser.parseString(headersJson).getAsJsonObject();
-    } catch (Exception e) {
+    } catch (Exception _) {
       headers = new JsonObject();
     }
 

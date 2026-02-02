@@ -19,15 +19,14 @@ package com.soulfiremc.server.grpc;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.Value;
+import com.google.protobuf.*;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.grpc.generated.PortType;
 import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.database.InstanceEntity;
 import com.soulfiremc.server.database.ScriptEntity;
 import com.soulfiremc.server.script.*;
@@ -41,13 +40,13 @@ import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * gRPC service implementation for visual script management.
@@ -723,8 +722,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       // Add blocks
       if (specificRegistry == null || "blocks".equals(specificRegistry)) {
-        for (var block : net.minecraft.core.registries.BuiltInRegistries.BLOCK) {
-          var id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block);
+        for (var block : BuiltInRegistries.BLOCK) {
+          var id = BuiltInRegistries.BLOCK.getKey(block);
           responseBuilder.addBlocks(RegistryEntry.newBuilder()
             .setId(id.toString())
             .setDisplayName(formatRegistryId(id.toString()))
@@ -734,8 +733,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       // Add entities
       if (specificRegistry == null || "entities".equals(specificRegistry)) {
-        for (var entityType : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE) {
-          var id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
+        for (var entityType : BuiltInRegistries.ENTITY_TYPE) {
+          var id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
           responseBuilder.addEntities(RegistryEntry.newBuilder()
             .setId(id.toString())
             .setDisplayName(formatRegistryId(id.toString()))
@@ -745,8 +744,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       // Add items
       if (specificRegistry == null || "items".equals(specificRegistry)) {
-        for (var item : net.minecraft.core.registries.BuiltInRegistries.ITEM) {
-          var id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
+        for (var item : BuiltInRegistries.ITEM) {
+          var id = BuiltInRegistries.ITEM.getKey(item);
           responseBuilder.addItems(RegistryEntry.newBuilder()
             .setId(id.toString())
             .setDisplayName(formatRegistryId(id.toString()))
@@ -976,7 +975,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         node.getType(),
         new PositionData(node.getPosition().getX(), node.getPosition().getY()),
         node.getDataMap().entrySet().stream()
-          .collect(java.util.stream.Collectors.toMap(
+          .collect(Collectors.toMap(
             Map.Entry::getKey,
             e -> valueToJsonElement(e.getValue())
           ))
@@ -1065,7 +1064,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .build();
   }
 
-  private Timestamp instantToTimestamp(java.time.Instant instant) {
+  private Timestamp instantToTimestamp(Instant instant) {
     return Timestamps.fromMillis(instant.toEpochMilli());
   }
 
@@ -1254,7 +1253,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   private Value objectToProtoValue(Object value) {
     if (value == null) {
-      return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+      return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
     }
     if (value instanceof Boolean b) {
       return Value.newBuilder().setBoolValue(b).build();
@@ -1266,14 +1265,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return Value.newBuilder().setStringValue(s).build();
     }
     if (value instanceof List<?> list) {
-      var listBuilder = com.google.protobuf.ListValue.newBuilder();
+      var listBuilder = ListValue.newBuilder();
       for (var item : list) {
         listBuilder.addValues(objectToProtoValue(item));
       }
       return Value.newBuilder().setListValue(listBuilder.build()).build();
     }
     if (value instanceof Map<?, ?> map) {
-      var structBuilder = com.google.protobuf.Struct.newBuilder();
+      var structBuilder = Struct.newBuilder();
       for (var entry : map.entrySet()) {
         structBuilder.putFields(entry.getKey().toString(), objectToProtoValue(entry.getValue()));
       }
@@ -1284,21 +1283,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   private Value nodeValueToProtoValue(NodeValue value) {
     if (value == null || value.isNull()) {
-      return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+      return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
     }
     if (value instanceof NodeValue.Json(JsonElement element)) {
       return jsonElementToProtoValue(element);
     }
-    if (value instanceof NodeValue.Bot(com.soulfiremc.server.bot.BotConnection bot1)) {
+    if (value instanceof NodeValue.Bot(BotConnection bot1)) {
       // Bot references are serialized as their account name
       return Value.newBuilder().setStringValue(bot1.accountName()).build();
     }
-    return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+    return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
   }
 
-  private Value jsonElementToProtoValue(com.google.gson.JsonElement element) {
+  private Value jsonElementToProtoValue(JsonElement element) {
     if (element == null || element.isJsonNull()) {
-      return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+      return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
     }
     if (element.isJsonPrimitive()) {
       var primitive = element.getAsJsonPrimitive();
@@ -1311,20 +1310,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return Value.newBuilder().setStringValue(primitive.getAsString()).build();
     }
     if (element.isJsonArray()) {
-      var listBuilder = com.google.protobuf.ListValue.newBuilder();
+      var listBuilder = ListValue.newBuilder();
       for (var item : element.getAsJsonArray()) {
         listBuilder.addValues(jsonElementToProtoValue(item));
       }
       return Value.newBuilder().setListValue(listBuilder.build()).build();
     }
     if (element.isJsonObject()) {
-      var structBuilder = com.google.protobuf.Struct.newBuilder();
+      var structBuilder = Struct.newBuilder();
       for (var entry : element.getAsJsonObject().entrySet()) {
         structBuilder.putFields(entry.getKey(), jsonElementToProtoValue(entry.getValue()));
       }
       return Value.newBuilder().setStructValue(structBuilder.build()).build();
     }
-    return Value.newBuilder().setNullValue(com.google.protobuf.NullValue.NULL_VALUE).build();
+    return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
   }
 
   /// Formats a registry ID (e.g., "minecraft:diamond_ore") into a display name (e.g., "Diamond Ore").
@@ -1332,8 +1331,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     // Remove namespace prefix (e.g., "minecraft:")
     var name = id.contains(":") ? id.substring(id.indexOf(':') + 1) : id;
     // Replace underscores with spaces and capitalize each word
-    return java.util.Arrays.stream(name.split("_"))
+    return Arrays.stream(name.split("_"))
       .map(word -> word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1))
-      .collect(java.util.stream.Collectors.joining(" "));
+      .collect(Collectors.joining(" "));
   }
 }

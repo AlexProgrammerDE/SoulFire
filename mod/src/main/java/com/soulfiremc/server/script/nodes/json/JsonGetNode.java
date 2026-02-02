@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.script.nodes.json;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.soulfiremc.server.script.*;
 
@@ -66,7 +65,7 @@ public final class JsonGetNode extends AbstractScriptNode {
           "value", NodeValue.fromJson(element),
           "found", true
         ));
-      } catch (Exception e) {
+      } catch (Exception _) {
         return completed(results(
           "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
           "found", false
@@ -136,7 +135,7 @@ public final class JsonGetNode extends AbstractScriptNode {
         "value", NodeValue.fromJson(current),
         "found", true
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false

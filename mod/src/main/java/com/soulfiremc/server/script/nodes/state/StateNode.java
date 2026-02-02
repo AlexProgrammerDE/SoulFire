@@ -71,7 +71,7 @@ public final class StateNode extends AbstractScriptNode {
     var allowedTransitionsJson = getStringInput(inputs, "allowedTransitions", "{}");
 
     var stateMachines = bot.metadata().getOrSet(STATE_MACHINES_KEY, ConcurrentHashMap::new);
-    var stateData = stateMachines.computeIfAbsent(stateId, k -> new StateData("initial", ""));
+    var stateData = stateMachines.computeIfAbsent(stateId, _ -> new StateData("initial", ""));
 
     return switch (operation) {
       case "get" -> completed(results(
@@ -109,7 +109,7 @@ public final class StateNode extends AbstractScriptNode {
   }
 
   private boolean isTransitionAllowed(String current, String target, String allowedTransitionsJson) {
-    if (allowedTransitionsJson.isEmpty() || allowedTransitionsJson.equals("{}")) {
+    if (allowedTransitionsJson.isEmpty() || "{}".equals(allowedTransitionsJson)) {
       return true; // No restrictions
     }
 
@@ -128,7 +128,7 @@ public final class StateNode extends AbstractScriptNode {
         return allowedSet.contains(target);
       }
       return false;
-    } catch (Exception e) {
+    } catch (Exception _) {
       return true; // If parsing fails, allow all transitions
     }
   }

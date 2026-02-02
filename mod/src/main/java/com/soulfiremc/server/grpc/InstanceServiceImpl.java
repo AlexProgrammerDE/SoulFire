@@ -35,10 +35,9 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -128,7 +127,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       // Check if-modified-since
       if (request.hasIfModifiedSince()) {
-        var ifModifiedSince = java.time.Instant.ofEpochSecond(
+        var ifModifiedSince = Instant.ofEpochSecond(
           request.getIfModifiedSince().getSeconds(),
           request.getIfModifiedSince().getNanos()
         );
@@ -383,7 +382,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var profileIds = request.getProfileIdsList().stream()
         .map(UUID::fromString)
-        .collect(java.util.stream.Collectors.toSet());
+        .collect(Collectors.toSet());
 
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);
@@ -536,7 +535,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      var addressesToRemove = new java.util.HashSet<>(request.getAddressesList());
+      var addressesToRemove = new HashSet<>(request.getAddressesList());
 
       soulFireServer.sessionFactory().inTransaction(session -> {
         var instanceEntity = session.find(InstanceEntity.class, instanceId);

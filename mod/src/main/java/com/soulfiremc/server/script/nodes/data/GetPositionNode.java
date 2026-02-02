@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -52,7 +53,7 @@ public final class GetPositionNode extends AbstractScriptNode {
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(result("position", net.minecraft.world.phys.Vec3.ZERO));
+      return completed(result("position", Vec3.ZERO));
     }
 
     return completed(result("position", player.position()));

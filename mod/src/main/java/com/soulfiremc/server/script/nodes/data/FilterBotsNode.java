@@ -59,7 +59,7 @@ public final class FilterBotsNode extends AbstractScriptNode {
     Pattern pattern;
     try {
       pattern = Pattern.compile(patternStr);
-    } catch (PatternSyntaxException e) {
+    } catch (PatternSyntaxException _) {
       // If pattern is invalid, return empty list
       return completed(result("bots", List.of()));
     }

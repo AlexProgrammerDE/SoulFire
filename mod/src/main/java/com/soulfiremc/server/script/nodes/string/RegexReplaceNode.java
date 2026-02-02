@@ -68,9 +68,15 @@ public final class RegexReplaceNode extends AbstractScriptNode {
 
     try {
       int regexFlags = 0;
-      if (flags.contains("i")) regexFlags |= Pattern.CASE_INSENSITIVE;
-      if (flags.contains("m")) regexFlags |= Pattern.MULTILINE;
-      if (flags.contains("s")) regexFlags |= Pattern.DOTALL;
+      if (flags.contains("i")) {
+        regexFlags |= Pattern.CASE_INSENSITIVE;
+      }
+      if (flags.contains("m")) {
+        regexFlags |= Pattern.MULTILINE;
+      }
+      if (flags.contains("s")) {
+        regexFlags |= Pattern.DOTALL;
+      }
 
       var compiledPattern = Pattern.compile(patternStr, regexFlags);
       var matcher = compiledPattern.matcher(input);
@@ -79,7 +85,9 @@ public final class RegexReplaceNode extends AbstractScriptNode {
       int count = 0;
       while (matcher.find()) {
         count++;
-        if (!replaceAll) break;
+        if (!replaceAll) {
+          break;
+        }
       }
       matcher.reset();
 
@@ -94,7 +102,7 @@ public final class RegexReplaceNode extends AbstractScriptNode {
         "result", result,
         "count", count
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "result", input,
         "count", 0

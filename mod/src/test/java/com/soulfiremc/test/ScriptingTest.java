@@ -73,7 +73,7 @@ final class ScriptingTest {
 
     var result = value.asList();
     assertEquals(3, result.size());
-    assertEquals(1, result.get(0).asInt(0));
+    assertEquals(1, result.getFirst().asInt(0));
     assertEquals(2, result.get(1).asInt(0));
     assertEquals(3, result.get(2).asInt(0));
   }
@@ -102,7 +102,7 @@ final class ScriptingTest {
     var strings = value.asStringList();
 
     assertEquals(3, strings.size());
-    assertEquals("a", strings.get(0));
+    assertEquals("a", strings.getFirst());
     assertEquals("b", strings.get(1));
     assertEquals("c", strings.get(2));
   }
@@ -657,7 +657,7 @@ final class ScriptingTest {
     var parts = result.get("result").asStringList();
 
     assertEquals(3, parts.size());
-    assertEquals("a", parts.get(0));
+    assertEquals("a", parts.getFirst());
     assertEquals("b", parts.get(1));
     assertEquals("c", parts.get(2));
   }
@@ -865,7 +865,7 @@ final class ScriptingTest {
     var list = result.get("list").asList();
 
     assertEquals(4, list.size());
-    assertEquals(1, list.get(0).asInt(0));
+    assertEquals(1, list.getFirst().asInt(0));
     assertEquals(2, list.get(1).asInt(0));
     assertEquals(3, list.get(2).asInt(0));
     assertEquals(4, list.get(3).asInt(0));

@@ -17,7 +17,11 @@
  */
 package com.soulfiremc.server.script.nodes.ai;
 
-import com.openai.models.chat.completions.*;
+import com.openai.models.chat.completions.ChatCompletionCreateParams;
+import com.openai.models.chat.completions.ChatCompletionMessageParam;
+import com.openai.models.chat.completions.ChatCompletionSystemMessageParam;
+import com.openai.models.chat.completions.ChatCompletionUserMessageParam;
+import com.openai.models.completions.CompletionUsage;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.settings.instance.AISettings;
 
@@ -113,9 +117,9 @@ public final class LLMChatNode extends AbstractScriptNode {
 
         // Execute
         var completion = openAiClient.chat().completions().create(requestBuilder.build());
-        var choice = completion.choices().get(0);
+        var choice = completion.choices().getFirst();
         var responseText = choice.message().content().orElse("");
-        var tokensUsed = completion.usage().map(u -> u.totalTokens()).orElse(0L);
+        var tokensUsed = completion.usage().map(CompletionUsage::totalTokens).orElse(0L);
 
         return results(
           "response", responseText,

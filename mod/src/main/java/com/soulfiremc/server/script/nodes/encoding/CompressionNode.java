@@ -87,7 +87,7 @@ public final class CompressionNode extends AbstractScriptNode {
           "ratio", ratio
         ));
       }
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "output", "",
         "success", false,

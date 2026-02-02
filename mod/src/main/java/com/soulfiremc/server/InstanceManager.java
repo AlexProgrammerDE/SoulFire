@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SessionLifecycle;
@@ -168,7 +169,7 @@ public final class InstanceManager {
   }
 
   private void persistDirtyMetadata() {
-    var dirtyBots = new ArrayList<Map.Entry<UUID, Map<String, Map<String, com.google.gson.JsonElement>>>>();
+    var dirtyBots = new ArrayList<Map.Entry<UUID, Map<String, Map<String, JsonElement>>>>();
     for (var entry : botConnections.entrySet()) {
       var bot = entry.getValue();
       bot.persistentMetadata().exportIfDirty().ifPresent(metadata -> {

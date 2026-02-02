@@ -19,16 +19,13 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.SoulFireEvent;
-import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
-import com.soulfiremc.server.api.event.bot.BotDamageEvent;
-import com.soulfiremc.server.api.event.bot.BotPreTickEvent;
-import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
-import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
+import com.soulfiremc.server.api.event.bot.*;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -88,7 +85,9 @@ public final class ScriptTriggerService {
 
           // Register event handler that emits to sink
           Consumer<BotPreTickEvent> handler = event -> {
-            if (context.isCancelled()) return;
+            if (context.isCancelled()) {
+              return;
+            }
 
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
@@ -118,7 +117,9 @@ public final class ScriptTriggerService {
           triggerSubscriptions.put(sinkKey, subscription);
 
           Consumer<ChatMessageReceiveEvent> handler = event -> {
-            if (context.isCancelled()) return;
+            if (context.isCancelled()) {
+              return;
+            }
 
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
@@ -149,7 +150,9 @@ public final class ScriptTriggerService {
           triggerSubscriptions.put(sinkKey, subscription);
 
           Consumer<BotShouldRespawnEvent> handler = event -> {
-            if (context.isCancelled()) return;
+            if (context.isCancelled()) {
+              return;
+            }
 
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
@@ -178,7 +181,9 @@ public final class ScriptTriggerService {
           triggerSubscriptions.put(sinkKey, subscription);
 
           Consumer<BotConnectionInitEvent> handler = event -> {
-            if (context.isCancelled()) return;
+            if (context.isCancelled()) {
+              return;
+            }
 
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
@@ -210,7 +215,9 @@ public final class ScriptTriggerService {
 
           // Use tick event to detect when player is ready (fires once per bot when player becomes non-null)
           Consumer<BotPreTickEvent> handler = event -> {
-            if (context.isCancelled()) return;
+            if (context.isCancelled()) {
+              return;
+            }
 
             var connection = event.connection();
             var botId = connection.accountName();
@@ -245,7 +252,9 @@ public final class ScriptTriggerService {
           triggerSubscriptions.put(sinkKey, subscription);
 
           Consumer<BotDamageEvent> handler = event -> {
-            if (context.isCancelled()) return;
+            if (context.isCancelled()) {
+              return;
+            }
 
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
@@ -289,7 +298,9 @@ public final class ScriptTriggerService {
           Runnable task = new Runnable() {
             @Override
             public void run() {
-              if (context.isCancelled() || cancelled.get()) return;
+              if (context.isCancelled() || cancelled.get()) {
+                return;
+              }
 
               var inputs = new HashMap<String, NodeValue>();
               inputs.put("executionCount", NodeValue.ofNumber(executionCount.getAndIncrement()));
@@ -422,7 +433,7 @@ public final class ScriptTriggerService {
             log.error("Error in OnScriptEnd trigger execution", e);
             return Mono.empty();
           })
-          .block(java.time.Duration.ofSeconds(5));
+          .block(Duration.ofSeconds(5));
       } catch (Exception e) {
         log.error("Error firing OnScriptEnd trigger", e);
       }

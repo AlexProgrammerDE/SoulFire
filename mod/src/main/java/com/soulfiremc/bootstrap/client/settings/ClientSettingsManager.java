@@ -154,7 +154,7 @@ public final class ClientSettingsManager {
           .setService(AccountTypeCredentials.valueOf(authType.name()))
           .addAllPayload(accounts);
 
-      var results = new java.util.ArrayList<MinecraftAccount>();
+      var results = new ArrayList<MinecraftAccount>();
       var responses = rpcClient.mcAuthServiceBlocking().loginCredentials(request.build());
       while (responses.hasNext()) {
         var response = responses.next();

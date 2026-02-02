@@ -93,7 +93,7 @@ public interface ScriptNode {
         try {
           var jsonElement = JsonParser.parseString(defaultValueStr);
           defaults.put(input.id(), NodeValue.fromJson(jsonElement));
-        } catch (Exception e) {
+        } catch (Exception _) {
           // If JSON parsing fails, treat as raw string
           defaults.put(input.id(), NodeValue.ofString(defaultValueStr));
         }

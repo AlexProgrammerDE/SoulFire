@@ -61,7 +61,7 @@ public final class Base64DecodeNode extends AbstractScriptNode {
         "decoded", decoded,
         "success", true
       ));
-    } catch (IllegalArgumentException e) {
+    } catch (IllegalArgumentException _) {
       return completed(results(
         "decoded", "",
         "success", false

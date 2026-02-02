@@ -80,7 +80,7 @@ public final class GetPersistentBotVariableNode extends AbstractScriptNode {
         "value", NodeValue.fromJson(jsonValue),
         "found", true
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false

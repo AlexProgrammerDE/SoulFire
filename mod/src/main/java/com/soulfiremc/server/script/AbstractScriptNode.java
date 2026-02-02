@@ -46,7 +46,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
     if (defaultValue instanceof Vec3) {
       var list = value.asList();
       if (list.size() >= 3) {
-        var x = list.get(0).asDouble(0.0);
+        var x = list.getFirst().asDouble(0.0);
         var y = list.get(1).asDouble(0.0);
         var z = list.get(2).asDouble(0.0);
         return (T) new Vec3(x, y, z);
@@ -157,8 +157,8 @@ public abstract class AbstractScriptNode implements ScriptNode {
   protected BotConnection requireBot(Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
     if (bot == null) {
-      throw new IllegalStateException("This node requires a 'bot' input, but none was provided. " +
-        "Connect a bot output from a trigger node or GetBots/GetBotByName node.");
+      throw new IllegalStateException("This node requires a 'bot' input, but none was provided. "
+        + "Connect a bot output from a trigger node or GetBots/GetBotByName node.");
     }
     return bot;
   }

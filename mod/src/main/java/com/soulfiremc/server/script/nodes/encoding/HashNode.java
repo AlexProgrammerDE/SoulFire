@@ -71,7 +71,7 @@ public final class HashNode extends AbstractScriptNode {
         "hash", result,
         "success", true
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "hash", "",
         "success", false

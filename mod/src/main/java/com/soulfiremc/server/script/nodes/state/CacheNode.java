@@ -62,13 +62,15 @@ public final class CacheNode extends AbstractScriptNode {
     var ttlMs = getLongInput(inputs, "ttlMs", 0L);
     var namespace = getStringInput(inputs, "namespace", "default");
 
-    var cache = CACHES.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
+    var cache = CACHES.computeIfAbsent(namespace, _ -> new ConcurrentHashMap<>());
 
     return switch (operation) {
       case "get" -> {
         var entry = cache.get(key);
         if (entry == null || entry.isExpired()) {
-          if (entry != null) cache.remove(key);
+          if (entry != null) {
+            cache.remove(key);
+          }
           yield completed(results(
             "value", NodeValue.ofNull(),
             "found", false,
@@ -109,7 +111,9 @@ public final class CacheNode extends AbstractScriptNode {
       case "has" -> {
         var entry = cache.get(key);
         var found = entry != null && !entry.isExpired();
-        if (entry != null && entry.isExpired()) cache.remove(key);
+        if (entry != null && entry.isExpired()) {
+          cache.remove(key);
+        }
         yield completed(results(
           "value", NodeValue.ofNull(),
           "found", found,

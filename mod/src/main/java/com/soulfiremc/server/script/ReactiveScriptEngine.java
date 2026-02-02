@@ -99,8 +99,8 @@ public final class ReactiveScriptEngine {
           log.error("Error executing trigger node {}: {}", triggerNodeId, message, e);
           context.eventListener().onNodeError(triggerNodeId, message);
         })
-        .onErrorResume(e -> Mono.just(Map.of()))
-        .flatMap(outputs -> executeDownstream(graph, triggerNodeId, StandardPorts.EXEC_OUT, context));
+        .onErrorResume(_ -> Mono.just(Map.of()))
+        .flatMap(_ -> executeDownstream(graph, triggerNodeId, StandardPorts.EXEC_OUT, context));
     }).subscribeOn(context.getReactorScheduler());
   }
 
@@ -192,7 +192,7 @@ public final class ReactiveScriptEngine {
       .toList();
 
     return Flux.merge(upstreamMonos)
-      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b))
+      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (_, b) -> b))
       .map(resolvedInputs -> {
         var merged = new HashMap<>(baseInputs);
         merged.putAll(resolvedInputs);
@@ -228,8 +228,8 @@ public final class ReactiveScriptEngine {
         log.error("Error executing node {}: {}", nodeId, message, e);
         context.eventListener().onNodeError(nodeId, message);
       })
-      .onErrorResume(e -> Mono.just(Map.of()))
-      .flatMap(outputs -> executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context));
+      .onErrorResume(_ -> Mono.just(Map.of()))
+      .flatMap(_ -> executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context));
   }
 
   /// Executes the full graph (for testing/one-shot execution).
@@ -265,8 +265,8 @@ public final class ReactiveScriptEngine {
     return Flux.fromIterable(triggers)
       .flatMap(triggerId -> executeFromTrigger(graph, triggerId, context, Map.of()))
       .then()
-      .doOnSuccess(v -> eventListener.onScriptCompleted(true))
-      .doOnError(e -> eventListener.onScriptCompleted(false));
+      .doOnSuccess(_ -> eventListener.onScriptCompleted(true))
+      .doOnError(_ -> eventListener.onScriptCompleted(false));
   }
 
   /// Gets a registered node by type.

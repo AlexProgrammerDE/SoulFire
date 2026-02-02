@@ -116,11 +116,9 @@ public final class MetadataHolder<O> {
     lock.writeLock().lock();
     try {
       this.metadata.clear();
-      newMetadata.forEach((@KeyPattern.Namespace String namespace, Map<String, O> keyValues) -> {
-        keyValues.forEach((@KeyPattern.Value String key, O value) -> {
-          this.metadata.put(Key.key(namespace, key), value);
-        });
-      });
+      newMetadata.forEach((@KeyPattern.Namespace String namespace, Map<String, O> keyValues) ->
+        keyValues.forEach((@KeyPattern.Value String key, O value) ->
+          this.metadata.put(Key.key(namespace, key), value)));
       dirty.set(false);
     } finally {
       lock.writeLock().unlock();

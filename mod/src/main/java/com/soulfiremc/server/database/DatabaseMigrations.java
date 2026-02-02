@@ -78,8 +78,8 @@ public final class DatabaseMigrations {
    * and bot becomes an explicit input to nodes.
    */
   private static void dropScriptsScopeColumn(Connection connection, boolean isSqlite) throws SQLException {
-    if (tableExists(connection, "scripts", isSqlite) &&
-        columnExists(connection, "scripts", "scope", isSqlite)) {
+    if (tableExists(connection, "scripts", isSqlite)
+      && columnExists(connection, "scripts", "scope", isSqlite)) {
       log.info("Migrating database: dropping scope column from scripts table");
 
       if (isSqlite) {

@@ -69,7 +69,7 @@ public final class SetSessionBotVariableNode extends AbstractScriptNode {
       var sessionVars = bot.metadata().getOrSet(SESSION_VARS_KEY, ConcurrentHashMap::new);
       sessionVars.put(key, value != null ? value : NodeValue.ofNull());
       return completed(result("success", true));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(result("success", false));
     }
   }

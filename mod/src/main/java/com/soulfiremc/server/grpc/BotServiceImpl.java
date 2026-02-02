@@ -24,6 +24,7 @@ import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.plugins.DialogHandler;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
 import com.soulfiremc.server.settings.lib.SettingsSource;
@@ -36,9 +37,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.dialog.*;
 import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.ClickType;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -105,7 +112,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
           // Check for custom display name
           var displayName = item.getHoverName();
-          if (item.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
+          if (item.has(DataComponents.CUSTOM_NAME)) {
             slotBuilder.setDisplayName(displayName.getString());
           }
 
@@ -117,7 +124,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     return builder.build();
   }
 
-  private static String toBase64PNG(java.awt.image.BufferedImage image) {
+  private static String toBase64PNG(BufferedImage image) {
     try (var os = new ByteArrayOutputStream()) {
       ImageIO.write(image, "png", os);
       return Base64.getEncoder().encodeToString(os.toByteArray());
@@ -360,89 +367,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error rendering bot POV", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
-  }
-
-  @Override
-  public void clickInventorySlot(BotInventoryClickRequest request, StreamObserver<BotInventoryClickResponse> responseObserver) {
-    var instanceId = UUID.fromString(request.getInstanceId());
-    var botId = UUID.fromString(request.getBotId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
-
-    try {
-      var optionalInstance = soulFireServer.getInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
-        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
-      }
-
-      var instance = optionalInstance.get();
-      var activeBot = instance.botConnections().get(botId);
-      if (activeBot == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
-      }
-
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      var gameMode = minecraft.gameMode;
-      if (player == null || gameMode == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
-      }
-
-      // Map proto ClickType to Minecraft ClickType and mouse button
-      var container = player.containerMenu;
-      var slotId = request.getSlot();
-      int mouseButton;
-      net.minecraft.world.inventory.ClickType clickType;
-
-      switch (request.getClickType()) {
-        case LEFT_CLICK -> {
-          mouseButton = 0;
-          clickType = net.minecraft.world.inventory.ClickType.PICKUP;
-        }
-        case RIGHT_CLICK -> {
-          mouseButton = 1;
-          clickType = net.minecraft.world.inventory.ClickType.PICKUP;
-        }
-        case SHIFT_LEFT_CLICK -> {
-          mouseButton = 0;
-          clickType = net.minecraft.world.inventory.ClickType.QUICK_MOVE;
-        }
-        case DROP_ONE -> {
-          mouseButton = 0;
-          clickType = net.minecraft.world.inventory.ClickType.THROW;
-        }
-        case DROP_ALL -> {
-          mouseButton = 1;
-          clickType = net.minecraft.world.inventory.ClickType.THROW;
-        }
-        case SWAP_HOTBAR -> {
-          mouseButton = request.getHotbarSlot(); // 0-8 for hotbar slots
-          clickType = net.minecraft.world.inventory.ClickType.SWAP;
-        }
-        case MIDDLE_CLICK -> {
-          mouseButton = 2;
-          clickType = net.minecraft.world.inventory.ClickType.CLONE;
-        }
-        default -> {
-          responseObserver.onNext(BotInventoryClickResponse.newBuilder()
-            .setSuccess(false)
-            .setError("Invalid click type")
-            .build());
-          responseObserver.onCompleted();
-          return;
-        }
-      }
-
-      // Perform the click
-      gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player);
-
-      responseObserver.onNext(BotInventoryClickResponse.newBuilder()
-        .setSuccess(true)
-        .build());
-      responseObserver.onCompleted();
-    } catch (Throwable t) {
-      log.error("Error clicking inventory slot", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
@@ -914,7 +838,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var inputItem = anvilMenu.getSlot(0).getItem();
       if (!inputItem.isEmpty()) {
         // Get the item's custom name if it has one, otherwise empty
-        if (inputItem.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
+        if (inputItem.has(DataComponents.CUSTOM_NAME)) {
           currentName = inputItem.getHoverName().getString();
         }
       }
@@ -937,7 +861,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         layoutBuilder.setCurrentBookPage(currentPage);
 
         // Try to extract book content
-        var bookContent = bookItem.get(net.minecraft.core.component.DataComponents.WRITABLE_BOOK_CONTENT);
+        var bookContent = bookItem.get(DataComponents.WRITABLE_BOOK_CONTENT);
         if (bookContent != null) {
           var pages = bookContent.pages();
           for (int i = 0; i < pages.size(); i++) {
@@ -949,7 +873,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           }
         } else {
           // Try written book content
-          var writtenContent = bookItem.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+          var writtenContent = bookItem.get(DataComponents.WRITTEN_BOOK_CONTENT);
           if (writtenContent != null) {
             var pages = writtenContent.pages();
             for (int i = 0; i < pages.size(); i++) {
@@ -966,34 +890,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     }
 
     return layoutBuilder.build();
-  }
-
-  /**
-   * Gets a container type identifier for client rendering.
-   */
-  private static String getContainerTypeId(AbstractContainerMenu menu) {
-    return switch (menu) {
-      case InventoryMenu ignored -> "inventory";
-      case ChestMenu ignored -> "chest";
-      case DispenserMenu ignored -> "dispenser";
-      case HopperMenu ignored -> "hopper";
-      case AbstractFurnaceMenu ignored -> "furnace";
-      case CraftingMenu ignored -> "crafting";
-      case AnvilMenu ignored -> "anvil";
-      case EnchantmentMenu ignored -> "enchanting";
-      case BrewingStandMenu ignored -> "brewing";
-      case BeaconMenu ignored -> "beacon";
-      case ShulkerBoxMenu ignored -> "shulker";
-      case GrindstoneMenu ignored -> "grindstone";
-      case StonecutterMenu ignored -> "stonecutter";
-      case LoomMenu ignored -> "loom";
-      case CartographyTableMenu ignored -> "cartography";
-      case SmithingMenu ignored -> "smithing";
-      case MerchantMenu ignored -> "merchant";
-      case CrafterMenu ignored -> "crafter";
-      case LecternMenu ignored -> "lectern";
-      default -> "generic";
-    };
   }
 
   /**
@@ -1031,11 +927,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       for (int i = 0; i < 3; i++) {
         var needsLapis = lapisCosts[i];
         var disabled = !hasItem || lapisCount < needsLapis;
-        var description = String.format("Requires %d lapis, %d+ levels", needsLapis, levelCosts[i]);
+        var description = "Requires %d lapis, %d+ levels".formatted(needsLapis, levelCosts[i]);
         if (!hasItem) {
           description = "Insert item to enchant";
         } else if (lapisCount < needsLapis) {
-          description = String.format("Need %d more lapis lazuli", needsLapis - lapisCount);
+          description = "Need %d more lapis lazuli".formatted(needsLapis - lapisCount);
         }
 
         buttons.add(ContainerButton.newBuilder()
@@ -1089,11 +985,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var hasPayment = !beaconMenu.getSlot(0).getItem().isEmpty();
 
       // Get actual MobEffect registry to iterate and find effects by name
-      var mobEffectRegistry = net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT;
+      var mobEffectRegistry = BuiltInRegistries.MOB_EFFECT;
 
       // Primary effects with their required levels
       record BeaconEffectDef(String effectName, String displayName, int requiredLevel, boolean isPrimary) {}
-      var effects = new BeaconEffectDef[] {
+      var effects = new BeaconEffectDef[]{
         new BeaconEffectDef("speed", "Speed", 1, true),
         new BeaconEffectDef("haste", "Haste", 1, true),
         new BeaconEffectDef("resistance", "Resistance", 2, true),
@@ -1117,8 +1013,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             buttons.add(ContainerButton.newBuilder()
               .setButtonId(effectRegistryId)
               .setLabel(effectDef.displayName)
-              .setDescription("Level " + effectDef.requiredLevel + "+ (" + (effectDef.isPrimary ? "Primary" : "Secondary") + ")" +
-                (disabled ? " - Requires more beacon levels" : ""))
+              .setDescription("Level " + effectDef.requiredLevel + "+ (" + (effectDef.isPrimary ? "Primary" : "Secondary") + ")"
+                + (disabled ? " - Requires more beacon levels" : ""))
               .setIconItemId("minecraft:potion")
               .setDisabled(disabled)
               .build());
@@ -1180,6 +1076,65 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     return buttons;
   }
 
+  /**
+   * Gets a container type identifier for client rendering.
+   */
+  private static String getContainerTypeId(AbstractContainerMenu menu) {
+    return switch (menu) {
+      case InventoryMenu ignored -> "inventory";
+      case ChestMenu ignored -> "chest";
+      case DispenserMenu ignored -> "dispenser";
+      case HopperMenu ignored -> "hopper";
+      case AbstractFurnaceMenu ignored -> "furnace";
+      case CraftingMenu ignored -> "crafting";
+      case AnvilMenu ignored -> "anvil";
+      case EnchantmentMenu ignored -> "enchanting";
+      case BrewingStandMenu ignored -> "brewing";
+      case BeaconMenu ignored -> "beacon";
+      case ShulkerBoxMenu ignored -> "shulker";
+      case GrindstoneMenu ignored -> "grindstone";
+      case StonecutterMenu ignored -> "stonecutter";
+      case LoomMenu ignored -> "loom";
+      case CartographyTableMenu ignored -> "cartography";
+      case SmithingMenu ignored -> "smithing";
+      case MerchantMenu ignored -> "merchant";
+      case CrafterMenu ignored -> "crafter";
+      case LecternMenu ignored -> "lectern";
+      default -> "generic";
+    };
+  }
+
+  /**
+   * Converts a Minecraft Dialog to the proto ServerDialog format.
+   * This is a simplified conversion that captures the essential dialog information.
+   */
+  private static ServerDialog convertDialogToProto(Holder<Dialog> dialogHolder) {
+    var dialog = dialogHolder.value();
+    var builder = ServerDialog.newBuilder();
+
+    // Set dialog ID from the holder key if available
+    dialogHolder.unwrapKey().ifPresent(key ->
+      builder.setId(key.identifier().toString()));
+
+    // Set dialog type based on the concrete class
+    if (dialog instanceof NoticeDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_NOTICE);
+    } else if (dialog instanceof ConfirmationDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_CONFIRMATION);
+    } else if (dialog instanceof MultiActionDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_MULTI_ACTION);
+    } else if (dialog instanceof ServerLinksDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_SERVER_LINKS);
+    } else if (dialog instanceof DialogListDialog) {
+      builder.setType(DialogType.DIALOG_TYPE_DIALOG_LIST);
+    }
+
+    // Set a basic title from the class name if we can't access the actual title
+    builder.setTitle(dialog.getClass().getSimpleName().replace("Dialog", ""));
+
+    return builder.build();
+  }
+
 
   /**
    * Gets the display title for a container menu.
@@ -1203,10 +1158,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   }
 
   @Override
-  public void getInventoryState(BotInventoryStateRequest request, StreamObserver<BotInventoryStateResponse> responseObserver) {
+  public void clickInventorySlot(BotInventoryClickRequest request, StreamObserver<BotInventoryClickResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
     var botId = UUID.fromString(request.getBotId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
 
     try {
       var optionalInstance = soulFireServer.getInstance(instanceId);
@@ -1222,54 +1177,65 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var minecraft = activeBot.minecraft();
       var player = minecraft.player;
-      if (player == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
+      var gameMode = minecraft.gameMode;
+      if (player == null || gameMode == null) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
       }
 
+      // Map proto ClickType to Minecraft ClickType and mouse button
       var container = player.containerMenu;
-      var title = getContainerTitle(container, minecraft);
-      var layout = buildContainerLayout(container, title);
+      var slotId = request.getSlot();
+      int mouseButton;
+      ClickType clickType;
 
-      var responseBuilder = BotInventoryStateResponse.newBuilder()
-        .setLayout(layout)
-        .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
-
-      // Add all non-empty slots
-      for (var slot : container.slots) {
-        var item = slot.getItem();
-        if (!item.isEmpty()) {
-          var slotBuilder = InventorySlot.newBuilder()
-            .setSlot(slot.index)
-            .setItemId(item.getItemHolder().getRegisteredName())
-            .setCount(item.getCount());
-
-          if (item.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
-            slotBuilder.setDisplayName(item.getHoverName().getString());
-          }
-
-          responseBuilder.addSlots(slotBuilder.build());
+      switch (request.getClickType()) {
+        case LEFT_CLICK -> {
+          mouseButton = 0;
+          clickType = ClickType.PICKUP;
+        }
+        case RIGHT_CLICK -> {
+          mouseButton = 1;
+          clickType = ClickType.PICKUP;
+        }
+        case SHIFT_LEFT_CLICK -> {
+          mouseButton = 0;
+          clickType = ClickType.QUICK_MOVE;
+        }
+        case DROP_ONE -> {
+          mouseButton = 0;
+          clickType = ClickType.THROW;
+        }
+        case DROP_ALL -> {
+          mouseButton = 1;
+          clickType = ClickType.THROW;
+        }
+        case SWAP_HOTBAR -> {
+          mouseButton = request.getHotbarSlot(); // 0-8 for hotbar slots
+          clickType = ClickType.SWAP;
+        }
+        case MIDDLE_CLICK -> {
+          mouseButton = 2;
+          clickType = ClickType.CLONE;
+        }
+        default -> {
+          responseObserver.onNext(BotInventoryClickResponse.newBuilder()
+            .setSuccess(false)
+            .setError("Invalid click type")
+            .build());
+          responseObserver.onCompleted();
+          return;
         }
       }
 
-      // Add carried item if present
-      var carried = container.getCarried();
-      if (!carried.isEmpty()) {
-        var carriedBuilder = InventorySlot.newBuilder()
-          .setSlot(-1) // -1 indicates carried item
-          .setItemId(carried.getItemHolder().getRegisteredName())
-          .setCount(carried.getCount());
+      // Perform the click
+      gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player);
 
-        if (carried.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
-          carriedBuilder.setDisplayName(carried.getHoverName().getString());
-        }
-
-        responseBuilder.setCarriedItem(carriedBuilder.build());
-      }
-
-      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onNext(BotInventoryClickResponse.newBuilder()
+        .setSuccess(true)
+        .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting inventory state", t);
+      log.error("Error clicking inventory slot", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
@@ -1463,6 +1429,82 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   }
 
   @Override
+  public void getInventoryState(BotInventoryStateRequest request, StreamObserver<BotInventoryStateResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    var botId = UUID.fromString(request.getBotId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
+
+    try {
+      var optionalInstance = soulFireServer.getInstance(instanceId);
+      if (optionalInstance.isEmpty()) {
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+      }
+
+      var instance = optionalInstance.get();
+      var activeBot = instance.botConnections().get(botId);
+      if (activeBot == null) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
+      }
+
+      var minecraft = activeBot.minecraft();
+      var player = minecraft.player;
+      if (player == null) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
+      }
+
+      var container = player.containerMenu;
+      var title = getContainerTitle(container, minecraft);
+      var layout = buildContainerLayout(container, title);
+
+      var responseBuilder = BotInventoryStateResponse.newBuilder()
+        .setLayout(layout)
+        .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
+
+      // Add all non-empty slots
+      for (var slot : container.slots) {
+        var item = slot.getItem();
+        if (!item.isEmpty()) {
+          var slotBuilder = InventorySlot.newBuilder()
+            .setSlot(slot.index)
+            .setItemId(item.getItemHolder().getRegisteredName())
+            .setCount(item.getCount());
+
+          if (item.has(DataComponents.CUSTOM_NAME)) {
+            slotBuilder.setDisplayName(item.getHoverName().getString());
+          }
+
+          responseBuilder.addSlots(slotBuilder.build());
+        }
+      }
+
+      // Add carried item if present
+      var carried = container.getCarried();
+      if (!carried.isEmpty()) {
+        var carriedBuilder = InventorySlot.newBuilder()
+          .setSlot(-1) // -1 indicates carried item
+          .setItemId(carried.getItemHolder().getRegisteredName())
+          .setCount(carried.getCount());
+
+        if (carried.has(DataComponents.CUSTOM_NAME)) {
+          carriedBuilder.setDisplayName(carried.getHoverName().getString());
+        }
+
+        responseBuilder.setCarriedItem(carriedBuilder.build());
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting inventory state", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  // ============================================================================
+  // Dialog Management (Minecraft 1.21.6+)
+  // ============================================================================
+
+  @Override
   public void setContainerText(BotSetContainerTextRequest request, StreamObserver<BotSetContainerTextResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
     var botId = UUID.fromString(request.getBotId());
@@ -1500,11 +1542,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
         // Send the rename packet
         activeBot.botControl().registerControllingTask(
-          ControllingTask.singleTick(() -> {
+          ControllingTask.singleTick(() ->
             // The anvil menu has a setItemName method that we can call
             // This will update the output slot and send the appropriate packet
-            anvilMenu.setItemName(text);
-          }));
+            anvilMenu.setItemName(text)));
 
         responseObserver.onNext(BotSetContainerTextResponse.newBuilder()
           .setSuccess(true)
@@ -1521,41 +1562,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       log.error("Error setting container text", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
-  }
-
-  // ============================================================================
-  // Dialog Management (Minecraft 1.21.6+)
-  // ============================================================================
-
-  /**
-   * Converts a Minecraft Dialog to the proto ServerDialog format.
-   * This is a simplified conversion that captures the essential dialog information.
-   */
-  private static ServerDialog convertDialogToProto(net.minecraft.core.Holder<net.minecraft.server.dialog.Dialog> dialogHolder) {
-    var dialog = dialogHolder.value();
-    var builder = ServerDialog.newBuilder();
-
-    // Set dialog ID from the holder key if available
-    dialogHolder.unwrapKey().ifPresent(key ->
-      builder.setId(key.identifier().toString()));
-
-    // Set dialog type based on the concrete class
-    if (dialog instanceof net.minecraft.server.dialog.NoticeDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_NOTICE);
-    } else if (dialog instanceof net.minecraft.server.dialog.ConfirmationDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_CONFIRMATION);
-    } else if (dialog instanceof net.minecraft.server.dialog.MultiActionDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_MULTI_ACTION);
-    } else if (dialog instanceof net.minecraft.server.dialog.ServerLinksDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_SERVER_LINKS);
-    } else if (dialog instanceof net.minecraft.server.dialog.DialogListDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_DIALOG_LIST);
-    }
-
-    // Set a basic title from the class name if we can't access the actual title
-    builder.setTitle(dialog.getClass().getSimpleName().replace("Dialog", ""));
-
-    return builder.build();
   }
 
   @Override
@@ -1576,7 +1582,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       if (activeBot != null) {
         // Get current dialog from the DialogHandler
-        var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+        var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
         if (dialogHolder != null) {
           responseBuilder.setDialog(convertDialogToProto(dialogHolder));
         }
@@ -1608,7 +1614,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+      var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
       if (dialogHolder == null) {
         responseObserver.onNext(BotSubmitDialogResponse.newBuilder()
           .setSuccess(false)
@@ -1622,7 +1628,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       // requires more complex NBT payload construction that varies by dialog type
       // TODO: Implement proper dialog response packets
       log.info("Dialog submit requested with {} input values - clearing dialog state", request.getInputValuesCount());
-      com.soulfiremc.server.plugins.DialogHandler.setCurrentDialog(activeBot, null);
+      DialogHandler.setCurrentDialog(activeBot, null);
 
       responseObserver.onNext(BotSubmitDialogResponse.newBuilder()
         .setSuccess(true)
@@ -1652,7 +1658,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var dialogHolder = com.soulfiremc.server.plugins.DialogHandler.getCurrentDialog(activeBot);
+      var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
       if (dialogHolder == null) {
         responseObserver.onNext(BotClickDialogButtonResponse.newBuilder()
           .setSuccess(false)
@@ -1666,7 +1672,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       // requires more complex NBT payload construction
       // TODO: Implement proper dialog button click packets
       log.info("Dialog button click requested (button index: {}) - clearing dialog state", request.getButtonIndex());
-      com.soulfiremc.server.plugins.DialogHandler.setCurrentDialog(activeBot, null);
+      DialogHandler.setCurrentDialog(activeBot, null);
 
       responseObserver.onNext(BotClickDialogButtonResponse.newBuilder()
         .setSuccess(true)
@@ -1697,7 +1703,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       }
 
       // Just clear the dialog state locally - the server will handle cleanup
-      com.soulfiremc.server.plugins.DialogHandler.setCurrentDialog(activeBot, null);
+      DialogHandler.setCurrentDialog(activeBot, null);
 
       responseObserver.onNext(BotCloseDialogResponse.newBuilder()
         .setSuccess(true)
@@ -1890,8 +1896,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       pitch = Math.max(-90f, Math.min(90f, pitch));
 
       // Normalize yaw to -180 to 180 range
-      while (yaw > 180f) yaw -= 360f;
-      while (yaw < -180f) yaw += 360f;
+      while (yaw > 180f) {
+        yaw -= 360f;
+      }
+      while (yaw < -180f) {
+        yaw += 360f;
+      }
 
       final float finalYaw = yaw;
       final float finalPitch = pitch;

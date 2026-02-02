@@ -137,11 +137,11 @@ public final class SFMinecraftDownloader {
       });
 
       if (!Files.exists(minecraftJarPath)) {
-        var clientUrl = !CLIENT_URL_OVERRIDE.isBlank() ? CLIENT_URL_OVERRIDE : versionInfo.get()
+        var clientUrl = CLIENT_URL_OVERRIDE.isBlank() ? versionInfo.get()
           .getAsJsonObject("downloads")
           .getAsJsonObject("client")
           .get("url")
-          .getAsString();
+          .getAsString() : CLIENT_URL_OVERRIDE;
 
         IO.println("Downloading Minecraft client jar from: " + clientUrl);
         var tempJarPath = Files.createTempFile("sf-mc-jar-download-", "-" + MINECRAFT_CLIENT_JAR_NAME);

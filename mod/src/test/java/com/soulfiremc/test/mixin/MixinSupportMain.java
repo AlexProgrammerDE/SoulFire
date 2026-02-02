@@ -28,7 +28,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 
-public class MixinSupportMain {
+public final class MixinSupportMain {
   private MixinSupportMain() {
   }
 

@@ -17,11 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.json;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.soulfiremc.server.script.*;
 
 import java.util.Map;
@@ -74,7 +70,7 @@ public final class JsonSetNode extends AbstractScriptNode {
       var root = JsonParser.parseString(jsonInput);
       var valueElement = value != null ? value.asJsonElement() : null;
       if (valueElement == null) {
-        valueElement = com.google.gson.JsonNull.INSTANCE;
+        valueElement = JsonNull.INSTANCE;
       }
 
       // Navigate to parent and set value
@@ -100,7 +96,7 @@ public final class JsonSetNode extends AbstractScriptNode {
         "result", GSON.toJson(root),
         "success", true
       ));
-    } catch (Exception e) {
+    } catch (Exception _) {
       return completed(results(
         "result", jsonInput,
         "success", false
@@ -161,7 +157,7 @@ public final class JsonSetNode extends AbstractScriptNode {
         if (current.isJsonArray()) {
           var array = current.getAsJsonArray();
           while (array.size() <= index) {
-            array.add(com.google.gson.JsonNull.INSTANCE);
+            array.add(JsonNull.INSTANCE);
           }
           if (!matcher.find()) {
             array.set(index, value);

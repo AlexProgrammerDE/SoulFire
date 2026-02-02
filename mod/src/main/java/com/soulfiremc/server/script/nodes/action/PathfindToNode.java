@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import com.soulfiremc.server.script.*;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -58,14 +59,14 @@ public final class PathfindToNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var destination = getInput(inputs, "destination", net.minecraft.world.phys.Vec3.ZERO);
+    var destination = getInput(inputs, "destination", Vec3.ZERO);
 
     var goal = new PosGoal(SFVec3i.fromDouble(destination));
     var constraint = new PathConstraintImpl(bot);
 
     var future = PathExecutor.executePathfinding(bot, goal, constraint)
-      .thenApply(v -> result("success", true))
-      .exceptionally(e -> result("success", false));
+      .thenApply(_ -> result("success", true))
+      .exceptionally(_ -> result("success", false));
 
     // Track pending operation for cleanup on deactivation
     runtime.addPendingOperation(future);

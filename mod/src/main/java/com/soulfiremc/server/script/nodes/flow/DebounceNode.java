@@ -73,7 +73,7 @@ public final class DebounceNode extends AbstractScriptNode {
     var key = getStringInput(inputs, "key", "default");
 
     var now = System.currentTimeMillis();
-    var lastExecutionTime = lastExecutionTimes.computeIfAbsent(key, k -> new AtomicLong(0));
+    var lastExecutionTime = lastExecutionTimes.computeIfAbsent(key, _ -> new AtomicLong(0));
 
     // Atomic check-and-set to avoid race conditions
     while (true) {

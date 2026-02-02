@@ -84,7 +84,7 @@ public final class ScriptEntity {
    */
   @ColumnDefault("false")
   @Column(nullable = false)
-  private boolean paused = false;
+  private boolean paused;
 
   @CreationTimestamp
   @Column(nullable = false, updatable = false)

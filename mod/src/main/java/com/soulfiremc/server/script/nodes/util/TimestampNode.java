@@ -61,7 +61,7 @@ public final class TimestampNode extends AbstractScriptNode {
     ZoneId zone;
     try {
       zone = ZoneId.of(timezone);
-    } catch (Exception e) {
+    } catch (Exception _) {
       zone = ZoneId.of("UTC");
     }
     var zoned = ZonedDateTime.ofInstant(now, zone);
@@ -72,7 +72,7 @@ public final class TimestampNode extends AbstractScriptNode {
     } else {
       try {
         formatted = DateTimeFormatter.ofPattern(format).format(zoned);
-      } catch (Exception e) {
+      } catch (Exception _) {
         formatted = String.valueOf(now.toEpochMilli());
       }
     }

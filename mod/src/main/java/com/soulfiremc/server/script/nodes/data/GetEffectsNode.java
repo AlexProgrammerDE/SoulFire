@@ -19,8 +19,10 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's active potion effects.
@@ -65,8 +67,8 @@ public final class GetEffectsNode extends AbstractScriptNode {
     var effects = player.getActiveEffects();
     var effectNames = effects.stream()
       .map(effect -> BuiltInRegistries.MOB_EFFECT.getKey(effect.getEffect().value()))
-      .filter(java.util.Objects::nonNull)
-      .map(key -> key.getPath())
+      .filter(Objects::nonNull)
+      .map(Identifier::getPath)
       .toList();
 
     return completed(results(

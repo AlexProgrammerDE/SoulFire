@@ -91,7 +91,7 @@ public final class ReactiveScriptContext implements NodeRuntime {
   /// @return a Mono that completes with the node's outputs
   public Mono<Map<String, NodeValue>> awaitNodeOutputs(String nodeId) {
     return nodeOutputSinks
-      .computeIfAbsent(nodeId, k -> Sinks.one())
+      .computeIfAbsent(nodeId, _ -> Sinks.one())
       .asMono()
       .timeout(Duration.ofMinutes(5))
       .onErrorReturn(Map.of());
@@ -111,7 +111,7 @@ public final class ReactiveScriptContext implements NodeRuntime {
     try {
       var result = sink.asMono().block(Duration.ZERO);
       return result != null ? result : Map.of();
-    } catch (Exception e) {
+    } catch (Exception _) {
       return Map.of();
     }
   }
@@ -123,7 +123,7 @@ public final class ReactiveScriptContext implements NodeRuntime {
   /// @param outputs the output values
   public void publishNodeOutputs(String nodeId, Map<String, NodeValue> outputs) {
     nodeOutputSinks
-      .computeIfAbsent(nodeId, k -> Sinks.one())
+      .computeIfAbsent(nodeId, _ -> Sinks.one())
       .tryEmitValue(outputs);
   }
 

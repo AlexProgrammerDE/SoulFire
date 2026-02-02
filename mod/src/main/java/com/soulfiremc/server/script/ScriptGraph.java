@@ -21,7 +21,6 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
-import java.util.Set;
 
 /// Represents the graph structure of a visual script.
 /// Contains nodes and edges that define the execution flow and data connections.
@@ -159,7 +158,7 @@ public final class ScriptGraph {
 
           if (isMultiInput) {
             // Collect into list for multi-input ports
-            multiInputs.computeIfAbsent(targetKey, k -> new ArrayList<>()).add(value);
+            multiInputs.computeIfAbsent(targetKey, _ -> new ArrayList<>()).add(value);
           } else {
             // Single input - last connection wins
             inputs.put(targetKey, value);
