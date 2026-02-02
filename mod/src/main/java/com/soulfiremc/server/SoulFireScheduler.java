@@ -90,10 +90,32 @@ public final class SoulFireScheduler implements Executor {
   }
 
   public void scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
-    schedule(FinalizableRunnable.chainFinalizers(() -> {
-      scheduleAtFixedRate(command, period, period, unit);
+    var periodMs = unit.toMillis(period);
+    var scheduledTime = System.currentTimeMillis() + unit.toMillis(delay);
+    scheduleAtFixedRate(command, scheduledTime, periodMs);
+  }
+
+  private void scheduleAtFixedRate(Runnable command, long scheduledTime, long periodMs) {
+    scheduleAbsolute(FinalizableRunnable.chainFinalizers(() -> {
+      scheduleAtFixedRate(command, scheduledTime + periodMs, periodMs);
       runCommandWithoutFinalize(command);
-    }, command), delay, unit);
+    }, command), scheduledTime);
+  }
+
+  private void scheduleAbsolute(Runnable command, long absoluteTimeMs) {
+    if (blockNewTasks.get()) {
+      FinalizableRunnable.finalize(command);
+      return;
+    }
+
+    synchronized (executionQueue) {
+      if (blockNewTasks.get()) {
+        FinalizableRunnable.finalize(command);
+        return;
+      }
+
+      executionQueue.enqueue(new TimedRunnable(command, absoluteTimeMs));
+    }
   }
 
   public void scheduleWithFixedDelay(Runnable command, long delay, long period, TimeUnit unit) {
