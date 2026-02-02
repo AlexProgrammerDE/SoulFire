@@ -125,6 +125,7 @@ public final class SoulFireScheduler implements Executor {
     }
 
     drainQueue();
+    executor.shutdown();
   }
 
   public CompletableFuture<?> runAsync(Runnable command) {
