@@ -92,20 +92,20 @@ public final class SoulFireScheduler implements Executor {
   public void scheduleAtFixedRate(Runnable command, long delay, long period, TimeUnit unit) {
     schedule(FinalizableRunnable.chainFinalizers(() -> {
       scheduleAtFixedRate(command, period, period, unit);
-      runCommand(command);
+      runCommandWithoutFinalize(command);
     }, command), delay, unit);
   }
 
   public void scheduleWithFixedDelay(Runnable command, long delay, long period, TimeUnit unit) {
     schedule(FinalizableRunnable.chainFinalizers(() -> {
-      runCommand(command);
+      runCommandWithoutFinalize(command);
       scheduleWithFixedDelay(command, period, period, unit);
     }, command), delay, unit);
   }
 
   public void scheduleWithDynamicDelay(Runnable command, LongSupplier delay, TimeUnit unit) {
     schedule(FinalizableRunnable.chainFinalizers(() -> {
-      runCommand(command);
+      runCommandWithoutFinalize(command);
       scheduleWithDynamicDelay(command, delay, unit);
     }, command), delay.getAsLong(), unit);
   }
@@ -172,6 +172,20 @@ public final class SoulFireScheduler implements Executor {
         throw new CompletionException(t);
       }
     };
+  }
+
+  /// Runs a command without finalizing it. Used by recurring methods where
+  /// finalization is handled by the outer [#runCommand(Runnable)] via [FinalizableRunnable#chainFinalizers].
+  private void runCommandWithoutFinalize(Runnable command) {
+    if (blockNewTasks.get()) {
+      return;
+    }
+
+    try {
+      runnableWrapper.runWrapped(command);
+    } catch (Throwable t) {
+      runnableWrapper.runWrapped(() -> log.error("Error in async executor", t));
+    }
   }
 
   private void runCommand(Runnable command) {
