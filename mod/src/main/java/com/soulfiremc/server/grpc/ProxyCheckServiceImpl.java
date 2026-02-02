@@ -76,83 +76,85 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
       var proxyCheckEventLoopGroup =
         NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().execute(() -> {
-        SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
-            var proxy = SFProxy.fromProto(payload);
-            var stopWatch = Stopwatch.createStarted();
-            var factory = new BotConnectionFactory(
-              instance,
-              new BotSettingsImpl(PROXY_CHECK_ACCOUNT, settingsSource),
-              protocolVersion,
-              serverAddress,
-              proxy,
-              proxyCheckEventLoopGroup
-            );
-            var connectionHolder = new CompletableFuture<BotConnection>();
-            return instance.scheduler().supplyAsync(() -> {
-                var future = cancellationCollector.add(new CompletableFuture<Void>());
-                var connection = factory.prepareConnection(true);
-                connectionHolder.complete(connection);
+        try {
+          SFHelpers.maxFutures(settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
+              var proxy = SFProxy.fromProto(payload);
+              var stopWatch = Stopwatch.createStarted();
+              var factory = new BotConnectionFactory(
+                instance,
+                new BotSettingsImpl(PROXY_CHECK_ACCOUNT, settingsSource),
+                protocolVersion,
+                serverAddress,
+                proxy,
+                proxyCheckEventLoopGroup
+              );
+              var connectionHolder = new CompletableFuture<BotConnection>();
+              return instance.scheduler().supplyAsync(() -> {
+                  var future = cancellationCollector.add(new CompletableFuture<Void>());
+                  var connection = factory.prepareConnection(true);
+                  connectionHolder.complete(connection);
 
-                connection.shutdownHooks().add(() -> future.completeExceptionally(new RuntimeException("Connection closed")));
+                  connection.shutdownHooks().add(() -> future.completeExceptionally(new RuntimeException("Connection closed")));
 
-                Consumer<BotPacketPreReceiveEvent> listener = event -> {
-                  if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
-                    future.complete(null);
-                  }
-                };
-                SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, listener);
+                  Consumer<BotPacketPreReceiveEvent> listener = event -> {
+                    if (event.connection() == connection && event.packet() instanceof ClientboundStatusResponsePacket) {
+                      future.complete(null);
+                    }
+                  };
+                  SoulFireAPI.registerListener(BotPacketPreReceiveEvent.class, listener);
 
-                // Ensure listener is unregistered when future completes (success, failure, or timeout)
-                future.whenComplete((_, _) -> SoulFireAPI.unregisterListener(BotPacketPreReceiveEvent.class, listener));
+                  // Ensure listener is unregistered when future completes (success, failure, or timeout)
+                  future.whenComplete((_, _) -> SoulFireAPI.unregisterListener(BotPacketPreReceiveEvent.class, listener));
 
-                log.debug("Checking proxy: {}", proxy);
-                connection.connect().join();
+                  log.debug("Checking proxy: {}", proxy);
+                  connection.connect().join();
 
-                return future.join();
-              }, Level.TRACE)
-              .orTimeout(30, TimeUnit.SECONDS)
-              .whenComplete((_, _) -> {
-                // Ensure connection resources are cleaned up after timeout or completion
-                connectionHolder.thenAccept(conn ->
-                  conn.disconnect(Component.text("Proxy check completed")));
-              })
-              .handle((_, throwable) -> ProxyCheckResponseSingle.newBuilder()
-                .setProxy(payload)
-                .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
-                .setValid(throwable == null)
-                .build());
-          }, result -> {
-            synchronized (responseObserver) {
-              if (responseObserver.isCancelled()) {
-                return;
+                  return future.join();
+                }, Level.TRACE)
+                .orTimeout(30, TimeUnit.SECONDS)
+                .whenComplete((_, _) -> {
+                  // Ensure connection resources are cleaned up after timeout or completion
+                  connectionHolder.thenAccept(conn ->
+                    conn.disconnect(Component.text("Proxy check completed")));
+                })
+                .handle((_, throwable) -> ProxyCheckResponseSingle.newBuilder()
+                  .setProxy(payload)
+                  .setLatency((int) stopWatch.stop().elapsed(TimeUnit.MILLISECONDS))
+                  .setValid(throwable == null)
+                  .build());
+            }, result -> {
+              synchronized (responseObserver) {
+                if (responseObserver.isCancelled()) {
+                  return;
+                }
+
+                var proxy = SFProxy.fromProto(result.getProxy());
+                if (result.getValid()) {
+                  log.debug("Proxy check successful for {}: {}ms", proxy, result.getLatency());
+                } else {
+                  log.debug("Proxy check failed for {}", proxy);
+                }
+
+                responseObserver.onNext(ProxyCheckResponse.newBuilder()
+                  .setSingle(result)
+                  .build());
               }
+            },
+            cancellationCollector);
 
-              var proxy = SFProxy.fromProto(result.getProxy());
-              if (result.getValid()) {
-                log.debug("Proxy check successful for {}: {}ms", proxy, result.getLatency());
-              } else {
-                log.debug("Proxy check failed for {}", proxy);
-              }
-
-              responseObserver.onNext(ProxyCheckResponse.newBuilder()
-                .setSingle(result)
-                .build());
+          synchronized (responseObserver) {
+            if (responseObserver.isCancelled()) {
+              return;
             }
-          },
-          cancellationCollector);
 
-        proxyCheckEventLoopGroup.shutdownGracefully()
-          .awaitUninterruptibly(5, TimeUnit.SECONDS);
-
-        synchronized (responseObserver) {
-          if (responseObserver.isCancelled()) {
-            return;
+            responseObserver.onNext(ProxyCheckResponse.newBuilder()
+              .setEnd(ProxyCheckEnd.getDefaultInstance())
+              .build());
+            responseObserver.onCompleted();
           }
-
-          responseObserver.onNext(ProxyCheckResponse.newBuilder()
-            .setEnd(ProxyCheckEnd.getDefaultInstance())
-            .build());
-          responseObserver.onCompleted();
+        } finally {
+          proxyCheckEventLoopGroup.shutdownGracefully()
+            .awaitUninterruptibly(5, TimeUnit.SECONDS);
         }
       });
     } catch (Throwable t) {
