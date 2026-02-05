@@ -1,11 +1,12 @@
-FROM azul/zulu-openjdk-alpine:25.0.2-jre-headless AS soulfire-runner
+FROM eclipse-temurin:25-jre AS soulfire-runner
 
 ARG VERSION
 
 # Setup groups and install dumb init
-RUN addgroup --gid 1001 soulfire && \
-    adduser --home /soulfire --uid 1001 -S -G soulfire soulfire && \
-    apk add --update --no-progress --no-cache dumb-init libstdc++
+RUN groupadd --gid 1001 soulfire && \
+    useradd --home-dir /soulfire --uid 1001 --gid soulfire --create-home soulfire && \
+    apt-get update && apt-get install -y --no-install-recommends dumb-init && \
+    rm -rf /var/lib/apt/lists/*
 
 # Download JAR from GitHub releases
 ADD --chown=soulfire:soulfire https://github.com/AlexProgrammerDE/SoulFire/releases/download/${VERSION}/SoulFireDedicated-${VERSION}.jar /soulfire/soulfire.jar
