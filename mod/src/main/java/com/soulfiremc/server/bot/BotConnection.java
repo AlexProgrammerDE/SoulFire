@@ -53,6 +53,7 @@ import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerStatusPinger;
@@ -62,6 +63,7 @@ import net.minecraft.network.PacketProcessor;
 import net.minecraft.server.network.EventLoopGroupHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.net.Proxy;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -119,8 +121,8 @@ public final class BotConnection {
     this.runnableWrapper = instanceManager.runnableWrapper().with(new BotRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.serverAddress = serverAddress;
-    this.minecraft = createMinecraftCopy(minecraftAccount);
     this.proxy = proxyData;
+    this.minecraft = createMinecraftCopy(minecraftAccount);
     this.sessionService = new SFSessionService(this);
     this.currentProtocolVersion = currentProtocolVersion;
     this.isStatusPing = isStatusPing;
@@ -158,10 +160,16 @@ public final class BotConnection {
     );
     newInstance.deltaTracker = new DeltaTracker.Timer(20.0F, 0L, newInstance::getTickTargetMillis);
     newInstance.reloadStateTracker = new ResourceLoadStateTracker();
+    var javaProxy = proxy != null
+      ? new Proxy(
+      proxy.type() == com.soulfiremc.server.proxy.ProxyType.HTTP ? Proxy.Type.HTTP : Proxy.Type.SOCKS,
+      proxy.address())
+      : Proxy.NO_PROXY;
+    var userData = new GameConfig.UserData(newInstance.user, javaProxy);
     newInstance.downloadedPackSource = new DownloadedPackSource(
       newInstance,
       newInstance.gameDirectory.toPath().resolve("downloads"),
-      ((IMinecraft) newInstance).soulfire$getGameConfig().user
+      userData
     );
 
     ((IMinecraft) newInstance).soulfire$setConnection(this);

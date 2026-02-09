@@ -23,6 +23,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
 import com.soulfiremc.server.api.event.session.InstanceInitEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.DatabaseManager;
 import com.soulfiremc.server.database.InstanceEntity;
@@ -50,9 +51,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.hibernate.SessionFactory;
+import org.jspecify.annotations.Nullable;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -106,6 +110,28 @@ public final class SoulFireServer {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+    Authenticator.setDefault(new Authenticator() {
+      @Override
+      protected @Nullable PasswordAuthentication getPasswordAuthentication() {
+        var connection = BotConnection.CURRENT.get();
+        if (connection == null
+          || connection.proxy() == null) {
+          return null;
+        }
+
+        var proxyUsername = connection.proxy().username();
+        var proxyPassword = connection.proxy().password();
+        if (proxyUsername == null || proxyPassword == null) {
+          return null;
+        }
+
+        return new PasswordAuthentication(
+          proxyUsername,
+          proxyPassword.toCharArray()
+        );
+      }
+    });
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
     var sessionFactoryFuture = scheduler.supplyAsync(DatabaseManager::select);
