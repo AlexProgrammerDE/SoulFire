@@ -31,7 +31,6 @@ import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
-import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.server.util.structs.CancellationCollector;
 import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
@@ -68,22 +67,20 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
 
     var cancellationCollector = new CancellationCollector(responseObserver);
     try {
-      var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
-      var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(ProxySettings.PROXY_CHECK_ADDRESS), protocolVersion);
-      var proxyCheckEventLoopGroup =
-        NettyHelper.createEventLoopGroup("ProxyCheck-%s".formatted(UUID.randomUUID().toString()), instance.runnableWrapper());
       instance.scheduler().execute(() -> {
         try {
           SFHelpers.maxFutures(instance.scheduler(), settingsSource.get(ProxySettings.PROXY_CHECK_CONCURRENCY), request.getProxyList(), payload -> {
               var proxy = SFProxy.fromProto(payload);
               var stopWatch = Stopwatch.createStarted();
+              var botSettingsSource = new BotSettingsImpl(PROXY_CHECK_ACCOUNT, settingsSource);
+              var protocolVersion = botSettingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
+              var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(ProxySettings.PROXY_CHECK_ADDRESS), protocolVersion);
               var factory = new BotConnectionFactory(
                 instance,
-                new BotSettingsImpl(PROXY_CHECK_ACCOUNT, settingsSource),
+                botSettingsSource,
                 protocolVersion,
                 serverAddress,
-                proxy,
-                proxyCheckEventLoopGroup
+                proxy
               );
               var valid = false;
               var connection = factory.prepareConnection(true);
@@ -154,9 +151,6 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
               responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
             }
           }
-        } finally {
-          proxyCheckEventLoopGroup.shutdownGracefully()
-            .awaitUninterruptibly(5, TimeUnit.SECONDS);
         }
       });
     } catch (Throwable t) {

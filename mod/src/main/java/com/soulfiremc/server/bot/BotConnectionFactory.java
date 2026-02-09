@@ -24,7 +24,6 @@ import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import io.netty.channel.EventLoopGroup;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,8 +34,7 @@ public record BotConnectionFactory(
   ProtocolVersion protocolVersion,
   ServerAddress serverAddress,
   @Nullable
-  SFProxy proxyData,
-  EventLoopGroup eventLoopGroup) {
+  SFProxy proxyData) {
   private static final int JAVA_DEFAULT_PORT = 25565;
   private static final int BEDROCK_DEFAULT_PORT = 19132;
 
@@ -59,7 +57,6 @@ public record BotConnectionFactory(
         protocolVersion,
         serverAddress,
         proxyData,
-        eventLoopGroup,
         isStatusPing);
 
     SoulFireAPI.postEvent(new BotConnectionInitEvent(botConnection));

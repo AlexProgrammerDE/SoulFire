@@ -66,13 +66,6 @@ public final class AutoReconnect extends InternalPlugin {
         () -> {
           TimeUtil.waitCondition(() -> instanceManager.sessionLifecycle().isPaused());
 
-          var eventLoopGroup = bot.eventLoopGroup();
-          if (eventLoopGroup.isShuttingDown()
-            || eventLoopGroup.isShutdown()
-            || eventLoopGroup.isTerminated()) {
-            return;
-          }
-
           if (instanceManager.sessionLifecycle().isStoppedOrStopping()) {
             return;
           }

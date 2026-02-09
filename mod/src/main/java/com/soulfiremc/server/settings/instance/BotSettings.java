@@ -82,9 +82,9 @@ public final class BotSettings implements SettingsObject {
       .defaultValue(3000)
       .build())
     .build();
-  public static final ComboProperty<SettingsSource.Instance> PROTOCOL_VERSION =
-    ImmutableComboProperty.<SettingsSource.Instance>builder()
-      .sourceType(SettingsSource.Instance.INSTANCE)
+  public static final ComboProperty<SettingsSource.Bot> PROTOCOL_VERSION =
+    ImmutableComboProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
       .namespace(NAMESPACE)
       .key("protocol-version")
       .uiName("Protocol Version")
@@ -166,6 +166,18 @@ public final class BotSettings implements SettingsObject {
         Sometimes a bot fails to process a packet. When that happens it disconnects due to "packet errors".
         When this option is turned on, SoulFire will ignore errors during the packet handling process and keep bots connected.
         This might cause bots to have inconsistent world state though, so it could be detected by the server.""")
+      .defaultValue(true)
+      .build();
+  public static final BooleanProperty<SettingsSource.Bot> USE_IO_URING =
+    ImmutableBooleanProperty.<SettingsSource.Bot>builder()
+      .sourceType(SettingsSource.Bot.INSTANCE)
+      .namespace(NAMESPACE)
+      .key("use-io-uring")
+      .uiName("Use IO_URING")
+      .description("""
+        Whether to use IO_URING for bot connections. This can improve performance and reduce CPU usage on Linux systems that support it.
+        Requires a compatible kernel version and Java version.
+        IO_URING won't be used if this option is disabled, your protocol version is bedrock edition or your PC does not support IO_URING.""")
       .defaultValue(true)
       .build();
 

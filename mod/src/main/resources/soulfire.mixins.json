@@ -12,6 +12,7 @@
     "soulfire.botfixes.MixinConnection",
     "soulfire.botfixes.MixinConnection$1",
     "soulfire.botfixes.MixinConnectScreen$1",
+    "soulfire.botfixes.MixinEventLoopGroupHolder",
     "soulfire.botfixes.MixinReloadableResourceManager",
     "soulfire.botfixes.MixinServerLoginPacketListenerImpl$1",
     "soulfire.botfixes.MixinYggdrasilMinecraftSessionService",

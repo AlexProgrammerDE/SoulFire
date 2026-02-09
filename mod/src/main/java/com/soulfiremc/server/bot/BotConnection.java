@@ -37,7 +37,6 @@ import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.shared.SFLogAppender;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
-import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -95,7 +94,6 @@ public final class BotConnection {
   private final Minecraft minecraft;
   @Nullable
   private final SFProxy proxy;
-  private final EventLoopGroup eventLoopGroup;
   private final SFSessionService sessionService;
   private final boolean isStatusPing;
   @Setter
@@ -110,7 +108,6 @@ public final class BotConnection {
     ServerAddress serverAddress,
     @Nullable
     SFProxy proxyData,
-    EventLoopGroup eventLoopGroup,
     boolean isStatusPing) {
     this.factory = factory;
     this.instanceManager = instanceManager;
@@ -124,7 +121,6 @@ public final class BotConnection {
     this.serverAddress = serverAddress;
     this.minecraft = createMinecraftCopy(minecraftAccount);
     this.proxy = proxyData;
-    this.eventLoopGroup = eventLoopGroup;
     this.sessionService = new SFSessionService(this);
     this.currentProtocolVersion = currentProtocolVersion;
     this.isStatusPing = isStatusPing;

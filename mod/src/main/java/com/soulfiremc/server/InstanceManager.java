@@ -40,10 +40,8 @@ import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
-import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.shared.SFLogAppender;
-import io.netty.channel.EventLoopGroup;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
@@ -392,36 +390,32 @@ public final class InstanceManager {
       accountQueue.addAll(accounts.subList(0, botAmount));
     }
 
-    // Prepare an event loop group for the session
-    var sessionEventLoopGroup =
-      NettyHelper.createEventLoopGroup("Session-%s".formatted(id), runnableWrapper);
-
-    var protocolVersion = settingsSource.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
-    var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(BotSettings.ADDRESS), protocolVersion);
-
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     while (!accountQueue.isEmpty()) {
       var minecraftAccount = refreshAccount(accountQueue.poll());
       var lastAccountObject = new AtomicReference<>(minecraftAccount);
       var proxyData = getProxy(proxies).orElse(null);
+
+      var botSettings = new BotSettingsDelegate(new CachedLazyObject<>(() -> {
+        var fetchedSettingsSource = this.settingsSource();
+        var fetchedAccount = fetchedSettingsSource.accounts().get(minecraftAccount.profileId());
+        if (fetchedAccount == null) {
+          fetchedAccount = lastAccountObject.get();
+        } else {
+          lastAccountObject.set(fetchedAccount);
+        }
+
+        return new BotSettingsImpl(fetchedAccount, fetchedSettingsSource);
+      }, 1, TimeUnit.SECONDS));
+      var protocolVersion = botSettings.get(BotSettings.PROTOCOL_VERSION, BotSettings.PROTOCOL_VERSION_PARSER);
+      var serverAddress = BotConnectionFactory.parseAddress(settingsSource.get(BotSettings.ADDRESS), protocolVersion);
       factories.add(
         new BotConnectionFactory(
           this,
-          new BotSettingsDelegate(new CachedLazyObject<>(() -> {
-            var fetchedSettingsSource = this.settingsSource();
-            var fetchedAccount = fetchedSettingsSource.accounts().get(minecraftAccount.profileId());
-            if (fetchedAccount == null) {
-              fetchedAccount = lastAccountObject.get();
-            } else {
-              lastAccountObject.set(fetchedAccount);
-            }
-
-            return new BotSettingsImpl(fetchedAccount, fetchedSettingsSource);
-          }, 1, TimeUnit.SECONDS)),
+          botSettings,
           protocolVersion,
           serverAddress,
-          proxyData,
-          sessionEventLoopGroup
+          proxyData
         ));
     }
 
@@ -529,20 +523,15 @@ public final class InstanceManager {
     });
   }
 
-  // Doesn't shut down properly unless #shutdown() is called
-  // Not sure why, netty moment...
-  @SuppressWarnings("deprecation")
   public CompletableFuture<?> stopSession() {
     return scheduler.runAsync(() -> {
       allBotsConnected.set(false);
       log.info("Disconnecting bots");
       do {
-        var eventLoopGroups = new HashSet<EventLoopGroup>();
         var disconnectFuture = new ArrayList<CompletableFuture<?>>();
         botConnections.entrySet().removeIf(entry -> {
           var botConnection = entry.getValue();
           disconnectFuture.add(scheduler.runAsync(() -> botConnection.disconnect(Component.text("Session stopped"))));
-          eventLoopGroups.add(botConnection.eventLoopGroup());
           return true;
         });
 
@@ -550,16 +539,6 @@ public final class InstanceManager {
         for (var future : disconnectFuture) {
           try {
             future.get();
-          } catch (InterruptedException | ExecutionException e) {
-            log.error("Error while shutting down", e);
-          }
-        }
-
-        log.info("Shutting down session event loop groups");
-        for (var eventLoopGroup : eventLoopGroups) {
-          try {
-            eventLoopGroup.shutdown();
-            eventLoopGroup.shutdownGracefully().get();
           } catch (InterruptedException | ExecutionException e) {
             log.error("Error while shutting down", e);
           }
