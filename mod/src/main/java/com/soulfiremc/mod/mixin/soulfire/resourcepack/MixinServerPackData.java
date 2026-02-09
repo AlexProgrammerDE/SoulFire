@@ -32,7 +32,6 @@ public class MixinServerPackData {
   @Inject(method = "<init>", at = @At("RETURN"))
   private void onInit(UUID id, URL url, HashCode hash, CallbackInfo ci) {
     var packDataThis = (ServerPackManager.ServerPackData) (Object) this;
-    packDataThis.downloadStatus = ServerPackManager.PackDownloadStatus.DONE;
     packDataThis.activationStatus = ServerPackManager.ActivationStatus.INACTIVE;
     packDataThis.promptAccepted = true;
   }
