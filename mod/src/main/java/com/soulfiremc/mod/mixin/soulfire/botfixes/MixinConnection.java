@@ -47,6 +47,7 @@ public class MixinConnection {
 
   @WrapMethod(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V")
   private void injectLogIntoPacketHandler(ChannelHandlerContext context, Packet<?> packet, Operation<Void> original) {
-    BotConnection.CURRENT.get().runnableWrapper().runWrapped(() -> original.call(context, packet));
+    var botConnection = context.channel().attr(SFConstants.NETTY_BOT_CONNECTION).get();
+    botConnection.runnableWrapper().runWrapped(() -> original.call(context, packet));
   }
 }
