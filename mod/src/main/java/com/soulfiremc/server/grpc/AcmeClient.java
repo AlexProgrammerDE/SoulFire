@@ -244,13 +244,13 @@ public final class AcmeClient {
 
     // Output the challenge, wait for acknowledge...
     log.info("Please create a TXT record:");
-    log.info("{} IN TXT {}", Dns01Challenge.toRRName(auth.getIdentifier()), challenge.getDigest());
+    log.info("{} IN TXT {}", challenge.getRRName(auth.getIdentifier()), challenge.getDigest());
     log.info("If you're ready, dismiss the dialog...");
 
     var message = """
       Please create a TXT record:
 
-      %s IN TXT %s""".formatted(Dns01Challenge.toRRName(auth.getIdentifier()), challenge.getDigest());
+      %s IN TXT %s""".formatted(challenge.getRRName(auth.getIdentifier()), challenge.getDigest());
     scannerPromptYes(message);
 
     return challenge;
