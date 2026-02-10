@@ -2,7 +2,8 @@
   "extends": ["config:base", "group:allNonMajor", ":semanticCommits"],
   "ignoreDeps": [
     "net.fabricmc:intermediary",
-    "eclipse-temurin"
+    "eclipse-temurin",
+    "com.viaversion:viafabricplus"
   ],
   "packageRules": [
     {
