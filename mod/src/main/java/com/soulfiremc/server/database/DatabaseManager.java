@@ -112,6 +112,16 @@ public final class DatabaseManager {
 
       log.info("Detected old Hibernate schema, migrating columns to snake_case...");
       try (var stmt = conn.createStatement()) {
+        // Convert binary UUID columns to text format (Hibernate may store UUIDs as BLOBs)
+        convertBinaryUuids(stmt, "users", "id");
+        convertBinaryUuids(stmt, "instances", "id");
+        convertBinaryUuids(stmt, "instances", "owner_id");
+        convertBinaryUuids(stmt, "instance_audit_logs", "id");
+        convertBinaryUuids(stmt, "instance_audit_logs", "instance_id");
+        convertBinaryUuids(stmt, "instance_audit_logs", "user_id");
+        convertBinaryUuids(stmt, "scripts", "id");
+        convertBinaryUuids(stmt, "scripts", "instance_id");
+
         // users
         renameColumn(stmt, "users", "createdAt", "created_at");
         renameColumn(stmt, "users", "updatedAt", "updated_at");
@@ -138,6 +148,28 @@ public final class DatabaseManager {
       log.info("Hibernate schema migration complete");
     } catch (SQLException e) {
       log.warn("Could not migrate from Hibernate schema", e);
+    }
+  }
+
+  /// Converts binary UUID values (stored by Hibernate as BLOBs) to the standard
+  /// hyphenated text format expected by JOOQ. Only updates rows where the column
+  /// contains BLOB data (typeof returns 'blob'), leaving text UUIDs untouched.
+  private static void convertBinaryUuids(
+    java.sql.Statement stmt, String table, String column) {
+    try {
+      // SQLite: convert 16-byte binary UUID to hyphenated text format
+      // lower(hex(x)) gives 32 hex chars, then we insert hyphens at positions 8, 12, 16, 20
+      stmt.execute("""
+        UPDATE %s SET %s =
+          substr(lower(hex(%s)), 1, 8) || '-' ||
+          substr(lower(hex(%s)), 9, 4) || '-' ||
+          substr(lower(hex(%s)), 13, 4) || '-' ||
+          substr(lower(hex(%s)), 17, 4) || '-' ||
+          substr(lower(hex(%s)), 21, 12)
+        WHERE typeof(%s) = 'blob'
+        """.formatted(table, column, column, column, column, column, column, column));
+    } catch (SQLException e) {
+      log.debug("Could not convert binary UUIDs in {}.{}: {}", table, column, e.getMessage());
     }
   }
 

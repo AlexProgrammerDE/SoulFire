@@ -71,15 +71,13 @@ public final class AuthSystem {
       var ctx = DSL.using(cfg);
       var currentRootUser = ctx.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(ROOT_USER_ID.toString())).fetchOne();
       if (currentRootUser == null) {
-        var collidingUser = ctx.selectFrom(Tables.USERS).where(Tables.USERS.USERNAME.eq("root")).fetchOne();
-        if (collidingUser != null) {
-          ctx.update(Tables.USERS)
-            .set(Tables.USERS.USERNAME, "old-root-%s".formatted(UUID.randomUUID().toString().substring(0, 6)))
-            .set(Tables.USERS.EMAIL, "old-%s-%s".formatted(UUID.randomUUID().toString().substring(0, 6), collidingUser.getEmail()))
-            .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
-            .where(Tables.USERS.ID.eq(collidingUser.getId()))
-            .execute();
-        }
+        // Use USERNAME in the WHERE clause (not ID) to handle old Hibernate databases
+        // where UUIDs may be stored in a binary format that doesn't match text comparison
+        ctx.update(Tables.USERS)
+          .set(Tables.USERS.USERNAME, "old-root-%s".formatted(UUID.randomUUID().toString().substring(0, 6)))
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.USERS.USERNAME.eq("root"))
+          .execute();
       }
     });
 
