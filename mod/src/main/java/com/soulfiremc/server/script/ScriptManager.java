@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.hibernate.SessionFactory;
+import org.jooq.DSLContext;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RequiredArgsConstructor
 public final class ScriptManager {
   private final InstanceManager instanceManager;
-  private final SessionFactory sessionFactory;
+  private final DSLContext dsl;
   private final ReactiveScriptEngine engine;
   private final ScriptTriggerService triggerService;
 
@@ -55,8 +55,8 @@ public final class ScriptManager {
   private final List<ScriptEventListener> globalListeners = new CopyOnWriteArrayList<>();
 
   /// Creates a new ScriptManager with a new ReactiveScriptEngine and TriggerService.
-  public ScriptManager(InstanceManager instanceManager, SessionFactory sessionFactory) {
-    this(instanceManager, sessionFactory, new ReactiveScriptEngine(), new ScriptTriggerService());
+  public ScriptManager(InstanceManager instanceManager, DSLContext dsl) {
+    this(instanceManager, dsl, new ReactiveScriptEngine(), new ScriptTriggerService());
   }
 
   /// Registers a global event listener for all script executions.

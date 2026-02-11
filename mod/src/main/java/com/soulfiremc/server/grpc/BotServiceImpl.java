@@ -23,13 +23,15 @@ import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.ControllingTask;
-import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.plugins.DialogHandler;
 import com.soulfiremc.server.renderer.RenderConstants;
 import com.soulfiremc.server.renderer.SoftwareRenderer;
+import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.MouseClickHelper;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
@@ -43,11 +45,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.dialog.*;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.inventory.ClickType;
+import org.jooq.impl.DSL;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -199,30 +203,36 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_BOT_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        instanceEntity.settings(instanceEntity.settings().withAccounts(instanceEntity.settings().accounts().stream()
+        var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+        var newSettings = currentSettings.withAccounts(currentSettings.accounts().stream()
           .map(minecraftAccount -> {
             if (minecraftAccount.profileId().equals(botId)) {
               var currentStem = minecraftAccount.settings() == null ? Map.<String, Map<String, JsonElement>>of() : minecraftAccount.settings();
-              var newSettings = SettingsSource.Stem.withUpdatedEntry(
+              var updatedSettings = SettingsSource.Stem.withUpdatedEntry(
                 currentStem,
                 request.getNamespace(),
                 request.getKey(),
                 SettingsSource.Stem.valueToJsonElement(request.getValue())
               );
-              return minecraftAccount.withSettings(newSettings);
+              return minecraftAccount.withSettings(updatedSettings);
             } else {
               return minecraftAccount;
             }
           })
-          .toList()));
+          .toList());
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(BotUpdateConfigEntryResponse.newBuilder().build());

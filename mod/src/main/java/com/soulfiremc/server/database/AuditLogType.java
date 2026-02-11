@@ -15,18 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.mod.mixin.soulfire.libfixes;
+package com.soulfiremc.server.database;
 
-import org.hibernate.boot.registry.classloading.internal.AggregatedClassLoader;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-@Mixin(AggregatedClassLoader.class)
-public class MixinAggregatedClassLoader {
-  @Inject(method = "locateSystemClassLoader", at = @At("HEAD"), cancellable = true, remap = false)
-  private static void locateSystemClassLoader(CallbackInfoReturnable<ClassLoader> cir) {
-    cir.setReturnValue(null);
-  }
+public enum AuditLogType {
+  EXECUTE_COMMAND,
+  START_SESSION,
+  PAUSE_SESSION,
+  RESUME_SESSION,
+  STOP_SESSION,
 }

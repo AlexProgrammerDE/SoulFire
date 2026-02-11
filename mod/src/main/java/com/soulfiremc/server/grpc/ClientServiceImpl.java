@@ -20,7 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
@@ -29,8 +29,9 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.impl.DSL;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -147,15 +148,16 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, userId);
-        if (user == null) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var updated = ctx.update(Tables.USERS)
+          .set(Tables.USERS.USERNAME, request.getUsername())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.USERS.ID.eq(userId.toString()))
+          .execute();
+        if (updated == 0) {
           throw new IllegalArgumentException("User not found: " + userId);
         }
-
-        user.username(request.getUsername());
-
-        session.merge(user);
       });
 
       responseObserver.onNext(UpdateSelfUsernameResponse.newBuilder().build());
@@ -172,15 +174,16 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, userId);
-        if (user == null) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var updated = ctx.update(Tables.USERS)
+          .set(Tables.USERS.EMAIL, request.getEmail())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.USERS.ID.eq(userId.toString()))
+          .execute();
+        if (updated == 0) {
           throw new IllegalArgumentException("User not found: " + userId);
         }
-
-        user.email(request.getEmail());
-
-        session.merge(user);
       });
 
       responseObserver.onNext(UpdateSelfEmailResponse.newBuilder().build());
@@ -197,15 +200,17 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, userId);
-        if (user == null) {
+      var now = LocalDateTime.now();
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var updated = ctx.update(Tables.USERS)
+          .set(Tables.USERS.MIN_ISSUED_AT, now)
+          .set(Tables.USERS.UPDATED_AT, now)
+          .where(Tables.USERS.ID.eq(userId.toString()))
+          .execute();
+        if (updated == 0) {
           throw new IllegalArgumentException("User not found: " + userId);
         }
-
-        user.minIssuedAt(Instant.now());
-
-        session.merge(user);
       });
 
       responseObserver.onNext(InvalidateSelfSessionsResponse.newBuilder().build());

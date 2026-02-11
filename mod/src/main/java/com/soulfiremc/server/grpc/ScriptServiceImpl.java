@@ -27,8 +27,8 @@ import com.soulfiremc.grpc.generated.PortType;
 import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
-import com.soulfiremc.server.database.InstanceEntity;
-import com.soulfiremc.server.database.ScriptEntity;
+import com.soulfiremc.server.database.generated.Tables;
+import com.soulfiremc.server.database.generated.tables.records.ScriptsRecord;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.script.PortDefinition;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
@@ -41,9 +41,11 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.registries.BuiltInRegistries;
+import org.jooq.impl.DSL;
 
 import java.lang.reflect.Type;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -99,9 +101,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   /// Starts a script without modifying the paused flag in the database.
   /// Used for automatic script starting on create/update/server startup.
-  private void startScriptInternal(ScriptEntity scriptEntity) {
-    var scriptId = scriptEntity.id();
-    var instanceId = scriptEntity.instance().id();
+  private void startScriptInternal(ScriptsRecord record) {
+    var scriptId = UUID.fromString(record.getId());
+    var instanceId = UUID.fromString(record.getInstanceId());
 
     // Check if already running
     if (activeScripts.containsKey(scriptId)) {
@@ -110,8 +112,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
 
     try {
-      // Build the script graph from the entity
-      var graph = buildScriptGraph(scriptEntity);
+      // Build the script graph from the record
+      var graph = buildScriptGraph(record);
 
       // Get the instance manager
       var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
@@ -185,22 +187,22 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   /// Restarts a script by stopping it and starting it again.
   /// Used when a script is updated to apply new configuration.
-  private void restartScriptInternal(ScriptEntity scriptEntity) {
-    var scriptId = scriptEntity.id();
+  private void restartScriptInternal(ScriptsRecord record) {
+    var scriptId = UUID.fromString(record.getId());
     log.info("Restarting script {}", scriptId);
     stopScriptInternal(scriptId);
-    startScriptInternal(scriptEntity);
+    startScriptInternal(record);
   }
 
   /// Starts all non-paused scripts for a given instance.
   /// Called on server startup.
   public void startAllNonPausedScripts(UUID instanceId) {
-    soulFireServer.sessionFactory().inTransaction(session -> {
-      var scripts = session.createQuery(
-          "FROM ScriptEntity WHERE instance.id = :instanceId AND paused = false",
-          ScriptEntity.class)
-        .setParameter("instanceId", instanceId)
-        .list();
+    soulFireServer.dsl().transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var scripts = ctx.selectFrom(Tables.SCRIPTS)
+        .where(Tables.SCRIPTS.INSTANCE_ID.eq(instanceId.toString()))
+        .and(Tables.SCRIPTS.PAUSED.eq(false))
+        .fetch();
 
       for (var script : scripts) {
         startScriptInternal(script);
@@ -213,11 +215,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   /// Starts all non-paused scripts across all instances.
   /// Called on server startup.
   public void startAllNonPausedScripts() {
-    soulFireServer.sessionFactory().inTransaction(session -> {
-      var scripts = session.createQuery(
-          "FROM ScriptEntity WHERE paused = false",
-          ScriptEntity.class)
-        .list();
+    soulFireServer.dsl().transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var scripts = ctx.selectFrom(Tables.SCRIPTS)
+        .where(Tables.SCRIPTS.PAUSED.eq(false))
+        .fetch();
 
       for (var script : scripts) {
         startScriptInternal(script);
@@ -273,31 +275,42 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var instanceRecord = ctx.selectFrom(Tables.INSTANCES)
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .fetchOne();
+        if (instanceRecord == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var newScript = new ScriptEntity();
-        newScript.name(request.getName());
-        newScript.description(request.getDescription());
-        newScript.instance(instanceEntity);
-        newScript.nodesJson(nodesToJson(request.getNodesList()));
-        newScript.edgesJson(edgesToJson(request.getEdgesList()));
-        newScript.paused(request.getPaused());
+        var newId = UUID.randomUUID().toString();
+        var now = LocalDateTime.now();
+        ctx.insertInto(Tables.SCRIPTS)
+          .set(Tables.SCRIPTS.ID, newId)
+          .set(Tables.SCRIPTS.NAME, request.getName())
+          .set(Tables.SCRIPTS.DESCRIPTION, request.getDescription())
+          .set(Tables.SCRIPTS.INSTANCE_ID, instanceId.toString())
+          .set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()))
+          .set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()))
+          .set(Tables.SCRIPTS.PAUSED, request.getPaused())
+          .set(Tables.SCRIPTS.CREATED_AT, now)
+          .set(Tables.SCRIPTS.UPDATED_AT, now)
+          .set(Tables.SCRIPTS.VERSION, 0L)
+          .execute();
 
-        session.persist(newScript);
-        return newScript;
+        return ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(newId))
+          .fetchOne();
       });
 
       // Start the script immediately if not paused
-      if (!scriptEntity.paused()) {
-        startScriptInternal(scriptEntity);
+      if (!scriptRecord.getPaused()) {
+        startScriptInternal(scriptRecord);
       }
 
       responseObserver.onNext(CreateScriptResponse.newBuilder()
-        .setScript(entityToScriptData(scriptEntity))
+        .setScript(recordToScriptData(scriptRecord))
         .build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
@@ -316,17 +329,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
-      var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
-        return script;
+        return record;
       });
 
       responseObserver.onNext(GetScriptResponse.newBuilder()
-        .setScript(entityToScriptData(scriptEntity))
+        .setScript(recordToScriptData(scriptRecord))
         .build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
@@ -345,43 +361,52 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
 
+        var update = ctx.update(Tables.SCRIPTS)
+          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now());
+
         if (request.hasName()) {
-          script.name(request.getName());
+          update = update.set(Tables.SCRIPTS.NAME, request.getName());
         }
         if (request.hasDescription()) {
-          script.description(request.getDescription());
+          update = update.set(Tables.SCRIPTS.DESCRIPTION, request.getDescription());
         }
         if (request.getUpdateNodes()) {
-          script.nodesJson(nodesToJson(request.getNodesList()));
+          update = update.set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()));
         }
         if (request.getUpdateEdges()) {
-          script.edgesJson(edgesToJson(request.getEdgesList()));
+          update = update.set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()));
         }
         if (request.hasPaused()) {
-          script.paused(request.getPaused());
+          update = update.set(Tables.SCRIPTS.PAUSED, request.getPaused());
         }
 
-        session.merge(script);
-        return script;
+        update.where(Tables.SCRIPTS.ID.eq(scriptId.toString())).execute();
+
+        return ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
       });
 
       // Restart the script if it's not paused (to apply new configuration)
-      if (!scriptEntity.paused()) {
-        restartScriptInternal(scriptEntity);
+      if (!scriptRecord.getPaused()) {
+        restartScriptInternal(scriptRecord);
       } else {
         // Script is paused, make sure it's stopped
         stopScriptInternal(scriptId);
       }
 
       responseObserver.onNext(UpdateScriptResponse.newBuilder()
-        .setScript(entityToScriptData(scriptEntity))
+        .setScript(recordToScriptData(scriptRecord))
         .build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
@@ -403,13 +428,18 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Stop the script if it's running
       stopScriptInternal(scriptId);
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
-        session.remove(script);
+        ctx.deleteFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .execute();
       });
 
       log.info("Script {} deleted", scriptId);
@@ -430,20 +460,24 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
-      var scripts = soulFireServer.sessionFactory().fromTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var scripts = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var instanceRecord = ctx.selectFrom(Tables.INSTANCES)
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .fetchOne();
+        if (instanceRecord == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        return session.createQuery("FROM ScriptEntity WHERE instance = :instance ORDER BY createdAt DESC", ScriptEntity.class)
-          .setParameter("instance", instanceEntity)
-          .list();
+        return ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.INSTANCE_ID.eq(instanceId.toString()))
+          .orderBy(Tables.SCRIPTS.CREATED_AT.desc())
+          .fetch();
       });
 
       var responseBuilder = ListScriptsResponse.newBuilder();
       for (var script : scripts) {
-        responseBuilder.addScripts(entityToScriptInfo(script));
+        responseBuilder.addScripts(recordToScriptInfo(script));
       }
 
       responseObserver.onNext(responseBuilder.build());
@@ -465,18 +499,25 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       // Load and unpause the script in the database
-      var scriptEntity = soulFireServer.sessionFactory().fromTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
         // Set paused=false to persist the resumed state
-        if (script.paused()) {
-          script.paused(false);
-          session.merge(script);
+        if (record.getPaused()) {
+          ctx.update(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.PAUSED, false)
+            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now())
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .execute();
+          record.setPaused(false);
         }
-        return script;
+        return record;
       });
 
       var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
@@ -527,8 +568,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       }
 
       // Script is not running, start it
-      // Build the script graph from the entity
-      var graph = buildScriptGraph(scriptEntity);
+      // Build the script graph from the record
+      var graph = buildScriptGraph(scriptRecord);
 
       // Get the instance manager
       var instanceManager = soulFireServer.getInstance(instanceId)
@@ -583,14 +624,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       // Set paused=true in the database to persist the paused state
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
-        script.paused(true);
-        session.merge(script);
+        ctx.update(Tables.SCRIPTS)
+          .set(Tables.SCRIPTS.PAUSED, true)
+          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .execute();
       });
 
       // Stop the script if it's running
@@ -616,9 +663,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       // Verify script exists
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
@@ -655,9 +705,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       // Verify script exists
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var script = session.find(ScriptEntity.class, scriptId);
-        if (script == null || !script.instance().id().equals(instanceId)) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
@@ -1040,32 +1093,32 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .toList();
   }
 
-  private ScriptData entityToScriptData(ScriptEntity entity) {
+  private ScriptData recordToScriptData(ScriptsRecord record) {
     return ScriptData.newBuilder()
-      .setId(entity.id().toString())
-      .setName(entity.name())
-      .setDescription(entity.description() != null ? entity.description() : "")
-      .setInstanceId(entity.instance().id().toString())
-      .addAllNodes(jsonToNodes(entity.nodesJson()))
-      .addAllEdges(jsonToEdges(entity.edgesJson()))
-      .setPaused(entity.paused())
+      .setId(record.getId())
+      .setName(record.getName())
+      .setDescription(record.getDescription() != null ? record.getDescription() : "")
+      .setInstanceId(record.getInstanceId())
+      .addAllNodes(jsonToNodes(record.getNodesJson()))
+      .addAllEdges(jsonToEdges(record.getEdgesJson()))
+      .setPaused(record.getPaused())
       .build();
   }
 
-  private ScriptInfo entityToScriptInfo(ScriptEntity entity) {
+  private ScriptInfo recordToScriptInfo(ScriptsRecord record) {
     return ScriptInfo.newBuilder()
-      .setId(entity.id().toString())
-      .setName(entity.name())
-      .setDescription(entity.description() != null ? entity.description() : "")
-      .setInstanceId(entity.instance().id().toString())
-      .setCreatedAt(instantToTimestamp(entity.createdAt()))
-      .setUpdatedAt(instantToTimestamp(entity.updatedAt()))
-      .setPaused(entity.paused())
+      .setId(record.getId())
+      .setName(record.getName())
+      .setDescription(record.getDescription() != null ? record.getDescription() : "")
+      .setInstanceId(record.getInstanceId())
+      .setCreatedAt(localDateTimeToTimestamp(record.getCreatedAt()))
+      .setUpdatedAt(localDateTimeToTimestamp(record.getUpdatedAt()))
+      .setPaused(record.getPaused())
       .build();
   }
 
-  private Timestamp instantToTimestamp(Instant instant) {
-    return Timestamps.fromMillis(instant.toEpochMilli());
+  private Timestamp localDateTimeToTimestamp(LocalDateTime dateTime) {
+    return Timestamps.fromMillis(dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
   }
 
   private JsonElement valueToJsonElement(Value value) {
@@ -1086,11 +1139,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
   }
 
-  private ScriptGraph buildScriptGraph(ScriptEntity entity) {
-    var builder = ScriptGraph.builder(entity.id().toString(), entity.name());
+  private ScriptGraph buildScriptGraph(ScriptsRecord record) {
+    var builder = ScriptGraph.builder(record.getId(), record.getName());
 
-    List<ScriptNodeData> nodes = GsonInstance.GSON.fromJson(entity.nodesJson(), NODE_LIST_TYPE);
-    List<ScriptEdgeData> edges = GsonInstance.GSON.fromJson(entity.edgesJson(), EDGE_LIST_TYPE);
+    List<ScriptNodeData> nodes = GsonInstance.GSON.fromJson(record.getNodesJson(), NODE_LIST_TYPE);
+    List<ScriptEdgeData> edges = GsonInstance.GSON.fromJson(record.getEdgesJson(), EDGE_LIST_TYPE);
 
     // Add nodes
     if (nodes != null) {

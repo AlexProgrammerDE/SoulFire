@@ -27,7 +27,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.database.InstanceAuditLogEntity;
+import com.soulfiremc.server.database.AuditLogType;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -139,7 +139,7 @@ public final class BrigadierHelper {
     for (var instance : instances) {
       context.getSource().source().sendInfo("--- Running command for instance %s ---".formatted(instance.friendlyNameCache().get()));
 
-      instance.addAuditLog(context.getSource().source(), InstanceAuditLogEntity.AuditLogType.EXECUTE_COMMAND, context.getInput());
+      instance.addAuditLog(context.getSource().source(), AuditLogType.EXECUTE_COMMAND, context.getInput());
       instance.runnableWrapper().runWrapped(() ->
         resultSum.addAndGet(consumer.run(instance)));
     }

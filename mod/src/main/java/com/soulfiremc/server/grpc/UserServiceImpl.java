@@ -20,7 +20,8 @@ package com.soulfiremc.server.grpc;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.UserRole;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.RPCConstants;
@@ -28,8 +29,10 @@ import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.impl.DSL;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Slf4j
@@ -50,19 +53,22 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_USER));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var userEntity = new UserEntity();
-        userEntity.id(UUID.randomUUID());
-        userEntity.username(request.getUsername());
-        userEntity.email(request.getEmail());
-        userEntity.role(switch (request.getRole()) {
-          case ADMIN -> UserEntity.Role.ADMIN;
-          case USER -> UserEntity.Role.USER;
-          case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
-        });
-        userEntity.minIssuedAt(Instant.now());
-
-        session.persist(userEntity);
+      var now = LocalDateTime.now();
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        ctx.insertInto(Tables.USERS)
+          .set(Tables.USERS.ID, UUID.randomUUID().toString())
+          .set(Tables.USERS.USERNAME, request.getUsername())
+          .set(Tables.USERS.EMAIL, request.getEmail())
+          .set(Tables.USERS.ROLE, (switch (request.getRole()) {
+            case ADMIN -> UserRole.ADMIN;
+            case USER -> UserRole.USER;
+            case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
+          }).name())
+          .set(Tables.USERS.MIN_ISSUED_AT, now)
+          .set(Tables.USERS.CREATED_AT, now)
+          .set(Tables.USERS.UPDATED_AT, now)
+          .execute();
       });
 
       responseObserver.onNext(UserCreateResponse.newBuilder().build());
@@ -96,23 +102,23 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_USER));
 
     try {
-      var users = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity", UserEntity.class).list());
+      var users = soulFireServer.dsl().selectFrom(Tables.USERS).fetch();
 
       responseObserver.onNext(UserListResponse.newBuilder()
         .addAllUsers(users.stream().map(user -> {
             var result = UserListResponse.User.newBuilder()
-              .setId(user.id().toString())
-              .setUsername(user.username())
-              .setEmail(user.email())
-              .setRole(switch (user.role()) {
-                case ADMIN -> UserRole.ADMIN;
-                case USER -> UserRole.USER;
+              .setId(user.getId())
+              .setUsername(user.getUsername())
+              .setEmail(user.getEmail())
+              .setRole(switch (UserRole.valueOf(user.getRole())) {
+                case ADMIN -> com.soulfiremc.grpc.generated.UserRole.ADMIN;
+                case USER -> com.soulfiremc.grpc.generated.UserRole.USER;
               })
-              .setCreatedAt(Timestamps.fromMillis(user.createdAt().toEpochMilli()))
-              .setUpdatedAt(Timestamps.fromMillis(user.updatedAt().toEpochMilli()))
-              .setMinIssuedAt(Timestamps.fromMillis(user.minIssuedAt().toEpochMilli()));
-            if (user.lastLoginAt() != null) {
-              result.setLastLoginAt(Timestamps.fromMillis(user.lastLoginAt().toEpochMilli()));
+              .setCreatedAt(Timestamps.fromMillis(user.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli()))
+              .setUpdatedAt(Timestamps.fromMillis(user.getUpdatedAt().toInstant(ZoneOffset.UTC).toEpochMilli()))
+              .setMinIssuedAt(Timestamps.fromMillis(user.getMinIssuedAt().toInstant(ZoneOffset.UTC).toEpochMilli()));
+            if (user.getLastLoginAt() != null) {
+              result.setLastLoginAt(Timestamps.fromMillis(user.getLastLoginAt().toInstant(ZoneOffset.UTC).toEpochMilli()));
             }
 
             return result.build();
@@ -132,23 +138,25 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     try {
       var userId = UUID.fromString(request.getId());
-      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
+      var user = soulFireServer.dsl().selectFrom(Tables.USERS)
+        .where(Tables.USERS.ID.eq(userId.toString()))
+        .fetchOne();
       if (user == null) {
         throw new IllegalArgumentException("User not found: " + userId);
       }
 
       var result = UserInfoResponse.newBuilder()
-        .setUsername(user.username())
-        .setEmail(user.email())
-        .setRole(switch (user.role()) {
-          case ADMIN -> UserRole.ADMIN;
-          case USER -> UserRole.USER;
+        .setUsername(user.getUsername())
+        .setEmail(user.getEmail())
+        .setRole(switch (UserRole.valueOf(user.getRole())) {
+          case ADMIN -> com.soulfiremc.grpc.generated.UserRole.ADMIN;
+          case USER -> com.soulfiremc.grpc.generated.UserRole.USER;
         })
-        .setCreatedAt(Timestamps.fromMillis(user.createdAt().toEpochMilli()))
-        .setUpdatedAt(Timestamps.fromMillis(user.updatedAt().toEpochMilli()))
-        .setMinIssuedAt(Timestamps.fromMillis(user.minIssuedAt().toEpochMilli()));
-      if (user.lastLoginAt() != null) {
-        result.setLastLoginAt(Timestamps.fromMillis(user.lastLoginAt().toEpochMilli()));
+        .setCreatedAt(Timestamps.fromMillis(user.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli()))
+        .setUpdatedAt(Timestamps.fromMillis(user.getUpdatedAt().toInstant(ZoneOffset.UTC).toEpochMilli()))
+        .setMinIssuedAt(Timestamps.fromMillis(user.getMinIssuedAt().toInstant(ZoneOffset.UTC).toEpochMilli()));
+      if (user.getLastLoginAt() != null) {
+        result.setLastLoginAt(Timestamps.fromMillis(user.getLastLoginAt().toInstant(ZoneOffset.UTC).toEpochMilli()));
       }
 
       responseObserver.onNext(result.build());
@@ -167,15 +175,17 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, userId);
-        if (user == null) {
+      var now = LocalDateTime.now();
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var updated = ctx.update(Tables.USERS)
+          .set(Tables.USERS.MIN_ISSUED_AT, now)
+          .set(Tables.USERS.UPDATED_AT, now)
+          .where(Tables.USERS.ID.eq(userId.toString()))
+          .execute();
+        if (updated == 0) {
           throw new IllegalArgumentException("User not found: " + userId);
         }
-
-        user.minIssuedAt(Instant.now());
-
-        session.merge(user);
       });
 
       responseObserver.onNext(InvalidateSessionsResponse.newBuilder().build());
@@ -194,21 +204,22 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var user = session.find(UserEntity.class, userId);
-        if (user == null) {
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var updated = ctx.update(Tables.USERS)
+          .set(Tables.USERS.USERNAME, request.getUsername())
+          .set(Tables.USERS.EMAIL, request.getEmail())
+          .set(Tables.USERS.ROLE, (switch (request.getRole()) {
+            case ADMIN -> UserRole.ADMIN;
+            case USER -> UserRole.USER;
+            case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
+          }).name())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.USERS.ID.eq(userId.toString()))
+          .execute();
+        if (updated == 0) {
           throw new IllegalArgumentException("User not found: " + userId);
         }
-
-        user.username(request.getUsername());
-        user.email(request.getEmail());
-        user.role(switch (request.getRole()) {
-          case ADMIN -> UserEntity.Role.ADMIN;
-          case USER -> UserEntity.Role.USER;
-          case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
-        });
-
-        session.merge(user);
       });
 
       responseObserver.onNext(UpdateUserResponse.newBuilder().build());
@@ -227,10 +238,9 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.find(UserEntity.class, userId));
-      if (user == null) {
-        throw new IllegalArgumentException("User not found: " + userId);
-      }
+      var user = soulFireServer.authSystem().getUserData(userId).orElseThrow(
+        () -> new IllegalArgumentException("User not found: " + userId)
+      );
 
       var token = soulFireServer.authSystem().generateJWT(user, RPCConstants.API_AUDIENCE);
 

@@ -20,7 +20,7 @@ package com.soulfiremc.server.command;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.UserRole;
 import com.soulfiremc.server.user.SoulFireUser;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,7 +38,7 @@ public record CommandSourceStack(
   @Nullable
   Set<UUID> botIds
 ) {
-  public static final Predicate<CommandSourceStack> IS_ADMIN = stack -> stack.source.getRole() == UserEntity.Role.ADMIN;
+  public static final Predicate<CommandSourceStack> IS_ADMIN = stack -> stack.source.getRole() == UserRole.ADMIN;
 
   public static CommandSourceStack ofUnrestricted(SoulFireServer soulFire, SoulFireUser source) {
     return new CommandSourceStack(soulFire, source, null, null);

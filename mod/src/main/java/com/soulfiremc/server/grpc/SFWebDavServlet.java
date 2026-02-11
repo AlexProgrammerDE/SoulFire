@@ -19,7 +19,7 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.InstancePermission;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.UserRole;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.RPCConstants;
@@ -201,7 +201,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
   private boolean isForbiddenPath(final HttpServletRequest req, final String path) {
     var user = (SoulFireUser) req.getAttribute(SF_USER_ATTRIBUTE);
-    if (user.getRole() == UserEntity.Role.ADMIN) {
+    if (user.getRole() == UserRole.ADMIN) {
       return false;
     }
 

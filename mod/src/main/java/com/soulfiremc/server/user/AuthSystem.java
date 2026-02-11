@@ -19,8 +19,9 @@ package com.soulfiremc.server.user;
 
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.adventure.SoulFireAdventure;
-import com.soulfiremc.server.database.InstanceEntity;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.UserRole;
+import com.soulfiremc.server.database.generated.Tables;
+import com.soulfiremc.server.database.generated.tables.records.UsersRecord;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
@@ -29,12 +30,15 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
-import org.hibernate.SessionFactory;
+import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.slf4j.event.Level;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
@@ -50,50 +54,58 @@ public final class AuthSystem {
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
   private final JwtParser parser;
-  private final SessionFactory sessionFactory;
+  private final DSLContext dsl;
 
-  public AuthSystem(SoulFireServer soulFireServer, SessionFactory sessionFactory) {
+  public AuthSystem(SoulFireServer soulFireServer, DSLContext dsl) {
     this.logService = soulFireServer.logStateHolder();
     this.jwtSecretKey = soulFireServer.jwtSecretKey();
     this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
     this.settingsSource = soulFireServer.settingsSource();
-    this.sessionFactory = sessionFactory;
+    this.dsl = dsl;
 
     createRootUser();
   }
 
   private void createRootUser() {
-    sessionFactory.inTransaction(s -> {
-      var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
+    dsl.transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var currentRootUser = ctx.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(ROOT_USER_ID.toString())).fetchOne();
       if (currentRootUser == null) {
-        var collidingUser = s.createQuery("FROM UserEntity WHERE username = :username", UserEntity.class)
-          .setParameter("username", "root")
-          .uniqueResult();
+        var collidingUser = ctx.selectFrom(Tables.USERS).where(Tables.USERS.USERNAME.eq("root")).fetchOne();
         if (collidingUser != null) {
-          collidingUser.username("old-root-%s".formatted(UUID.randomUUID().toString().substring(0, 6)));
-          collidingUser.email("old-%s-%s".formatted(UUID.randomUUID().toString().substring(0, 6), collidingUser.email()));
-          s.merge(collidingUser);
+          ctx.update(Tables.USERS)
+            .set(Tables.USERS.USERNAME, "old-root-%s".formatted(UUID.randomUUID().toString().substring(0, 6)))
+            .set(Tables.USERS.EMAIL, "old-%s-%s".formatted(UUID.randomUUID().toString().substring(0, 6), collidingUser.getEmail()))
+            .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+            .where(Tables.USERS.ID.eq(collidingUser.getId()))
+            .execute();
         }
       }
     });
 
-    sessionFactory.inTransaction(s -> {
-      var currentRootUser = s.find(UserEntity.class, ROOT_USER_ID);
+    dsl.transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var currentRootUser = ctx.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(ROOT_USER_ID.toString())).fetchOne();
       if (currentRootUser == null) {
-        var rootUser = new UserEntity();
-        rootUser.id(ROOT_USER_ID);
-        rootUser.username("root");
-        rootUser.role(UserEntity.Role.ADMIN);
-        rootUser.email(ROOT_DEFAULT_EMAIL);
-        rootUser.minIssuedAt(Instant.now());
-        s.persist(rootUser);
-
+        var now = LocalDateTime.now();
+        ctx.insertInto(Tables.USERS)
+          .set(Tables.USERS.ID, ROOT_USER_ID.toString())
+          .set(Tables.USERS.USERNAME, "root")
+          .set(Tables.USERS.ROLE, UserRole.ADMIN.name())
+          .set(Tables.USERS.EMAIL, ROOT_DEFAULT_EMAIL)
+          .set(Tables.USERS.MIN_ISSUED_AT, now)
+          .set(Tables.USERS.CREATED_AT, now)
+          .set(Tables.USERS.UPDATED_AT, now)
+          .set(Tables.USERS.VERSION, 0L)
+          .execute();
         log.warn("The root user email is defaulted to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
       } else {
-        currentRootUser.role(UserEntity.Role.ADMIN);
-        s.merge(currentRootUser);
-
-        if (ROOT_DEFAULT_EMAIL.equals(currentRootUser.email())) {
+        ctx.update(Tables.USERS)
+          .set(Tables.USERS.ROLE, UserRole.ADMIN.name())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.USERS.ID.eq(ROOT_USER_ID.toString()))
+          .execute();
+        if (ROOT_DEFAULT_EMAIL.equals(currentRootUser.getEmail())) {
           log.warn("The root user email is currently set to '{}'. Please change it using the command 'set-email <email>'", ROOT_DEFAULT_EMAIL);
         }
       }
@@ -139,26 +151,32 @@ public final class AuthSystem {
   }
 
   public Optional<SoulFireUser> authenticateBySubject(UUID uuid, Instant issuedAt) {
-    return sessionFactory.fromTransaction(s -> {
-      var userEntity = s.find(UserEntity.class, uuid);
-      if (userEntity == null) {
+    return dsl.transactionResult(cfg -> {
+      var ctx = DSL.using(cfg);
+      var userRecord = ctx.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(uuid.toString())).fetchOne();
+      if (userRecord == null) {
         return Optional.empty();
       }
 
       // Used to prevent old/stolen JWTs from being used
       // Truncate to seconds because JWTs only have second precision
-      if (issuedAt.isBefore(userEntity.minIssuedAt().truncatedTo(ChronoUnit.SECONDS))) {
+      var minIssuedAt = userRecord.getMinIssuedAt().toInstant(ZoneOffset.UTC);
+      if (issuedAt.isBefore(minIssuedAt.truncatedTo(ChronoUnit.SECONDS))) {
         return Optional.empty();
       }
 
       // Only update login if last login was more than 30 seconds ago
-      if (userEntity.lastLoginAt() == null
-        || userEntity.lastLoginAt().isBefore(Instant.now().minusSeconds(30))) {
-        userEntity.lastLoginAt(Instant.now());
-        s.merge(userEntity);
+      var lastLogin = userRecord.getLastLoginAt();
+      var lastLoginInstant = lastLogin != null ? lastLogin.toInstant(ZoneOffset.UTC) : null;
+      if (lastLoginInstant == null || lastLoginInstant.isBefore(Instant.now().minusSeconds(30))) {
+        ctx.update(Tables.USERS)
+          .set(Tables.USERS.LAST_LOGIN_AT, LocalDateTime.now())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.USERS.ID.eq(uuid.toString()))
+          .execute();
       }
 
-      return Optional.of(new SoulFireUserImpl(logService, userEntity, sessionFactory, settingsSource, issuedAt));
+      return Optional.of(new SoulFireUserImpl(logService, userRecord, dsl, settingsSource, issuedAt));
     });
   }
 
@@ -167,31 +185,24 @@ public final class AuthSystem {
       throw new IllegalArgumentException("Cannot delete root user");
     }
 
-    sessionFactory.inTransaction(s -> {
-      var userEntity = s.find(UserEntity.class, uuid);
-      if (userEntity == null) {
-        return;
-      }
-
-      s.remove(userEntity);
-    });
+    dsl.deleteFrom(Tables.USERS).where(Tables.USERS.ID.eq(uuid.toString())).execute();
 
     logService.disconnect(uuid);
   }
 
-  public UserEntity rootUserData() {
+  public UsersRecord rootUserData() {
     return getUserData(ROOT_USER_ID).orElseThrow();
   }
 
-  public Optional<UserEntity> getUserData(UUID uuid) {
-    return Optional.ofNullable(sessionFactory.fromTransaction(s -> s.find(UserEntity.class, uuid)));
+  public Optional<UsersRecord> getUserData(UUID uuid) {
+    return Optional.ofNullable(dsl.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(uuid.toString())).fetchOne());
   }
 
-  public String generateJWT(UserEntity user, String audience) {
+  public String generateJWT(UsersRecord user, String audience) {
     return Jwts.builder()
       .signWith(jwtSecretKey, Jwts.SIG.HS256)
       .claims()
-      .subject(user.id().toString())
+      .subject(UUID.fromString(user.getId()).toString())
       .issuedAt(Date.from(Instant.now()))
       .audience()
       .add(audience)
@@ -202,29 +213,29 @@ public final class AuthSystem {
 
   private record SoulFireUserImpl(
     LogServiceImpl.StateHolder logService,
-    UserEntity userData,
-    SessionFactory sessionFactory,
+    UsersRecord userData,
+    DSLContext dsl,
     ServerSettingsSource settingsSource,
     Instant issuedAt
   ) implements SoulFireUser {
     @Override
     public UUID getUniqueId() {
-      return userData.id();
+      return UUID.fromString(userData.getId());
     }
 
     @Override
     public String getUsername() {
-      return userData.username();
+      return userData.getUsername();
     }
 
     @Override
     public String getEmail() {
-      return userData.email();
+      return userData.getEmail();
     }
 
     @Override
-    public UserEntity.Role getRole() {
-      return userData.role();
+    public UserRole getRole() {
+      return UserRole.valueOf(userData.getRole());
     }
 
     @Override
@@ -272,21 +283,20 @@ public final class AuthSystem {
 
     @Override
     public void sendMessage(Level level, Component message) {
-      logService.sendPersonalMessage(userData.id(), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
+      logService.sendPersonalMessage(UUID.fromString(userData.getId()), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
     }
 
     private boolean isOwnerOfInstance(UUID instanceId) {
-      return sessionFactory.fromTransaction(s -> {
-        var instanceEntity = s.createQuery("FROM InstanceEntity WHERE id = :id AND owner = :owner", InstanceEntity.class)
-          .setParameter("id", instanceId)
-          .setParameter("owner", userData)
-          .uniqueResult();
-        return instanceEntity != null;
-      });
+      var count = dsl.selectCount()
+        .from(Tables.INSTANCES)
+        .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+        .and(Tables.INSTANCES.OWNER_ID.eq(userData.getId()))
+        .fetchOne(0, int.class);
+      return count != null && count > 0;
     }
 
     private boolean isAdmin() {
-      return userData.role() == UserEntity.Role.ADMIN;
+      return UserRole.valueOf(userData.getRole()) == UserRole.ADMIN;
     }
   }
 }

@@ -2,6 +2,7 @@ plugins {
   `sf-special-publish-conventions`
   id("net.fabricmc.fabric-loom")
   alias(libs.plugins.jmh)
+  alias(libs.plugins.jooq.codegen)
 }
 
 repositories {
@@ -77,6 +78,10 @@ dependencies {
   testImplementation(projects.shared)
 
   jmhImplementation(projects.shared)
+
+  jooqCodegen(libs.jooq.codegen)
+  jooqCodegen(libs.jooq.meta.extensions)
+  jooqCodegen(libs.sqlite)
 }
 
 loom {
@@ -117,6 +122,48 @@ publishing {
   publications {
     getByName<MavenPublication>("mavenJava") {
       artifact(tasks.jar)
+    }
+  }
+}
+
+jooq {
+  configuration {
+    generator {
+      database {
+        name = "org.jooq.meta.extensions.ddl.DDLDatabase"
+        properties {
+          property {
+            key = "scripts"
+            value = "src/main/resources/db/migration/*.sql"
+          }
+          property {
+            key = "sort"
+            value = "flyway"
+          }
+          property {
+            key = "defaultNameCase"
+            value = "as_is"
+          }
+        }
+      }
+      generate {
+        isDeprecated = false
+        isRecords = true
+        isPojos = false
+        isFluentSetters = true
+      }
+      target {
+        packageName = "com.soulfiremc.server.database.generated"
+        directory = "build/generated-sources/jooq"
+      }
+    }
+  }
+}
+
+sourceSets {
+  main {
+    java {
+      srcDir("build/generated-sources/jooq")
     }
   }
 }

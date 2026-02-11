@@ -7,10 +7,13 @@ reactor-core = "3.8.3"
 armeria = "1.36.0"
 classtransform = "1.14.1"
 kyori = "4.26.1"
+jooq = "3.19.18"
+flyway = "11.5.0"
 
 [plugins]
 protobuf = "com.google.protobuf:0.9.6"
 jmh = "me.champeau.jmh:0.7.3"
+jooq-codegen = { id = "org.jooq.jooq-codegen-gradle", version.ref = "jooq" }
 
 [libraries]
 gradle-plugin-shadow = "gradle.plugin.com.github.johnrengelman:shadow:8.0.0"
@@ -64,12 +67,11 @@ spark = "me.lucko:spark-common:1.10.142-SNAPSHOT"
 openai = "com.openai:openai-java:4.20.0"
 immutables-value = "org.immutables:value:2.12.1"
 immutables-gson = "org.immutables:gson:2.12.1"
-hibernate-core = "org.hibernate.orm:hibernate-core:7.2.4.Final"
-hibernate-community-dialects = "org.hibernate.orm:hibernate-community-dialects:7.2.4.Final"
-hibernate-hikaricp = "org.hibernate.orm:hibernate-hikaricp:7.2.4.Final"
-hibernate-validator = "org.hibernate.validator:hibernate-validator:9.1.0.Final"
-hibernate-validator-cdi = "org.hibernate.validator:hibernate-validator-cdi:9.1.0.Final"
-expressly = "org.glassfish.expressly:expressly:6.0.0"
+jooq-lib = { module = "org.jooq:jooq", version.ref = "jooq" }
+jooq-codegen = { module = "org.jooq:jooq-codegen", version.ref = "jooq" }
+jooq-meta-extensions = { module = "org.jooq:jooq-meta-extensions", version.ref = "jooq" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
 mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.7"
 sqlite = "org.xerial:sqlite-jdbc:3.51.2.0"
@@ -93,6 +95,6 @@ grpc = ["grpc-proto", "grpc-services", "grpc-stub", "grpc-netty", "protobuf-util
 ansi4j = ["ansi4j-core-api", "ansi4j-core-impl"]
 armeria = ["armeria", "armeria-grpc", "armeria-grpc-protocol", "armeria-prometheus1", "armeria-tomcat10"]
 reactor-netty = ["reactor-netty-core", "reactor-netty-http"]
-hibernate = ["hibernate-core", "hibernate-community-dialects", "hibernate-hikaricp", "hibernate-validator", "hibernate-validator-cdi"]
+jooq = ["jooq-lib"]
 classtransform = ["classtransform-mixinstranslator", "classtransform-additionalclassprovider"]
 kyori = ["kyori-plain", "kyori-gson", "kyori-ansi"]

@@ -21,7 +21,9 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.generated.Tables;
+
+import java.time.LocalDateTime;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -38,11 +40,12 @@ public final class SetEmailCommand {
               "Set the email of the current user",
               c -> {
                 var email = StringArgumentType.getString(c, "email");
-                c.getSource().soulFire().sessionFactory().inTransaction(s -> {
-                  var userData = s.find(UserEntity.class, c.getSource().source().getUniqueId());
-                  userData.email(email);
-                  s.merge(userData);
-                });
+                c.getSource().soulFire().dsl()
+                  .update(Tables.USERS)
+                  .set(Tables.USERS.EMAIL, email)
+                  .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+                  .where(Tables.USERS.ID.eq(c.getSource().source().getUniqueId().toString()))
+                  .execute();
                 c.getSource().source().sendInfo("Email of user {} set to {}", c.getSource().source().getUsername(), email);
 
                 return Command.SINGLE_SUCCESS;

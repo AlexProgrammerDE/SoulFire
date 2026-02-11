@@ -17,26 +17,28 @@
  */
 package com.soulfiremc.server.database;
 
-import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import com.soulfiremc.server.util.SFHelpers;
 
-@Getter
-@Setter
-@Entity
-@Table(name = "server_config")
-public final class ServerConfigEntity {
-  @Id
-  @NotNull(message = "ID cannot be null")
-  private Long id = 1L;
+import java.util.List;
 
-  @NotNull(message = "Settings cannot be null")
-  @Convert(converter = ServerSettingsConverter.class)
-  @Column(nullable = false)
-  private ServerSettingsImpl.Stem settings = ServerSettingsImpl.Stem.EMPTY;
+public final class InstanceConstants {
+  public static final List<String> ICON_POOL = List.of(
+    "pickaxe",
+    "apple",
+    "shovel",
+    "sword",
+    "fish",
+    "citrus",
+    "popcorn",
+    "cookie",
+    "carrot",
+    "croissant"
+  );
 
-  @Version
-  private long version;
+  private InstanceConstants() {
+  }
+
+  public static String randomInstanceIcon() {
+    return SFHelpers.getRandomEntry(ICON_POOL);
+  }
 }

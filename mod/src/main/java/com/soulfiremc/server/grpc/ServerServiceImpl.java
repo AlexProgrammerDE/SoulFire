@@ -17,16 +17,19 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.database.ServerConfigEntity;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.impl.DSL;
 
 
 @Slf4j
@@ -39,12 +42,12 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_SERVER_CONFIG));
 
     try {
-      var configEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(ServerConfigEntity.class, 1));
+      var record = soulFireServer.dsl().selectFrom(Tables.SERVER_CONFIG).where(Tables.SERVER_CONFIG.ID.eq(1L)).fetchOne();
       ServerSettingsImpl.Stem config;
-      if (configEntity == null) {
+      if (record == null) {
         config = ServerSettingsImpl.Stem.EMPTY;
       } else {
-        config = configEntity.settings();
+        config = ServerSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
       }
 
       var registry = soulFireServer.settingsPageRegistry();
@@ -66,15 +69,23 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SERVER_CONFIG));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var currentConfigEntity = session.find(ServerConfigEntity.class, 1);
-        if (currentConfigEntity == null) {
-          var newConfigEntity = new ServerConfigEntity();
-          newConfigEntity.settings(ServerSettingsImpl.Stem.fromProto(request.getConfig()));
-          session.persist(newConfigEntity);
+      var newStem = ServerSettingsImpl.Stem.fromProto(request.getConfig());
+      var settingsJson = GsonInstance.GSON.toJson(newStem.serializeToTree());
+
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var existing = ctx.selectFrom(Tables.SERVER_CONFIG).where(Tables.SERVER_CONFIG.ID.eq(1L)).fetchOne();
+        if (existing == null) {
+          ctx.insertInto(Tables.SERVER_CONFIG)
+            .set(Tables.SERVER_CONFIG.ID, 1L)
+            .set(Tables.SERVER_CONFIG.SETTINGS, settingsJson)
+            .set(Tables.SERVER_CONFIG.VERSION, 0L)
+            .execute();
         } else {
-          currentConfigEntity.settings(ServerSettingsImpl.Stem.fromProto(request.getConfig()));
-          session.merge(currentConfigEntity);
+          ctx.update(Tables.SERVER_CONFIG)
+            .set(Tables.SERVER_CONFIG.SETTINGS, settingsJson)
+            .where(Tables.SERVER_CONFIG.ID.eq(1L))
+            .execute();
         }
       });
 
@@ -92,14 +103,14 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SERVER_CONFIG));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var currentConfigEntity = session.find(ServerConfigEntity.class, 1);
+      soulFireServer.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var existing = ctx.selectFrom(Tables.SERVER_CONFIG).where(Tables.SERVER_CONFIG.ID.eq(1L)).fetchOne();
         ServerSettingsImpl.Stem currentConfig;
-        if (currentConfigEntity == null) {
-          currentConfigEntity = new ServerConfigEntity();
+        if (existing == null) {
           currentConfig = ServerSettingsImpl.Stem.EMPTY;
         } else {
-          currentConfig = currentConfigEntity.settings();
+          currentConfig = ServerSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(existing.getSettings(), JsonElement.class));
         }
 
         var newSettings = SettingsSource.Stem.withUpdatedEntry(
@@ -108,12 +119,20 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
           request.getKey(),
           SettingsSource.Stem.valueToJsonElement(request.getValue())
         );
-        currentConfigEntity.settings(currentConfig.withSettings(newSettings));
+        var updatedStem = currentConfig.withSettings(newSettings);
+        var settingsJson = GsonInstance.GSON.toJson(updatedStem.serializeToTree());
 
-        if (session.find(ServerConfigEntity.class, 1) == null) {
-          session.persist(currentConfigEntity);
+        if (existing == null) {
+          ctx.insertInto(Tables.SERVER_CONFIG)
+            .set(Tables.SERVER_CONFIG.ID, 1L)
+            .set(Tables.SERVER_CONFIG.SETTINGS, settingsJson)
+            .set(Tables.SERVER_CONFIG.VERSION, 0L)
+            .execute();
         } else {
-          session.merge(currentConfigEntity);
+          ctx.update(Tables.SERVER_CONFIG)
+            .set(Tables.SERVER_CONFIG.SETTINGS, settingsJson)
+            .where(Tables.SERVER_CONFIG.ID.eq(1L))
+            .execute();
         }
       });
 

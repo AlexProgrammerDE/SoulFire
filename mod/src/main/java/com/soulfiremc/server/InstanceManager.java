@@ -30,9 +30,8 @@ import com.soulfiremc.server.api.event.session.SessionTickEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
-import com.soulfiremc.server.database.InstanceAuditLogEntity;
-import com.soulfiremc.server.database.InstanceEntity;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.AuditLogType;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.*;
 import com.soulfiremc.server.settings.lib.*;
@@ -41,16 +40,19 @@ import com.soulfiremc.server.util.MathHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.TimeUtil;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.SFLogAppender;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.hibernate.SessionFactory;
+import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,19 +71,19 @@ public final class InstanceManager {
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
   private final SoulFireServer soulFireServer;
-  private final SessionFactory sessionFactory;
+  private final DSLContext dsl;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final CachedLazyObject<String> friendlyNameCache;
   private final SettingsPageRegistry instanceSettingsPageRegistry;
   private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
   private SessionLifecycle sessionLifecycle = SessionLifecycle.STOPPED;
 
-  public InstanceManager(SoulFireServer soulFireServer, SessionFactory sessionFactory, UUID id, SessionLifecycle lastState) {
+  public InstanceManager(SoulFireServer soulFireServer, DSLContext dsl, UUID id, SessionLifecycle lastState) {
     this.id = id;
     this.runnableWrapper = soulFireServer.runnableWrapper().with(new InstanceRunnableWrapper(this));
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.soulFireServer = soulFireServer;
-    this.sessionFactory = sessionFactory;
+    this.dsl = dsl;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
     this.friendlyNameCache = new CachedLazyObject<>(this::fetchFriendlyName, 1, TimeUnit.SECONDS);
 
@@ -117,27 +119,24 @@ public final class InstanceManager {
   }
 
   private InstanceSettingsSource fetchSettingsSource() {
-    return sessionFactory.fromTransaction(session -> {
-      var instance = session.find(InstanceEntity.class, id);
+    var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
 
-      if (instance == null) {
-        throw new IllegalStateException("Instance not found");
-      } else {
-        return new InstanceSettingsImpl(instance.settings(), soulFireServer.settingsSource());
-      }
-    });
+    if (record == null) {
+      throw new IllegalStateException("Instance not found");
+    } else {
+      var stem = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+      return new InstanceSettingsImpl(stem, soulFireServer.settingsSource());
+    }
   }
 
   private String fetchFriendlyName() {
-    return sessionFactory.fromTransaction(session -> {
-      var instance = session.find(InstanceEntity.class, id);
+    var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
 
-      if (instance == null) {
-        return "Unknown";
-      } else {
-        return instance.friendlyName();
-      }
-    });
+    if (record == null) {
+      return "Unknown";
+    } else {
+      return record.getFriendlyName();
+    }
   }
 
   private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
@@ -180,13 +179,14 @@ public final class InstanceManager {
       return;
     }
 
-    sessionFactory.inTransaction(session -> {
-      var instanceEntity = session.find(InstanceEntity.class, id);
-      if (instanceEntity == null) {
+    dsl.transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
+      if (record == null) {
         return;
       }
 
-      var currentSettings = instanceEntity.settings();
+      var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
       var newAccounts = currentSettings.accounts().stream()
         .map(account -> {
           for (var dirtyEntry : dirtyBots) {
@@ -198,8 +198,12 @@ public final class InstanceManager {
         })
         .toList();
 
-      instanceEntity.settings(currentSettings.withAccounts(newAccounts));
-      session.merge(instanceEntity);
+      var newSettings = currentSettings.withAccounts(newAccounts);
+      ctx.update(Tables.INSTANCES)
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
+        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+        .where(Tables.INSTANCES.ID.eq(id.toString()))
+        .execute();
     });
   }
 
@@ -245,12 +249,20 @@ public final class InstanceManager {
 
     if (refreshed > 0) {
       log.info("Refreshed {} accounts", refreshed);
-      sessionFactory.inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, id);
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
+        if (record == null) {
+          return;
+        }
 
-        instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
-
-        session.merge(instanceEntity);
+        var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+        var newSettings = currentSettings.withAccounts(accounts);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(id.toString()))
+          .execute();
       });
     }
   }
@@ -271,12 +283,20 @@ public final class InstanceManager {
     var accounts = new ArrayList<>(settingsSource.accounts().values());
     accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())
       && a.profileId().equals(refreshedAccount.profileId()) ? refreshedAccount : a);
-    sessionFactory.inTransaction(session -> {
-      var instanceEntity = session.find(InstanceEntity.class, id);
+    dsl.transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
+      if (record == null) {
+        return;
+      }
 
-      instanceEntity.settings(instanceEntity.settings().withAccounts(accounts));
-
-      session.merge(instanceEntity);
+      var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+      var newSettings = currentSettings.withAccounts(accounts);
+      ctx.update(Tables.INSTANCES)
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
+        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+        .where(Tables.INSTANCES.ID.eq(id.toString()))
+        .execute();
     });
 
     return refreshedAccount;
@@ -288,7 +308,7 @@ public final class InstanceManager {
         case STARTING, RUNNING, STOPPING -> CompletableFuture.completedFuture(null);
         case PAUSED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.RESUME_SESSION, null);
+            addAuditLog(initiator, AuditLogType.RESUME_SESSION, null);
           }
 
           this.sessionLifecycle(allBotsConnected.get() ? SessionLifecycle.RUNNING : SessionLifecycle.STARTING);
@@ -296,7 +316,7 @@ public final class InstanceManager {
         }
         case STOPPED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_SESSION, null);
+            addAuditLog(initiator, AuditLogType.START_SESSION, null);
           }
 
           yield scheduler.runAsync(this::start);
@@ -305,7 +325,7 @@ public final class InstanceManager {
       case PAUSED -> switch (sessionLifecycle()) {
         case STARTING, RUNNING -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_SESSION, null);
+            addAuditLog(initiator, AuditLogType.PAUSE_SESSION, null);
           }
 
           this.sessionLifecycle(SessionLifecycle.PAUSED);
@@ -314,8 +334,8 @@ public final class InstanceManager {
         case STOPPING, PAUSED -> CompletableFuture.completedFuture(null);
         case STOPPED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.START_SESSION, null);
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.PAUSE_SESSION, null);
+            addAuditLog(initiator, AuditLogType.START_SESSION, null);
+            addAuditLog(initiator, AuditLogType.PAUSE_SESSION, null);
           }
 
           yield scheduler.runAsync(this::start)
@@ -325,7 +345,7 @@ public final class InstanceManager {
       case STOPPING, STOPPED -> switch (sessionLifecycle()) {
         case STARTING, RUNNING, PAUSED -> {
           if (initiator != null) {
-            addAuditLog(initiator, InstanceAuditLogEntity.AuditLogType.STOP_SESSION, null);
+            addAuditLog(initiator, AuditLogType.STOP_SESSION, null);
           }
           yield stopSessionPermanently();
         }
@@ -511,16 +531,11 @@ public final class InstanceManager {
 
   private void sessionLifecycle(SessionLifecycle sessionLifecycle) {
     this.sessionLifecycle = sessionLifecycle;
-    sessionFactory.inTransaction(session -> {
-      var instanceEntity = session.find(InstanceEntity.class, id);
-      if (instanceEntity == null) {
-        return;
-      }
-
-      instanceEntity.sessionLifecycle(sessionLifecycle);
-
-      session.merge(instanceEntity);
-    });
+    dsl.update(Tables.INSTANCES)
+      .set(Tables.INSTANCES.SESSION_LIFECYCLE, sessionLifecycle.name())
+      .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+      .where(Tables.INSTANCES.ID.eq(id.toString()))
+      .execute();
   }
 
   public CompletableFuture<?> stopSession() {
@@ -550,25 +565,27 @@ public final class InstanceManager {
     });
   }
 
-  public void addAuditLog(SoulFireUser source, InstanceAuditLogEntity.AuditLogType logType, @Nullable String data) {
-    scheduler.execute(() -> sessionFactory.inTransaction(session -> {
-      var instanceEntity = session.find(InstanceEntity.class, id);
-      if (instanceEntity == null) {
+  public void addAuditLog(SoulFireUser source, AuditLogType logType, @Nullable String data) {
+    scheduler.execute(() -> dsl.transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      // Verify instance and user exist
+      var instanceExists = ctx.fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(id.toString()));
+      var userExists = ctx.fetchExists(Tables.USERS, Tables.USERS.ID.eq(source.getUniqueId().toString()));
+      if (!instanceExists || !userExists) {
         return;
       }
 
-      var userEntity = session.find(UserEntity.class, source.getUniqueId());
-      if (userEntity == null) {
-        return;
-      }
-
-      var auditLogEntry = new InstanceAuditLogEntity();
-      auditLogEntry.type(logType);
-      auditLogEntry.data(data);
-      auditLogEntry.instance(instanceEntity);
-      auditLogEntry.user(userEntity);
-
-      session.persist(auditLogEntry);
+      var now = LocalDateTime.now();
+      ctx.insertInto(Tables.INSTANCE_AUDIT_LOGS)
+        .set(Tables.INSTANCE_AUDIT_LOGS.ID, UUID.randomUUID().toString())
+        .set(Tables.INSTANCE_AUDIT_LOGS.TYPE, logType.name())
+        .set(Tables.INSTANCE_AUDIT_LOGS.DATA, data)
+        .set(Tables.INSTANCE_AUDIT_LOGS.INSTANCE_ID, id.toString())
+        .set(Tables.INSTANCE_AUDIT_LOGS.USER_ID, source.getUniqueId().toString())
+        .set(Tables.INSTANCE_AUDIT_LOGS.CREATED_AT, now)
+        .set(Tables.INSTANCE_AUDIT_LOGS.UPDATED_AT, now)
+        .set(Tables.INSTANCE_AUDIT_LOGS.VERSION, 0L)
+        .execute();
     }));
   }
 

@@ -63,13 +63,13 @@ public final class DevSettings implements SettingsObject {
       .description("Enable gRPC debug logging")
       .defaultValue(false)
       .build();
-  public static final BooleanProperty<SettingsSource.Server> HIBERNATE_DEBUG =
+  public static final BooleanProperty<SettingsSource.Server> DATABASE_DEBUG =
     ImmutableBooleanProperty.<SettingsSource.Server>builder()
       .sourceType(SettingsSource.Server.INSTANCE)
       .namespace(NAMESPACE)
-      .key("hibernate-debug")
-      .uiName("Hibernate debug")
-      .description("Enable Hibernate debug logging")
+      .key("database-debug")
+      .uiName("Database debug")
+      .description("Enable database debug logging")
       .defaultValue(false)
       .build();
   public static final BooleanProperty<SettingsSource.Server> VIA_DEBUG =

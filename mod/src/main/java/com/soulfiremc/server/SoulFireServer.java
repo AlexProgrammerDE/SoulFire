@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
@@ -26,11 +27,11 @@ import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.command.ServerCommandManager;
 import com.soulfiremc.server.database.DatabaseManager;
-import com.soulfiremc.server.database.InstanceEntity;
-import com.soulfiremc.server.database.ServerConfigEntity;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.InstanceConstants;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
+import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
@@ -43,6 +44,7 @@ import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.util.structs.SFUpdateChecker;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import com.viaversion.viaversion.api.Via;
@@ -50,7 +52,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.hibernate.SessionFactory;
+import org.jooq.DSLContext;
 import org.jspecify.annotations.Nullable;
 
 import javax.crypto.SecretKey;
@@ -61,6 +63,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -89,7 +92,7 @@ public final class SoulFireServer {
   private final SettingsPageRegistry settingsPageRegistry;
   private final ServerCommandManager serverCommandManager;
   private final ShutdownManager shutdownManager;
-  private final SessionFactory sessionFactory;
+  private final DatabaseManager.DatabaseContext databaseContext;
   private final SecretKey jwtSecretKey;
   private final SFSparkPlugin sparkPlugin;
   @Getter
@@ -134,8 +137,8 @@ public final class SoulFireServer {
     });
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
-    var sessionFactoryFuture = scheduler.supplyAsync(DatabaseManager::select);
-    var authSystemFuture = sessionFactoryFuture.thenApplyAsync(sessionFactory -> new AuthSystem(this, sessionFactory), scheduler);
+    var databaseContextFuture = scheduler.supplyAsync(DatabaseManager::select);
+    var authSystemFuture = databaseContextFuture.thenApplyAsync(databaseContext -> new AuthSystem(this, databaseContext.dsl()), scheduler);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
     var configDirectory = SFPathConstants.getConfigDirectory();
@@ -166,7 +169,7 @@ public final class SoulFireServer {
       return registry;
     });
 
-    this.sessionFactory = sessionFactoryFuture.join();
+    this.databaseContext = databaseContextFuture.join();
     this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
     this.authSystem = authSystemFuture.join();
     this.rpcServer = rpcServerFuture.join();
@@ -207,16 +210,24 @@ public final class SoulFireServer {
       "Finished loading! (Took {}ms)", Duration.between(startTime, Instant.now()).toMillis());
   }
 
-  private ServerSettingsSource fetchSettingsSource() {
-    return this.sessionFactory.fromTransaction(session -> {
-      var entity = session.find(ServerConfigEntity.class, 1);
-      if (entity == null) {
-        entity = new ServerConfigEntity();
-        session.persist(entity);
-      }
+  public DSLContext dsl() {
+    return databaseContext.dsl();
+  }
 
-      return new ServerSettingsImpl(entity.settings());
-    });
+  private ServerSettingsSource fetchSettingsSource() {
+    var record = dsl().selectFrom(Tables.SERVER_CONFIG).where(Tables.SERVER_CONFIG.ID.eq(1L)).fetchOne();
+    if (record == null) {
+      dsl().insertInto(Tables.SERVER_CONFIG)
+        .set(Tables.SERVER_CONFIG.ID, 1L)
+        .set(Tables.SERVER_CONFIG.SETTINGS, GsonInstance.GSON.toJson(ServerSettingsImpl.Stem.EMPTY.serializeToTree()))
+        .set(Tables.SERVER_CONFIG.VERSION, 0L)
+        .execute();
+      return new ServerSettingsImpl(ServerSettingsImpl.Stem.EMPTY);
+    }
+
+    var settingsStr = record.getSettings();
+    var stem = ServerSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(settingsStr, JsonElement.class));
+    return new ServerSettingsImpl(stem);
   }
 
   public EmailSender emailSender() {
@@ -243,7 +254,7 @@ public final class SoulFireServer {
     Configurator.setLevel("net.minecraft", settingsSource.get(DevSettings.MINECRAFT_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.netty", settingsSource.get(DevSettings.NETTY_DEBUG) ? Level.DEBUG : Level.INFO);
     Configurator.setLevel("io.grpc", settingsSource.get(DevSettings.GRPC_DEBUG) ? Level.DEBUG : Level.INFO);
-    Configurator.setLevel("org.hibernate", settingsSource.get(DevSettings.HIBERNATE_DEBUG) ? Level.DEBUG : Level.INFO);
+    Configurator.setLevel("org.jooq", settingsSource.get(DevSettings.DATABASE_DEBUG) ? Level.DEBUG : Level.INFO);
     if (!Boolean.getBoolean("sf.unit.test")) {
       Via.getManager().debugHandler().setEnabled(settingsSource.get(DevSettings.VIA_DEBUG));
     }
@@ -252,10 +263,11 @@ public final class SoulFireServer {
 
   private void loadInstances() {
     try {
-      for (var instanceData : sessionFactory.fromTransaction(s ->
-        s.createQuery("FROM InstanceEntity", InstanceEntity.class).list())) {
+      for (var record : dsl().selectFrom(Tables.INSTANCES).fetch()) {
         try {
-          var instance = new InstanceManager(this, sessionFactory, instanceData.id(), instanceData.sessionLifecycle());
+          var instanceId = UUID.fromString(record.getId());
+          var lifecycle = SessionLifecycle.valueOf(record.getSessionLifecycle());
+          var instance = new InstanceManager(this, dsl(), instanceId, lifecycle);
           SoulFireAPI.postEvent(new InstanceInitEvent(instance));
 
           instances.put(instance.id(), instance);
@@ -285,20 +297,25 @@ public final class SoulFireServer {
     scheduler.shutdown();
 
     // Shutdown database
-    sessionFactory.close();
+    databaseContext.close();
   }
 
   public UUID createInstance(String friendlyName, SoulFireUser owner) {
-    var instanceEntity = sessionFactory.fromTransaction(s -> {
-      var newInstanceEntity = new InstanceEntity();
-      newInstanceEntity.friendlyName(friendlyName);
-      newInstanceEntity.icon(InstanceEntity.randomInstanceIcon());
-      newInstanceEntity.owner(s.find(UserEntity.class, owner.getUniqueId()));
-      s.persist(newInstanceEntity);
+    var now = LocalDateTime.now();
+    var id = UUID.randomUUID();
+    dsl().insertInto(Tables.INSTANCES)
+      .set(Tables.INSTANCES.ID, id.toString())
+      .set(Tables.INSTANCES.FRIENDLY_NAME, friendlyName)
+      .set(Tables.INSTANCES.ICON, InstanceConstants.randomInstanceIcon())
+      .set(Tables.INSTANCES.OWNER_ID, owner.getUniqueId().toString())
+      .set(Tables.INSTANCES.SESSION_LIFECYCLE, SessionLifecycle.STOPPED.name())
+      .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(InstanceSettingsImpl.Stem.EMPTY.serializeToTree()))
+      .set(Tables.INSTANCES.CREATED_AT, now)
+      .set(Tables.INSTANCES.UPDATED_AT, now)
+      .set(Tables.INSTANCES.VERSION, 0L)
+      .execute();
 
-      return newInstanceEntity;
-    });
-    var instanceManager = new InstanceManager(this, sessionFactory, instanceEntity.id(), SessionLifecycle.STOPPED);
+    var instanceManager = new InstanceManager(this, dsl(), id, SessionLifecycle.STOPPED);
     SoulFireAPI.postEvent(new InstanceInitEvent(instanceManager));
 
     instances.put(instanceManager.id(), instanceManager);
@@ -315,14 +332,7 @@ public final class SoulFireServer {
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
-    sessionFactory.inTransaction(s -> {
-      var userEntity = s.find(InstanceEntity.class, id);
-      if (userEntity == null) {
-        return;
-      }
-
-      s.remove(userEntity);
-    });
+    dsl().deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).execute();
 
     return Optional.ofNullable(instances.remove(id)).map(InstanceManager::deleteInstance);
   }

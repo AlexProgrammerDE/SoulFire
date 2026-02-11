@@ -17,25 +17,30 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.gson.JsonElement;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SessionLifecycle;
-import com.soulfiremc.server.database.InstanceAuditLogEntity;
-import com.soulfiremc.server.database.InstanceEntity;
+import com.soulfiremc.server.database.AuditLogType;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.impl.DSL;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +58,14 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         .setGranted(user.hasPermission(PermissionContext.instance(permission, instanceId)))
         .build())
       .toList();
+  }
+
+  private InstanceSettingsImpl.Stem parseSettings(String settingsJson) {
+    return InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(settingsJson, JsonElement.class));
+  }
+
+  private String serializeSettings(InstanceSettingsImpl.Stem stem) {
+    return GsonInstance.GSON.toJson(stem.serializeToTree());
   }
 
   @Override
@@ -92,16 +105,25 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   @Override
   public void listInstances(InstanceListRequest request, StreamObserver<InstanceListResponse> responseObserver) {
     try {
+      var dsl = soulFireServer.dsl();
+      var records = dsl.selectFrom(Tables.INSTANCES).fetch();
+
       responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("FROM InstanceEntity", InstanceEntity.class).list()).stream()
-          .filter(instance -> ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, instance.id())))
-          .map(instance -> InstanceListResponse.Instance.newBuilder()
-            .setId(instance.id().toString())
-            .setFriendlyName(instance.friendlyName())
-            .setIcon(instance.icon())
-            .setState(instance.sessionLifecycle().toProto())
-            .addAllInstancePermissions(getInstancePermissions(instance.id()))
-            .build())
+        .addAllInstances(records.stream()
+          .filter(record -> {
+            var id = UUID.fromString(record.getId());
+            return ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, id));
+          })
+          .map(record -> {
+            var id = UUID.fromString(record.getId());
+            return InstanceListResponse.Instance.newBuilder()
+              .setId(record.getId())
+              .setFriendlyName(record.getFriendlyName())
+              .setIcon(record.getIcon())
+              .setState(SessionLifecycle.valueOf(record.getSessionLifecycle()).toProto())
+              .addAllInstancePermissions(getInstancePermissions(id))
+              .build();
+          })
           .toList())
         .build());
       responseObserver.onCompleted();
@@ -117,12 +139,13 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
-      var instanceEntity = soulFireServer.sessionFactory().fromTransaction(session -> session.find(InstanceEntity.class, instanceId));
-      if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+      if (record == null) {
         throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
       }
 
-      var lastModified = instanceEntity.updatedAt();
+      var lastModified = record.getUpdatedAt().toInstant(ZoneOffset.UTC);
       var lastModifiedProto = Timestamps.fromMillis(lastModified.toEpochMilli());
 
       // Check if-modified-since
@@ -150,12 +173,13 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       var instance = optionalInstance.get();
       var registry = instance.instanceSettingsPageRegistry();
+      var settings = parseSettings(record.getSettings());
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
         .setInfo(InstanceInfo.newBuilder()
-          .setFriendlyName(instanceEntity.friendlyName())
-          .setIcon(instanceEntity.icon())
-          .setConfig(instanceEntity.settings().toProto())
-          .setState(instanceEntity.sessionLifecycle().toProto())
+          .setFriendlyName(record.getFriendlyName())
+          .setIcon(record.getIcon())
+          .setConfig(settings.toProto())
+          .setState(SessionLifecycle.valueOf(record.getSessionLifecycle()).toProto())
           .addAllInstancePermissions(getInstancePermissions(instanceId))
           .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
           .addAllInstanceSettings(registry.exportSettingsPages())
@@ -176,19 +200,24 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        SFHelpers.mustSupply(() -> switch (request.getMetaCase()) {
-          case FRIENDLY_NAME -> () -> instanceEntity.friendlyName(request.getFriendlyName());
-          case ICON -> () -> instanceEntity.icon(request.getIcon());
+        var updateStep = switch (request.getMetaCase()) {
+          case FRIENDLY_NAME -> ctx.update(Tables.INSTANCES).set(Tables.INSTANCES.FRIENDLY_NAME, request.getFriendlyName());
+          case ICON -> ctx.update(Tables.INSTANCES).set(Tables.INSTANCES.ICON, request.getIcon());
           case META_NOT_SET -> throw new IllegalStateException("Unknown meta type");
-        });
+        };
 
-        session.merge(instanceEntity);
+        updateStep
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceUpdateMetaResponse.newBuilder().build());
@@ -205,15 +234,21 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        instanceEntity.settings(InstanceSettingsImpl.Stem.fromProto(request.getConfig()));
+        var newSettings = InstanceSettingsImpl.Stem.fromProto(request.getConfig());
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(newSettings))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
@@ -230,22 +265,28 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newSettings = SettingsSource.Stem.withUpdatedEntry(
           currentSettings.settings(),
           request.getNamespace(),
           request.getKey(),
           SettingsSource.Stem.valueToJsonElement(request.getValue())
         );
-        instanceEntity.settings(currentSettings.withSettings(newSettings));
+        var updatedStem = currentSettings.withSettings(newSettings);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceUpdateConfigEntryResponse.newBuilder().build());
@@ -262,18 +303,24 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = new ArrayList<>(currentSettings.accounts());
         newAccounts.add(MinecraftAccount.fromProto(request.getAccount()));
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        var updatedStem = currentSettings.withAccounts(newAccounts);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceAddAccountResponse.newBuilder().build());
@@ -291,19 +338,25 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = currentSettings.accounts().stream()
           .filter(account -> !account.profileId().equals(profileId))
           .toList();
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        var updatedStem = currentSettings.withAccounts(newAccounts);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceRemoveAccountResponse.newBuilder().build());
@@ -320,20 +373,26 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
         var updatedAccount = MinecraftAccount.fromProto(request.getAccount());
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = currentSettings.accounts().stream()
           .map(account -> account.profileId().equals(updatedAccount.profileId()) ? updatedAccount : account)
           .toList();
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        var updatedStem = currentSettings.withAccounts(newAccounts);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceUpdateAccountResponse.newBuilder().build());
@@ -350,20 +409,26 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = new ArrayList<>(currentSettings.accounts());
         for (var accountProto : request.getAccountsList()) {
           newAccounts.add(MinecraftAccount.fromProto(accountProto));
         }
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        var updatedStem = currentSettings.withAccounts(newAccounts);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceAddAccountsBatchResponse.newBuilder().build());
@@ -384,19 +449,25 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         .map(UUID::fromString)
         .collect(Collectors.toSet());
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = currentSettings.accounts().stream()
           .filter(account -> !profileIds.contains(account.profileId()))
           .toList();
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
+        var updatedStem = currentSettings.withAccounts(newAccounts);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceRemoveAccountsBatchResponse.newBuilder().build());
@@ -413,18 +484,24 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newProxies = new ArrayList<>(currentSettings.proxies());
         newProxies.add(SFProxy.fromProto(request.getProxy()));
-        instanceEntity.settings(currentSettings.withProxies(newProxies));
+        var updatedStem = currentSettings.withProxies(newProxies);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceAddProxyResponse.newBuilder().build());
@@ -442,21 +519,27 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newProxies = new ArrayList<>(currentSettings.proxies());
         if (index < 0 || index >= newProxies.size()) {
           throw Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)).asRuntimeException();
         }
         newProxies.remove(index);
-        instanceEntity.settings(currentSettings.withProxies(newProxies));
+        var updatedStem = currentSettings.withProxies(newProxies);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceRemoveProxyResponse.newBuilder().build());
@@ -474,21 +557,27 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newProxies = new ArrayList<>(currentSettings.proxies());
         if (index < 0 || index >= newProxies.size()) {
           throw Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)).asRuntimeException();
         }
         newProxies.set(index, SFProxy.fromProto(request.getProxy()));
-        instanceEntity.settings(currentSettings.withProxies(newProxies));
+        var updatedStem = currentSettings.withProxies(newProxies);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceUpdateProxyResponse.newBuilder().build());
@@ -505,20 +594,26 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newProxies = new ArrayList<>(currentSettings.proxies());
         for (var proxyProto : request.getProxiesList()) {
           newProxies.add(SFProxy.fromProto(proxyProto));
         }
-        instanceEntity.settings(currentSettings.withProxies(newProxies));
+        var updatedStem = currentSettings.withProxies(newProxies);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceAddProxiesBatchResponse.newBuilder().build());
@@ -537,19 +632,25 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var addressesToRemove = new HashSet<>(request.getAddressesList());
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newProxies = currentSettings.proxies().stream()
           .filter(proxy -> !addressesToRemove.contains(SocketAddressHelper.serialize(proxy.address())))
           .toList();
-        instanceEntity.settings(currentSettings.withProxies(newProxies));
+        var updatedStem = currentSettings.withProxies(newProxies);
 
-        session.merge(instanceEntity);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       responseObserver.onNext(InstanceRemoveProxiesBatchResponse.newBuilder().build());
@@ -587,35 +688,43 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE_AUDIT_LOGS, instanceId));
 
     try {
-      var auditLogs = soulFireServer.sessionFactory().fromTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
-          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
-        }
+      var dsl = soulFireServer.dsl();
+      var instanceExists = dsl.fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(instanceId.toString()));
+      if (!instanceExists) {
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+      }
 
-        return session.createQuery("FROM InstanceAuditLogEntity WHERE instance = :instance ORDER BY createdAt DESC", InstanceAuditLogEntity.class)
-          .setParameter("instance", instanceEntity)
-          .list();
-      });
+      var auditLogs = dsl.selectFrom(Tables.INSTANCE_AUDIT_LOGS)
+        .where(Tables.INSTANCE_AUDIT_LOGS.INSTANCE_ID.eq(instanceId.toString()))
+        .orderBy(Tables.INSTANCE_AUDIT_LOGS.CREATED_AT.desc())
+        .fetch();
 
       var responseBuilder = InstanceAuditLogResponse.newBuilder();
-      for (var log : auditLogs) {
+      for (var auditLog : auditLogs) {
+        var userRecord = dsl.selectFrom(Tables.USERS)
+          .where(Tables.USERS.ID.eq(auditLog.getUserId()))
+          .fetchOne();
+
+        var userBuilder = InstanceUser.newBuilder()
+          .setId(auditLog.getUserId());
+        if (userRecord != null) {
+          userBuilder.setUsername(userRecord.getUsername())
+            .setEmail(userRecord.getEmail());
+        }
+
+        var auditLogType = AuditLogType.valueOf(auditLog.getType());
         responseBuilder.addEntry(InstanceAuditLogResponse.AuditLogEntry.newBuilder()
-          .setId(log.id().toString())
-          .setUser(InstanceUser.newBuilder()
-            .setId(log.user().id().toString())
-            .setUsername(log.user().username())
-            .setEmail(log.user().email())
-            .build())
-          .setType(switch (log.type()) {
+          .setId(auditLog.getId())
+          .setUser(userBuilder.build())
+          .setType(switch (auditLogType) {
             case EXECUTE_COMMAND -> InstanceAuditLogResponse.AuditLogEntryType.EXECUTE_COMMAND;
             case START_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.START_SESSION;
             case PAUSE_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.PAUSE_SESSION;
             case RESUME_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.RESUME_SESSION;
             case STOP_SESSION -> InstanceAuditLogResponse.AuditLogEntryType.STOP_SESSION;
           })
-          .setTimestamp(Timestamps.fromMillis(log.createdAt().toEpochMilli()))
-          .setData(log.data() != null ? log.data() : "")
+          .setTimestamp(Timestamps.fromMillis(auditLog.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli()))
+          .setData(auditLog.getData() != null ? auditLog.getData() : "")
           .build());
       }
 
@@ -634,23 +743,23 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_BOT_INFO, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
-          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
-        }
+      var dsl = soulFireServer.dsl();
+      var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+      if (record == null) {
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+      }
 
-        var account = instanceEntity.settings().accounts().stream()
-          .filter(a -> a.profileId().equals(accountId))
-          .findFirst()
-          .orElseThrow(() ->
-            Status.NOT_FOUND.withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId)).asRuntimeException());
+      var settings = parseSettings(record.getSettings());
+      var account = settings.accounts().stream()
+        .filter(a -> a.profileId().equals(accountId))
+        .findFirst()
+        .orElseThrow(() ->
+          Status.NOT_FOUND.withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId)).asRuntimeException());
 
-        responseObserver.onNext(GetAccountMetadataResponse.newBuilder()
-          .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(account.persistentMetadata()))
-          .build());
-        responseObserver.onCompleted();
-      });
+      responseObserver.onNext(GetAccountMetadataResponse.newBuilder()
+        .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(account.persistentMetadata()))
+        .build());
+      responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting account metadata", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -666,13 +775,15 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var jsonValue = SettingsSource.Stem.valueToJsonElement(request.getValue());
 
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = currentSettings.accounts().stream()
           .map(account -> {
             if (account.profileId().equals(accountId)) {
@@ -687,8 +798,12 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           })
           .toList();
 
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
-        session.merge(instanceEntity);
+        var updatedStem = currentSettings.withAccounts(newAccounts);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       // Also update the live bot's persistent metadata if it's connected
@@ -716,13 +831,15 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      soulFireServer.sessionFactory().inTransaction(session -> {
-        var instanceEntity = session.find(InstanceEntity.class, instanceId);
-        if (instanceEntity == null) {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
           throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
         }
 
-        var currentSettings = instanceEntity.settings();
+        var currentSettings = parseSettings(record.getSettings());
         var newAccounts = currentSettings.accounts().stream()
           .map(account -> {
             if (account.profileId().equals(accountId)) {
@@ -736,8 +853,12 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           })
           .toList();
 
-        instanceEntity.settings(currentSettings.withAccounts(newAccounts));
-        session.merge(instanceEntity);
+        var updatedStem = currentSettings.withAccounts(newAccounts);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
       });
 
       // Also update the live bot's persistent metadata if it's connected

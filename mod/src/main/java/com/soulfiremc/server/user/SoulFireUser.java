@@ -17,7 +17,7 @@
  */
 package com.soulfiremc.server.user;
 
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.UserRole;
 import io.grpc.Status;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -76,7 +76,7 @@ public interface SoulFireUser {
 
   String getEmail();
 
-  UserEntity.Role getRole();
+  UserRole getRole();
 
   Instant getIssuedAt();
 }

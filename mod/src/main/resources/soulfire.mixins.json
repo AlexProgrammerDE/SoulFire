@@ -18,7 +18,6 @@
     "soulfire.botfixes.MixinYggdrasilMinecraftSessionService",
     "soulfire.debug.MixinCrashReport",
     "soulfire.debug.MixinUtil",
-    "soulfire.libfixes.MixinAggregatedClassLoader",
     "soulfire.lifecycle.MixinMain",
     "soulfire.optimization.MixinDataFixers",
     "soulfire.optimization.MixinFontCacheReload",

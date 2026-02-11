@@ -102,8 +102,9 @@ dependencies {
   api(libs.lambdaevents)
 
   // For database support
-  api(libs.bundles.hibernate)
-  api(libs.expressly)
+  api(libs.bundles.jooq)
+  api(libs.flyway.core)
+  api(libs.flyway.mysql)
   api(libs.hikaricp)
   api(libs.sqlite)
   api(libs.mariadb)

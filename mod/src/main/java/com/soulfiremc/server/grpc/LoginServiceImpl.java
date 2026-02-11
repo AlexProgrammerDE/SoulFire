@@ -24,7 +24,7 @@ import com.soulfiremc.grpc.generated.LoginRequest;
 import com.soulfiremc.grpc.generated.LoginServiceGrpc;
 import com.soulfiremc.grpc.generated.NextAuthFlowResponse;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.util.RPCConstants;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -53,16 +53,16 @@ public final class LoginServiceImpl extends LoginServiceGrpc.LoginServiceImplBas
   public void login(LoginRequest request, StreamObserver<NextAuthFlowResponse> responseObserver) {
     try {
       var authFlowToken = UUID.randomUUID();
-      var user = soulFireServer.sessionFactory().fromTransaction(session -> session.createQuery("from UserEntity where email = :email", UserEntity.class)
-        .setParameter("email", request.getEmail())
-        .uniqueResult());
+      var user = soulFireServer.dsl().selectFrom(Tables.USERS)
+        .where(Tables.USERS.EMAIL.eq(request.getEmail()))
+        .fetchOne();
 
       // To prevent people checking if an email is registered,
       // we always return a flow token, even if the email is not registered
       if (user != null) {
         var emailCode = generateSixDigitCode();
-        authFlows.put(authFlowToken, new EmailFlowStage(user.id(), emailCode));
-        soulFireServer.emailSender().sendLoginCode(user.email(), user.username(), emailCode);
+        authFlows.put(authFlowToken, new EmailFlowStage(UUID.fromString(user.getId()), emailCode));
+        soulFireServer.emailSender().sendLoginCode(user.getEmail(), user.getUsername(), emailCode);
       }
 
       responseObserver.onNext(NextAuthFlowResponse.newBuilder()

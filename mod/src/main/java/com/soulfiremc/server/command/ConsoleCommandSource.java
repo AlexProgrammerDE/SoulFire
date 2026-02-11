@@ -18,7 +18,7 @@
 package com.soulfiremc.server.command;
 
 import com.soulfiremc.server.adventure.SoulFireAdventure;
-import com.soulfiremc.server.database.UserEntity;
+import com.soulfiremc.server.database.UserRole;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -54,17 +54,17 @@ public final class ConsoleCommandSource implements SoulFireUser {
 
   @Override
   public String getUsername() {
-    return authSystem.rootUserData().username();
+    return authSystem.rootUserData().getUsername();
   }
 
   @Override
   public String getEmail() {
-    return authSystem.rootUserData().email();
+    return authSystem.rootUserData().getEmail();
   }
 
   @Override
-  public UserEntity.Role getRole() {
-    return authSystem.rootUserData().role();
+  public UserRole getRole() {
+    return UserRole.valueOf(authSystem.rootUserData().getRole());
   }
 
   @Override

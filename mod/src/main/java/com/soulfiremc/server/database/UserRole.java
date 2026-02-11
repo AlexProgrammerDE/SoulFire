@@ -17,21 +17,7 @@
  */
 package com.soulfiremc.server.database;
 
-import com.google.gson.JsonElement;
-import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
-import com.soulfiremc.server.util.structs.GsonInstance;
-import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
-
-@Converter(autoApply = true)
-public final class ServerSettingsConverter implements AttributeConverter<ServerSettingsImpl.Stem, String> {
-  @Override
-  public String convertToDatabaseColumn(ServerSettingsImpl.Stem attribute) {
-    return GsonInstance.GSON.toJson(attribute.serializeToTree());
-  }
-
-  @Override
-  public ServerSettingsImpl.Stem convertToEntityAttribute(String dbData) {
-    return ServerSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(dbData, JsonElement.class));
-  }
+public enum UserRole {
+  USER,
+  ADMIN
 }
