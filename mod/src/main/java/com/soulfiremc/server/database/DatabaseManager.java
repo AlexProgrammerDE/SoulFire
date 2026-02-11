@@ -98,51 +98,77 @@ public final class DatabaseManager {
     flyway.migrate();
   }
 
-  /// Detects an existing Hibernate-created schema (camelCase columns) and renames
-  /// columns to snake_case so they match the V1 Flyway schema. This runs before
-  /// Flyway so that baselineOnMigrate can safely treat the existing schema as V1.
+  /// Detects an existing Hibernate-created schema and migrates it to the
+  /// Flyway V1 format. Handles two independent issues:
+  /// 1. camelCase column names → snake_case
+  /// 2. Binary UUID BLOBs → hyphenated text format
+  /// Each step is idempotent and can run independently.
   private static void migrateFromHibernate(DataSource dataSource) {
     try (var conn = dataSource.getConnection()) {
-      // Check if old Hibernate schema exists by looking for a camelCase column
-      try (var rs = conn.getMetaData().getColumns(null, null, "users", "createdAt")) {
+      // Check if users table exists at all
+      try (var rs = conn.getMetaData().getTables(null, null, "users", null)) {
         if (!rs.next()) {
-          return; // Not a Hibernate database or already migrated
+          return; // Fresh database, nothing to migrate
         }
       }
 
-      log.info("Detected old Hibernate schema, migrating columns to snake_case...");
+      // Check for camelCase columns (not yet renamed)
+      var needsColumnRename = false;
+      try (var rs = conn.getMetaData().getColumns(null, null, "users", "createdAt")) {
+        needsColumnRename = rs.next();
+      }
+
+      // Check for binary UUID values
+      var needsUuidConversion = false;
+      try (var stmt = conn.createStatement();
+           var rs = stmt.executeQuery("SELECT typeof(id) FROM users LIMIT 1")) {
+        if (rs.next()) {
+          needsUuidConversion = "blob".equals(rs.getString(1));
+        }
+      }
+
+      if (!needsColumnRename && !needsUuidConversion) {
+        return; // Already fully migrated
+      }
+
+      log.info("Detected old Hibernate schema (renameColumns={}, convertUuids={}), migrating...",
+        needsColumnRename, needsUuidConversion);
       try (var stmt = conn.createStatement()) {
-        // Convert binary UUID columns to text format (Hibernate may store UUIDs as BLOBs)
-        convertBinaryUuids(stmt, "users", "id");
-        convertBinaryUuids(stmt, "instances", "id");
-        convertBinaryUuids(stmt, "instances", "owner_id");
-        convertBinaryUuids(stmt, "instance_audit_logs", "id");
-        convertBinaryUuids(stmt, "instance_audit_logs", "instance_id");
-        convertBinaryUuids(stmt, "instance_audit_logs", "user_id");
-        convertBinaryUuids(stmt, "scripts", "id");
-        convertBinaryUuids(stmt, "scripts", "instance_id");
+        if (needsUuidConversion) {
+          // Convert binary UUID columns to text format (Hibernate stores UUIDs as BLOBs)
+          convertBinaryUuids(stmt, "users", "id");
+          convertBinaryUuids(stmt, "instances", "id");
+          convertBinaryUuids(stmt, "instances", "owner_id");
+          convertBinaryUuids(stmt, "instance_audit_logs", "id");
+          convertBinaryUuids(stmt, "instance_audit_logs", "instance_id");
+          convertBinaryUuids(stmt, "instance_audit_logs", "user_id");
+          convertBinaryUuids(stmt, "scripts", "id");
+          convertBinaryUuids(stmt, "scripts", "instance_id");
+        }
 
-        // users
-        renameColumn(stmt, "users", "createdAt", "created_at");
-        renameColumn(stmt, "users", "updatedAt", "updated_at");
-        renameColumn(stmt, "users", "lastLoginAt", "last_login_at");
-        renameColumn(stmt, "users", "minIssuedAt", "min_issued_at");
+        if (needsColumnRename) {
+          // users
+          renameColumn(stmt, "users", "createdAt", "created_at");
+          renameColumn(stmt, "users", "updatedAt", "updated_at");
+          renameColumn(stmt, "users", "lastLoginAt", "last_login_at");
+          renameColumn(stmt, "users", "minIssuedAt", "min_issued_at");
 
-        // instances
-        renameColumn(stmt, "instances", "friendlyName", "friendly_name");
-        renameColumn(stmt, "instances", "sessionLifecycle", "session_lifecycle");
-        renameColumn(stmt, "instances", "createdAt", "created_at");
-        renameColumn(stmt, "instances", "updatedAt", "updated_at");
+          // instances
+          renameColumn(stmt, "instances", "friendlyName", "friendly_name");
+          renameColumn(stmt, "instances", "sessionLifecycle", "session_lifecycle");
+          renameColumn(stmt, "instances", "createdAt", "created_at");
+          renameColumn(stmt, "instances", "updatedAt", "updated_at");
 
-        // instance_audit_logs
-        renameColumn(stmt, "instance_audit_logs", "createdAt", "created_at");
-        renameColumn(stmt, "instance_audit_logs", "updatedAt", "updated_at");
+          // instance_audit_logs
+          renameColumn(stmt, "instance_audit_logs", "createdAt", "created_at");
+          renameColumn(stmt, "instance_audit_logs", "updatedAt", "updated_at");
 
-        // scripts
-        renameColumn(stmt, "scripts", "nodesJson", "nodes_json");
-        renameColumn(stmt, "scripts", "edgesJson", "edges_json");
-        renameColumn(stmt, "scripts", "createdAt", "created_at");
-        renameColumn(stmt, "scripts", "updatedAt", "updated_at");
+          // scripts
+          renameColumn(stmt, "scripts", "nodesJson", "nodes_json");
+          renameColumn(stmt, "scripts", "edgesJson", "edges_json");
+          renameColumn(stmt, "scripts", "createdAt", "created_at");
+          renameColumn(stmt, "scripts", "updatedAt", "updated_at");
+        }
       }
 
       log.info("Hibernate schema migration complete");
