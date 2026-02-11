@@ -28,6 +28,7 @@ import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 
 @Slf4j
 public final class DatabaseManager {
@@ -86,11 +87,67 @@ public final class DatabaseManager {
   }
 
   private static void runMigrations(DataSource dataSource) {
+    migrateFromHibernate(dataSource);
+
     var flyway = Flyway.configure()
       .dataSource(dataSource)
       .locations("classpath:db/migration")
+      .baselineOnMigrate(true)
+      .baselineVersion("1")
       .load();
     flyway.migrate();
+  }
+
+  /// Detects an existing Hibernate-created schema (camelCase columns) and renames
+  /// columns to snake_case so they match the V1 Flyway schema. This runs before
+  /// Flyway so that baselineOnMigrate can safely treat the existing schema as V1.
+  private static void migrateFromHibernate(DataSource dataSource) {
+    try (var conn = dataSource.getConnection()) {
+      // Check if old Hibernate schema exists by looking for a camelCase column
+      try (var rs = conn.getMetaData().getColumns(null, null, "users", "createdAt")) {
+        if (!rs.next()) {
+          return; // Not a Hibernate database or already migrated
+        }
+      }
+
+      log.info("Detected old Hibernate schema, migrating columns to snake_case...");
+      try (var stmt = conn.createStatement()) {
+        // users
+        renameColumn(stmt, "users", "createdAt", "created_at");
+        renameColumn(stmt, "users", "updatedAt", "updated_at");
+        renameColumn(stmt, "users", "lastLoginAt", "last_login_at");
+        renameColumn(stmt, "users", "minIssuedAt", "min_issued_at");
+
+        // instances
+        renameColumn(stmt, "instances", "friendlyName", "friendly_name");
+        renameColumn(stmt, "instances", "sessionLifecycle", "session_lifecycle");
+        renameColumn(stmt, "instances", "createdAt", "created_at");
+        renameColumn(stmt, "instances", "updatedAt", "updated_at");
+
+        // instance_audit_logs
+        renameColumn(stmt, "instance_audit_logs", "createdAt", "created_at");
+        renameColumn(stmt, "instance_audit_logs", "updatedAt", "updated_at");
+
+        // scripts
+        renameColumn(stmt, "scripts", "nodesJson", "nodes_json");
+        renameColumn(stmt, "scripts", "edgesJson", "edges_json");
+        renameColumn(stmt, "scripts", "createdAt", "created_at");
+        renameColumn(stmt, "scripts", "updatedAt", "updated_at");
+      }
+
+      log.info("Hibernate schema migration complete");
+    } catch (SQLException e) {
+      log.warn("Could not migrate from Hibernate schema", e);
+    }
+  }
+
+  private static void renameColumn(
+    java.sql.Statement stmt, String table, String oldName, String newName) {
+    try {
+      stmt.execute("ALTER TABLE %s RENAME COLUMN %s TO %s".formatted(table, oldName, newName));
+    } catch (SQLException e) {
+      log.debug("Could not rename column {}.{} (may not exist): {}", table, oldName, e.getMessage());
+    }
   }
 
   private static DSLContext createDslContext(DataSource dataSource, SQLDialect dialect) {
