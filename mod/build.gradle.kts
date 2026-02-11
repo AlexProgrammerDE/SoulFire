@@ -108,6 +108,10 @@ tasks {
   processIncludeJars {
     dependsOn(":proto:jar")
   }
+
+  compileJava {
+    dependsOn(named("jooqCodegen"))
+  }
 }
 
 configurations.create("mod-jar")
