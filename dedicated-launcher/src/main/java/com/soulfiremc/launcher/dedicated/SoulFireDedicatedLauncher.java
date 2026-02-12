@@ -24,7 +24,7 @@ import java.nio.file.Path;
 public final class SoulFireDedicatedLauncher {
   void main(String[] args) {
     SoulFireAbstractLauncher.run(
-      Path.of(System.getProperty("user.dir")),
+      Path.of( System.getProperty( "user.dir" ) ),
       "com.soulfiremc.bootstrap.dedicated.SoulFireDedicatedBootstrap",
       args
     );

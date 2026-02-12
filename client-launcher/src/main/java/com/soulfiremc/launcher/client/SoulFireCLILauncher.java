@@ -24,7 +24,7 @@ import java.nio.file.Path;
 public final class SoulFireCLILauncher {
   void main(String[] args) {
     SoulFireAbstractLauncher.run(
-      Path.of(System.getProperty("user.home")).resolve(".soulfire"),
+      Path.of( System.getProperty( "user.home" ) ).resolve( ".soulfire" ),
       "com.soulfiremc.bootstrap.client.SoulFireCLIBootstrap",
       args
     );

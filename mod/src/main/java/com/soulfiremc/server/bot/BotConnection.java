@@ -32,6 +32,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.proxy.ProxyType;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
@@ -162,7 +163,7 @@ public final class BotConnection {
     newInstance.reloadStateTracker = new ResourceLoadStateTracker();
     var javaProxy = proxy != null
       ? new Proxy(
-      proxy.type() == com.soulfiremc.server.proxy.ProxyType.HTTP ? Proxy.Type.HTTP : Proxy.Type.SOCKS,
+      proxy.type() == ProxyType.HTTP ? Proxy.Type.HTTP : Proxy.Type.SOCKS,
       proxy.address())
       : Proxy.NO_PROXY;
     var userData = new GameConfig.UserData(newInstance.user, javaProxy);

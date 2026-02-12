@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.concurrent.TimeUnit;
 
-@Mixin(value = Connection.class)
+@Mixin(Connection.class)
 public class MixinConnection {
   @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/AbstractBootstrap;"))
   private static AbstractBootstrap<?, ?> useCustomGroup(Bootstrap instance, EventLoopGroup eventLoopGroup, Operation<AbstractBootstrap<Bootstrap, Channel>> original) {

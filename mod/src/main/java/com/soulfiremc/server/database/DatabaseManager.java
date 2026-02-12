@@ -29,6 +29,7 @@ import org.jooq.impl.DefaultConfiguration;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 @Slf4j
 public final class DatabaseManager {
@@ -230,7 +231,7 @@ public final class DatabaseManager {
   /// hyphenated text format expected by JOOQ. Only updates rows where the column
   /// contains BLOB data (typeof returns 'blob'), leaving text UUIDs untouched.
   private static void convertBinaryUuids(
-    java.sql.Statement stmt, String table, String column) {
+    Statement stmt, String table, String column) {
     try {
       // SQLite: convert 16-byte binary UUID to hyphenated text format
       // lower(hex(x)) gives 32 hex chars, then we insert hyphens at positions 8, 12, 16, 20
@@ -249,7 +250,7 @@ public final class DatabaseManager {
   }
 
   private static void renameColumn(
-    java.sql.Statement stmt, String table, String oldName, String newName) {
+    Statement stmt, String table, String oldName, String newName) {
     try {
       stmt.execute("ALTER TABLE %s RENAME COLUMN %s TO %s".formatted(table, oldName, newName));
     } catch (SQLException e) {
@@ -258,7 +259,7 @@ public final class DatabaseManager {
   }
 
   private static void addColumn(
-    java.sql.Statement stmt, String table, String column, String definition) {
+    Statement stmt, String table, String column, String definition) {
     try {
       stmt.execute("ALTER TABLE %s ADD COLUMN %s %s".formatted(table, column, definition));
     } catch (SQLException e) {
@@ -266,7 +267,7 @@ public final class DatabaseManager {
     }
   }
 
-  private static void executeQuietly(java.sql.Statement stmt, String sql) {
+  private static void executeQuietly(Statement stmt, String sql) {
     try {
       stmt.execute(sql);
     } catch (SQLException e) {
