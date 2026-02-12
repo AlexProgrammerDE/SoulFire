@@ -99,10 +99,11 @@ public final class DatabaseManager {
   }
 
   /// Detects an existing Hibernate-created schema and migrates it to the
-  /// Flyway V1 format. Handles three independent issues:
-  /// 1. camelCase column names → snake_case
+  /// Flyway V1 format. Handles four independent issues:
+  /// 1. camelCase column names → snake_case (including attackLifecycle → session_lifecycle)
   /// 2. Binary UUID BLOBs → hyphenated text format
-  /// 3. Missing columns added after the original Hibernate schema
+  /// 3. Incompatible scripts table (old-style scripts → new node-based scripting)
+  /// 4. Old audit log type values (e.g. START_ATTACK → START_SESSION)
   /// Each step is idempotent and can run independently.
   private static void migrateFromHibernate(DataSource dataSource) {
     try (var conn = dataSource.getConnection()) {
@@ -128,23 +129,25 @@ public final class DatabaseManager {
         }
       }
 
-      // Check for columns added after the original Hibernate schema
-      // If neither snake_case nor camelCase form exists, the column was never created
-      var needsNewColumns = false;
-      try (var rs = conn.getMetaData().getColumns(null, null, "instances", "session_lifecycle")) {
-        if (!rs.next()) {
-          try (var rs2 = conn.getMetaData().getColumns(null, null, "instances", "sessionLifecycle")) {
-            needsNewColumns = !rs2.next();
-          }
-        }
+      // Check for old "attackLifecycle" column (predecessor of "session_lifecycle")
+      var needsLegacyRename = false;
+      try (var rs = conn.getMetaData().getColumns(null, null, "instances", "attackLifecycle")) {
+        needsLegacyRename = rs.next();
       }
 
-      if (!needsColumnRename && !needsUuidConversion && !needsNewColumns) {
+      // Check if scripts table has old incompatible schema (old-style scripts
+      // with scriptName/elevatedPermissions vs new node-based scripting)
+      var needsScriptsRecreate = false;
+      try (var rs = conn.getMetaData().getColumns(null, null, "scripts", "scriptName")) {
+        needsScriptsRecreate = rs.next();
+      }
+
+      if (!needsColumnRename && !needsUuidConversion && !needsLegacyRename && !needsScriptsRecreate) {
         return; // Already fully migrated
       }
 
-      log.info("Detected old Hibernate schema (renameColumns={}, convertUuids={}, addNewColumns={}), migrating...",
-        needsColumnRename, needsUuidConversion, needsNewColumns);
+      log.info("Detected old Hibernate schema (renameColumns={}, convertUuids={}, legacyRename={}, recreateScripts={}), migrating...",
+        needsColumnRename, needsUuidConversion, needsLegacyRename, needsScriptsRecreate);
       try (var stmt = conn.createStatement()) {
         if (needsUuidConversion) {
           // Convert binary UUID columns to text format (Hibernate stores UUIDs as BLOBs)
@@ -154,8 +157,10 @@ public final class DatabaseManager {
           convertBinaryUuids(stmt, "instance_audit_logs", "id");
           convertBinaryUuids(stmt, "instance_audit_logs", "instance_id");
           convertBinaryUuids(stmt, "instance_audit_logs", "user_id");
-          convertBinaryUuids(stmt, "scripts", "id");
-          convertBinaryUuids(stmt, "scripts", "instance_id");
+          if (!needsScriptsRecreate) {
+            convertBinaryUuids(stmt, "scripts", "id");
+            convertBinaryUuids(stmt, "scripts", "instance_id");
+          }
         }
 
         if (needsColumnRename) {
@@ -175,18 +180,43 @@ public final class DatabaseManager {
           renameColumn(stmt, "instance_audit_logs", "createdAt", "created_at");
           renameColumn(stmt, "instance_audit_logs", "updatedAt", "updated_at");
 
-          // scripts
-          renameColumn(stmt, "scripts", "nodesJson", "nodes_json");
-          renameColumn(stmt, "scripts", "edgesJson", "edges_json");
-          renameColumn(stmt, "scripts", "createdAt", "created_at");
-          renameColumn(stmt, "scripts", "updatedAt", "updated_at");
+          if (!needsScriptsRecreate) {
+            // Only rename script columns if we're not recreating the table
+            renameColumn(stmt, "scripts", "nodesJson", "nodes_json");
+            renameColumn(stmt, "scripts", "edgesJson", "edges_json");
+            renameColumn(stmt, "scripts", "createdAt", "created_at");
+            renameColumn(stmt, "scripts", "updatedAt", "updated_at");
+          }
         }
 
-        if (needsNewColumns) {
-          // Add columns that didn't exist in the original Hibernate schema
-          addColumn(stmt, "instances", "session_lifecycle", "VARCHAR(20) NOT NULL DEFAULT 'STOPPED'");
-          addColumn(stmt, "scripts", "name", "VARCHAR(100) NOT NULL DEFAULT 'Unnamed Script'");
-          addColumn(stmt, "scripts", "description", "VARCHAR(1000)");
+        // Rename old "attackLifecycle" column to "session_lifecycle"
+        if (needsLegacyRename) {
+          renameColumn(stmt, "instances", "attackLifecycle", "session_lifecycle");
+
+          // Update old audit log type values
+          executeQuietly(stmt, "UPDATE instance_audit_logs SET type = 'START_SESSION' WHERE type = 'START_ATTACK'");
+          executeQuietly(stmt, "UPDATE instance_audit_logs SET type = 'PAUSE_SESSION' WHERE type = 'PAUSE_ATTACK'");
+          executeQuietly(stmt, "UPDATE instance_audit_logs SET type = 'RESUME_SESSION' WHERE type = 'RESUME_ATTACK'");
+          executeQuietly(stmt, "UPDATE instance_audit_logs SET type = 'STOP_SESSION' WHERE type = 'STOP_ATTACK'");
+        }
+
+        // Drop and recreate the scripts table if it has the old incompatible schema
+        if (needsScriptsRecreate) {
+          executeQuietly(stmt, "DROP TABLE scripts");
+          stmt.execute("""
+            CREATE TABLE scripts (
+              id VARCHAR(36) NOT NULL PRIMARY KEY,
+              name VARCHAR(100) NOT NULL,
+              description VARCHAR(1000),
+              instance_id VARCHAR(36) NOT NULL,
+              nodes_json TEXT NOT NULL DEFAULT '[]',
+              edges_json TEXT NOT NULL DEFAULT '[]',
+              paused BOOLEAN NOT NULL DEFAULT FALSE,
+              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              version BIGINT NOT NULL DEFAULT 0,
+              FOREIGN KEY (instance_id) REFERENCES instances(id) ON DELETE CASCADE
+            )""");
         }
       }
 
@@ -233,6 +263,14 @@ public final class DatabaseManager {
       stmt.execute("ALTER TABLE %s ADD COLUMN %s %s".formatted(table, column, definition));
     } catch (SQLException e) {
       log.debug("Could not add column {}.{} (may already exist): {}", table, column, e.getMessage());
+    }
+  }
+
+  private static void executeQuietly(java.sql.Statement stmt, String sql) {
+    try {
+      stmt.execute(sql);
+    } catch (SQLException e) {
+      log.debug("Could not execute migration SQL [{}]: {}", sql, e.getMessage());
     }
   }
 
