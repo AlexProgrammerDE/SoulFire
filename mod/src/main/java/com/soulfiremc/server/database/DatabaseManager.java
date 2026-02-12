@@ -99,9 +99,10 @@ public final class DatabaseManager {
   }
 
   /// Detects an existing Hibernate-created schema and migrates it to the
-  /// Flyway V1 format. Handles two independent issues:
+  /// Flyway V1 format. Handles three independent issues:
   /// 1. camelCase column names → snake_case
   /// 2. Binary UUID BLOBs → hyphenated text format
+  /// 3. Missing columns added after the original Hibernate schema
   /// Each step is idempotent and can run independently.
   private static void migrateFromHibernate(DataSource dataSource) {
     try (var conn = dataSource.getConnection()) {
@@ -127,12 +128,23 @@ public final class DatabaseManager {
         }
       }
 
-      if (!needsColumnRename && !needsUuidConversion) {
+      // Check for columns added after the original Hibernate schema
+      // If neither snake_case nor camelCase form exists, the column was never created
+      var needsNewColumns = false;
+      try (var rs = conn.getMetaData().getColumns(null, null, "instances", "session_lifecycle")) {
+        if (!rs.next()) {
+          try (var rs2 = conn.getMetaData().getColumns(null, null, "instances", "sessionLifecycle")) {
+            needsNewColumns = !rs2.next();
+          }
+        }
+      }
+
+      if (!needsColumnRename && !needsUuidConversion && !needsNewColumns) {
         return; // Already fully migrated
       }
 
-      log.info("Detected old Hibernate schema (renameColumns={}, convertUuids={}), migrating...",
-        needsColumnRename, needsUuidConversion);
+      log.info("Detected old Hibernate schema (renameColumns={}, convertUuids={}, addNewColumns={}), migrating...",
+        needsColumnRename, needsUuidConversion, needsNewColumns);
       try (var stmt = conn.createStatement()) {
         if (needsUuidConversion) {
           // Convert binary UUID columns to text format (Hibernate stores UUIDs as BLOBs)
@@ -168,6 +180,13 @@ public final class DatabaseManager {
           renameColumn(stmt, "scripts", "edgesJson", "edges_json");
           renameColumn(stmt, "scripts", "createdAt", "created_at");
           renameColumn(stmt, "scripts", "updatedAt", "updated_at");
+        }
+
+        if (needsNewColumns) {
+          // Add columns that didn't exist in the original Hibernate schema
+          addColumn(stmt, "instances", "session_lifecycle", "VARCHAR(20) NOT NULL DEFAULT 'STOPPED'");
+          addColumn(stmt, "scripts", "name", "VARCHAR(100) NOT NULL DEFAULT 'Unnamed Script'");
+          addColumn(stmt, "scripts", "description", "VARCHAR(1000)");
         }
       }
 
@@ -205,6 +224,15 @@ public final class DatabaseManager {
       stmt.execute("ALTER TABLE %s RENAME COLUMN %s TO %s".formatted(table, oldName, newName));
     } catch (SQLException e) {
       log.debug("Could not rename column {}.{} (may not exist): {}", table, oldName, e.getMessage());
+    }
+  }
+
+  private static void addColumn(
+    java.sql.Statement stmt, String table, String column, String definition) {
+    try {
+      stmt.execute("ALTER TABLE %s ADD COLUMN %s %s".formatted(table, column, definition));
+    } catch (SQLException e) {
+      log.debug("Could not add column {}.{} (may already exist): {}", table, column, e.getMessage());
     }
   }
 
