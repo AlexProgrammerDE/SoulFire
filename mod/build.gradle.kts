@@ -112,6 +112,10 @@ tasks {
   compileJava {
     dependsOn(named("jooqCodegen"))
   }
+
+  named("sourcesJar") {
+    dependsOn(named("jooqCodegen"))
+  }
 }
 
 configurations.create("mod-jar")
