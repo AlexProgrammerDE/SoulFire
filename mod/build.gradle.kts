@@ -168,13 +168,6 @@ jooq {
   }
 }
 
-sourceSets {
-  main {
-    java {
-      srcDir("build/generated-sources/jooq")
-    }
-  }
-}
 
 jmh {
   warmupIterations = 2
