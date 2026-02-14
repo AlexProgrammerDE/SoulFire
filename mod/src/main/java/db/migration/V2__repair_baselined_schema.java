@@ -89,10 +89,10 @@ public final class V2__repair_baselined_schema extends BaseJavaMigration {
       chooseExpr(cols, "''", "username"),
       chooseExpr(cols, "''", "email"),
       chooseExpr(cols, "'USER'", "role"),
-      chooseExpr(cols, "NULL", "last_login_at", "lastLoginAt"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "min_issued_at", "minIssuedAt"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
+      timestampExpr(cols, "NULL", "last_login_at", "lastLoginAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "min_issued_at", "minIssuedAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
       chooseExpr(cols, "0", "version"),
       oldTable
     ));
@@ -139,8 +139,8 @@ public final class V2__repair_baselined_schema extends BaseJavaMigration {
       uuidExpr(cols, "owner_id", "ownerId"),
       chooseExpr(cols, "'STOPPED'", "session_lifecycle", "sessionLifecycle", "attackLifecycle"),
       chooseExpr(cols, "'{}'", "settings"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
       chooseExpr(cols, "0", "version"),
       oldTable
     ));
@@ -185,8 +185,8 @@ public final class V2__repair_baselined_schema extends BaseJavaMigration {
       chooseExpr(cols, "NULL", "data"),
       uuidExpr(cols, "instance_id", "instanceId"),
       uuidExpr(cols, "user_id", "userId"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
       chooseExpr(cols, "0", "version"),
       oldTable
     ));
@@ -285,8 +285,8 @@ public final class V2__repair_baselined_schema extends BaseJavaMigration {
       chooseExpr(cols, "'[]'", "nodes_json", "nodesJson"),
       chooseExpr(cols, "'[]'", "edges_json", "edgesJson"),
       chooseExpr(cols, "0", "paused"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
-      chooseExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "created_at", "createdAt"),
+      timestampExpr(cols, "CURRENT_TIMESTAMP", "updated_at", "updatedAt"),
       chooseExpr(cols, "0", "version"),
       oldTable
     ));
@@ -370,6 +370,37 @@ public final class V2__repair_baselined_schema extends BaseJavaMigration {
   private static String chooseExpr(Set<String> columns, String fallback, String... candidates) {
     var source = firstExisting(columns, candidates);
     return source == null ? fallback : source;
+  }
+
+  private static String timestampExpr(Set<String> columns, String fallback, String... candidates) {
+    var source = firstExisting(columns, candidates);
+    if (source == null) {
+      return fallback;
+    }
+
+    // Normalize common legacy timestamp formats into JDBC Timestamp.valueOf format:
+    // - Replace 'T' separator with space
+    // - Drop trailing 'Z'
+    // - Drop trailing timezone offset (+hh:mm / -hh:mm)
+    return """
+      trim(
+        replace(
+          replace(
+            CASE
+              WHEN instr(CAST(%1$s AS TEXT), '+') > 0
+                THEN substr(CAST(%1$s AS TEXT), 1, instr(CAST(%1$s AS TEXT), '+') - 1)
+              WHEN instr(substr(CAST(%1$s AS TEXT), 20), '-') > 0
+                THEN substr(CAST(%1$s AS TEXT), 1, 19 + instr(substr(CAST(%1$s AS TEXT), 20), '-') - 1)
+              ELSE CAST(%1$s AS TEXT)
+            END,
+            'T',
+            ' '
+          ),
+          'Z',
+          ''
+        )
+      )
+      """.formatted(source);
   }
 
   private static String firstExisting(Set<String> columns, String... candidates) {

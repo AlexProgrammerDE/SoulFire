@@ -80,11 +80,40 @@ public final class V3__migrate_legacy_local_timestamps_to_utc extends BaseJavaMi
     }
 
     // Treat existing value as local time and rewrite it as UTC.
+    // Also normalize legacy formats (T separator, trailing Z/offset, epoch
+    // seconds/millis) into a JDBC-compatible timestamp string.
     execute(connection, """
-      UPDATE %s
-      SET %s = strftime('%%Y-%%m-%%d %%H:%%M:%%f', %s, 'utc')
-      WHERE %s IS NOT NULL
-      """.formatted(table, column, column, column));
+      UPDATE %1$s
+      SET %2$s = COALESCE(
+        CASE
+          WHEN trim(CAST(%2$s AS TEXT)) GLOB '[0-9][0-9][0-9][0-9]*' THEN
+            CASE
+              WHEN length(trim(CAST(%2$s AS TEXT))) >= 13
+                THEN strftime('%%Y-%%m-%%d %%H:%%M:%%f', substr(trim(CAST(%2$s AS TEXT)), 1, 10), 'unixepoch')
+              ELSE strftime('%%Y-%%m-%%d %%H:%%M:%%f', trim(CAST(%2$s AS TEXT)), 'unixepoch')
+            END
+          ELSE strftime('%%Y-%%m-%%d %%H:%%M:%%f', CAST(%2$s AS TEXT), 'utc')
+        END,
+        trim(
+          replace(
+            replace(
+              CASE
+                WHEN instr(CAST(%2$s AS TEXT), '+') > 0
+                  THEN substr(CAST(%2$s AS TEXT), 1, instr(CAST(%2$s AS TEXT), '+') - 1)
+                WHEN instr(substr(CAST(%2$s AS TEXT), 20), '-') > 0
+                  THEN substr(CAST(%2$s AS TEXT), 1, 19 + instr(substr(CAST(%2$s AS TEXT), 20), '-') - 1)
+                ELSE CAST(%2$s AS TEXT)
+              END,
+              'T',
+              ' '
+            ),
+            'Z',
+            ''
+          )
+        )
+      )
+      WHERE %2$s IS NOT NULL
+      """.formatted(table, column));
   }
 
   private static boolean tableExists(Connection connection, String table) throws SQLException {
