@@ -18,17 +18,15 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that iterates over a collection.
-/// Input: items (list of items to iterate over)
-/// Input: currentIndex (current iteration, managed by script executor)
-/// Output: item (current item), index (current index)
-/// Output: isComplete (boolean, true when iteration is done)
-///
-/// The script executor is responsible for managing the iteration state.
+/// Self-driving: uses runtime.executeDownstream() to iterate over items,
+/// then fires exec_done when complete.
 public final class ForEachNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.foreach")
@@ -36,8 +34,7 @@ public final class ForEachNode extends AbstractScriptNode {
     .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.listInput("items", "Items", PortType.ANY, "List of items to iterate"),
-      PortDefinition.inputWithDefault("currentIndex", "Current Index", PortType.NUMBER, "0", "Current iteration index")
+      PortDefinition.listInput("items", "Items", PortType.ANY, "List of items to iterate")
     )
     .addOutputs(
       PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each item"),
@@ -45,7 +42,6 @@ public final class ForEachNode extends AbstractScriptNode {
       PortDefinition.output("item", "Item", PortType.ANY, "Current item"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current index"),
       PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done"),
-      PortDefinition.output("nextIndex", "Next Index", PortType.NUMBER, "Next iteration index"),
       PortDefinition.output("size", "Size", PortType.NUMBER, "Total items count")
     )
     .description("Iterates over each item in a list")
@@ -62,17 +58,32 @@ public final class ForEachNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var items = getListInput(inputs, "items");
-    var currentIndex = getIntInput(inputs, "currentIndex", 0);
-
-    var isComplete = currentIndex >= items.size();
-    var currentItem = isComplete ? NodeValue.ofNull() : items.get(currentIndex);
-
     return completed(results(
-      "item", currentItem,
-      "index", currentIndex,
-      "isComplete", isComplete,
-      "nextIndex", currentIndex + 1,
+      "item", items.isEmpty() ? NodeValue.ofNull() : items.getFirst(),
+      "index", 0,
+      "isComplete", items.isEmpty(),
       "size", items.size()
     ));
+  }
+
+  @Override
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    var items = getListInput(inputs, "items");
+    var size = items.size();
+
+    return Flux.range(0, size)
+      .concatMap(i -> runtime.executeDownstream("exec_loop", Map.of(
+        "item", items.get(i),
+        "index", NodeValue.ofNumber(i),
+        "isComplete", NodeValue.ofBoolean(false),
+        "size", NodeValue.ofNumber(size)
+      )))
+      .then(runtime.executeDownstream("exec_done", Map.of(
+        "item", NodeValue.ofNull(),
+        "index", NodeValue.ofNumber(size),
+        "isComplete", NodeValue.ofBoolean(true),
+        "size", NodeValue.ofNumber(size)
+      )))
+      .thenReturn(results("index", size, "isComplete", true, "size", size));
   }
 }

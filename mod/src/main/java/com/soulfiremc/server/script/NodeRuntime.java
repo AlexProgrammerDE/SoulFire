@@ -19,8 +19,9 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
+import reactor.core.publisher.Mono;
 
-import java.util.concurrent.Future;
+import java.util.Map;
 
 /// Runtime environment for script node execution.
 /// Provides minimal API surface for nodes - just what they need to execute their logic.
@@ -36,16 +37,21 @@ public interface NodeRuntime {
   /// @return the instance scheduler
   SoulFireScheduler scheduler();
 
-  /// Registers a pending async operation for cleanup on script deactivation.
-  /// Call this for any long-running futures that should be cancelled when the script stops.
-  ///
-  /// @param future the future to track
-  void addPendingOperation(Future<?> future);
-
   /// Logs a message from script execution.
   /// Used by Print node and other debugging nodes.
   ///
   /// @param level   the log level (debug, info, warn, error)
   /// @param message the message to log
   void log(String level, String message);
+
+  /// Triggers downstream execution along a named exec handle.
+  /// Only functional during reactive engine execution; self-driving nodes
+  /// (LoopNode, ForEachNode, etc.) use this to iterate.
+  ///
+  /// @param handle  the exec output port ID to follow (e.g., "exec_loop")
+  /// @param outputs the outputs to merge into the execution context
+  /// @return a Mono that completes when downstream execution finishes
+  default Mono<Void> executeDownstream(String handle, Map<String, NodeValue> outputs) {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
 }

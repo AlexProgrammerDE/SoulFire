@@ -30,8 +30,11 @@ public final class GetBotsNode extends AbstractScriptNode {
     .type("data.get_bots")
     .displayName("Get Bots")
     .category(CategoryRegistry.DATA)
-    .addInputs()
+    .addInputs(
+      PortDefinition.execIn()
+    )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.listOutput("bots", "Bots", PortType.BOT, "List of all connected bots")
     )
     .description("Returns all connected bots in the instance")

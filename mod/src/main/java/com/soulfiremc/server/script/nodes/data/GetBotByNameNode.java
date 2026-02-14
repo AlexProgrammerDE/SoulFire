@@ -31,9 +31,11 @@ public final class GetBotByNameNode extends AbstractScriptNode {
     .displayName("Get Bot By Name")
     .category(CategoryRegistry.DATA)
     .addInputs(
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("name", "Name", PortType.STRING, "\"\"", "The bot's account name")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("bot", "Bot", PortType.BOT, "The found bot (null if not found)"),
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the bot was found")
     )

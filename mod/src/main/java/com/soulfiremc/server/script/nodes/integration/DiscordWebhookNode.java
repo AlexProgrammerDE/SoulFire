@@ -73,6 +73,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
 
     if (webhookUrl.isEmpty()) {
       return completed(results(
+        "exec_error", true,
         "success", false,
         "errorMessage", "Webhook URL is required"
       ));
@@ -80,6 +81,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
 
     if (content.isEmpty() && embedJson.isEmpty()) {
       return completed(results(
+        "exec_error", true,
         "success", false,
         "errorMessage", "Either content or embed is required"
       ));
@@ -105,6 +107,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
         payload.add("embeds", embeds);
       } catch (Exception e) {
         return completed(results(
+          "exec_error", true,
           "success", false,
           "errorMessage", "Invalid embed JSON: " + e.getMessage()
         ));
@@ -114,7 +117,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
     var client = ReactorHttpHelper.createReactorClient(null, true);
     var payloadBytes = GSON.toJson(payload).getBytes(StandardCharsets.UTF_8);
 
-    var future = client
+    return client
       .post()
       .uri(webhookUrl)
       .send(Mono.just(Unpooled.wrappedBuffer(payloadBytes)))
@@ -122,6 +125,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
         var statusCode = resp.status().code();
         if (statusCode >= 200 && statusCode < 300) {
           return Mono.just(results(
+            "exec_success", true,
             "success", true,
             "errorMessage", ""
           ));
@@ -129,18 +133,17 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
           return buf.asString(StandardCharsets.UTF_8)
             .defaultIfEmpty("")
             .map(body -> results(
+              "exec_error", true,
               "success", false,
               "errorMessage", "HTTP " + statusCode + ": " + body
             ));
         }
       })
       .onErrorResume(e -> Mono.just(results(
+        "exec_error", true,
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       )))
       .toFuture();
-
-    runtime.addPendingOperation(future);
-    return future;
   }
 }

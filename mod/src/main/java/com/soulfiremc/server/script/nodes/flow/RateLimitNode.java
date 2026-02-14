@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,11 +71,12 @@ public final class RateLimitNode extends AbstractScriptNode {
 
     var result = bucket.tryConsume(tokensRequired);
 
-    return completed(results(
-      "wasAllowed", result.allowed,
-      "tokensRemaining", result.tokensRemaining,
-      "retryAfterMs", result.retryAfterMs
-    ));
+    var outputs = new HashMap<String, NodeValue>();
+    outputs.put("wasAllowed", NodeValue.of(result.allowed));
+    outputs.put("tokensRemaining", NodeValue.of(result.tokensRemaining));
+    outputs.put("retryAfterMs", NodeValue.of(result.retryAfterMs));
+    outputs.put(result.allowed ? "exec_allowed" : "exec_denied", NodeValue.ofBoolean(true));
+    return completed(outputs);
   }
 
   private static class TokenBucket {

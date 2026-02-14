@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -31,11 +32,14 @@ import java.util.stream.Collectors;
 /// Reactive execution engine for visual scripts.
 /// Uses Project Reactor for proper fan-in synchronization and parallel branch execution.
 ///
-/// Key improvements over the legacy engine:
+/// Key features:
 /// - Fan-in: Waits for all upstream DATA edges before executing a node
 /// - Parallelism: Independent branches execute concurrently via Flux.flatMap
-/// - Backpressure: Configurable concurrency limits prevent resource exhaustion
-/// - Cancellation: Proper cleanup via Disposable
+/// - Dynamic routing: Follows exec output ports whose IDs appear in node outputs
+/// - Self-driving loops: Loop nodes call back into the engine via NodeRuntime.executeDownstream
+/// - Error routing: Nodes with exec_error ports route errors; others stop the branch
+/// - Muted bypass: Muted nodes pass execution context through unchanged
+/// - Per-invocation isolation: Each trigger creates its own ExecutionRun
 @Slf4j
 public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
@@ -64,6 +68,8 @@ public final class ReactiveScriptEngine {
         return Mono.empty();
       }
 
+      var run = new ExecutionRun();
+
       var graphNode = graph.getNode(triggerNodeId);
       if (graphNode == null) {
         log.warn("Trigger node {} not found in graph", triggerNodeId);
@@ -89,9 +95,11 @@ public final class ReactiveScriptEngine {
 
       context.eventListener().onNodeStarted(triggerNodeId);
 
-      return nodeImpl.executeReactive(context, inputs)
+      var nodeRuntime = createNodeRuntime(graph, triggerNodeId, context, run, ExecutionContext.empty());
+
+      return nodeImpl.executeReactive(nodeRuntime, inputs)
         .doOnNext(outputs -> {
-          context.publishNodeOutputs(triggerNodeId, outputs);
+          run.publishNodeOutputs(triggerNodeId, outputs);
           context.eventListener().onNodeCompleted(triggerNodeId, outputs);
         })
         .doOnError(e -> {
@@ -99,12 +107,44 @@ public final class ReactiveScriptEngine {
           log.error("Error executing trigger node {}: {}", triggerNodeId, message, e);
           context.eventListener().onNodeError(triggerNodeId, message);
         })
-        .onErrorResume(_ -> Mono.just(Map.of()))
+        .onErrorResume(_ -> Mono.empty())
         .flatMap(outputs -> {
           var execContext = ExecutionContext.from(outputs);
-          return executeDownstream(graph, triggerNodeId, StandardPorts.EXEC_OUT, context, execContext);
+          return followExecOutputs(graph, triggerNodeId, nodeImpl, outputs, context, run, execContext);
         });
     }).subscribeOn(context.getReactorScheduler());
+  }
+
+  /// Determines which exec output ports to follow based on node outputs,
+  /// then executes downstream for each active port.
+  ///
+  /// Convention: if any exec output port IDs appear as keys in the outputs map,
+  /// follow those. Otherwise fall back to "out".
+  private Mono<Void> followExecOutputs(
+    ScriptGraph graph,
+    String nodeId,
+    ScriptNode nodeImpl,
+    Map<String, NodeValue> outputs,
+    ReactiveScriptContext context,
+    ExecutionRun run,
+    ExecutionContext execContext
+  ) {
+    var execPorts = nodeImpl.getMetadata().outputs().stream()
+      .filter(p -> p.type() == PortType.EXEC)
+      .map(PortDefinition::id)
+      .toList();
+
+    var active = execPorts.stream()
+      .filter(outputs::containsKey)
+      .toList();
+
+    if (active.isEmpty()) {
+      active = List.of(StandardPorts.EXEC_OUT);
+    }
+
+    return Flux.fromIterable(active)
+      .flatMap(handle -> executeDownstream(graph, nodeId, handle, context, run, execContext), MAX_PARALLEL_BRANCHES)
+      .then();
   }
 
   /// Executes all nodes connected to an execution output handle.
@@ -114,6 +154,7 @@ public final class ReactiveScriptEngine {
   /// @param fromNodeId   the source node ID
   /// @param outputHandle the execution output handle to follow
   /// @param context      the script execution context
+  /// @param run          the per-invocation execution run
   /// @param execContext  the accumulated execution context flowing along execution edges
   /// @return a Mono that completes when all downstream nodes finish
   private Mono<Void> executeDownstream(
@@ -121,6 +162,7 @@ public final class ReactiveScriptEngine {
     String fromNodeId,
     String outputHandle,
     ReactiveScriptContext context,
+    ExecutionRun run,
     ExecutionContext execContext
   ) {
     var nextNodes = graph.getNextExecutionNodes(fromNodeId, outputHandle);
@@ -128,11 +170,9 @@ public final class ReactiveScriptEngine {
       return Mono.empty();
     }
 
-    // Execute downstream nodes in parallel (respecting max concurrency)
-    // Each branch gets its own snapshot of the execution context
     return Flux.fromIterable(nextNodes)
       .flatMap(
-        nodeId -> executeNodeWithDependencies(graph, nodeId, context, execContext),
+        nodeId -> executeNodeWithDependencies(graph, nodeId, context, run, execContext),
         MAX_PARALLEL_BRANCHES
       )
       .then();
@@ -146,16 +186,11 @@ public final class ReactiveScriptEngine {
   /// 2. Execution context values (upstream outputs flowing along execution edges)
   /// 3. Graph-level default inputs
   /// 4. Node metadata default inputs
-  ///
-  /// @param graph       the script graph
-  /// @param nodeId      the node to execute
-  /// @param context     the script execution context
-  /// @param execContext the accumulated execution context
-  /// @return a Mono that completes when the node and its downstream finish
   private Mono<Void> executeNodeWithDependencies(
     ScriptGraph graph,
     String nodeId,
     ReactiveScriptContext context,
+    ExecutionRun run,
     ExecutionContext execContext
   ) {
     if (context.isCancelled()) {
@@ -174,6 +209,13 @@ public final class ReactiveScriptEngine {
 
     var nodeImpl = NodeRegistry.create(graphNode.type());
 
+    // Muted node bypass — skip execution, pass context through on "out"
+    if (graphNode.muted()) {
+      run.publishNodeOutputs(nodeId, Map.of());
+      context.eventListener().onNodeCompleted(nodeId, Map.of());
+      return executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context, run, execContext);
+    }
+
     // Collect all DATA edges targeting this node
     var incomingDataEdges = graph.getIncomingDataEdges(nodeId);
 
@@ -184,20 +226,14 @@ public final class ReactiveScriptEngine {
         baseInputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
       }
     }
-    // Merge execution context — upstream outputs are available automatically
     baseInputs.putAll(execContext.values());
 
-    // If no DATA edges, execute immediately with base inputs (includes context)
     if (incomingDataEdges.isEmpty()) {
-      return executeNode(nodeImpl, nodeId, baseInputs, graph, context, execContext);
+      return executeNode(nodeImpl, nodeId, baseInputs, graph, context, run, execContext);
     }
 
-    // Wait for all upstream nodes to complete and merge their outputs
-    // DATA edge values override execution context values (highest priority)
-    // Port IDs are simple names that match the keys in node outputs
-    // Use handle() instead of map().filter() because Reactor's map() doesn't allow null returns
     var upstreamMonos = incomingDataEdges.stream()
-      .map(edge -> context.awaitNodeOutputs(edge.sourceNodeId())
+      .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId())
         .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
           var sourceKey = edge.sourceHandle();
           var targetKey = edge.targetHandle();
@@ -215,32 +251,28 @@ public final class ReactiveScriptEngine {
         merged.putAll(resolvedInputs);
         return merged;
       })
-      .flatMap(inputs -> executeNode(nodeImpl, nodeId, inputs, graph, context, execContext));
+      .flatMap(inputs -> executeNode(nodeImpl, nodeId, inputs, graph, context, run, execContext));
   }
 
   /// Executes a single node with resolved inputs.
-  /// After execution, merges node outputs into the execution context for downstream nodes.
-  ///
-  /// @param nodeImpl    the node implementation
-  /// @param nodeId      the node identifier
-  /// @param inputs      the resolved inputs
-  /// @param graph       the script graph
-  /// @param context     the script execution context
-  /// @param execContext the accumulated execution context
-  /// @return a Mono that completes when the node and its downstream finish
+  /// After execution, follows dynamic exec output routing.
+  /// Error handling: nodes with exec_error ports route errors; others stop the branch.
   private Mono<Void> executeNode(
     ScriptNode nodeImpl,
     String nodeId,
     Map<String, NodeValue> inputs,
     ScriptGraph graph,
     ReactiveScriptContext context,
+    ExecutionRun run,
     ExecutionContext execContext
   ) {
     context.eventListener().onNodeStarted(nodeId);
 
-    return nodeImpl.executeReactive(context, inputs)
+    var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
+
+    return nodeImpl.executeReactive(nodeRuntime, inputs)
       .doOnNext(outputs -> {
-        context.publishNodeOutputs(nodeId, outputs);
+        run.publishNodeOutputs(nodeId, outputs);
         context.eventListener().onNodeCompleted(nodeId, outputs);
       })
       .doOnError(e -> {
@@ -248,11 +280,58 @@ public final class ReactiveScriptEngine {
         log.error("Error executing node {}: {}", nodeId, message, e);
         context.eventListener().onNodeError(nodeId, message);
       })
-      .onErrorResume(_ -> Mono.just(Map.of()))
+      .onErrorResume(e -> {
+        var hasErrorPort = nodeImpl.getMetadata().outputs().stream()
+          .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+        if (hasErrorPort) {
+          var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+          return Mono.just(Map.of(
+            "exec_error", NodeValue.ofBoolean(true),
+            "success", NodeValue.ofBoolean(false),
+            "errorMessage", NodeValue.ofString(msg != null ? msg : e.getClass().getSimpleName())
+          ));
+        }
+        // No error port — stop this branch
+        return Mono.empty();
+      })
       .flatMap(outputs -> {
         var newExecContext = execContext.mergeWith(outputs);
-        return executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context, newExecContext);
+        return followExecOutputs(graph, nodeId, nodeImpl, outputs, context, run, newExecContext);
       });
+  }
+
+  /// Creates a NodeRuntime wrapper that captures the current execution state.
+  /// Self-driving nodes (loops, sequences) use runtime.executeDownstream() to
+  /// call back into the engine.
+  private NodeRuntime createNodeRuntime(
+    ScriptGraph graph,
+    String nodeId,
+    ReactiveScriptContext context,
+    ExecutionRun run,
+    ExecutionContext execContext
+  ) {
+    return new NodeRuntime() {
+      @Override
+      public InstanceManager instance() {
+        return context.instance();
+      }
+
+      @Override
+      public SoulFireScheduler scheduler() {
+        return context.scheduler();
+      }
+
+      @Override
+      public void log(String level, String message) {
+        context.log(level, message);
+      }
+
+      @Override
+      public Mono<Void> executeDownstream(String handle, Map<String, NodeValue> outputs) {
+        var newCtx = execContext.mergeWith(outputs);
+        return ReactiveScriptEngine.this.executeDownstream(graph, nodeId, handle, context, run, newCtx);
+      }
+    };
   }
 
   /// Executes the full graph (for testing/one-shot execution).

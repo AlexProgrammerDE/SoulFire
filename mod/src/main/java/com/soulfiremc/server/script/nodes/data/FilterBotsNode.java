@@ -34,10 +34,12 @@ public final class FilterBotsNode extends AbstractScriptNode {
     .displayName("Filter Bots")
     .category(CategoryRegistry.DATA)
     .addInputs(
+      PortDefinition.execIn(),
       PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to filter"),
       PortDefinition.inputWithDefault("pattern", "Pattern", PortType.STRING, "\".*\"", "Regex pattern to match bot names")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.listOutput("bots", "Bots", PortType.BOT, "Filtered list of bots")
     )
     .description("Filters a list of bots by name using a regex pattern")

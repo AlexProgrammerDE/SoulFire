@@ -74,6 +74,7 @@ public final class LLMChatNode extends AbstractScriptNode {
 
     if (prompt.isEmpty()) {
       return completed(results(
+        "exec_error", true,
         "response", "",
         "success", false,
         "errorMessage", "Prompt is required",
@@ -81,7 +82,7 @@ public final class LLMChatNode extends AbstractScriptNode {
       ));
     }
 
-    var future = CompletableFuture.supplyAsync(() -> {
+    return CompletableFuture.supplyAsync(() -> {
       try {
         var settingsSource = bot.settingsSource();
         var openAiClient = AISettings.create(settingsSource);
@@ -121,6 +122,7 @@ public final class LLMChatNode extends AbstractScriptNode {
         var tokensUsed = completion.usage().map(CompletionUsage::totalTokens).orElse(0L);
 
         return results(
+          "exec_success", true,
           "response", responseText,
           "success", true,
           "errorMessage", "",
@@ -128,6 +130,7 @@ public final class LLMChatNode extends AbstractScriptNode {
         );
       } catch (Exception e) {
         return results(
+          "exec_error", true,
           "response", "",
           "success", false,
           "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName(),
@@ -135,8 +138,5 @@ public final class LLMChatNode extends AbstractScriptNode {
         );
       }
     });
-
-    runtime.addPendingOperation(future);
-    return future;
   }
 }

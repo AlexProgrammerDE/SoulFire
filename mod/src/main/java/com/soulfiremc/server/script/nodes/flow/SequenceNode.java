@@ -18,15 +18,14 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that executes multiple branches in sequence.
-/// This node simply passes execution through and is used to organize sequential execution flow.
-/// The script executor handles connecting multiple outputs from this node to execute them in order.
-///
-/// Output: out0, out1, out2, etc. (execution outputs for each branch)
+/// Self-driving: uses runtime.executeDownstream() to fire exec_0, exec_1, etc. in order.
 public final class SequenceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.sequence")
@@ -55,8 +54,19 @@ public final class SequenceNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var branchCount = getIntInput(inputs, "branchCount", 2);
-
-    // Simply output the branch count so the executor knows how many branches to execute
     return completed(result("branchCount", branchCount));
+  }
+
+  @Override
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    var branchCount = getIntInput(inputs, "branchCount", 2);
+
+    return Flux.range(0, branchCount)
+      .concatMap(i -> runtime.executeDownstream("exec_" + i, Map.of(
+        "branchCount", NodeValue.ofNumber(branchCount)
+      )))
+      // Return final outputs without exec handle keys
+      .then()
+      .thenReturn(result("branchCount", branchCount));
   }
 }

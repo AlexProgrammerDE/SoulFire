@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -57,10 +58,11 @@ public final class BranchNode extends AbstractScriptNode {
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var condition = getBooleanInput(inputs, "condition", false);
 
-    // Output which branch should be taken
-    return completed(results(
-      "branch", condition ? "true" : "false",
-      "condition", condition
-    ));
+    // Include exec handle key so the engine follows the correct branch
+    var outputs = new HashMap<String, NodeValue>();
+    outputs.put("branch", NodeValue.of(condition ? "true" : "false"));
+    outputs.put("condition", NodeValue.of(condition));
+    outputs.put(condition ? "exec_true" : "exec_false", NodeValue.ofBoolean(true));
+    return completed(outputs);
   }
 }

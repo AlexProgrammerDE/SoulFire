@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -66,19 +67,21 @@ public final class SwitchNode extends AbstractScriptNode {
     var cases = casesStr.split(",");
     for (int i = 0; i < cases.length; i++) {
       if (cases[i].trim().equals(value)) {
-        return completed(results(
-          "branch", "case" + i,
-          "caseIndex", i,
-          "matched", true
-        ));
+        var outputs = new HashMap<String, NodeValue>();
+        outputs.put("branch", NodeValue.of("case" + i));
+        outputs.put("caseIndex", NodeValue.of(i));
+        outputs.put("matched", NodeValue.of(true));
+        outputs.put("exec_case" + i, NodeValue.ofBoolean(true));
+        return completed(outputs);
       }
     }
 
     // No case matched, return default
-    return completed(results(
-      "branch", "default",
-      "caseIndex", -1,
-      "matched", false
-    ));
+    var outputs = new HashMap<String, NodeValue>();
+    outputs.put("branch", NodeValue.of("default"));
+    outputs.put("caseIndex", NodeValue.of(-1));
+    outputs.put("matched", NodeValue.of(false));
+    outputs.put("exec_default", NodeValue.ofBoolean(true));
+    return completed(outputs);
   }
 }

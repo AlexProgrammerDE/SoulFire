@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 /// Output: passed (boolean) - whether execution was allowed
 /// Output: value (any) - the passed-through value (only if condition is true)
 ///
-/// Acts as a conditional gate - if condition is false, the output stops here.
+/// Routes to exec_allowed if condition is true, exec_blocked if false.
 public final class GateNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.gate")
@@ -40,7 +41,8 @@ public final class GateNode extends AbstractScriptNode {
       PortDefinition.input("value", "Value", PortType.ANY, "Value to pass through")
     )
     .addOutputs(
-      PortDefinition.execOut(),
+      PortDefinition.output("exec_allowed", "Allowed", PortType.EXEC, "Executes if condition is true"),
+      PortDefinition.output("exec_blocked", "Blocked", PortType.EXEC, "Executes if condition is false"),
       PortDefinition.output("passed", "Passed", PortType.BOOLEAN, "Whether execution was allowed"),
       PortDefinition.output("value", "Value", PortType.ANY, "The passed-through value")
     )
@@ -60,9 +62,10 @@ public final class GateNode extends AbstractScriptNode {
     var condition = getBooleanInput(inputs, "condition", true);
     var value = inputs.get("value");
 
-    return completed(results(
-      "passed", condition,
-      "value", condition ? value : null
-    ));
+    var outputs = new HashMap<String, NodeValue>();
+    outputs.put("passed", NodeValue.of(condition));
+    outputs.put("value", condition ? value : NodeValue.ofNull());
+    outputs.put(condition ? "exec_allowed" : "exec_blocked", NodeValue.ofBoolean(true));
+    return completed(outputs);
   }
 }

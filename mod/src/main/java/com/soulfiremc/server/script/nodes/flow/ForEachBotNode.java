@@ -18,15 +18,15 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that iterates over a list of bots.
-/// Input: bots (List of BotConnection)
-/// Output: bot (current BotConnection in iteration), index (current index), count (total bots)
-///
-/// The bot output should be wired to downstream action nodes that need it.
+/// Self-driving: uses runtime.executeDownstream() to iterate over bots,
+/// outputting the current bot per iteration.
 public final class ForEachBotNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.foreach_bot")
@@ -34,8 +34,7 @@ public final class ForEachBotNode extends AbstractScriptNode {
     .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to iterate"),
-      PortDefinition.inputWithDefault("currentIndex", "Current Index", PortType.NUMBER, "0", "Current iteration index")
+      PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to iterate")
     )
     .addOutputs(
       PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each bot"),
@@ -43,8 +42,7 @@ public final class ForEachBotNode extends AbstractScriptNode {
       PortDefinition.output("bot", "Bot", PortType.BOT, "Current bot in iteration"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current bot index"),
       PortDefinition.output("count", "Count", PortType.NUMBER, "Total number of bots"),
-      PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done"),
-      PortDefinition.output("nextIndex", "Next Index", PortType.NUMBER, "Next iteration index")
+      PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done")
     )
     .description("Iterates over each bot in a list")
     .icon("users")
@@ -60,29 +58,35 @@ public final class ForEachBotNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var botValues = getListInput(inputs, "bots");
-    var currentIndex = getIntInput(inputs, "currentIndex", 0);
-
-    var isComplete = currentIndex >= botValues.size();
-
-    if (isComplete) {
-      return completed(results(
-        "bot", null,
-        "index", currentIndex,
-        "count", botValues.size(),
-        "isComplete", true,
-        "nextIndex", currentIndex + 1
-      ));
-    }
-
-    var currentBotValue = botValues.get(currentIndex);
-    var currentBot = currentBotValue.asBot();
-
     return completed(results(
-      "bot", currentBot,
-      "index", currentIndex,
+      "bot", botValues.isEmpty() ? null : botValues.getFirst().asBot(),
+      "index", 0,
       "count", botValues.size(),
-      "isComplete", false,
-      "nextIndex", currentIndex + 1
+      "isComplete", botValues.isEmpty()
     ));
+  }
+
+  @Override
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    var botValues = getListInput(inputs, "bots");
+    var count = botValues.size();
+
+    return Flux.range(0, count)
+      .concatMap(i -> {
+        var currentBot = botValues.get(i).asBot();
+        return runtime.executeDownstream("exec_loop", Map.of(
+          "bot", currentBot != null ? NodeValue.ofBot(currentBot) : NodeValue.ofNull(),
+          "index", NodeValue.ofNumber(i),
+          "count", NodeValue.ofNumber(count),
+          "isComplete", NodeValue.ofBoolean(false)
+        ));
+      })
+      .then(runtime.executeDownstream("exec_done", Map.of(
+        "bot", NodeValue.ofNull(),
+        "index", NodeValue.ofNumber(count),
+        "count", NodeValue.ofNumber(count),
+        "isComplete", NodeValue.ofBoolean(true)
+      )))
+      .thenReturn(results("index", count, "count", count, "isComplete", true));
   }
 }

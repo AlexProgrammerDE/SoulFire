@@ -63,12 +63,8 @@ public final class PathfindToNode extends AbstractScriptNode {
     var goal = new PosGoal(SFVec3i.fromDouble(destination));
     var constraint = new PathConstraintImpl(bot);
 
-    var future = PathExecutor.executePathfinding(bot, goal, constraint)
+    return PathExecutor.executePathfinding(bot, goal, constraint)
       .thenApply(_ -> result("success", true))
       .exceptionally(_ -> result("success", false));
-
-    // Track pending operation for cleanup on deactivation
-    runtime.addPendingOperation(future);
-    return future;
   }
 }

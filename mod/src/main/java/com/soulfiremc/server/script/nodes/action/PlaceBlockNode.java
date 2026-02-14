@@ -63,12 +63,8 @@ public final class PlaceBlockNode extends AbstractScriptNode {
     var goal = new PlaceBlockGoal(SFVec3i.fromDouble(position));
     var constraint = new PathConstraintImpl(bot);
 
-    var future = PathExecutor.executePathfinding(bot, goal, constraint)
+    return PathExecutor.executePathfinding(bot, goal, constraint)
       .thenApply(_ -> result("success", true))
       .exceptionally(_ -> result("success", false));
-
-    // Track pending operation for cleanup on deactivation
-    runtime.addPendingOperation(future);
-    return future;
   }
 }

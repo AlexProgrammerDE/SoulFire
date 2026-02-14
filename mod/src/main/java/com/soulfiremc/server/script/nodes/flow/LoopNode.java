@@ -18,18 +18,15 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that repeats execution a specified number of times.
-/// Input: count (number of iterations)
-/// Input: currentIndex (current iteration, managed by script executor)
-/// Output: index (current iteration index, 0-based)
-/// Output: isComplete (boolean, true when all iterations are done)
-///
-/// The script executor is responsible for managing the loop state and re-executing
-/// the connected nodes for each iteration.
+/// Self-driving: uses runtime.executeDownstream() to iterate over the loop body,
+/// then fires exec_done when complete.
 public final class LoopNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.loop")
@@ -37,15 +34,14 @@ public final class LoopNode extends AbstractScriptNode {
     .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.inputWithDefault("count", "Count", PortType.NUMBER, "10", "Number of iterations"),
-      PortDefinition.inputWithDefault("currentIndex", "Current Index", PortType.NUMBER, "0", "Current iteration index")
+      PortDefinition.inputWithDefault("count", "Count", PortType.NUMBER, "10", "Number of iterations")
     )
     .addOutputs(
       PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each iteration"),
       PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when loop completes"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current iteration index"),
       PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether loop is done"),
-      PortDefinition.output("nextIndex", "Next Index", PortType.NUMBER, "Next iteration index")
+      PortDefinition.output("count", "Count", PortType.NUMBER, "Total iteration count")
     )
     .description("Repeats execution a specified number of times")
     .icon("rotate-cw")
@@ -61,14 +57,26 @@ public final class LoopNode extends AbstractScriptNode {
   @Override
   public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var count = getIntInput(inputs, "count", 10);
-    var currentIndex = getIntInput(inputs, "currentIndex", 0);
+    return completed(results("index", 0, "isComplete", count <= 0, "count", count));
+  }
 
-    var isComplete = currentIndex >= count;
+  @Override
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+    var count = getIntInput(inputs, "count", 10);
 
-    return completed(results(
-      "index", currentIndex,
-      "isComplete", isComplete,
-      "nextIndex", currentIndex + 1
-    ));
+    return Flux.range(0, count)
+      .concatMap(i -> runtime.executeDownstream("exec_loop", Map.of(
+        "index", NodeValue.ofNumber(i),
+        "isComplete", NodeValue.ofBoolean(false),
+        "count", NodeValue.ofNumber(count)
+      )))
+      .then(runtime.executeDownstream("exec_done", Map.of(
+        "index", NodeValue.ofNumber(count),
+        "isComplete", NodeValue.ofBoolean(true),
+        "count", NodeValue.ofNumber(count)
+      )))
+      // Return final outputs without exec handle keys so the engine's
+      // dynamic routing finds nothing active and exits cleanly
+      .thenReturn(results("index", count, "isComplete", true, "count", count));
   }
 }

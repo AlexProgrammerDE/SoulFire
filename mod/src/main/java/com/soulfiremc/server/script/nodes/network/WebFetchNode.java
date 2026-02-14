@@ -77,6 +77,7 @@ public final class WebFetchNode extends AbstractScriptNode {
 
     if (url.isEmpty()) {
       return completed(results(
+        "exec_error", true,
         "response", "",
         "statusCode", 0,
         "responseHeaders", "{}",
@@ -124,24 +125,27 @@ public final class WebFetchNode extends AbstractScriptNode {
       default -> client.get().uri(url); // GET
     };
 
-    var future = request
+    return request
       .responseSingle((resp, buf) -> {
         var statusCode = resp.status().code();
         var responseHeadersObj = new JsonObject();
         resp.responseHeaders().forEach(entry ->
           responseHeadersObj.addProperty(entry.getKey(), entry.getValue()));
+        var isSuccess = statusCode >= 200 && statusCode < 300;
 
         return buf.asString(StandardCharsets.UTF_8)
           .defaultIfEmpty("")
           .map(responseBody -> results(
+            isSuccess ? "exec_success" : "exec_error", true,
             "response", responseBody,
             "statusCode", statusCode,
             "responseHeaders", GSON.toJson(responseHeadersObj),
-            "success", statusCode >= 200 && statusCode < 300,
+            "success", isSuccess,
             "errorMessage", ""
           ));
       })
       .onErrorResume(e -> Mono.just(results(
+        "exec_error", true,
         "response", "",
         "statusCode", 0,
         "responseHeaders", "{}",
@@ -149,8 +153,5 @@ public final class WebFetchNode extends AbstractScriptNode {
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       )))
       .toFuture();
-
-    runtime.addPendingOperation(future);
-    return future;
   }
 }

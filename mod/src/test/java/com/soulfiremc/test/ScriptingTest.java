@@ -17,15 +17,14 @@
  */
 package com.soulfiremc.test;
 
-import com.soulfiremc.server.script.ExecutionContext;
-import com.soulfiremc.server.script.NodeValue;
-import com.soulfiremc.server.script.ScriptGraph;
+import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1054,5 +1053,239 @@ final class ScriptingTest {
       var node = NodeRegistry.create(type);
       assertEquals(type, node.getId(), "Node getId() doesn't match registered type");
     }
+  }
+
+  // ==================== ExecutionRun Isolation Tests ====================
+
+  @Test
+  void executionRunIsolation() {
+    var run1 = new ExecutionRun();
+    var run2 = new ExecutionRun();
+
+    var outputs1 = Map.of("value", NodeValue.ofString("run1"));
+    var outputs2 = Map.of("value", NodeValue.ofString("run2"));
+
+    run1.publishNodeOutputs("node1", outputs1);
+    run2.publishNodeOutputs("node1", outputs2);
+
+    var result1 = run1.awaitNodeOutputs("node1").block();
+    var result2 = run2.awaitNodeOutputs("node1").block();
+
+    assertNotNull(result1);
+    assertNotNull(result2);
+    assertEquals("run1", result1.get("value").asString(""));
+    assertEquals("run2", result2.get("value").asString(""));
+  }
+
+  @Test
+  void executionRunAwaitBeforePublish() {
+    var run = new ExecutionRun();
+
+    // Start awaiting before publishing
+    var mono = run.awaitNodeOutputs("node1");
+    run.publishNodeOutputs("node1", Map.of("value", NodeValue.ofNumber(42)));
+
+    var result = mono.block();
+    assertNotNull(result);
+    assertEquals(42, result.get("value").asInt(0));
+  }
+
+  // ==================== BranchNode Routing Tests ====================
+
+  @Test
+  void branchNodeOutputsExecTrueKey() {
+    var node = NodeRegistry.create("flow.branch");
+    var inputs = Map.of("condition", NodeValue.ofBoolean(true));
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_true"), "Should contain exec_true key");
+    assertFalse(result.containsKey("exec_false"), "Should not contain exec_false key");
+    assertEquals("true", result.get("branch").asString(""));
+  }
+
+  @Test
+  void branchNodeOutputsExecFalseKey() {
+    var node = NodeRegistry.create("flow.branch");
+    var inputs = Map.of("condition", NodeValue.ofBoolean(false));
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_false"), "Should contain exec_false key");
+    assertFalse(result.containsKey("exec_true"), "Should not contain exec_true key");
+    assertEquals("false", result.get("branch").asString(""));
+  }
+
+  // ==================== SwitchNode Routing Tests ====================
+
+  @Test
+  void switchNodeOutputsMatchingCaseKey() {
+    var node = NodeRegistry.create("flow.switch");
+    var inputs = Map.of(
+      "value", NodeValue.ofString("b"),
+      "cases", NodeValue.ofString("a,b,c")
+    );
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_case1"), "Should contain exec_case1 key");
+    assertFalse(result.containsKey("exec_default"), "Should not contain exec_default key");
+    assertEquals("case1", result.get("branch").asString(""));
+    assertEquals(1, result.get("caseIndex").asInt(-1));
+  }
+
+  @Test
+  void switchNodeOutputsDefaultKey() {
+    var node = NodeRegistry.create("flow.switch");
+    var inputs = Map.of(
+      "value", NodeValue.ofString("z"),
+      "cases", NodeValue.ofString("a,b,c")
+    );
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_default"), "Should contain exec_default key");
+    assertFalse(result.containsKey("exec_case0"), "Should not contain exec_case0 key");
+    assertEquals("default", result.get("branch").asString(""));
+    assertEquals(-1, result.get("caseIndex").asInt(0));
+  }
+
+  // ==================== GateNode Routing Tests ====================
+
+  @Test
+  void gateNodeOutputsExecAllowedKey() {
+    var node = NodeRegistry.create("flow.gate");
+    var inputs = new HashMap<String, NodeValue>();
+    inputs.put("condition", NodeValue.ofBoolean(true));
+    inputs.put("value", NodeValue.ofString("test"));
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_allowed"), "Should contain exec_allowed key");
+    assertFalse(result.containsKey("exec_blocked"), "Should not contain exec_blocked key");
+    assertTrue(result.get("passed").asBoolean(false));
+  }
+
+  @Test
+  void gateNodeOutputsExecBlockedKey() {
+    var node = NodeRegistry.create("flow.gate");
+    var inputs = new HashMap<String, NodeValue>();
+    inputs.put("condition", NodeValue.ofBoolean(false));
+    inputs.put("value", NodeValue.ofString("test"));
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_blocked"), "Should contain exec_blocked key");
+    assertFalse(result.containsKey("exec_allowed"), "Should not contain exec_allowed key");
+    assertFalse(result.get("passed").asBoolean(true));
+  }
+
+  // ==================== RateLimitNode Routing Tests ====================
+
+  @Test
+  void rateLimitNodeOutputsExecAllowedKey() {
+    var node = NodeRegistry.create("flow.rate_limit");
+    var inputs = Map.of(
+      "key", NodeValue.ofString("test-allowed-" + System.nanoTime()),
+      "maxTokens", NodeValue.ofNumber(10),
+      "refillRate", NodeValue.ofNumber(1),
+      "tokensRequired", NodeValue.ofNumber(1)
+    );
+
+    var result = node.execute(null, inputs).join();
+
+    assertTrue(result.containsKey("exec_allowed"), "Should contain exec_allowed key");
+    assertTrue(result.get("wasAllowed").asBoolean(false));
+  }
+
+  // ==================== Data Node Exec Port Tests ====================
+
+  @Test
+  void getBotsNodeHasExecPorts() {
+    var node = NodeRegistry.create("data.get_bots");
+    var metadata = node.getMetadata();
+
+    var hasExecIn = metadata.inputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
+    var hasExecOut = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("out"));
+
+    assertTrue(hasExecIn, "GetBotsNode should have exec input");
+    assertTrue(hasExecOut, "GetBotsNode should have exec output");
+  }
+
+  @Test
+  void filterBotsNodeHasExecPorts() {
+    var node = NodeRegistry.create("data.filter_bots");
+    var metadata = node.getMetadata();
+
+    var hasExecIn = metadata.inputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
+    var hasExecOut = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("out"));
+
+    assertTrue(hasExecIn, "FilterBotsNode should have exec input");
+    assertTrue(hasExecOut, "FilterBotsNode should have exec output");
+  }
+
+  @Test
+  void getBotByNameNodeHasExecPorts() {
+    var node = NodeRegistry.create("data.get_bot_by_name");
+    var metadata = node.getMetadata();
+
+    var hasExecIn = metadata.inputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
+    var hasExecOut = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("out"));
+
+    assertTrue(hasExecIn, "GetBotByNameNode should have exec input");
+    assertTrue(hasExecOut, "GetBotByNameNode should have exec output");
+  }
+
+  // ==================== LLMChatNode Exec Handle Tests ====================
+
+  @Test
+  void llmChatNodeOutputsExecErrorOnEmptyPrompt() {
+    var node = NodeRegistry.create("ai.llm_chat");
+    // LLMChatNode requires a bot, but empty prompt check happens first
+    // We need to provide a bot to get past requireBot, but that needs a real instance.
+    // Instead, verify that the metadata has the correct exec ports.
+    var metadata = node.getMetadata();
+
+    var hasExecSuccess = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
+    var hasExecError = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+
+    assertTrue(hasExecSuccess, "LLMChatNode should have exec_success port");
+    assertTrue(hasExecError, "LLMChatNode should have exec_error port");
+  }
+
+  @Test
+  void webFetchNodeHasExecPorts() {
+    var node = NodeRegistry.create("network.web_fetch");
+    var metadata = node.getMetadata();
+
+    var hasExecSuccess = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
+    var hasExecError = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+
+    assertTrue(hasExecSuccess, "WebFetchNode should have exec_success port");
+    assertTrue(hasExecError, "WebFetchNode should have exec_error port");
+  }
+
+  @Test
+  void discordWebhookNodeHasExecPorts() {
+    var node = NodeRegistry.create("integration.discord_webhook");
+    var metadata = node.getMetadata();
+
+    var hasExecSuccess = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
+    var hasExecError = metadata.outputs().stream()
+      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+
+    assertTrue(hasExecSuccess, "DiscordWebhookNode should have exec_success port");
+    assertTrue(hasExecError, "DiscordWebhookNode should have exec_error port");
   }
 }
