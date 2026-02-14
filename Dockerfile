@@ -6,7 +6,8 @@ ARG VERSION
 RUN groupadd --gid 1001 soulfire && \
     useradd --home-dir /soulfire --uid 1001 --gid soulfire --create-home soulfire && \
     apt-get update && apt-get install -y --no-install-recommends dumb-init && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    chmod 755 /soulfire
 
 # Download JAR from GitHub releases
 ADD --chown=soulfire:soulfire https://github.com/AlexProgrammerDE/SoulFire/releases/download/${VERSION}/SoulFireDedicated-${VERSION}.jar /soulfire/soulfire.jar
@@ -15,10 +16,7 @@ ADD --chown=soulfire:soulfire https://github.com/AlexProgrammerDE/SoulFire/relea
 WORKDIR /soulfire/data
 
 # Copy over the start script
-COPY start.sh /soulfire/start.sh
-
-# Make executable
-RUN chmod +x /soulfire/start.sh
+COPY --chmod=755 start.sh /soulfire/start.sh
 
 # Switch from root to soulfire
 USER soulfire
