@@ -30,9 +30,10 @@ public final class GetBotStateNode extends AbstractScriptNode {
     .displayName("Get Bot State")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get state from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("isOnGround", "On Ground", PortType.BOOLEAN, "True if bot is on ground"),
       PortDefinition.output("isInWater", "In Water", PortType.BOOLEAN, "True if bot is in water"),
       PortDefinition.output("isSwimming", "Swimming", PortType.BOOLEAN, "True if bot is swimming"),

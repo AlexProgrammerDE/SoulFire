@@ -32,7 +32,6 @@ public final class SelectSlotNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
       PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Hotbar slot (0-8)")
     )
     .addOutputs(

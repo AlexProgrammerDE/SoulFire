@@ -31,10 +31,11 @@ public final class GetInventoryNode extends AbstractScriptNode {
     .displayName("Get Inventory")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get inventory from"),
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory slot (0-35 main, 36-39 armor, 40 offhand)")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("itemId", "Item ID", PortType.STRING, "The item's registry ID"),
       PortDefinition.output("count", "Count", PortType.NUMBER, "Stack count"),
       PortDefinition.output("isEmpty", "Is Empty", PortType.BOOLEAN, "Whether the slot is empty")

@@ -31,9 +31,10 @@ public final class GetPositionNode extends AbstractScriptNode {
     .displayName("Get Position")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get position from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("position", "Position", PortType.VECTOR3, "Current position")
     )
     .description("Gets the bot's current position in the world")

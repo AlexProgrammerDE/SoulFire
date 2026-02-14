@@ -31,7 +31,6 @@ public final class SendChatNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
       PortDefinition.inputWithDefault("message", "Message", PortType.STRING, "\"\"", "The message to send")
     )
     .addOutputs(

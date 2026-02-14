@@ -35,7 +35,6 @@ public final class StateNode extends AbstractScriptNode {
     .category(CategoryRegistry.STATE)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "Bot for state storage"),
       PortDefinition.inputWithDefault("stateId", "State ID", PortType.STRING, "\"main\"", "State machine identifier"),
       PortDefinition.inputWithDefault("operation", "Operation", PortType.STRING, "\"get\"", "Operation: get, set, transition"),
       PortDefinition.inputWithDefault("newState", "New State", PortType.STRING, "\"\"", "New state (for set/transition)"),

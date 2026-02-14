@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.test;
 
+import com.soulfiremc.server.script.ExecutionContext;
 import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptGraph;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
@@ -964,6 +965,70 @@ final class ScriptingTest {
     var result = node.execute(null, inputs).join();
 
     assertFalse(result.get("result").asBoolean(true));
+  }
+
+  // ==================== ExecutionContext Tests ====================
+
+  @Test
+  void executionContextEmpty() {
+    var ctx = ExecutionContext.empty();
+    assertTrue(ctx.values().isEmpty());
+  }
+
+  @Test
+  void executionContextFrom() {
+    var initial = Map.of(
+      "bot", NodeValue.ofString("testBot"),
+      "tickCount", NodeValue.ofNumber(42)
+    );
+    var ctx = ExecutionContext.from(initial);
+
+    assertEquals(2, ctx.values().size());
+    assertEquals("testBot", ctx.values().get("bot").asString(""));
+    assertEquals(42, ctx.values().get("tickCount").asInt(0));
+  }
+
+  @Test
+  void executionContextMergeWithAddsNewKeys() {
+    var ctx = ExecutionContext.from(Map.of("bot", NodeValue.ofString("testBot")));
+    var merged = ctx.mergeWith(Map.of("health", NodeValue.ofNumber(20)));
+
+    assertEquals(2, merged.values().size());
+    assertEquals("testBot", merged.values().get("bot").asString(""));
+    assertEquals(20, merged.values().get("health").asInt(0));
+  }
+
+  @Test
+  void executionContextMergeWithOverridesExistingKeys() {
+    var ctx = ExecutionContext.from(Map.of(
+      "bot", NodeValue.ofString("bot1"),
+      "health", NodeValue.ofNumber(10)
+    ));
+    var merged = ctx.mergeWith(Map.of("health", NodeValue.ofNumber(20)));
+
+    assertEquals("bot1", merged.values().get("bot").asString(""));
+    assertEquals(20, merged.values().get("health").asInt(0));
+  }
+
+  @Test
+  void executionContextMergeWithIsImmutable() {
+    var ctx = ExecutionContext.from(Map.of("bot", NodeValue.ofString("bot1")));
+    var merged = ctx.mergeWith(Map.of("health", NodeValue.ofNumber(20)));
+
+    // Original context unchanged
+    assertEquals(1, ctx.values().size());
+    assertNull(ctx.values().get("health"));
+
+    // Merged has both
+    assertEquals(2, merged.values().size());
+  }
+
+  @Test
+  void executionContextMergeWithEmptyReturnsThis() {
+    var ctx = ExecutionContext.from(Map.of("bot", NodeValue.ofString("bot1")));
+    var merged = ctx.mergeWith(Map.of());
+
+    assertSame(ctx, merged);
   }
 
   // ==================== Node Metadata Tests ====================

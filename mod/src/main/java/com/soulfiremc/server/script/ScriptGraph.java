@@ -124,57 +124,6 @@ public final class ScriptGraph {
       .toList();
   }
 
-  /// Resolves input values for a node by following data edges.
-  /// Returns a map of input names to their values from connected nodes.
-  /// Multi-input ports collect all connected values into a list.
-  ///
-  /// @param nodeId  the node to resolve inputs for
-  /// @param context the execution context containing node outputs
-  /// @return map of input handle names to resolved values
-  public Map<String, NodeValue> resolveInputs(String nodeId, ScriptContext context) {
-    var inputs = new HashMap<String, NodeValue>();
-    var multiInputs = new HashMap<String, List<NodeValue>>();
-
-    // First, apply default values from the node (convert from Object to NodeValue)
-    var node = nodes.get(nodeId);
-    if (node != null && node.defaultInputs != null) {
-      for (var entry : node.defaultInputs.entrySet()) {
-        inputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
-      }
-    }
-
-    // Then, collect values from connected data edges
-    // Port IDs are simple names that match the keys in node outputs
-    for (var edge : edges) {
-      if (edge.edgeType == EdgeType.DATA && edge.targetNodeId.equals(nodeId)) {
-        var sourceOutputs = context.getNodeOutputs(edge.sourceNodeId);
-        var sourceKey = edge.sourceHandle;
-        var targetKey = edge.targetHandle;
-        var value = sourceOutputs.get(sourceKey);
-        if (value != null) {
-          // Check if this is a multi-input port by looking at port metadata
-          var isMultiInput = node != null && node.multiInputPorts != null
-            && node.multiInputPorts.contains(targetKey);
-
-          if (isMultiInput) {
-            // Collect into list for multi-input ports
-            multiInputs.computeIfAbsent(targetKey, _ -> new ArrayList<>()).add(value);
-          } else {
-            // Single input - last connection wins
-            inputs.put(targetKey, value);
-          }
-        }
-      }
-    }
-
-    // Convert multi-input lists to NodeValue.List
-    for (var entry : multiInputs.entrySet()) {
-      inputs.put(entry.getKey(), NodeValue.ofList(entry.getValue()));
-    }
-
-    return inputs;
-  }
-
   /// Performs topological sort on the graph nodes.
   /// Returns nodes in execution order, respecting dependencies.
   ///

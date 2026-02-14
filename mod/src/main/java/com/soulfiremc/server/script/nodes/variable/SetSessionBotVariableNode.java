@@ -32,7 +32,6 @@ public final class SetSessionBotVariableNode extends AbstractScriptNode {
     .category(CategoryRegistry.VARIABLE)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "Bot to store variable for"),
       PortDefinition.input("key", "Key", PortType.STRING, "Variable key"),
       PortDefinition.input("value", "Value", PortType.ANY, "Value to store")
     )

@@ -31,7 +31,6 @@ public final class SetPersistentBotVariableNode extends AbstractScriptNode {
     .category(CategoryRegistry.VARIABLE)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "Bot to store variable for"),
       PortDefinition.inputWithDefault("namespace", "Namespace", PortType.STRING, "\"script\"", "Variable namespace"),
       PortDefinition.input("key", "Key", PortType.STRING, "Variable key"),
       PortDefinition.input("value", "Value", PortType.ANY, "Value to store")

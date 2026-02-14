@@ -30,9 +30,10 @@ public final class GetRotationNode extends AbstractScriptNode {
     .displayName("Get Rotation")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get rotation from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("yaw", "Yaw", PortType.NUMBER, "Horizontal rotation (-180 to 180)"),
       PortDefinition.output("pitch", "Pitch", PortType.NUMBER, "Vertical rotation (-90 to 90)")
     )

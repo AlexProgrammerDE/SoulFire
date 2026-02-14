@@ -31,9 +31,10 @@ public final class GetGamemodeNode extends AbstractScriptNode {
     .displayName("Get Gamemode")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get gamemode from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("gamemode", "Gamemode", PortType.STRING, "Current gamemode name"),
       PortDefinition.output("isSurvival", "Is Survival", PortType.BOOLEAN, "True if in survival mode"),
       PortDefinition.output("isCreative", "Is Creative", PortType.BOOLEAN, "True if in creative mode"),

@@ -149,16 +149,18 @@ public abstract class AbstractScriptNode implements ScriptNode {
   }
 
   /// Helper method to require a bot from inputs.
-  /// Nodes should be stateless - bot must be explicitly wired as an input.
+  /// The bot is typically provided automatically via the execution context
+  /// from an upstream trigger node or ForEachBot node.
   ///
-  /// @param inputs the node inputs
+  /// @param inputs the node inputs (includes execution context values)
   /// @return the bot connection
   /// @throws IllegalStateException if no bot is available
   protected BotConnection requireBot(Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
     if (bot == null) {
-      throw new IllegalStateException("This node requires a 'bot' input, but none was provided. "
-        + "Connect a bot output from a trigger node or GetBots/GetBotByName node.");
+      throw new IllegalStateException("This node requires a bot in the execution context. "
+        + "Ensure it is downstream of a bot-producing trigger (OnTick, OnChat, etc.) "
+        + "or a ForEachBot/GetBotByName node.");
     }
     return bot;
   }

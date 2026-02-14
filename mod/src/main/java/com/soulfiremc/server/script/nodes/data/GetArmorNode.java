@@ -31,9 +31,10 @@ public final class GetArmorNode extends AbstractScriptNode {
     .displayName("Get Armor")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get armor from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("armorValue", "Armor", PortType.NUMBER, "Total armor points"),
       PortDefinition.output("armorToughness", "Toughness", PortType.NUMBER, "Armor toughness value")
     )

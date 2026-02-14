@@ -36,11 +36,12 @@ public final class FindBlockNode extends AbstractScriptNode {
     .displayName("Find Block")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to search around"),
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("blockType", "Block Type", PortType.STRING, "\"minecraft:diamond_ore\"", "Block ID to search for"),
       PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "16", "Maximum search radius")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether a block was found"),
       PortDefinition.output("position", "Position", PortType.VECTOR3, "Block position"),
       PortDefinition.output("distance", "Distance", PortType.NUMBER, "Distance to the block")

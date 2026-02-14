@@ -31,8 +31,7 @@ public final class JumpNode extends AbstractScriptNode {
     .displayName("Jump")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control")
+      PortDefinition.execIn()
     )
     .addOutputs(
       PortDefinition.execOut()

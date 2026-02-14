@@ -31,9 +31,10 @@ public final class GetLightLevelNode extends AbstractScriptNode {
     .displayName("Get Light Level")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get light level from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("blockLight", "Block Light", PortType.NUMBER, "Light from blocks (0-15)"),
       PortDefinition.output("skyLight", "Sky Light", PortType.NUMBER, "Light from sky (0-15)"),
       PortDefinition.output("combinedLight", "Combined", PortType.NUMBER, "Maximum of block and sky light")

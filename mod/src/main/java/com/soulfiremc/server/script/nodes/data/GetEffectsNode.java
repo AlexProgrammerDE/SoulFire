@@ -33,9 +33,10 @@ public final class GetEffectsNode extends AbstractScriptNode {
     .displayName("Get Effects")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get effects from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("effectCount", "Count", PortType.NUMBER, "Number of active effects"),
       PortDefinition.output("effectNames", "Effects", PortType.STRING, "Comma-separated effect names"),
       PortDefinition.output("hasEffects", "Has Effects", PortType.BOOLEAN, "True if any effects are active")

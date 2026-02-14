@@ -31,9 +31,10 @@ public final class GetDimensionNode extends AbstractScriptNode {
     .displayName("Get Dimension")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get dimension from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("dimension", "Dimension", PortType.STRING, "Current dimension name"),
       PortDefinition.output("isOverworld", "Is Overworld", PortType.BOOLEAN, "True if in overworld"),
       PortDefinition.output("isNether", "Is Nether", PortType.BOOLEAN, "True if in nether"),

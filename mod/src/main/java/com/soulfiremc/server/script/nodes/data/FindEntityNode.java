@@ -35,11 +35,12 @@ public final class FindEntityNode extends AbstractScriptNode {
     .displayName("Find Entity")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to search around"),
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("entityType", "Entity Type", PortType.STRING, "\"any\"", "Entity ID or 'any' for any entity"),
       PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "32", "Maximum search radius")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether an entity was found"),
       PortDefinition.output("position", "Position", PortType.VECTOR3, "Entity position"),
       PortDefinition.output("entityId", "Entity ID", PortType.NUMBER, "The entity's ID"),

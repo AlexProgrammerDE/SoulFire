@@ -32,8 +32,7 @@ public final class UseItemNode extends AbstractScriptNode {
     .displayName("Use Item")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control")
+      PortDefinition.execIn()
     )
     .addOutputs(
       PortDefinition.execOut()

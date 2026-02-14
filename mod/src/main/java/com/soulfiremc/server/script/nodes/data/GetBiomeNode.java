@@ -30,9 +30,10 @@ public final class GetBiomeNode extends AbstractScriptNode {
     .displayName("Get Biome")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get biome from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("biome", "Biome", PortType.STRING, "Current biome identifier")
     )
     .description("Gets the biome at the bot's current position")

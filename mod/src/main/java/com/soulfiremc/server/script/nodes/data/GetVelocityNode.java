@@ -31,9 +31,10 @@ public final class GetVelocityNode extends AbstractScriptNode {
     .displayName("Get Velocity")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get velocity from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("velocity", "Velocity", PortType.VECTOR3, "Current velocity vector"),
       PortDefinition.output("speed", "Speed", PortType.NUMBER, "Movement speed (magnitude)")
     )

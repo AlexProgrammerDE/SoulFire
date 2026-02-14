@@ -30,9 +30,10 @@ public final class GetWeatherNode extends AbstractScriptNode {
     .displayName("Get Weather")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get weather from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("isRaining", "Is Raining", PortType.BOOLEAN, "True if raining"),
       PortDefinition.output("isThundering", "Is Thundering", PortType.BOOLEAN, "True if thunderstorm"),
       PortDefinition.output("rainLevel", "Rain Level", PortType.NUMBER, "Rain intensity (0-1)"),

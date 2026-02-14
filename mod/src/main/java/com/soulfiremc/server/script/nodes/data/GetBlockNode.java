@@ -33,12 +33,13 @@ public final class GetBlockNode extends AbstractScriptNode {
     .displayName("Get Block")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to query world data from"),
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Block X coordinate"),
       PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Block Y coordinate"),
       PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Block Z coordinate")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("blockId", "Block ID", PortType.STRING, "The block's ID"),
       PortDefinition.output("isAir", "Is Air", PortType.BOOLEAN, "Whether the block is air"),
       PortDefinition.output("isSolid", "Is Solid", PortType.BOOLEAN, "Whether the block is solid")

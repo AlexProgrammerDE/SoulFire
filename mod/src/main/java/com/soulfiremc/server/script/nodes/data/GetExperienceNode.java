@@ -30,9 +30,10 @@ public final class GetExperienceNode extends AbstractScriptNode {
     .displayName("Get Experience")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get experience from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("level", "Level", PortType.NUMBER, "Current experience level"),
       PortDefinition.output("totalXp", "Total XP", PortType.NUMBER, "Total experience points"),
       PortDefinition.output("xpProgress", "XP Progress", PortType.NUMBER, "Progress to next level (0-1)")

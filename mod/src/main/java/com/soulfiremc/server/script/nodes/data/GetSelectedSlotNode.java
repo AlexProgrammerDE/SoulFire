@@ -31,9 +31,10 @@ public final class GetSelectedSlotNode extends AbstractScriptNode {
     .displayName("Get Selected Slot")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get selected slot from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("slot", "Slot", PortType.NUMBER, "Selected hotbar slot (0-8)"),
       PortDefinition.output("itemId", "Item ID", PortType.STRING, "Item in selected slot"),
       PortDefinition.output("itemCount", "Count", PortType.NUMBER, "Stack count in selected slot")

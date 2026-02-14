@@ -30,9 +30,10 @@ public final class GetTimeNode extends AbstractScriptNode {
     .displayName("Get Time")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get time from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("gameTime", "Game Time", PortType.NUMBER, "Total game time in ticks"),
       PortDefinition.output("dayTime", "Day Time", PortType.NUMBER, "Time of day (0-24000)"),
       PortDefinition.output("isDay", "Is Day", PortType.BOOLEAN, "True if daytime (6000-18000)"),

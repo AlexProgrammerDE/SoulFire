@@ -30,9 +30,10 @@ public final class GetHungerNode extends AbstractScriptNode {
     .displayName("Get Hunger")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get hunger from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("foodLevel", "Food Level", PortType.NUMBER, "Current food level (0-20)"),
       PortDefinition.output("saturation", "Saturation", PortType.NUMBER, "Current saturation")
     )

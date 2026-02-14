@@ -30,9 +30,10 @@ public final class GetHealthNode extends AbstractScriptNode {
     .displayName("Get Health")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to get health from")
+      PortDefinition.execIn()
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("health", "Health", PortType.NUMBER, "Current health"),
       PortDefinition.output("maxHealth", "Max Health", PortType.NUMBER, "Maximum health")
     )

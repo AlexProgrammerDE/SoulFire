@@ -34,7 +34,6 @@ public final class LookAtNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to control"),
       PortDefinition.input("target", "Target", PortType.VECTOR3, "Position to look at")
     )
     .addOutputs(

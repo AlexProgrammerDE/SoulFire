@@ -35,10 +35,11 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
     .displayName("Get Target Block")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.input("bot", "Bot", PortType.BOT, "The bot to raycast from"),
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "5", "Maximum raycast distance")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "True if a block was found"),
       PortDefinition.output("blockId", "Block ID", PortType.STRING, "Block identifier"),
       PortDefinition.output("position", "Position", PortType.VECTOR3, "Block position"),
