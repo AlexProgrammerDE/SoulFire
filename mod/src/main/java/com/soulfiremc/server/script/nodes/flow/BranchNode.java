@@ -38,8 +38,8 @@ public final class BranchNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("condition", "Condition", PortType.BOOLEAN, "false", "Condition to evaluate")
     )
     .addOutputs(
-      PortDefinition.output("exec_true", "True", PortType.EXEC, "Executes if condition is true"),
-      PortDefinition.output("exec_false", "False", PortType.EXEC, "Executes if condition is false"),
+      PortDefinition.output(StandardPorts.EXEC_TRUE, "True", PortType.EXEC, "Executes if condition is true"),
+      PortDefinition.output(StandardPorts.EXEC_FALSE, "False", PortType.EXEC, "Executes if condition is false"),
       PortDefinition.output("branch", "Branch", PortType.STRING, "Which branch was taken"),
       PortDefinition.output("condition", "Condition", PortType.BOOLEAN, "The evaluated condition")
     )
@@ -62,7 +62,7 @@ public final class BranchNode extends AbstractScriptNode {
     var outputs = new HashMap<String, NodeValue>();
     outputs.put("branch", NodeValue.of(condition ? "true" : "false"));
     outputs.put("condition", NodeValue.of(condition));
-    outputs.put(condition ? "exec_true" : "exec_false", NodeValue.ofBoolean(true));
+    outputs.put(condition ? StandardPorts.EXEC_TRUE : StandardPorts.EXEC_FALSE, NodeValue.ofBoolean(true));
     return completedMono(outputs);
   }
 }

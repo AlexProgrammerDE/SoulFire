@@ -36,8 +36,8 @@ public final class ForEachBotNode extends AbstractScriptNode {
       PortDefinition.listInput("bots", "Bots", PortType.BOT, "List of bots to iterate")
     )
     .addOutputs(
-      PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each bot"),
-      PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when iteration completes"),
+      PortDefinition.output(StandardPorts.EXEC_LOOP, "Loop", PortType.EXEC, "Executes for each bot"),
+      PortDefinition.output(StandardPorts.EXEC_DONE, "Done", PortType.EXEC, "Executes when iteration completes"),
       PortDefinition.output("bot", "Bot", PortType.BOT, "Current bot in iteration"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current bot index"),
       PortDefinition.output("count", "Count", PortType.NUMBER, "Total number of bots"),
@@ -62,14 +62,14 @@ public final class ForEachBotNode extends AbstractScriptNode {
     return Flux.range(0, count)
       .concatMap(i -> {
         var currentBot = botValues.get(i).asBot();
-        return runtime.executeDownstream("exec_loop", Map.of(
+        return runtime.executeDownstream(StandardPorts.EXEC_LOOP, Map.of(
           "bot", currentBot != null ? NodeValue.ofBot(currentBot) : NodeValue.ofNull(),
           "index", NodeValue.ofNumber(i),
           "count", NodeValue.ofNumber(count),
           "isComplete", NodeValue.ofBoolean(false)
         ));
       })
-      .then(runtime.executeDownstream("exec_done", Map.of(
+      .then(runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
         "bot", NodeValue.ofNull(),
         "index", NodeValue.ofNumber(count),
         "count", NodeValue.ofNumber(count),

@@ -24,10 +24,9 @@ import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
 
 /// Reactive execution context for scripts.
-/// Implements NodeRuntime to provide the API surface for nodes.
 /// Per-invocation state (output sinks) lives in ExecutionRun, not here.
 @Getter
-public final class ReactiveScriptContext implements NodeRuntime {
+public final class ReactiveScriptContext {
   private final ScriptStateStore stateStore = new ScriptStateStore();
   private final InstanceManager instance;
   private final Scheduler reactorScheduler;
@@ -47,12 +46,10 @@ public final class ReactiveScriptContext implements NodeRuntime {
     this.eventListener = eventListener;
   }
 
-  @Override
   public SoulFireScheduler scheduler() {
     return instance.scheduler();
   }
 
-  @Override
   public void log(String level, String message) {
     eventListener.onLog(level, message);
   }

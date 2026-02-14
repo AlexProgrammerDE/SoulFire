@@ -132,6 +132,7 @@ public interface PortDefinition {
 
   /// Whether this input accepts multiple connections (Blender-style multi-input).
   /// When true, all connected values are collected into a list.
+  /// NOTE: The reactive engine does not yet implement multi-input collection.
   @Value.Default
   default boolean multiInput() {
     return false;

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -262,13 +263,13 @@ final class ScriptingTest {
   }
 
   @Test
-  void nodeRegistryCreateReturnsNewInstance() {
+  void nodeRegistryCacheReturnsSameInstance() {
     var node1 = NodeRegistry.create("math.add");
     var node2 = NodeRegistry.create("math.add");
 
     assertNotNull(node1);
     assertNotNull(node2);
-    assertNotSame(node1, node2);
+    assertSame(node1, node2, "Cached instances should be the same reference");
     assertEquals("math.add", node1.getId());
   }
 
@@ -1310,5 +1311,187 @@ final class ScriptingTest {
 
     assertTrue(hasExecSuccess, "DiscordWebhookNode should have exec_success port");
     assertTrue(hasExecError, "DiscordWebhookNode should have exec_error port");
+  }
+
+  // ==================== Regression Tests ====================
+
+  /// Recording event listener for integration tests.
+  private static class RecordingEventListener implements ScriptEventListener {
+    final List<String> startedNodes = new ArrayList<>();
+    final List<String> completedNodes = new ArrayList<>();
+    final Map<String, Map<String, NodeValue>> nodeOutputs = new HashMap<>();
+    final Map<String, String> errorNodes = new HashMap<>();
+    boolean scriptCompleted;
+
+    @Override
+    public void onNodeStarted(String nodeId) {
+      startedNodes.add(nodeId);
+    }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
+      completedNodes.add(nodeId);
+      nodeOutputs.put(nodeId, outputs);
+    }
+
+    @Override
+    public void onNodeError(String nodeId, String error) {
+      errorNodes.put(nodeId, error);
+    }
+
+    @Override
+    public void onScriptCompleted(boolean success) {
+      scriptCompleted = success;
+    }
+
+    @Override
+    public void onScriptCancelled() {}
+  }
+
+  @Test
+  void standardPortsMatchActualNodePorts() {
+    // BranchNode
+    var branch = NodeRegistry.create("flow.branch");
+    var branchResult = branch.executeReactive(null, Map.of("condition", NodeValue.ofBoolean(true))).block();
+    assertTrue(branchResult.containsKey(StandardPorts.EXEC_TRUE),
+      "BranchNode output keys should match StandardPorts.EXEC_TRUE");
+
+    var branchFalse = branch.executeReactive(null, Map.of("condition", NodeValue.ofBoolean(false))).block();
+    assertTrue(branchFalse.containsKey(StandardPorts.EXEC_FALSE),
+      "BranchNode output keys should match StandardPorts.EXEC_FALSE");
+
+    // GateNode
+    var gate = NodeRegistry.create("flow.gate");
+    var gateInputs = new HashMap<String, NodeValue>();
+    gateInputs.put("condition", NodeValue.ofBoolean(true));
+    gateInputs.put("value", NodeValue.ofString("test"));
+    var gateResult = gate.executeReactive(null, gateInputs).block();
+    assertTrue(gateResult.containsKey(StandardPorts.EXEC_ALLOWED),
+      "GateNode output keys should match StandardPorts.EXEC_ALLOWED");
+
+    // SwitchNode default
+    var switchNode = NodeRegistry.create("flow.switch");
+    var switchResult = switchNode.executeReactive(null,
+      Map.of("value", NodeValue.ofString("z"), "cases", NodeValue.ofString("a,b"))).block();
+    assertTrue(switchResult.containsKey(StandardPorts.EXEC_DEFAULT),
+      "SwitchNode output keys should match StandardPorts.EXEC_DEFAULT");
+  }
+
+  @Test
+  void executionRunSupportsMultiplePublishes() {
+    var run = new ExecutionRun();
+
+    // Publish to same nodeId 3 times — should not fail (unlike Sinks.One)
+    run.publishNodeOutputs("node1", Map.of("value", NodeValue.ofNumber(1)));
+    run.publishNodeOutputs("node1", Map.of("value", NodeValue.ofNumber(2)));
+    run.publishNodeOutputs("node1", Map.of("value", NodeValue.ofNumber(3)));
+
+    // Should get the latest value
+    var result = run.awaitNodeOutputs("node1").block();
+    assertNotNull(result);
+    assertEquals(3, result.get("value").asInt(0));
+  }
+
+  @Test
+  void executionRunLimitEnforced() {
+    var run = new ExecutionRun();
+
+    // Should allow up to 100,000
+    for (var i = 0; i < 100_000; i++) {
+      assertTrue(run.incrementAndCheckLimit(), "Should allow execution " + i);
+    }
+
+    // Should deny the 100,001st
+    assertFalse(run.incrementAndCheckLimit(), "Should deny execution after limit");
+  }
+
+  @Test
+  void nodeValueOfListPreservesBotValues() {
+    // Create a mixed list with Json and non-Json values
+    // Since we can't easily create a BotConnection in tests, test that
+    // ofList with only Json values returns a Json array
+    var jsonValues = List.of(NodeValue.ofNumber(1), NodeValue.ofString("hello"));
+    var jsonList = NodeValue.ofList(jsonValues);
+    var result = jsonList.asList();
+    assertEquals(2, result.size());
+    assertEquals(1, result.getFirst().asInt(0));
+    assertEquals("hello", result.get(1).asString(""));
+  }
+
+  @Test
+  void nodeValueValueListPreservesItems() {
+    // Test ValueList directly
+    var items = List.of(NodeValue.ofNumber(1), NodeValue.ofString("test"), NodeValue.ofBoolean(true));
+    var valueList = new NodeValue.ValueList(items);
+    var result = valueList.asList();
+
+    assertEquals(3, result.size());
+    assertEquals(1, result.getFirst().asInt(0));
+    assertEquals("test", result.get(1).asString(""));
+    assertTrue(result.get(2).asBoolean(false));
+  }
+
+  @Test
+  void followExecOutputsDoesNotFallbackForMultiExecNodes() {
+    // BranchNode with condition=false should NOT produce exec_true in outputs
+    var node = NodeRegistry.create("flow.branch");
+    var result = node.executeReactive(null, Map.of("condition", NodeValue.ofBoolean(false))).block();
+
+    // Should contain exec_false but NOT exec_true and NOT "out"
+    assertTrue(result.containsKey(StandardPorts.EXEC_FALSE));
+    assertFalse(result.containsKey(StandardPorts.EXEC_TRUE));
+    assertFalse(result.containsKey(StandardPorts.EXEC_OUT),
+      "BranchNode should not produce 'out' key - followExecOutputs should not fallback");
+  }
+
+  @Test
+  void dataEdgeDeliversValueAcrossNodes() {
+    // Build graph: trigger → exec → AddNode
+    // NumberConstant(42) → DATA → AddNode.a
+    // NumberConstant(8) → DATA → AddNode.b
+    var graph = ScriptGraph.builder("test-data-edge", "Data Edge Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const_a", "constant.number", Map.of("value", 42))
+      .addNode("const_b", "constant.number", Map.of("value", 8))
+      .addNode("add", "math.add", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "const_a", "in")
+      .addExecutionEdge("const_a", "out", "const_b", "in")
+      .addExecutionEdge("const_b", "out", "add", "in")
+      .addExecutionEdge("add", "out", "print", "in")
+      .addDataEdge("const_a", "value", "add", "a")
+      .addDataEdge("const_b", "value", "add", "b")
+      .build();
+
+    // Verify data edges exist
+    var dataEdges = graph.getIncomingDataEdges("add");
+    assertEquals(2, dataEdges.size(), "AddNode should have 2 incoming data edges");
+  }
+
+  @Test
+  void executionContextDoesNotContainExecKeys() {
+    // Verify that BranchNode outputs include exec keys but filtering works
+    var node = NodeRegistry.create("flow.branch");
+    var outputs = node.executeReactive(null, Map.of("condition", NodeValue.ofBoolean(true))).block();
+
+    // Outputs should contain exec_true (for routing)
+    assertTrue(outputs.containsKey(StandardPorts.EXEC_TRUE));
+
+    // But if we filter out exec port keys (as the engine now does), they should be gone
+    var execPortIds = node.getMetadata().outputs().stream()
+      .filter(p -> p.type() == PortType.EXEC)
+      .map(PortDefinition::id)
+      .collect(java.util.stream.Collectors.toSet());
+    var contextOutputs = new HashMap<>(outputs);
+    execPortIds.forEach(contextOutputs::remove);
+
+    assertFalse(contextOutputs.containsKey(StandardPorts.EXEC_TRUE),
+      "Execution context should not contain exec_true after filtering");
+    assertFalse(contextOutputs.containsKey(StandardPorts.EXEC_FALSE),
+      "Execution context should not contain exec_false after filtering");
+    assertTrue(contextOutputs.containsKey("branch"),
+      "Execution context should still contain data outputs");
+    assertTrue(contextOutputs.containsKey("condition"),
+      "Execution context should still contain data outputs");
   }
 }

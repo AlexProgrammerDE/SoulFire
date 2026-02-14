@@ -36,8 +36,8 @@ public final class LoopNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("count", "Count", PortType.NUMBER, "10", "Number of iterations")
     )
     .addOutputs(
-      PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each iteration"),
-      PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when loop completes"),
+      PortDefinition.output(StandardPorts.EXEC_LOOP, "Loop", PortType.EXEC, "Executes for each iteration"),
+      PortDefinition.output(StandardPorts.EXEC_DONE, "Done", PortType.EXEC, "Executes when loop completes"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current iteration index"),
       PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether loop is done"),
       PortDefinition.output("count", "Count", PortType.NUMBER, "Total iteration count")
@@ -58,12 +58,12 @@ public final class LoopNode extends AbstractScriptNode {
     var count = getIntInput(inputs, "count", 10);
 
     return Flux.range(0, count)
-      .concatMap(i -> runtime.executeDownstream("exec_loop", Map.of(
+      .concatMap(i -> runtime.executeDownstream(StandardPorts.EXEC_LOOP, Map.of(
         "index", NodeValue.ofNumber(i),
         "isComplete", NodeValue.ofBoolean(false),
         "count", NodeValue.ofNumber(count)
       )))
-      .then(runtime.executeDownstream("exec_done", Map.of(
+      .then(runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
         "index", NodeValue.ofNumber(count),
         "isComplete", NodeValue.ofBoolean(true),
         "count", NodeValue.ofNumber(count)

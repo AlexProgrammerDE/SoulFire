@@ -45,8 +45,8 @@ public final class WebFetchNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("timeout", "Timeout", PortType.NUMBER, "30000", "Timeout in milliseconds")
     )
     .addOutputs(
-      PortDefinition.output("exec_success", "Success", PortType.EXEC, "Executes on successful request"),
-      PortDefinition.output("exec_error", "Error", PortType.EXEC, "Executes on failed request"),
+      PortDefinition.output(StandardPorts.EXEC_SUCCESS, "Success", PortType.EXEC, "Executes on successful request"),
+      PortDefinition.output(StandardPorts.EXEC_ERROR, "Error", PortType.EXEC, "Executes on failed request"),
       PortDefinition.output("response", "Response", PortType.STRING, "Response body as string"),
       PortDefinition.output("statusCode", "Status Code", PortType.NUMBER, "HTTP status code"),
       PortDefinition.output("responseHeaders", "Response Headers", PortType.STRING, "Response headers as JSON object"),
@@ -76,7 +76,7 @@ public final class WebFetchNode extends AbstractScriptNode {
 
     if (url.isEmpty()) {
       return completedMono(results(
-        "exec_error", true,
+        StandardPorts.EXEC_ERROR, true,
         "response", "",
         "statusCode", 0,
         "responseHeaders", "{}",
@@ -135,7 +135,7 @@ public final class WebFetchNode extends AbstractScriptNode {
         return buf.asString(StandardCharsets.UTF_8)
           .defaultIfEmpty("")
           .map(responseBody -> results(
-            isSuccess ? "exec_success" : "exec_error", true,
+            isSuccess ? StandardPorts.EXEC_SUCCESS : StandardPorts.EXEC_ERROR, true,
             "response", responseBody,
             "statusCode", statusCode,
             "responseHeaders", GSON.toJson(responseHeadersObj),
@@ -144,7 +144,7 @@ public final class WebFetchNode extends AbstractScriptNode {
           ));
       })
       .onErrorResume(e -> Mono.just(results(
-        "exec_error", true,
+        StandardPorts.EXEC_ERROR, true,
         "response", "",
         "statusCode", 0,
         "responseHeaders", "{}",

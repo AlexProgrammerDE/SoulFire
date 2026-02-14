@@ -52,6 +52,7 @@ import java.util.function.Supplier;
 /// Provides factory methods to create node instances by their type identifier.
 public final class NodeRegistry {
   private static final Map<String, Supplier<ScriptNode>> NODES = new HashMap<>();
+  private static final Map<String, ScriptNode> CACHED_INSTANCES = new HashMap<>();
 
   static {
     // Trigger Nodes
@@ -233,11 +234,13 @@ public final class NodeRegistry {
 
   /// Registers a node type with its factory.
   /// The type identifier is derived from the node's metadata.
+  /// Caches the initial instance for reuse by create(), getAllMetadata(), etc.
   /// @param factory the factory to create node instances
   public static void register(Supplier<ScriptNode> factory) {
     var node = factory.get();
     var type = node.getId();
     NODES.put(type, factory);
+    CACHED_INSTANCES.put(type, node);
   }
 
   /// Registers a node type with an explicit type identifier.
@@ -247,16 +250,23 @@ public final class NodeRegistry {
     NODES.put(type, factory);
   }
 
-  /// Creates a new instance of a node by its type.
+  /// Gets a cached instance of a node by its type.
+  /// Node instances are stateless, so the same instance can be safely reused.
   /// @param type the node type identifier
-  /// @return a new node instance
+  /// @return the cached node instance
   /// @throws IllegalArgumentException if the type is not registered
   public static ScriptNode create(String type) {
+    var cached = CACHED_INSTANCES.get(type);
+    if (cached != null) {
+      return cached;
+    }
     var factory = NODES.get(type);
     if (factory == null) {
       throw new IllegalArgumentException("Unknown node type: " + type);
     }
-    return factory.get();
+    var node = factory.get();
+    CACHED_INSTANCES.put(type, node);
+    return node;
   }
 
   /// Checks if a node type is registered.
@@ -281,8 +291,7 @@ public final class NodeRegistry {
   /// Gets metadata for all registered node types.
   /// @return list of all node metadata
   public static List<NodeMetadata> getAllMetadata() {
-    return NODES.values().stream()
-      .map(Supplier::get)
+    return CACHED_INSTANCES.values().stream()
       .map(ScriptNode::getMetadata)
       .toList();
   }
@@ -292,8 +301,7 @@ public final class NodeRegistry {
   /// @param includeDeprecated whether to include deprecated nodes
   /// @return list of matching node metadata
   public static List<NodeMetadata> getFilteredMetadata(String categoryId, boolean includeDeprecated) {
-    return NODES.values().stream()
-      .map(Supplier::get)
+    return CACHED_INSTANCES.values().stream()
       .map(ScriptNode::getMetadata)
       .filter(m -> categoryId == null || categoryId.isEmpty() || m.category().id().equals(categoryId))
       .filter(m -> includeDeprecated || !m.deprecated())

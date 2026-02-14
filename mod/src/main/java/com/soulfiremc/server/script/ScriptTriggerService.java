@@ -17,9 +17,11 @@
  */
 package com.soulfiremc.server.script;
 
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.SoulFireEvent;
 import com.soulfiremc.server.api.event.bot.*;
+import com.soulfiremc.server.script.nodes.NodeRegistry;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
@@ -121,7 +123,8 @@ public final class ScriptTriggerService {
           ChatMessageReceiveEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
-            inputs.put("message", NodeValue.ofString(event.parseToPlainText()));
+            inputs.put("message", NodeValue.ofString(
+              SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.serialize(event.message())));
             inputs.put("messagePlainText", NodeValue.ofString(event.parseToPlainText()));
             inputs.put("timestamp", NodeValue.ofNumber(event.timestamp()));
             return inputs;
@@ -170,13 +173,15 @@ public final class ScriptTriggerService {
           }, listeners, "OnDamage");
 
         case "trigger.on_interval" -> {
-          var intervalMs = 1000L;
+          var nodeImpl = NodeRegistry.create(node.type());
+          var resolvedInputs = new HashMap<>(nodeImpl.getDefaultInputs());
           if (node.defaultInputs() != null) {
-            var intervalValue = node.defaultInputs().get("intervalMs");
-            if (intervalValue instanceof Number num) {
-              intervalMs = num.longValue();
+            for (var entry : node.defaultInputs().entrySet()) {
+              resolvedInputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
             }
           }
+          var intervalValue = resolvedInputs.get("intervalMs");
+          var intervalMs = intervalValue != null ? intervalValue.asLong(1000L) : 1000L;
 
           var executionCount = new AtomicLong(0);
           var finalIntervalMs = intervalMs;
@@ -258,14 +263,7 @@ public final class ScriptTriggerService {
       return;
     }
 
-    // First, fire any OnScriptEnd triggers synchronously
-    for (var listener : listeners) {
-      if (listener instanceof ScriptEndTrigger endTrigger) {
-        endTrigger.fire();
-      }
-    }
-
-    // Then clean up all listeners
+    // 1. Cancel interval tasks and unregister event listeners
     for (var listener : listeners) {
       if (listener instanceof CancellableTask task) {
         task.cancel();
@@ -274,7 +272,7 @@ public final class ScriptTriggerService {
       }
     }
 
-    // Clean up sinks and subscriptions for this script
+    // 2. Clean up sinks and subscriptions for this script
     var keysToRemove = triggerSinks.keySet().stream()
       .filter(key -> key.startsWith(scriptId + ":"))
       .toList();
@@ -287,6 +285,13 @@ public final class ScriptTriggerService {
       var sink = triggerSinks.remove(key);
       if (sink != null) {
         sink.tryEmitComplete();
+      }
+    }
+
+    // 3. Fire OnScriptEnd triggers last, after all other triggers are cleaned up
+    for (var listener : listeners) {
+      if (listener instanceof ScriptEndTrigger endTrigger) {
+        endTrigger.fire();
       }
     }
 

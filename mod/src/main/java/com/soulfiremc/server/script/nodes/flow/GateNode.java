@@ -41,8 +41,8 @@ public final class GateNode extends AbstractScriptNode {
       PortDefinition.input("value", "Value", PortType.ANY, "Value to pass through")
     )
     .addOutputs(
-      PortDefinition.output("exec_allowed", "Allowed", PortType.EXEC, "Executes if condition is true"),
-      PortDefinition.output("exec_blocked", "Blocked", PortType.EXEC, "Executes if condition is false"),
+      PortDefinition.output(StandardPorts.EXEC_ALLOWED, "Allowed", PortType.EXEC, "Executes if condition is true"),
+      PortDefinition.output(StandardPorts.EXEC_BLOCKED, "Blocked", PortType.EXEC, "Executes if condition is false"),
       PortDefinition.output("passed", "Passed", PortType.BOOLEAN, "Whether execution was allowed"),
       PortDefinition.output("value", "Value", PortType.ANY, "The passed-through value")
     )
@@ -65,7 +65,7 @@ public final class GateNode extends AbstractScriptNode {
     var outputs = new HashMap<String, NodeValue>();
     outputs.put("passed", NodeValue.of(condition));
     outputs.put("value", condition ? value : NodeValue.ofNull());
-    outputs.put(condition ? "exec_allowed" : "exec_blocked", NodeValue.ofBoolean(true));
+    outputs.put(condition ? StandardPorts.EXEC_ALLOWED : StandardPorts.EXEC_BLOCKED, NodeValue.ofBoolean(true));
     return completedMono(outputs);
   }
 }

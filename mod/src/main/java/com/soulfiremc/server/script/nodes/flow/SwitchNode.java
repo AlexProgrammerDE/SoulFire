@@ -40,15 +40,15 @@ public final class SwitchNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("cases", "Cases", PortType.STRING, "\"case1,case2,case3\"", "Comma-separated case values")
     )
     .addOutputs(
-      PortDefinition.output("exec_default", "Default", PortType.EXEC, "Executes if no case matches"),
-      PortDefinition.output("exec_case0", "Case 0", PortType.EXEC, "Executes if case 0 matches"),
-      PortDefinition.output("exec_case1", "Case 1", PortType.EXEC, "Executes if case 1 matches"),
-      PortDefinition.output("exec_case2", "Case 2", PortType.EXEC, "Executes if case 2 matches"),
-      PortDefinition.output("exec_case3", "Case 3", PortType.EXEC, "Executes if case 3 matches"),
-      PortDefinition.output("exec_case4", "Case 4", PortType.EXEC, "Executes if case 4 matches"),
-      PortDefinition.output("exec_case5", "Case 5", PortType.EXEC, "Executes if case 5 matches"),
-      PortDefinition.output("exec_case6", "Case 6", PortType.EXEC, "Executes if case 6 matches"),
-      PortDefinition.output("exec_case7", "Case 7", PortType.EXEC, "Executes if case 7 matches"),
+      PortDefinition.output(StandardPorts.EXEC_DEFAULT, "Default", PortType.EXEC, "Executes if no case matches"),
+      PortDefinition.output(StandardPorts.exec("case0"), "Case 0", PortType.EXEC, "Executes if case 0 matches"),
+      PortDefinition.output(StandardPorts.exec("case1"), "Case 1", PortType.EXEC, "Executes if case 1 matches"),
+      PortDefinition.output(StandardPorts.exec("case2"), "Case 2", PortType.EXEC, "Executes if case 2 matches"),
+      PortDefinition.output(StandardPorts.exec("case3"), "Case 3", PortType.EXEC, "Executes if case 3 matches"),
+      PortDefinition.output(StandardPorts.exec("case4"), "Case 4", PortType.EXEC, "Executes if case 4 matches"),
+      PortDefinition.output(StandardPorts.exec("case5"), "Case 5", PortType.EXEC, "Executes if case 5 matches"),
+      PortDefinition.output(StandardPorts.exec("case6"), "Case 6", PortType.EXEC, "Executes if case 6 matches"),
+      PortDefinition.output(StandardPorts.exec("case7"), "Case 7", PortType.EXEC, "Executes if case 7 matches"),
       PortDefinition.output("branch", "Branch", PortType.STRING, "Which case matched"),
       PortDefinition.output("caseIndex", "Case Index", PortType.NUMBER, "Index of matched case (-1 for default)"),
       PortDefinition.output("matched", "Matched", PortType.BOOLEAN, "Whether any case matched")
@@ -76,7 +76,7 @@ public final class SwitchNode extends AbstractScriptNode {
         outputs.put("branch", NodeValue.of("case" + i));
         outputs.put("caseIndex", NodeValue.of(i));
         outputs.put("matched", NodeValue.of(true));
-        outputs.put("exec_case" + i, NodeValue.ofBoolean(true));
+        outputs.put(StandardPorts.exec("case" + i), NodeValue.ofBoolean(true));
         return completedMono(outputs);
       }
     }
@@ -86,7 +86,7 @@ public final class SwitchNode extends AbstractScriptNode {
     outputs.put("branch", NodeValue.of("default"));
     outputs.put("caseIndex", NodeValue.of(-1));
     outputs.put("matched", NodeValue.of(false));
-    outputs.put("exec_default", NodeValue.ofBoolean(true));
+    outputs.put(StandardPorts.EXEC_DEFAULT, NodeValue.ofBoolean(true));
     return completedMono(outputs);
   }
 }

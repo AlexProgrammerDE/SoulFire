@@ -30,7 +30,7 @@ public final class ScriptGraph {
   private final String scriptName;
   private final Map<String, GraphNode> nodes;
   private final List<GraphEdge> edges;
-  private final Map<String, List<GraphEdge>> outgoingExecutionEdges;
+  private final Map<String, List<GraphEdge>> outgoingEdgesByHandle;
   private final Map<String, List<GraphEdge>> incomingEdgesByHandle;
   private final Map<String, List<GraphEdge>> incomingDataEdgesByNode;
 
@@ -62,7 +62,7 @@ public final class ScriptGraph {
       }
     }
 
-    this.outgoingExecutionEdges = Collections.unmodifiableMap(outgoing);
+    this.outgoingEdgesByHandle = Collections.unmodifiableMap(outgoing);
     this.incomingEdgesByHandle = Collections.unmodifiableMap(incomingByHandle);
     this.incomingDataEdgesByNode = Collections.unmodifiableMap(incomingDataByNode);
   }
@@ -110,7 +110,7 @@ public final class ScriptGraph {
   /// @return list of target node IDs to execute next
   public List<String> getNextExecutionNodes(String nodeId, String outputHandle) {
     var key = nodeId + ":" + outputHandle;
-    var edges = outgoingExecutionEdges.get(key);
+    var edges = outgoingEdgesByHandle.get(key);
     if (edges == null) {
       return List.of();
     }
@@ -193,7 +193,7 @@ public final class ScriptGraph {
   /// @param id              unique node identifier
   /// @param type            node type identifier (e.g., "action.pathfind")
   /// @param defaultInputs   default values for input ports
-  /// @param multiInputPorts set of port names that accept multiple connections
+  /// @param multiInputPorts set of port names that accept multiple connections (NOTE: the reactive engine does not yet implement multi-input collection)
   /// @param muted           whether the node is muted (bypassed during execution)
   public record GraphNode(
     String id,

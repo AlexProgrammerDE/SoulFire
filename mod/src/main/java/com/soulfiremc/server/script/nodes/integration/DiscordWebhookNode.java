@@ -44,8 +44,8 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("embedJson", "Embed JSON", PortType.STRING, "\"\"", "Optional embed as JSON")
     )
     .addOutputs(
-      PortDefinition.output("exec_success", "Success", PortType.EXEC, "Success execution path"),
-      PortDefinition.output("exec_error", "Error", PortType.EXEC, "Error execution path"),
+      PortDefinition.output(StandardPorts.EXEC_SUCCESS, "Success", PortType.EXEC, "Success execution path"),
+      PortDefinition.output(StandardPorts.EXEC_ERROR, "Error", PortType.EXEC, "Error execution path"),
       PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether message was sent"),
       PortDefinition.output("errorMessage", "Error Message", PortType.STRING, "Error details if failed")
     )
@@ -72,7 +72,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
 
     if (webhookUrl.isEmpty()) {
       return completedMono(results(
-        "exec_error", true,
+        StandardPorts.EXEC_ERROR, true,
         "success", false,
         "errorMessage", "Webhook URL is required"
       ));
@@ -80,7 +80,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
 
     if (content.isEmpty() && embedJson.isEmpty()) {
       return completedMono(results(
-        "exec_error", true,
+        StandardPorts.EXEC_ERROR, true,
         "success", false,
         "errorMessage", "Either content or embed is required"
       ));
@@ -106,7 +106,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
         payload.add("embeds", embeds);
       } catch (Exception e) {
         return completedMono(results(
-          "exec_error", true,
+          StandardPorts.EXEC_ERROR, true,
           "success", false,
           "errorMessage", "Invalid embed JSON: " + e.getMessage()
         ));
@@ -124,7 +124,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
         var statusCode = resp.status().code();
         if (statusCode >= 200 && statusCode < 300) {
           return Mono.just(results(
-            "exec_success", true,
+            StandardPorts.EXEC_SUCCESS, true,
             "success", true,
             "errorMessage", ""
           ));
@@ -132,14 +132,14 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
           return buf.asString(StandardCharsets.UTF_8)
             .defaultIfEmpty("")
             .map(body -> results(
-              "exec_error", true,
+              StandardPorts.EXEC_ERROR, true,
               "success", false,
               "errorMessage", "HTTP " + statusCode + ": " + body
             ));
         }
       })
       .onErrorResume(e -> Mono.just(results(
-        "exec_error", true,
+        StandardPorts.EXEC_ERROR, true,
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       )))

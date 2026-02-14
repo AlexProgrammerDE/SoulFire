@@ -36,8 +36,8 @@ public final class ForEachNode extends AbstractScriptNode {
       PortDefinition.listInput("items", "Items", PortType.ANY, "List of items to iterate")
     )
     .addOutputs(
-      PortDefinition.output("exec_loop", "Loop", PortType.EXEC, "Executes for each item"),
-      PortDefinition.output("exec_done", "Done", PortType.EXEC, "Executes when iteration completes"),
+      PortDefinition.output(StandardPorts.EXEC_LOOP, "Loop", PortType.EXEC, "Executes for each item"),
+      PortDefinition.output(StandardPorts.EXEC_DONE, "Done", PortType.EXEC, "Executes when iteration completes"),
       PortDefinition.output("item", "Item", PortType.ANY, "Current item"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current index"),
       PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done"),
@@ -60,13 +60,13 @@ public final class ForEachNode extends AbstractScriptNode {
     var size = items.size();
 
     return Flux.range(0, size)
-      .concatMap(i -> runtime.executeDownstream("exec_loop", Map.of(
+      .concatMap(i -> runtime.executeDownstream(StandardPorts.EXEC_LOOP, Map.of(
         "item", items.get(i),
         "index", NodeValue.ofNumber(i),
         "isComplete", NodeValue.ofBoolean(false),
         "size", NodeValue.ofNumber(size)
       )))
-      .then(runtime.executeDownstream("exec_done", Map.of(
+      .then(runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
         "item", NodeValue.ofNull(),
         "index", NodeValue.ofNumber(size),
         "isComplete", NodeValue.ofBoolean(true),

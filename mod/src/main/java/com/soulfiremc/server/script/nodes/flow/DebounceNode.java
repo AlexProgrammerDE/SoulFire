@@ -39,8 +39,8 @@ public final class DebounceNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("key", "Key", PortType.STRING, "\"default\"", "Unique key for this debounce")
     )
     .addOutputs(
-      PortDefinition.output("exec_allowed", "Allowed", PortType.EXEC, "Execution path if cooldown elapsed"),
-      PortDefinition.output("exec_denied", "Denied", PortType.EXEC, "Execution path if still in cooldown"),
+      PortDefinition.output(StandardPorts.EXEC_ALLOWED, "Allowed", PortType.EXEC, "Execution path if cooldown elapsed"),
+      PortDefinition.output(StandardPorts.EXEC_DENIED, "Denied", PortType.EXEC, "Execution path if still in cooldown"),
       PortDefinition.output("allowed", "Allowed", PortType.BOOLEAN, "Whether execution was allowed"),
       PortDefinition.output("remainingMs", "Remaining (ms)", PortType.NUMBER, "Milliseconds until next allowed execution")
     )
@@ -77,7 +77,7 @@ public final class DebounceNode extends AbstractScriptNode {
           var outputs = new HashMap<String, NodeValue>();
           outputs.put("allowed", NodeValue.ofBoolean(true));
           outputs.put("remainingMs", NodeValue.ofNumber(0L));
-          outputs.put("exec_allowed", NodeValue.ofBoolean(true));
+          outputs.put(StandardPorts.EXEC_ALLOWED, NodeValue.ofBoolean(true));
           return completedMono(outputs);
         }
         // Lost race, retry with new value
@@ -85,7 +85,7 @@ public final class DebounceNode extends AbstractScriptNode {
         var outputs = new HashMap<String, NodeValue>();
         outputs.put("allowed", NodeValue.ofBoolean(false));
         outputs.put("remainingMs", NodeValue.ofNumber(cooldownMs - elapsed));
-        outputs.put("exec_denied", NodeValue.ofBoolean(true));
+        outputs.put(StandardPorts.EXEC_DENIED, NodeValue.ofBoolean(true));
         return completedMono(outputs);
       }
     }

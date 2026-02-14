@@ -35,14 +35,14 @@ public final class SequenceNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("branchCount", "Branch Count", PortType.NUMBER, "2", "Number of branches to execute")
     )
     .addOutputs(
-      PortDefinition.output("exec_0", "Then 0", PortType.EXEC, "First branch"),
-      PortDefinition.output("exec_1", "Then 1", PortType.EXEC, "Second branch"),
-      PortDefinition.output("exec_2", "Then 2", PortType.EXEC, "Third branch"),
-      PortDefinition.output("exec_3", "Then 3", PortType.EXEC, "Fourth branch"),
-      PortDefinition.output("exec_4", "Then 4", PortType.EXEC, "Fifth branch"),
-      PortDefinition.output("exec_5", "Then 5", PortType.EXEC, "Sixth branch"),
-      PortDefinition.output("exec_6", "Then 6", PortType.EXEC, "Seventh branch"),
-      PortDefinition.output("exec_7", "Then 7", PortType.EXEC, "Eighth branch"),
+      PortDefinition.output(StandardPorts.exec("0"), "Then 0", PortType.EXEC, "First branch"),
+      PortDefinition.output(StandardPorts.exec("1"), "Then 1", PortType.EXEC, "Second branch"),
+      PortDefinition.output(StandardPorts.exec("2"), "Then 2", PortType.EXEC, "Third branch"),
+      PortDefinition.output(StandardPorts.exec("3"), "Then 3", PortType.EXEC, "Fourth branch"),
+      PortDefinition.output(StandardPorts.exec("4"), "Then 4", PortType.EXEC, "Fifth branch"),
+      PortDefinition.output(StandardPorts.exec("5"), "Then 5", PortType.EXEC, "Sixth branch"),
+      PortDefinition.output(StandardPorts.exec("6"), "Then 6", PortType.EXEC, "Seventh branch"),
+      PortDefinition.output(StandardPorts.exec("7"), "Then 7", PortType.EXEC, "Eighth branch"),
       PortDefinition.output("branchCount", "Branch Count", PortType.NUMBER, "Number of branches")
     )
     .description("Executes multiple branches in order")
@@ -61,7 +61,7 @@ public final class SequenceNode extends AbstractScriptNode {
     var branchCount = getIntInput(inputs, "branchCount", 2);
 
     return Flux.range(0, branchCount)
-      .concatMap(i -> runtime.executeDownstream("exec_" + i, Map.of(
+      .concatMap(i -> runtime.executeDownstream(StandardPorts.exec(String.valueOf(i)), Map.of(
         "branchCount", NodeValue.ofNumber(branchCount)
       )))
       // Return final outputs without exec handle keys

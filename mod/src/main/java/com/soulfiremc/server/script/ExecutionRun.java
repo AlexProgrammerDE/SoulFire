@@ -24,14 +24,18 @@ import reactor.core.publisher.Sinks;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /// Per-invocation execution state.
 /// Each trigger invocation gets its own ExecutionRun so that concurrent triggers
 /// don't corrupt each other's node output sinks.
 @Slf4j
 public final class ExecutionRun {
-  private final ConcurrentHashMap<String, Sinks.One<Map<String, NodeValue>>> nodeOutputSinks =
+  private static final long MAX_EXECUTION_COUNT = 100_000;
+
+  private final ConcurrentHashMap<String, Sinks.Many<Map<String, NodeValue>>> nodeOutputSinks =
     new ConcurrentHashMap<>();
+  private final AtomicLong executionCount = new AtomicLong(0);
 
   /// Waits for a node to produce outputs within this run.
   ///
@@ -39,22 +43,34 @@ public final class ExecutionRun {
   /// @return a Mono that completes with the node's outputs
   public Mono<Map<String, NodeValue>> awaitNodeOutputs(String nodeId) {
     return nodeOutputSinks
-      .computeIfAbsent(nodeId, _ -> Sinks.one())
-      .asMono()
-      .timeout(Duration.ofMinutes(5))
+      .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
+      .asFlux()
+      .next()
+      .timeout(Duration.ofSeconds(30))
+      .doOnError(e -> log.warn("Timeout waiting for node {} outputs - "
+        + "DATA edge may point to a node not on the execution path", nodeId))
       .onErrorReturn(Map.of());
   }
 
-  /// Publishes node outputs, completing the Sink for that node within this run.
+  /// Publishes node outputs, allowing consumers to receive the latest value.
+  /// Uses replay().latest() so that producers can emit multiple times (loops work)
+  /// and consumers always get the most recent value.
   ///
   /// @param nodeId  the node identifier
   /// @param outputs the output values
   public void publishNodeOutputs(String nodeId, Map<String, NodeValue> outputs) {
     var result = nodeOutputSinks
-      .computeIfAbsent(nodeId, _ -> Sinks.one())
-      .tryEmitValue(outputs);
+      .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
+      .tryEmitNext(outputs);
     if (result.isFailure()) {
       log.warn("Failed to publish outputs for node {}: {}", nodeId, result);
     }
+  }
+
+  /// Increments the execution count and checks if the limit has been exceeded.
+  ///
+  /// @return true if execution is allowed, false if the limit has been exceeded
+  public boolean incrementAndCheckLimit() {
+    return executionCount.incrementAndGet() <= MAX_EXECUTION_COUNT;
   }
 }

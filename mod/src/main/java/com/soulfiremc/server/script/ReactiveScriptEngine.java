@@ -109,7 +109,13 @@ public final class ReactiveScriptEngine {
         })
         .onErrorResume(_ -> Mono.empty())
         .flatMap(outputs -> {
-          var execContext = ExecutionContext.from(outputs);
+          var execPortIds = nodeImpl.getMetadata().outputs().stream()
+            .filter(p -> p.type() == PortType.EXEC)
+            .map(PortDefinition::id)
+            .collect(Collectors.toSet());
+          var contextOutputs = new HashMap<>(outputs);
+          execPortIds.forEach(contextOutputs::remove);
+          var execContext = ExecutionContext.from(contextOutputs);
           return followExecOutputs(graph, triggerNodeId, nodeImpl, outputs, context, run, execContext);
         });
     }).subscribeOn(context.getReactorScheduler());
@@ -134,12 +140,23 @@ public final class ReactiveScriptEngine {
       .map(PortDefinition::id)
       .toList();
 
+    if (execPorts.isEmpty()) {
+      // Node has no exec output ports — terminal node
+      return Mono.empty();
+    }
+
     var active = execPorts.stream()
       .filter(outputs::containsKey)
       .toList();
 
     if (active.isEmpty()) {
-      active = List.of(StandardPorts.EXEC_OUT);
+      if (execPorts.size() == 1 && execPorts.getFirst().equals(StandardPorts.EXEC_OUT)) {
+        // Single "out" port — always follow it
+        active = List.of(StandardPorts.EXEC_OUT);
+      } else {
+        // Multiple exec ports but none matched — self-driving node already handled it
+        return Mono.empty();
+      }
     }
 
     return Flux.fromIterable(active)
@@ -194,6 +211,12 @@ public final class ReactiveScriptEngine {
     ExecutionContext execContext
   ) {
     if (context.isCancelled()) {
+      return Mono.empty();
+    }
+
+    if (!run.incrementAndCheckLimit()) {
+      log.error("Execution limit exceeded for node {}", nodeId);
+      context.eventListener().onNodeError(nodeId, "Execution limit exceeded");
       return Mono.empty();
     }
 
@@ -282,11 +305,11 @@ public final class ReactiveScriptEngine {
       })
       .onErrorResume(e -> {
         var hasErrorPort = nodeImpl.getMetadata().outputs().stream()
-          .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+          .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals(StandardPorts.EXEC_ERROR));
         if (hasErrorPort) {
           var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
           return Mono.just(Map.of(
-            "exec_error", NodeValue.ofBoolean(true),
+            StandardPorts.EXEC_ERROR, NodeValue.ofBoolean(true),
             "success", NodeValue.ofBoolean(false),
             "errorMessage", NodeValue.ofString(msg != null ? msg : e.getClass().getSimpleName())
           ));
@@ -295,7 +318,13 @@ public final class ReactiveScriptEngine {
         return Mono.empty();
       })
       .flatMap(outputs -> {
-        var newExecContext = execContext.mergeWith(outputs);
+        var execPortIds = nodeImpl.getMetadata().outputs().stream()
+          .filter(p -> p.type() == PortType.EXEC)
+          .map(PortDefinition::id)
+          .collect(Collectors.toSet());
+        var contextOutputs = new HashMap<>(outputs);
+        execPortIds.forEach(contextOutputs::remove);
+        var newExecContext = execContext.mergeWith(contextOutputs);
         return followExecOutputs(graph, nodeId, nodeImpl, outputs, context, run, newExecContext);
       });
   }

@@ -45,8 +45,8 @@ public final class LLMChatNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("maxTokens", "Max Tokens", PortType.NUMBER, "1024", "Maximum response tokens")
     )
     .addOutputs(
-      PortDefinition.output("exec_success", "Success", PortType.EXEC, "Executes on successful response"),
-      PortDefinition.output("exec_error", "Error", PortType.EXEC, "Executes on failed request"),
+      PortDefinition.output(StandardPorts.EXEC_SUCCESS, "Success", PortType.EXEC, "Executes on successful response"),
+      PortDefinition.output(StandardPorts.EXEC_ERROR, "Error", PortType.EXEC, "Executes on failed request"),
       PortDefinition.output("response", "Response", PortType.STRING, "LLM response text"),
       PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether the request succeeded"),
       PortDefinition.output("errorMessage", "Error Message", PortType.STRING, "Error message if failed"),
@@ -74,7 +74,7 @@ public final class LLMChatNode extends AbstractScriptNode {
 
     if (prompt.isEmpty()) {
       return completedMono(results(
-        "exec_error", true,
+        StandardPorts.EXEC_ERROR, true,
         "response", "",
         "success", false,
         "errorMessage", "Prompt is required",
@@ -122,7 +122,7 @@ public final class LLMChatNode extends AbstractScriptNode {
         var tokensUsed = completion.usage().map(CompletionUsage::totalTokens).orElse(0L);
 
         return results(
-          "exec_success", true,
+          StandardPorts.EXEC_SUCCESS, true,
           "response", responseText,
           "success", true,
           "errorMessage", "",
@@ -130,7 +130,7 @@ public final class LLMChatNode extends AbstractScriptNode {
         );
       } catch (Exception e) {
         return results(
-          "exec_error", true,
+          StandardPorts.EXEC_ERROR, true,
           "response", "",
           "success", false,
           "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName(),

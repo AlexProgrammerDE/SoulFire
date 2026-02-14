@@ -39,8 +39,8 @@ public final class RateLimitNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("tokensRequired", "Tokens Required", PortType.NUMBER, "1", "Tokens consumed per execution")
     )
     .addOutputs(
-      PortDefinition.output("exec_allowed", "Allowed", PortType.EXEC, "Execution path if allowed"),
-      PortDefinition.output("exec_denied", "Denied", PortType.EXEC, "Execution path if rate limited"),
+      PortDefinition.output(StandardPorts.EXEC_ALLOWED, "Allowed", PortType.EXEC, "Execution path if allowed"),
+      PortDefinition.output(StandardPorts.EXEC_DENIED, "Denied", PortType.EXEC, "Execution path if rate limited"),
       PortDefinition.output("wasAllowed", "Was Allowed", PortType.BOOLEAN, "Whether execution was allowed"),
       PortDefinition.output("tokensRemaining", "Tokens Remaining", PortType.NUMBER, "Tokens left in bucket"),
       PortDefinition.output("retryAfterMs", "Retry After (ms)", PortType.NUMBER, "Milliseconds until tokens available")
@@ -77,7 +77,7 @@ public final class RateLimitNode extends AbstractScriptNode {
     outputs.put("wasAllowed", NodeValue.of(result.allowed));
     outputs.put("tokensRemaining", NodeValue.of(result.tokensRemaining));
     outputs.put("retryAfterMs", NodeValue.of(result.retryAfterMs));
-    outputs.put(result.allowed ? "exec_allowed" : "exec_denied", NodeValue.ofBoolean(true));
+    outputs.put(result.allowed ? StandardPorts.EXEC_ALLOWED : StandardPorts.EXEC_DENIED, NodeValue.ofBoolean(true));
     return completedMono(outputs);
   }
 

@@ -55,14 +55,15 @@ public sealed interface NodeValue {
       return new Json(new JsonPrimitive(b));
     }
     if (value instanceof List<?> list) {
+      var nodeValues = list.stream().map(NodeValue::of).toList();
+      var hasNonJson = nodeValues.stream().anyMatch(v -> !(v instanceof Json));
+      if (hasNonJson) {
+        return new ValueList(nodeValues);
+      }
       var array = new JsonArray();
-      for (var item : list) {
-        var itemValue = of(item);
-        if (itemValue instanceof Json(JsonElement element)) {
+      for (var nv : nodeValues) {
+        if (nv instanceof Json(JsonElement element)) {
           array.add(element);
-        } else {
-          // Can't serialize non-JSON values in arrays, skip or convert to string
-          array.add(item.toString());
         }
       }
       return new Json(array);
@@ -102,7 +103,13 @@ public sealed interface NodeValue {
   }
 
   /// Creates a list NodeValue.
+  /// If the list contains any non-Json values (e.g., Bot references),
+  /// a ValueList is used to preserve them. Otherwise, a Json array is used.
   static NodeValue ofList(List<NodeValue> values) {
+    var hasNonJson = values.stream().anyMatch(v -> !(v instanceof Json));
+    if (hasNonJson) {
+      return new ValueList(List.copyOf(values));
+    }
     var array = new JsonArray();
     for (var value : values) {
       if (value instanceof Json(JsonElement element)) {
@@ -181,6 +188,9 @@ public sealed interface NodeValue {
 
   /// Gets this value as a list of NodeValues.
   default List<NodeValue> asList() {
+    if (this instanceof ValueList(List<NodeValue> items)) {
+      return items;
+    }
     if (this instanceof Json(JsonElement element) && element.isJsonArray()) {
       return StreamSupport.stream(element.getAsJsonArray().spliterator(), false)
         .map(Json::new)
@@ -234,6 +244,14 @@ public sealed interface NodeValue {
     @Override
     public String toString() {
       return "Bot[" + bot.accountName() + "]";
+    }
+  }
+
+  /// List of NodeValues that may contain non-JSON values (e.g., Bot references).
+  record ValueList(List<NodeValue> items) implements NodeValue {
+    @Override
+    public String toString() {
+      return items.toString();
     }
   }
 }

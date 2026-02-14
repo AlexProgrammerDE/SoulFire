@@ -25,15 +25,29 @@ public final class StandardPorts {
   public static final String EXEC_OUT = "out";
 
   // Branch execution outputs
-  public static final String EXEC_TRUE = "true";
-  public static final String EXEC_FALSE = "false";
+  public static final String EXEC_TRUE = "exec_true";
+  public static final String EXEC_FALSE = "exec_false";
 
   // Loop execution outputs
-  public static final String EXEC_LOOP = "loop";
-  public static final String EXEC_DONE = "done";
+  public static final String EXEC_LOOP = "exec_loop";
+  public static final String EXEC_DONE = "exec_done";
 
-  // Sequence outputs (exec_0, exec_1, etc. generated dynamically)
-  public static final String EXEC_PREFIX = "exec_";
+  // Success/error execution outputs
+  public static final String EXEC_SUCCESS = "exec_success";
+  public static final String EXEC_ERROR = "exec_error";
+
+  // Gate/rate-limit execution outputs
+  public static final String EXEC_ALLOWED = "exec_allowed";
+  public static final String EXEC_BLOCKED = "exec_blocked";
+  public static final String EXEC_DENIED = "exec_denied";
+
+  // Switch execution outputs
+  public static final String EXEC_DEFAULT = "exec_default";
+
+  /// Builds a dynamic exec port name (e.g., exec("0") → "exec_0", exec("case3") → "exec_case3").
+  public static String exec(String suffix) {
+    return "exec_" + suffix;
+  }
 
   private StandardPorts() {
     // Utility class - no instantiation
