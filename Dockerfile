@@ -27,4 +27,4 @@ EXPOSE 38765/tcp
 
 # Start the process using dumb-init
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["/bin/sh", "/soulfire/start.sh"]
+CMD ["/bin/bash", "/soulfire/start.sh"]
