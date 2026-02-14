@@ -88,8 +88,6 @@ public final class DatabaseManager {
   }
 
   private static void runMigrations(DataSource dataSource) {
-    migrateFromHibernate(dataSource);
-
     var flyway = Flyway.configure()
       .dataSource(dataSource)
       .locations("classpath:db/migration")
