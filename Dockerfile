@@ -11,6 +11,7 @@ RUN groupadd --gid 1001 soulfire && \
 
 # Download JAR from GitHub releases
 ADD --chown=soulfire:soulfire https://github.com/AlexProgrammerDE/SoulFire/releases/download/${VERSION}/SoulFireDedicated-${VERSION}.jar /soulfire/soulfire.jar
+RUN chmod 644 /soulfire/soulfire.jar
 
 # Use the soulfire's home directory as our work directory
 WORKDIR /soulfire/data
