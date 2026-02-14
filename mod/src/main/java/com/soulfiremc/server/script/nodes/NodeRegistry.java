@@ -44,14 +44,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /// Registry of all available script node types.
 /// Metadata is stored separately from node instances — nodes are pure executors.
 public final class NodeRegistry {
-  private static final Map<String, Supplier<ScriptNode>> FACTORIES = new HashMap<>();
-  private static final Map<String, NodeMetadata> METADATA_MAP = new HashMap<>();
-  private static final Map<String, ScriptNode> CACHED_INSTANCES = new HashMap<>();
+  private static final Map<String, Supplier<ScriptNode>> FACTORIES = new ConcurrentHashMap<>();
+  private static final Map<String, NodeMetadata> METADATA_MAP = new ConcurrentHashMap<>();
+  private static final Map<String, ScriptNode> CACHED_INSTANCES = new ConcurrentHashMap<>();
 
   static {
     // Trigger Nodes
