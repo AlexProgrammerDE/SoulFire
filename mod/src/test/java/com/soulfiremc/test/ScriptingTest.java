@@ -270,7 +270,6 @@ final class ScriptingTest {
     assertNotNull(node1);
     assertNotNull(node2);
     assertSame(node1, node2, "Cached instances should be the same reference");
-    assertEquals("math.add", node1.getId());
   }
 
   @Test
@@ -1059,8 +1058,7 @@ final class ScriptingTest {
   @Test
   void allNodesHaveMetadata() {
     for (var type : NodeRegistry.getRegisteredTypes()) {
-      var node = NodeRegistry.create(type);
-      var metadata = node.getMetadata();
+      var metadata = NodeRegistry.getMetadata(type);
 
       assertNotNull(metadata, "Node " + type + " has no metadata");
       assertNotNull(metadata.type(), "Node " + type + " has no type");
@@ -1068,14 +1066,6 @@ final class ScriptingTest {
       assertNotNull(metadata.category(), "Node " + type + " has no category");
       assertNotNull(metadata.description(), "Node " + type + " has no description");
       assertEquals(type, metadata.type(), "Node metadata type doesn't match registered type");
-    }
-  }
-
-  @Test
-  void allNodesHaveConsistentId() {
-    for (var type : NodeRegistry.getRegisteredTypes()) {
-      var node = NodeRegistry.create(type);
-      assertEquals(type, node.getId(), "Node getId() doesn't match registered type");
     }
   }
 
@@ -1226,8 +1216,7 @@ final class ScriptingTest {
 
   @Test
   void getBotsNodeHasExecPorts() {
-    var node = NodeRegistry.create("data.get_bots");
-    var metadata = node.getMetadata();
+    var metadata = NodeRegistry.getMetadata("data.get_bots");
 
     var hasExecIn = metadata.inputs().stream()
       .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
@@ -1240,8 +1229,7 @@ final class ScriptingTest {
 
   @Test
   void filterBotsNodeHasExecPorts() {
-    var node = NodeRegistry.create("data.filter_bots");
-    var metadata = node.getMetadata();
+    var metadata = NodeRegistry.getMetadata("data.filter_bots");
 
     var hasExecIn = metadata.inputs().stream()
       .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
@@ -1254,8 +1242,7 @@ final class ScriptingTest {
 
   @Test
   void getBotByNameNodeHasExecPorts() {
-    var node = NodeRegistry.create("data.get_bot_by_name");
-    var metadata = node.getMetadata();
+    var metadata = NodeRegistry.getMetadata("data.get_bot_by_name");
 
     var hasExecIn = metadata.inputs().stream()
       .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
@@ -1270,11 +1257,10 @@ final class ScriptingTest {
 
   @Test
   void llmChatNodeOutputsExecErrorOnEmptyPrompt() {
-    var node = NodeRegistry.create("ai.llm_chat");
     // LLMChatNode requires a bot, but empty prompt check happens first
     // We need to provide a bot to get past requireBot, but that needs a real instance.
     // Instead, verify that the metadata has the correct exec ports.
-    var metadata = node.getMetadata();
+    var metadata = NodeRegistry.getMetadata("ai.llm_chat");
 
     var hasExecSuccess = metadata.outputs().stream()
       .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
@@ -1287,8 +1273,7 @@ final class ScriptingTest {
 
   @Test
   void webFetchNodeHasExecPorts() {
-    var node = NodeRegistry.create("network.web_fetch");
-    var metadata = node.getMetadata();
+    var metadata = NodeRegistry.getMetadata("network.web_fetch");
 
     var hasExecSuccess = metadata.outputs().stream()
       .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
@@ -1301,8 +1286,7 @@ final class ScriptingTest {
 
   @Test
   void discordWebhookNodeHasExecPorts() {
-    var node = NodeRegistry.create("integration.discord_webhook");
-    var metadata = node.getMetadata();
+    var metadata = NodeRegistry.getMetadata("integration.discord_webhook");
 
     var hasExecSuccess = metadata.outputs().stream()
       .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
@@ -1478,7 +1462,7 @@ final class ScriptingTest {
     assertTrue(outputs.containsKey(StandardPorts.EXEC_TRUE));
 
     // But if we filter out exec port keys (as the engine now does), they should be gone
-    var execPortIds = node.getMetadata().outputs().stream()
+    var execPortIds = NodeRegistry.getMetadata("flow.branch").outputs().stream()
       .filter(p -> p.type() == PortType.EXEC)
       .map(PortDefinition::id)
       .collect(java.util.stream.Collectors.toSet());

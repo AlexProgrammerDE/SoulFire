@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: a, b
 /// Output: result = a - b
 public final class SubtractNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.subtract")
     .displayName("Subtract")
     .category(CategoryRegistry.MATH)
@@ -42,11 +42,6 @@ public final class SubtractNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("subtract", "minus", "difference", "arithmetic")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

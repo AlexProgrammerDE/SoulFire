@@ -26,7 +26,7 @@ import java.util.Map;
 /// Data node that gets the light level at the bot's position.
 /// Outputs: blockLight, skyLight, combinedLight
 public final class GetLightLevelNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_light_level")
     .displayName("Get Light Level")
     .category(CategoryRegistry.DATA)
@@ -44,11 +44,6 @@ public final class GetLightLevelNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("light", "brightness", "dark", "spawn", "mob")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

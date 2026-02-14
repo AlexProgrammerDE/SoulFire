@@ -32,7 +32,7 @@ import java.util.Map;
 /// Supports basic math operators (+, -, *, /, %), parentheses,
 /// and standard math functions (SIN, COS, SQRT, ABS, etc.) via EvalEx.
 public final class FormulaNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.formula")
     .displayName("Formula")
     .category(CategoryRegistry.MATH)
@@ -54,11 +54,6 @@ public final class FormulaNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("formula", "expression", "evaluate", "math")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

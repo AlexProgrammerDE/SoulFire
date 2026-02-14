@@ -28,7 +28,7 @@ import java.util.Map;
 /// Inputs: start, end, step
 /// Output: list
 public final class RangeNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.range")
     .displayName("Range")
     .category(CategoryRegistry.LIST)
@@ -45,11 +45,6 @@ public final class RangeNode extends AbstractScriptNode {
     .color("#00BCD4")
     .addKeywords("list", "range", "sequence", "numbers", "generate", "create")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

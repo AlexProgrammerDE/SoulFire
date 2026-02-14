@@ -26,7 +26,7 @@ import java.util.Map;
 
 /// JSON node that converts a value to a JSON string with optional pretty printing.
 public final class JsonStringifyNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("json.stringify")
     .displayName("JSON Stringify")
     .category(CategoryRegistry.JSON)
@@ -45,11 +45,6 @@ public final class JsonStringifyNode extends AbstractScriptNode {
 
   private static final Gson GSON = new Gson();
   private static final Gson GSON_PRETTY = new GsonBuilder().setPrettyPrinting().create();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

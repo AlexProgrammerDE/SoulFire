@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 /// Inputs: text, search, replacement, replaceAll (boolean)
 /// Output: result
 public final class ReplaceNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.replace")
     .displayName("Replace")
     .category(CategoryRegistry.STRING)
@@ -46,11 +46,6 @@ public final class ReplaceNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "replace", "substitute", "swap")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

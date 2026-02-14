@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /// Variable node that stores a value in the bot's session metadata (lost on disconnect).
 public final class SetSessionBotVariableNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("variable.set_session")
     .displayName("Set Session Variable")
     .category(CategoryRegistry.VARIABLE)
@@ -48,11 +48,6 @@ public final class SetSessionBotVariableNode extends AbstractScriptNode {
   // Static storage for session variables, keyed by bot ID
   private static final MetadataKey<ConcurrentHashMap<String, NodeValue>> SESSION_VARS_KEY =
     MetadataKey.of("script_session", "variables", ConcurrentHashMap.class);
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

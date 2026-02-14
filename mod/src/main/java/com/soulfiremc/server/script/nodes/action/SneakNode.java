@@ -25,7 +25,7 @@ import java.util.Map;
 /// Action node that toggles or sets the bot's sneaking state.
 /// Input: enabled (boolean) - whether to sneak
 public final class SneakNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.sneak")
     .displayName("Sneak")
     .category(CategoryRegistry.ACTIONS)
@@ -41,11 +41,6 @@ public final class SneakNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("sneak", "crouch", "shift", "stealth")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 /// String node that replaces matches of a regex pattern with a replacement string.
 public final class RegexReplaceNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.regex_replace")
     .displayName("Regex Replace")
     .category(CategoryRegistry.STRING)
@@ -45,11 +45,6 @@ public final class RegexReplaceNode extends AbstractScriptNode {
     .color("#EAB308")
     .addKeywords("regex", "replace", "substitute", "pattern", "sed")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

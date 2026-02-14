@@ -27,7 +27,7 @@ import java.util.Map;
 /// Self-driving: uses runtime.executeDownstream() to iterate over items,
 /// then fires exec_done when complete.
 public final class ForEachNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.foreach")
     .displayName("For Each")
     .category(CategoryRegistry.FLOW)
@@ -48,11 +48,6 @@ public final class ForEachNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("foreach", "loop", "iterate", "list", "array")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

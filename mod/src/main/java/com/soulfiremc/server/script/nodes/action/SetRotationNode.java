@@ -26,7 +26,7 @@ import java.util.Map;
 /// Action node that sets the bot's rotation (yaw and pitch).
 /// Inputs: yaw (degrees, -180 to 180), pitch (degrees, -90 to 90)
 public final class SetRotationNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.set_rotation")
     .displayName("Set Rotation")
     .category(CategoryRegistry.ACTIONS)
@@ -43,11 +43,6 @@ public final class SetRotationNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("rotation", "yaw", "pitch", "turn", "face", "angle")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

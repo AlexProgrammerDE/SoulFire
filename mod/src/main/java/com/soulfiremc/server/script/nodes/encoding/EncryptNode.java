@@ -31,7 +31,7 @@ import java.util.Map;
 
 /// Encoding node that encrypts a string using AES encryption.
 public final class EncryptNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("encoding.encrypt")
     .displayName("Encrypt")
     .category(CategoryRegistry.ENCODING)
@@ -49,11 +49,6 @@ public final class EncryptNode extends AbstractScriptNode {
     .color("#64748B")
     .addKeywords("encrypt", "aes", "cipher", "secure", "protection")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

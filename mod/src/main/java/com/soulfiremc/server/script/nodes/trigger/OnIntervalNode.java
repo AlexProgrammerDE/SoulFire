@@ -28,7 +28,7 @@ import java.util.Map;
 /// Input: intervalMs - the interval in milliseconds (default: 1000)
 /// Output: executionCount - number of times this trigger has fired
 public final class OnIntervalNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_interval")
     .displayName("On Interval")
     .category(CategoryRegistry.TRIGGERS)
@@ -45,11 +45,6 @@ public final class OnIntervalNode extends AbstractScriptNode {
     .color("#4CAF50")
     .addKeywords("interval", "timer", "repeat", "periodic", "schedule")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

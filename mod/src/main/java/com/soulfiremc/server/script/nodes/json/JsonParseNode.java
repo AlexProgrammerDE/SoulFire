@@ -26,7 +26,7 @@ import java.util.Map;
 
 /// JSON node that parses a JSON string into a usable object.
 public final class JsonParseNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("json.parse")
     .displayName("JSON Parse")
     .category(CategoryRegistry.JSON)
@@ -43,11 +43,6 @@ public final class JsonParseNode extends AbstractScriptNode {
     .color("#F59E0B")
     .addKeywords("json", "parse", "deserialize", "decode")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

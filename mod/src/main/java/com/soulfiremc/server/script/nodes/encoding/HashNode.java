@@ -28,7 +28,7 @@ import java.util.Map;
 
 /// Encoding node that computes a cryptographic hash of the input.
 public final class HashNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("encoding.hash")
     .displayName("Hash")
     .category(CategoryRegistry.ENCODING)
@@ -46,11 +46,6 @@ public final class HashNode extends AbstractScriptNode {
     .color("#64748B")
     .addKeywords("hash", "md5", "sha", "sha256", "checksum", "digest")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

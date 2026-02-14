@@ -29,7 +29,7 @@ import java.util.regex.PatternSyntaxException;
 /// Input: bots (List of BotConnection), pattern (regex string)
 /// Output: bots (List of BotConnection matching pattern)
 public final class FilterBotsNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.filter_bots")
     .displayName("Filter Bots")
     .category(CategoryRegistry.DATA)
@@ -47,11 +47,6 @@ public final class FilterBotsNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("filter", "bots", "regex", "match", "name")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

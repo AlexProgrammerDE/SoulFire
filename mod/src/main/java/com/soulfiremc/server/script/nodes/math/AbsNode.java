@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: value
 /// Output: result
 public final class AbsNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.abs")
     .displayName("Absolute")
     .category(CategoryRegistry.MATH)
@@ -41,11 +41,6 @@ public final class AbsNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("abs", "absolute", "positive", "magnitude")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

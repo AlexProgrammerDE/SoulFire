@@ -25,7 +25,7 @@ import java.util.Map;
 /// Data node that gets the bot's current rotation.
 /// Outputs: yaw, pitch (float, in degrees)
 public final class GetRotationNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_rotation")
     .displayName("Get Rotation")
     .category(CategoryRegistry.DATA)
@@ -42,11 +42,6 @@ public final class GetRotationNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("rotation", "yaw", "pitch", "angle", "direction")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

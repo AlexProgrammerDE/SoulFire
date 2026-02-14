@@ -26,7 +26,7 @@ import java.util.Map;
 
 /// Encoding node that decodes a Base64 string.
 public final class Base64DecodeNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("encoding.base64_decode")
     .displayName("Base64 Decode")
     .category(CategoryRegistry.ENCODING)
@@ -43,11 +43,6 @@ public final class Base64DecodeNode extends AbstractScriptNode {
     .color("#64748B")
     .addKeywords("base64", "decode", "decoding")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

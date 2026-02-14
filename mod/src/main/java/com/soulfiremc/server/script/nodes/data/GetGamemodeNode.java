@@ -26,7 +26,7 @@ import java.util.Map;
 /// Data node that gets the bot's current gamemode.
 /// Outputs: gamemode (string), isSurvival, isCreative, isAdventure, isSpectator
 public final class GetGamemodeNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_gamemode")
     .displayName("Get Gamemode")
     .category(CategoryRegistry.DATA)
@@ -46,11 +46,6 @@ public final class GetGamemodeNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("gamemode", "survival", "creative", "adventure", "spectator")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -25,7 +25,7 @@ import java.util.Map;
 /// Action node that sends a chat message or command.
 /// Input: message (string)
 public final class SendChatNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.send_chat")
     .displayName("Send Chat")
     .category(CategoryRegistry.ACTIONS)
@@ -41,11 +41,6 @@ public final class SendChatNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("chat", "message", "send", "say", "command")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

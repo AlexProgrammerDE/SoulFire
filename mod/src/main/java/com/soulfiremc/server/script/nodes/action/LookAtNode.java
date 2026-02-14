@@ -28,7 +28,7 @@ import java.util.Map;
 /// Action node that makes the bot look at a specific position.
 /// Inputs: target (Vec3 coordinates to look at)
 public final class LookAtNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.look_at")
     .displayName("Look At")
     .category(CategoryRegistry.ACTIONS)
@@ -44,11 +44,6 @@ public final class LookAtNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("look", "face", "turn", "aim", "view")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

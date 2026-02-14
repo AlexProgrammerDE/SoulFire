@@ -27,7 +27,7 @@ import java.util.Map;
 /// Inputs: value, min, max
 /// Output: result = clamped value within [min, max]
 public final class ClampNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.clamp")
     .displayName("Clamp")
     .category(CategoryRegistry.MATH)
@@ -44,11 +44,6 @@ public final class ClampNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("clamp", "constrain", "limit", "bound")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

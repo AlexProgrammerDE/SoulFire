@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: text
 /// Output: length
 public final class StringLengthNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.length")
     .displayName("String Length")
     .category(CategoryRegistry.STRING)
@@ -41,11 +41,6 @@ public final class StringLengthNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "length", "count", "size")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

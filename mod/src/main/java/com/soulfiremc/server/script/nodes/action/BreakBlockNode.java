@@ -32,7 +32,7 @@ import java.util.Map;
 /// Inputs: position (Vec3 block coordinates)
 /// Output: success (boolean)
 public final class BreakBlockNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.break_block")
     .displayName("Break Block")
     .category(CategoryRegistry.ACTIONS)
@@ -49,11 +49,6 @@ public final class BreakBlockNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("break", "mine", "dig", "destroy", "block")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

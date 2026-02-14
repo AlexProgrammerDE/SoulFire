@@ -27,7 +27,7 @@ import java.util.Map;
 /// Action node that makes the bot attack the entity it's looking at.
 /// Uses the bot's current view direction to determine the target.
 public final class AttackNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.attack")
     .displayName("Attack")
     .category(CategoryRegistry.ACTIONS)
@@ -42,11 +42,6 @@ public final class AttackNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("attack", "hit", "fight", "damage", "combat", "left click")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

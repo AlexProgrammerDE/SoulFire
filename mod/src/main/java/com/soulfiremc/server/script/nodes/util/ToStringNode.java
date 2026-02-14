@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: value
 /// Output: result
 public final class ToStringNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.to_string")
     .displayName("To String")
     .category(CategoryRegistry.UTILITY)
@@ -41,11 +41,6 @@ public final class ToStringNode extends AbstractScriptNode {
     .color("#795548")
     .addKeywords("convert", "string", "text", "cast")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

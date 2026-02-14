@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 /// String node that tests if a string matches a regex pattern and extracts capture groups.
 public final class RegexMatchNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.regex_match")
     .displayName("Regex Match")
     .category(CategoryRegistry.STRING)
@@ -47,11 +47,6 @@ public final class RegexMatchNode extends AbstractScriptNode {
     .color("#EAB308")
     .addKeywords("regex", "match", "pattern", "test", "find", "capture", "group")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

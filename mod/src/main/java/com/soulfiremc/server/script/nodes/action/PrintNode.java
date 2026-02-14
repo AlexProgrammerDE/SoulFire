@@ -25,7 +25,7 @@ import java.util.Map;
 /// Action node that logs a message for debugging.
 /// Input: message (any), level (string)
 public final class PrintNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.print")
     .displayName("Print")
     .category(CategoryRegistry.ACTIONS)
@@ -42,11 +42,6 @@ public final class PrintNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("print", "log", "debug", "console", "output", "message")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: a, b
 /// Output: result
 public final class MaxNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.max")
     .displayName("Maximum")
     .category(CategoryRegistry.MATH)
@@ -42,11 +42,6 @@ public final class MaxNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("max", "maximum", "larger", "greatest")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

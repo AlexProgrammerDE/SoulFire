@@ -27,7 +27,7 @@ import java.util.Map;
 /// Input: vector
 /// Outputs: x, y, z
 public final class SplitVector3Node extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.split_vector3")
     .displayName("Split Vector3")
     .category(CategoryRegistry.UTILITY)
@@ -44,11 +44,6 @@ public final class SplitVector3Node extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("vector", "vec3", "position", "coordinates", "xyz", "split", "decompose")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

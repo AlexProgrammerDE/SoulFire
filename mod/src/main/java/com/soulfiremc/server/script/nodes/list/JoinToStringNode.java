@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 /// Inputs: list, separator
 /// Output: result
 public final class JoinToStringNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.join")
     .displayName("Join to String")
     .category(CategoryRegistry.LIST)
@@ -43,11 +43,6 @@ public final class JoinToStringNode extends AbstractScriptNode {
     .color("#00BCD4")
     .addKeywords("list", "join", "string", "concat", "combine", "separator")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: text, search, ignoreCase
 /// Output: index (-1 if not found)
 public final class IndexOfNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.index_of")
     .displayName("Index Of")
     .category(CategoryRegistry.STRING)
@@ -43,11 +43,6 @@ public final class IndexOfNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "index", "find", "search", "position", "location")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

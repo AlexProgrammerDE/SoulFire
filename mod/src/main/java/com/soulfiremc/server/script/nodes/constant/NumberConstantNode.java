@@ -25,7 +25,7 @@ import java.util.Map;
 /// Constant node that outputs a configurable number value.
 /// Output: value (number)
 public final class NumberConstantNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.number")
     .displayName("Number")
     .category(CategoryRegistry.CONSTANTS)
@@ -40,11 +40,6 @@ public final class NumberConstantNode extends AbstractScriptNode {
     .color("#E91E63")
     .addKeywords("number", "constant", "value")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

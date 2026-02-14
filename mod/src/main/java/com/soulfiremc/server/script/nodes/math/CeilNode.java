@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: value
 /// Output: result
 public final class CeilNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.ceil")
     .displayName("Ceiling")
     .category(CategoryRegistry.MATH)
@@ -41,11 +41,6 @@ public final class CeilNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("ceil", "ceiling", "round", "up", "integer")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

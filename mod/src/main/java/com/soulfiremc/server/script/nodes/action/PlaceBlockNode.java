@@ -32,7 +32,7 @@ import java.util.Map;
 /// Inputs: position (Vec3 target block coordinates)
 /// Output: success (boolean)
 public final class PlaceBlockNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
           .type("action.place_block")
           .displayName("Place Block")
           .category(CategoryRegistry.ACTIONS)
@@ -49,11 +49,6 @@ public final class PlaceBlockNode extends AbstractScriptNode {
           .color("#FF9800")
           .addKeywords("place", "build", "put", "block")
           .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

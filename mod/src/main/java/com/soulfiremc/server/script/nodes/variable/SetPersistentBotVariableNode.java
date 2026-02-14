@@ -25,7 +25,7 @@ import java.util.Map;
 
 /// Variable node that stores a value in the bot's persistent metadata (survives disconnects).
 public final class SetPersistentBotVariableNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("variable.set_persistent")
     .displayName("Set Persistent Variable")
     .category(CategoryRegistry.VARIABLE)
@@ -44,11 +44,6 @@ public final class SetPersistentBotVariableNode extends AbstractScriptNode {
     .color("#10B981")
     .addKeywords("variable", "persistent", "save", "store", "set", "permanent")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

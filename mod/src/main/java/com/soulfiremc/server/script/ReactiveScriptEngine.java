@@ -83,9 +83,10 @@ public final class ReactiveScriptEngine {
       }
 
       var nodeImpl = NodeRegistry.create(graphNode.type());
+      var metadata = NodeRegistry.getMetadata(graphNode.type());
 
       // Build inputs: defaults + graph defaults + event inputs
-      var inputs = new HashMap<>(nodeImpl.getDefaultInputs());
+      var inputs = new HashMap<>(NodeRegistry.computeDefaultInputs(metadata));
       if (graphNode.defaultInputs() != null) {
         for (var entry : graphNode.defaultInputs().entrySet()) {
           inputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
@@ -109,14 +110,14 @@ public final class ReactiveScriptEngine {
         })
         .onErrorResume(_ -> Mono.empty())
         .flatMap(outputs -> {
-          var execPortIds = nodeImpl.getMetadata().outputs().stream()
+          var execPortIds = metadata.outputs().stream()
             .filter(p -> p.type() == PortType.EXEC)
             .map(PortDefinition::id)
             .collect(Collectors.toSet());
           var contextOutputs = new HashMap<>(outputs);
           execPortIds.forEach(contextOutputs::remove);
           var execContext = ExecutionContext.from(contextOutputs);
-          return followExecOutputs(graph, triggerNodeId, nodeImpl, outputs, context, run, execContext);
+          return followExecOutputs(graph, triggerNodeId, metadata, outputs, context, run, execContext);
         });
     }).subscribeOn(context.getReactorScheduler());
   }
@@ -129,13 +130,13 @@ public final class ReactiveScriptEngine {
   private Mono<Void> followExecOutputs(
     ScriptGraph graph,
     String nodeId,
-    ScriptNode nodeImpl,
+    NodeMetadata metadata,
     Map<String, NodeValue> outputs,
     ReactiveScriptContext context,
     ExecutionRun run,
     ExecutionContext execContext
   ) {
-    var execPorts = nodeImpl.getMetadata().outputs().stream()
+    var execPorts = metadata.outputs().stream()
       .filter(p -> p.type() == PortType.EXEC)
       .map(PortDefinition::id)
       .toList();
@@ -231,6 +232,7 @@ public final class ReactiveScriptEngine {
     }
 
     var nodeImpl = NodeRegistry.create(graphNode.type());
+    var metadata = NodeRegistry.getMetadata(graphNode.type());
 
     // Muted node bypass — propagate execution context as outputs so DATA edges pass through
     if (graphNode.muted()) {
@@ -243,7 +245,7 @@ public final class ReactiveScriptEngine {
     var incomingDataEdges = graph.getIncomingDataEdges(nodeId);
 
     // Build the base inputs: node defaults < graph defaults < execution context
-    var baseInputs = new HashMap<>(nodeImpl.getDefaultInputs());
+    var baseInputs = new HashMap<>(NodeRegistry.computeDefaultInputs(metadata));
     if (graphNode.defaultInputs() != null) {
       for (var entry : graphNode.defaultInputs().entrySet()) {
         baseInputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
@@ -252,7 +254,7 @@ public final class ReactiveScriptEngine {
     baseInputs.putAll(execContext.values());
 
     if (incomingDataEdges.isEmpty()) {
-      return executeNode(nodeImpl, nodeId, baseInputs, graph, context, run, execContext);
+      return executeNode(nodeImpl, metadata, nodeId, baseInputs, graph, context, run, execContext);
     }
 
     var upstreamMonos = incomingDataEdges.stream()
@@ -274,7 +276,7 @@ public final class ReactiveScriptEngine {
         merged.putAll(resolvedInputs);
         return merged;
       })
-      .flatMap(inputs -> executeNode(nodeImpl, nodeId, inputs, graph, context, run, execContext));
+      .flatMap(inputs -> executeNode(nodeImpl, metadata, nodeId, inputs, graph, context, run, execContext));
   }
 
   /// Executes a single node with resolved inputs.
@@ -282,6 +284,7 @@ public final class ReactiveScriptEngine {
   /// Error handling: nodes with exec_error ports route errors; others stop the branch.
   private Mono<Void> executeNode(
     ScriptNode nodeImpl,
+    NodeMetadata metadata,
     String nodeId,
     Map<String, NodeValue> inputs,
     ScriptGraph graph,
@@ -304,7 +307,7 @@ public final class ReactiveScriptEngine {
         context.eventListener().onNodeError(nodeId, message);
       })
       .onErrorResume(e -> {
-        var hasErrorPort = nodeImpl.getMetadata().outputs().stream()
+        var hasErrorPort = metadata.outputs().stream()
           .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals(StandardPorts.EXEC_ERROR));
         if (hasErrorPort) {
           var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
@@ -318,14 +321,14 @@ public final class ReactiveScriptEngine {
         return Mono.empty();
       })
       .flatMap(outputs -> {
-        var execPortIds = nodeImpl.getMetadata().outputs().stream()
+        var execPortIds = metadata.outputs().stream()
           .filter(p -> p.type() == PortType.EXEC)
           .map(PortDefinition::id)
           .collect(Collectors.toSet());
         var contextOutputs = new HashMap<>(outputs);
         execPortIds.forEach(contextOutputs::remove);
         var newExecContext = execContext.mergeWith(contextOutputs);
-        return followExecOutputs(graph, nodeId, nodeImpl, outputs, context, run, newExecContext);
+        return followExecOutputs(graph, nodeId, metadata, outputs, context, run, newExecContext);
       });
   }
 

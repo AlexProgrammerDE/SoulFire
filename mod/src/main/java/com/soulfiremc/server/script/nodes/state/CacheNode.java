@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /// State node that provides an in-memory key-value cache with optional TTL.
 /// State is scoped per-script via ScriptStateStore.
 public final class CacheNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("state.cache")
     .displayName("Cache")
     .category(CategoryRegistry.STATE)
@@ -47,11 +47,6 @@ public final class CacheNode extends AbstractScriptNode {
     .color("#0EA5E9")
     .addKeywords("cache", "store", "memory", "ttl", "temporary")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

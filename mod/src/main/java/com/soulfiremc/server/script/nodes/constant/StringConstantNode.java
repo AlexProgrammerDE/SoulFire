@@ -25,7 +25,7 @@ import java.util.Map;
 /// Constant node that outputs a configurable string value.
 /// Output: value (string)
 public final class StringConstantNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.string")
     .displayName("String")
     .category(CategoryRegistry.CONSTANTS)
@@ -40,11 +40,6 @@ public final class StringConstantNode extends AbstractScriptNode {
     .color("#4CAF50")
     .addKeywords("string", "text", "constant", "value")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

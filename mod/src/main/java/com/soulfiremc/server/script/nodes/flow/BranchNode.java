@@ -29,7 +29,7 @@ import java.util.Map;
 ///
 /// The script executor should use the output values to determine which branch to execute.
 public final class BranchNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.branch")
     .displayName("Branch")
     .category(CategoryRegistry.FLOW)
@@ -48,11 +48,6 @@ public final class BranchNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("branch", "if", "condition", "switch", "split")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

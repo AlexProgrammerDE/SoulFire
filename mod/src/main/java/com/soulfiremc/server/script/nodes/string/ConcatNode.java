@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: a, b
 /// Output: result = a + b
 public final class ConcatNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.concat")
     .displayName("Concat")
     .category(CategoryRegistry.STRING)
@@ -42,11 +42,6 @@ public final class ConcatNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "concat", "concatenate", "join", "append", "combine")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

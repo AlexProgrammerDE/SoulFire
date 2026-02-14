@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: value (boolean)
 /// Output: result = NOT value
 public final class NotNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("logic.not")
     .displayName("Not")
     .category(CategoryRegistry.LOGIC)
@@ -41,11 +41,6 @@ public final class NotNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("not", "negate", "invert", "logic")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

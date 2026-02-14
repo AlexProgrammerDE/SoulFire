@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: slot (0-35 for main inventory, 36-39 for armor, 40 for offhand)
 /// Outputs: itemId (string), count (int), isEmpty (boolean)
 public final class GetInventoryNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_inventory")
     .displayName("Get Inventory")
     .category(CategoryRegistry.DATA)
@@ -45,11 +45,6 @@ public final class GetInventoryNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("inventory", "item", "slot", "count", "stack")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

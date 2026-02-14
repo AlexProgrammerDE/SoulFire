@@ -27,7 +27,7 @@ import java.util.Map;
 /// Input: value
 /// Output: result (boolean)
 public final class IsEmptyNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("util.is_empty")
     .displayName("Is Empty")
     .category(CategoryRegistry.UTILITY)
@@ -42,11 +42,6 @@ public final class IsEmptyNode extends AbstractScriptNode {
     .color("#795548")
     .addKeywords("empty", "check", "null", "blank", "validate", "length")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -27,7 +27,7 @@ import java.util.Map;
 /// Use OnJoin instead if you need to interact with the player.
 /// Outputs: bot (the bot), serverAddress, username
 public final class OnBotInitNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_bot_init")
     .displayName("On Bot Init")
     .category(CategoryRegistry.TRIGGERS)
@@ -44,11 +44,6 @@ public final class OnBotInitNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("init", "initialize", "start", "connect", "early")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

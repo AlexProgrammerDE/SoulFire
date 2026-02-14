@@ -25,7 +25,7 @@ import java.util.Map;
 /// Action node that toggles or sets the bot's sprinting state.
 /// Input: enabled (boolean) - whether to sprint
 public final class SprintNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.sprint")
     .displayName("Sprint")
     .category(CategoryRegistry.ACTIONS)
@@ -41,11 +41,6 @@ public final class SprintNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("sprint", "run", "fast", "speed")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -25,7 +25,7 @@ import java.util.Map;
 /// Data node that gets the current game time.
 /// Outputs: gameTime, dayTime, isDay, isNight
 public final class GetTimeNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_time")
     .displayName("Get Time")
     .category(CategoryRegistry.DATA)
@@ -44,11 +44,6 @@ public final class GetTimeNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("time", "day", "night", "tick", "clock")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

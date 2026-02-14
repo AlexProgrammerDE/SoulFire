@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 /// JSON node that extracts a value from JSON using a path expression.
 public final class JsonGetNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("json.get")
     .displayName("JSON Get")
     .category(CategoryRegistry.JSON)
@@ -46,11 +46,6 @@ public final class JsonGetNode extends AbstractScriptNode {
     .build();
 
   private static final Pattern ARRAY_INDEX_PATTERN = Pattern.compile("\\[(\\d+)]");
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

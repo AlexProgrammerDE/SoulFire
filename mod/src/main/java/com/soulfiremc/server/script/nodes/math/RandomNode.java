@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /// Inputs: min (default 0), max (default 1)
 /// Output: result (random double between min and max)
 public final class RandomNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.random")
     .displayName("Random")
     .category(CategoryRegistry.MATH)
@@ -43,11 +43,6 @@ public final class RandomNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("random", "rand", "chance", "dice")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

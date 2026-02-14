@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: text, start (index), end (index, -1 for end of string)
 /// Output: result
 public final class SubstringNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.substring")
     .displayName("Substring")
     .category(CategoryRegistry.STRING)
@@ -43,11 +43,6 @@ public final class SubstringNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "substring", "slice", "extract", "sub")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

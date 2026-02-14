@@ -28,7 +28,7 @@ import java.util.Map;
 /// Inputs: x, y, z (block coordinates)
 /// Outputs: blockId (string), isAir (boolean), isSolid (boolean)
 public final class GetBlockNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_block")
     .displayName("Get Block")
     .category(CategoryRegistry.DATA)
@@ -49,11 +49,6 @@ public final class GetBlockNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("block", "get", "info", "type", "world")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @SuppressWarnings("deprecation")
   @Override

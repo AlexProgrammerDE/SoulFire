@@ -27,7 +27,7 @@ import java.util.Map;
 /// Action node that uses the item in the bot's hand.
 /// Right-clicks to use items, interact with entities, or interact with blocks.
 public final class UseItemNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.use_item")
     .displayName("Use Item")
     .category(CategoryRegistry.ACTIONS)
@@ -42,11 +42,6 @@ public final class UseItemNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("use", "item", "right click", "interact", "eat", "drink")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

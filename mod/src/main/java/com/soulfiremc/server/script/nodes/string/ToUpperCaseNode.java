@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: text
 /// Output: result
 public final class ToUpperCaseNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.to_upper_case")
     .displayName("To Upper Case")
     .category(CategoryRegistry.STRING)
@@ -41,11 +41,6 @@ public final class ToUpperCaseNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "uppercase", "upper", "capital", "case")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

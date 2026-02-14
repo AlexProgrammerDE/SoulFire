@@ -30,7 +30,7 @@ import java.util.zip.GZIPOutputStream;
 
 /// Encoding node that compresses or decompresses data using GZIP.
 public final class CompressionNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("encoding.compress")
     .displayName("Compress/Decompress")
     .category(CategoryRegistry.ENCODING)
@@ -48,11 +48,6 @@ public final class CompressionNode extends AbstractScriptNode {
     .color("#64748B")
     .addKeywords("compress", "gzip", "decompress", "zip", "deflate")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

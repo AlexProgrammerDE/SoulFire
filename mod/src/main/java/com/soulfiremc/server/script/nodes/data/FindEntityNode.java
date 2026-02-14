@@ -30,7 +30,7 @@ import java.util.Map;
 /// Input: maxDistance (double, maximum search radius)
 /// Outputs: found (boolean), position (Vec3), entityId (int), distance (double)
 public final class FindEntityNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.find_entity")
     .displayName("Find Entity")
     .category(CategoryRegistry.DATA)
@@ -51,11 +51,6 @@ public final class FindEntityNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("find", "entity", "search", "nearest", "mob", "player", "locate")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

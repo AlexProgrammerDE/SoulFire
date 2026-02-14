@@ -27,7 +27,7 @@ import java.util.Map;
 /// Self-driving: uses runtime.executeDownstream() to iterate over bots,
 /// outputting the current bot per iteration.
 public final class ForEachBotNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.foreach_bot")
     .displayName("For Each Bot")
     .category(CategoryRegistry.FLOW)
@@ -48,11 +48,6 @@ public final class ForEachBotNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("foreach", "bot", "iterate", "loop")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

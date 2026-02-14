@@ -30,7 +30,7 @@ import java.util.Map;
 ///
 /// The script executor should use the output to determine which branch to execute.
 public final class SwitchNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.switch")
     .displayName("Switch")
     .category(CategoryRegistry.FLOW)
@@ -58,11 +58,6 @@ public final class SwitchNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("switch", "case", "branch", "select")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -28,7 +28,7 @@ import java.util.Map;
 ///
 /// Uses cubic B-spline basis functions for smooth interpolation.
 public final class BSplineNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.bspline")
     .displayName("B-Spline")
     .category(CategoryRegistry.MATH)
@@ -47,11 +47,6 @@ public final class BSplineNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("bspline", "spline", "curve", "interpolate")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

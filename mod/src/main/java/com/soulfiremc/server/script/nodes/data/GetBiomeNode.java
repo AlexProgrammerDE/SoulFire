@@ -25,7 +25,7 @@ import java.util.Map;
 /// Data node that gets the biome at the bot's current position.
 /// Outputs: biome (string identifier)
 public final class GetBiomeNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_biome")
     .displayName("Get Biome")
     .category(CategoryRegistry.DATA)
@@ -41,11 +41,6 @@ public final class GetBiomeNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("biome", "terrain", "environment", "forest", "desert", "ocean")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

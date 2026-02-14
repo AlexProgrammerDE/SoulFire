@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: name (string, the bot's account name)
 /// Outputs: bot (BotConnection or null), found (boolean)
 public final class GetBotByNameNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_bot_by_name")
     .displayName("Get Bot By Name")
     .category(CategoryRegistry.DATA)
@@ -44,11 +44,6 @@ public final class GetBotByNameNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("bot", "name", "find", "get", "search")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

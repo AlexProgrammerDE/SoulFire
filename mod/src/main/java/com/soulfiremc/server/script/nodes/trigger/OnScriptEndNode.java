@@ -26,7 +26,7 @@ import java.util.Map;
 /// This fires once before the script stops execution, allowing cleanup.
 /// Outputs: timestamp
 public final class OnScriptEndNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_script_end")
     .displayName("On Script End")
     .category(CategoryRegistry.TRIGGERS)
@@ -41,11 +41,6 @@ public final class OnScriptEndNode extends AbstractScriptNode {
     .color("#F44336")
     .addKeywords("end", "stop", "finish", "script", "cleanup", "shutdown")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

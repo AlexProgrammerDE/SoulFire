@@ -31,7 +31,7 @@ import java.util.Map;
 
 /// Integration node that sends messages to a Discord webhook.
 public final class DiscordWebhookNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("integration.discord_webhook")
     .displayName("Discord Webhook")
     .category(CategoryRegistry.INTEGRATION)
@@ -56,11 +56,6 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
     .build();
 
   private static final Gson GSON = new Gson();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

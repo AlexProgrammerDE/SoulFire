@@ -31,7 +31,7 @@ import java.util.Map;
 ///
 /// Routes to exec_allowed if condition is true, exec_blocked if false.
 public final class GateNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.gate")
     .displayName("Gate")
     .category(CategoryRegistry.FLOW)
@@ -51,11 +51,6 @@ public final class GateNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("gate", "filter", "pass", "block", "conditional")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

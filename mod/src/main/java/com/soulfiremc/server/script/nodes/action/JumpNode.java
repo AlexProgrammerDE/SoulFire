@@ -26,7 +26,7 @@ import java.util.Map;
 /// Action node that makes the bot jump.
 /// Sets the jump control state for one tick.
 public final class JumpNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.jump")
     .displayName("Jump")
     .category(CategoryRegistry.ACTIONS)
@@ -41,11 +41,6 @@ public final class JumpNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("jump", "hop", "leap")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

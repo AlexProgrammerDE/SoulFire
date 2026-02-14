@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /// Flow control node that limits execution rate using a token bucket algorithm.
 /// State is scoped per-script via ScriptStateStore.
 public final class RateLimitNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.rate_limit")
     .displayName("Rate Limit")
     .category(CategoryRegistry.FLOW)
@@ -50,11 +50,6 @@ public final class RateLimitNode extends AbstractScriptNode {
     .color("#8B5CF6")
     .addKeywords("rate", "limit", "throttle", "bucket", "spam", "cooldown")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

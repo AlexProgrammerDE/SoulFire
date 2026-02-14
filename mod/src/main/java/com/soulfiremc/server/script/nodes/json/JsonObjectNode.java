@@ -27,7 +27,7 @@ import java.util.Map;
 
 /// JSON node that creates a JSON object from key-value pairs.
 public final class JsonObjectNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("json.object")
     .displayName("JSON Object")
     .category(CategoryRegistry.JSON)
@@ -45,11 +45,6 @@ public final class JsonObjectNode extends AbstractScriptNode {
     .build();
 
   private static final Gson GSON = new Gson();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -25,7 +25,7 @@ import java.util.Map;
 /// Constant node that outputs a configurable boolean value.
 /// Output: value (boolean)
 public final class BooleanConstantNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.boolean")
     .displayName("Boolean")
     .category(CategoryRegistry.CONSTANTS)
@@ -40,11 +40,6 @@ public final class BooleanConstantNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("boolean", "bool", "true", "false", "constant", "value")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

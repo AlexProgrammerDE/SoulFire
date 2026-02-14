@@ -32,7 +32,7 @@ import java.util.Map;
 
 /// Network node that performs HTTP requests with full control over method, headers, and body.
 public final class WebFetchNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("network.web_fetch")
     .displayName("Web Fetch")
     .category(CategoryRegistry.NETWORK)
@@ -60,11 +60,6 @@ public final class WebFetchNode extends AbstractScriptNode {
     .build();
 
   private static final Gson GSON = new Gson();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

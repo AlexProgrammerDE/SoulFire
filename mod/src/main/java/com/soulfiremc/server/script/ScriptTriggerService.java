@@ -173,8 +173,7 @@ public final class ScriptTriggerService {
           }, listeners, "OnDamage");
 
         case "trigger.on_interval" -> {
-          var nodeImpl = NodeRegistry.create(node.type());
-          var resolvedInputs = new HashMap<>(nodeImpl.getDefaultInputs());
+          var resolvedInputs = new HashMap<>(NodeRegistry.computeDefaultInputs(NodeRegistry.getMetadata(node.type())));
           if (node.defaultInputs() != null) {
             for (var entry : node.defaultInputs().entrySet()) {
               resolvedInputs.put(entry.getKey(), NodeValue.of(entry.getValue()));

@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /// Action node that delays execution for a specified duration with optional jitter.
 public final class WaitNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.wait")
     .displayName("Wait")
     .category(CategoryRegistry.ACTIONS)
@@ -46,11 +46,6 @@ public final class WaitNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("wait", "delay", "sleep", "pause", "timer", "jitter")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

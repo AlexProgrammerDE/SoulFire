@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 /// Abstract base class for script nodes providing common utility methods.
-/// All subclasses MUST override getMetadata() to provide complete node metadata.
 public abstract class AbstractScriptNode implements ScriptNode {
 
   /// Helper method to get an input value with type casting.

@@ -28,7 +28,7 @@ import java.util.Map;
 
 /// Utility node that gets the current timestamp in various formats.
 public final class TimestampNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("utility.timestamp")
     .displayName("Timestamp")
     .category(CategoryRegistry.UTILITY)
@@ -46,11 +46,6 @@ public final class TimestampNode extends AbstractScriptNode {
     .color("#6B7280")
     .addKeywords("time", "timestamp", "date", "now", "epoch", "clock")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

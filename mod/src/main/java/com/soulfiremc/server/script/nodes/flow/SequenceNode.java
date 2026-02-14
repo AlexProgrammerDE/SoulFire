@@ -26,7 +26,7 @@ import java.util.Map;
 /// Flow control node that executes multiple branches in sequence.
 /// Self-driving: uses runtime.executeDownstream() to fire exec_0, exec_1, etc. in order.
 public final class SequenceNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.sequence")
     .displayName("Sequence")
     .category(CategoryRegistry.FLOW)
@@ -50,11 +50,6 @@ public final class SequenceNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("sequence", "order", "steps", "then")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

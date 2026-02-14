@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: a, b (booleans)
 /// Output: result = a OR b
 public final class OrNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("logic.or")
     .displayName("Or")
     .category(CategoryRegistry.LOGIC)
@@ -42,11 +42,6 @@ public final class OrNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("or", "either", "any", "logic")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

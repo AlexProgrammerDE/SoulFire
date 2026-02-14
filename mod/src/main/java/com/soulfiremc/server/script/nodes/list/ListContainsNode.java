@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: list, item
 /// Output: result (boolean)
 public final class ListContainsNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.contains")
     .displayName("List Contains")
     .category(CategoryRegistry.LIST)
@@ -42,11 +42,6 @@ public final class ListContainsNode extends AbstractScriptNode {
     .color("#00BCD4")
     .addKeywords("list", "contains", "includes", "has", "find", "search")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

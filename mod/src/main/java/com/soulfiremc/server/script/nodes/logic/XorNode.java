@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: a, b
 /// Output: result = a XOR b (true if exactly one is true)
 public final class XorNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("logic.xor")
     .displayName("Xor")
     .category(CategoryRegistry.LOGIC)
@@ -42,11 +42,6 @@ public final class XorNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("xor", "exclusive", "different", "logic")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

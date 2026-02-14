@@ -32,7 +32,7 @@ import java.util.Map;
 /// AI node that sends a prompt to an LLM and returns the response.
 /// Uses the bot's configured AI settings.
 public final class LLMChatNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("ai.llm_chat")
     .displayName("LLM Chat")
     .category(CategoryRegistry.AI)
@@ -57,11 +57,6 @@ public final class LLMChatNode extends AbstractScriptNode {
     .color("#A855F7")
     .addKeywords("ai", "llm", "gpt", "chat", "openai", "prompt", "completion", "generate")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

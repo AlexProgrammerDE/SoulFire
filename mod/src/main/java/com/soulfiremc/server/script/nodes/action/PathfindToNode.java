@@ -32,7 +32,7 @@ import java.util.Map;
 /// Inputs: destination (Vec3 target coordinates)
 /// Output: success (boolean)
 public final class PathfindToNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.pathfind_to")
     .displayName("Pathfind To")
     .category(CategoryRegistry.ACTIONS)
@@ -49,11 +49,6 @@ public final class PathfindToNode extends AbstractScriptNode {
     .color("#FF9800")
     .addKeywords("pathfind", "walk", "move", "goto", "navigate")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

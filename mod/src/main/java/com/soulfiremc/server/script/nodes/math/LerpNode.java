@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: a (start), b (end), t (interpolation factor 0-1)
 /// Output: result = a + (b - a) * t
 public final class LerpNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.lerp")
     .displayName("Lerp")
     .category(CategoryRegistry.MATH)
@@ -43,11 +43,6 @@ public final class LerpNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("lerp", "interpolate", "blend", "mix")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

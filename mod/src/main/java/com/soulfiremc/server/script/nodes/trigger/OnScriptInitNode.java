@@ -26,7 +26,7 @@ import java.util.Map;
 /// This fires once when the script begins execution.
 /// Outputs: timestamp
 public final class OnScriptInitNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_script_init")
     .displayName("On Script Init")
     .category(CategoryRegistry.TRIGGERS)
@@ -41,11 +41,6 @@ public final class OnScriptInitNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("init", "start", "begin", "script", "launch")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

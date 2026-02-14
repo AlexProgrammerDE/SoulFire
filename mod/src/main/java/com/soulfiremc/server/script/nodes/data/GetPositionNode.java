@@ -26,7 +26,7 @@ import java.util.Map;
 /// Data node that gets the bot's current position.
 /// Outputs: position (Vec3)
 public final class GetPositionNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_position")
     .displayName("Get Position")
     .category(CategoryRegistry.DATA)
@@ -42,11 +42,6 @@ public final class GetPositionNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("position", "location", "coordinates", "xyz")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

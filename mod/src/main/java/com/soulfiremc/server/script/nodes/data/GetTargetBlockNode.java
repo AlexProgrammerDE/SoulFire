@@ -30,7 +30,7 @@ import java.util.Map;
 /// Data node that gets the block the bot is looking at.
 /// Outputs: found, blockId, position, distance
 public final class GetTargetBlockNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_target_block")
     .displayName("Get Target Block")
     .category(CategoryRegistry.DATA)
@@ -50,11 +50,6 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("target", "look", "raycast", "crosshair", "aim")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

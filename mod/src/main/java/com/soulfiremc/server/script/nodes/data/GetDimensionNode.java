@@ -26,7 +26,7 @@ import java.util.Map;
 /// Data node that gets the bot's current dimension.
 /// Outputs: dimension (string), isOverworld, isNether, isEnd
 public final class GetDimensionNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.get_dimension")
     .displayName("Get Dimension")
     .category(CategoryRegistry.DATA)
@@ -45,11 +45,6 @@ public final class GetDimensionNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("dimension", "world", "overworld", "nether", "end")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

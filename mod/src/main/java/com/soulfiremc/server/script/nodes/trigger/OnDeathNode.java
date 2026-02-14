@@ -25,7 +25,7 @@ import java.util.Map;
 /// Trigger node that fires when the bot dies.
 /// Outputs: bot (the bot that died), deathMessage (string)
 public final class OnDeathNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_death")
     .displayName("On Death")
     .category(CategoryRegistry.TRIGGERS)
@@ -41,11 +41,6 @@ public final class OnDeathNode extends AbstractScriptNode {
     .color("#4CAF50")
     .addKeywords("death", "die", "dead", "killed", "respawn")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /// State node that provides a simple state machine for bot behavior management.
 public final class StateNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("state.state_machine")
     .displayName("State Machine")
     .category(CategoryRegistry.STATE)
@@ -55,11 +55,6 @@ public final class StateNode extends AbstractScriptNode {
   // Use ConcurrentHashMap to store state machines per bot
   private static final MetadataKey<ConcurrentHashMap<String, StateData>> STATE_MACHINES_KEY =
     MetadataKey.of("script_state", "machines", ConcurrentHashMap.class);
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

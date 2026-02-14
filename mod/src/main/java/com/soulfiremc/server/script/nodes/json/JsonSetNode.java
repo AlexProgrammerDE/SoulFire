@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 
 /// JSON node that sets a value in JSON at a specified path.
 public final class JsonSetNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("json.set")
     .displayName("JSON Set")
     .category(CategoryRegistry.JSON)
@@ -47,11 +47,6 @@ public final class JsonSetNode extends AbstractScriptNode {
 
   private static final Gson GSON = new Gson();
   private static final Pattern ARRAY_INDEX_PATTERN = Pattern.compile("\\[(\\d+)]");
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

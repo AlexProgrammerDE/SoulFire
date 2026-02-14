@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: list, index
 /// Outputs: item, found (boolean)
 public final class GetAtNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.get_at")
     .displayName("Get At Index")
     .category(CategoryRegistry.LIST)
@@ -43,11 +43,6 @@ public final class GetAtNode extends AbstractScriptNode {
     .color("#00BCD4")
     .addKeywords("list", "get", "index", "at", "element", "access")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: base, exponent
 /// Output: result = base ^ exponent
 public final class PowNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("math.pow")
     .displayName("Power")
     .category(CategoryRegistry.MATH)
@@ -42,11 +42,6 @@ public final class PowNode extends AbstractScriptNode {
     .color("#2196F3")
     .addKeywords("pow", "power", "exponent", "raise")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

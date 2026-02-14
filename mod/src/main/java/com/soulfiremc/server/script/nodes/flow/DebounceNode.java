@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /// Routes to exec_allowed or exec_denied based on whether the cooldown has elapsed.
 /// State is scoped per-script via ScriptStateStore.
 public final class DebounceNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.debounce")
     .displayName("Debounce")
     .category(CategoryRegistry.FLOW)
@@ -49,11 +49,6 @@ public final class DebounceNode extends AbstractScriptNode {
     .color("#607D8B")
     .addKeywords("debounce", "rate limit", "cooldown", "throttle")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

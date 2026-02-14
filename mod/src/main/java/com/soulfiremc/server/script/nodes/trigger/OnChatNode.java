@@ -25,7 +25,7 @@ import java.util.Map;
 /// Trigger node that fires when a chat message is received.
 /// Outputs: bot (the bot that received the message), message (Component), messagePlainText, timestamp
 public final class OnChatNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_chat")
     .displayName("On Chat")
     .category(CategoryRegistry.TRIGGERS)
@@ -43,11 +43,6 @@ public final class OnChatNode extends AbstractScriptNode {
     .color("#4CAF50")
     .addKeywords("chat", "message", "text", "say", "talk", "receive")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

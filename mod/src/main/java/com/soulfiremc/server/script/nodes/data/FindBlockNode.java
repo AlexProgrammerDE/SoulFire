@@ -31,7 +31,7 @@ import java.util.Map;
 /// Input: maxDistance (int, maximum search radius in blocks)
 /// Outputs: found (boolean), position (Vec3), distance (double)
 public final class FindBlockNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.find_block")
     .displayName("Find Block")
     .category(CategoryRegistry.DATA)
@@ -51,11 +51,6 @@ public final class FindBlockNode extends AbstractScriptNode {
     .color("#9C27B0")
     .addKeywords("find", "block", "search", "nearest", "ore", "locate")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

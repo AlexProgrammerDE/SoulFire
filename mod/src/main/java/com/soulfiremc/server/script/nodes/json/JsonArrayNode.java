@@ -27,7 +27,7 @@ import java.util.Map;
 
 /// JSON node that creates a JSON array from multiple inputs.
 public final class JsonArrayNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("json.array")
     .displayName("JSON Array")
     .category(CategoryRegistry.JSON)
@@ -44,11 +44,6 @@ public final class JsonArrayNode extends AbstractScriptNode {
     .build();
 
   private static final Gson GSON = new Gson();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

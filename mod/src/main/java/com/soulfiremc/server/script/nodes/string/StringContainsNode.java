@@ -26,7 +26,7 @@ import java.util.Map;
 /// Inputs: text, search, ignoreCase
 /// Output: result (boolean)
 public final class StringContainsNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("string.contains")
     .displayName("String Contains")
     .category(CategoryRegistry.STRING)
@@ -43,11 +43,6 @@ public final class StringContainsNode extends AbstractScriptNode {
     .color("#8BC34A")
     .addKeywords("string", "contains", "includes", "has", "search", "find")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

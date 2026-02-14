@@ -26,7 +26,7 @@ import java.util.Map;
 /// Input: list
 /// Outputs: item, found (boolean)
 public final class LastNode extends AbstractScriptNode {
-  private static final NodeMetadata METADATA = NodeMetadata.builder()
+  public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("list.last")
     .displayName("Last")
     .category(CategoryRegistry.LIST)
@@ -42,11 +42,6 @@ public final class LastNode extends AbstractScriptNode {
     .color("#00BCD4")
     .addKeywords("list", "last", "tail", "back", "end")
     .build();
-
-  @Override
-  public NodeMetadata getMetadata() {
-    return METADATA;
-  }
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
