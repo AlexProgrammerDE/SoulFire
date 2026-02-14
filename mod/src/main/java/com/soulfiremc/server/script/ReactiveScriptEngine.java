@@ -151,7 +151,7 @@ public final class ReactiveScriptEngine {
       .toList();
 
     if (active.isEmpty()) {
-      if (execPorts.size() == 1 && execPorts.getFirst().equals(StandardPorts.EXEC_OUT)) {
+      if (execPorts.size() == 1 && StandardPorts.EXEC_OUT.equals(execPorts.getFirst())) {
         // Single "out" port — always follow it
         active = List.of(StandardPorts.EXEC_OUT);
       } else {
@@ -308,7 +308,7 @@ public final class ReactiveScriptEngine {
       })
       .onErrorResume(e -> {
         var hasErrorPort = metadata.outputs().stream()
-          .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals(StandardPorts.EXEC_ERROR));
+          .anyMatch(p -> p.type() == PortType.EXEC && StandardPorts.EXEC_ERROR.equals(p.id()));
         if (hasErrorPort) {
           var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
           return Mono.just(Map.of(

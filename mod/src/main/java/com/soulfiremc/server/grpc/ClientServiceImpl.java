@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jooq.impl.DSL;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -152,7 +153,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
         var ctx = DSL.using(cfg);
         var updated = ctx.update(Tables.USERS)
           .set(Tables.USERS.USERNAME, request.getUsername())
-          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.ID.eq(userId.toString()))
           .execute();
         if (updated == 0) {
@@ -178,7 +179,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
         var ctx = DSL.using(cfg);
         var updated = ctx.update(Tables.USERS)
           .set(Tables.USERS.EMAIL, request.getEmail())
-          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.ID.eq(userId.toString()))
           .execute();
         if (updated == 0) {
@@ -200,7 +201,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
-      var now = LocalDateTime.now();
+      var now = LocalDateTime.now(ZoneOffset.UTC);
       soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
         var updated = ctx.update(Tables.USERS)

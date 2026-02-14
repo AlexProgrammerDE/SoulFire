@@ -53,7 +53,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_USER));
 
     try {
-      var now = LocalDateTime.now();
+      var now = LocalDateTime.now(ZoneOffset.UTC);
       soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
         ctx.insertInto(Tables.USERS)
@@ -175,7 +175,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
-      var now = LocalDateTime.now();
+      var now = LocalDateTime.now(ZoneOffset.UTC);
       soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
         var updated = ctx.update(Tables.USERS)
@@ -214,7 +214,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
             case USER -> UserRole.USER;
             case UNRECOGNIZED -> throw new IllegalArgumentException("Unknown role: " + request.getRole());
           }).name())
-          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.ID.eq(userId.toString()))
           .execute();
         if (updated == 0) {

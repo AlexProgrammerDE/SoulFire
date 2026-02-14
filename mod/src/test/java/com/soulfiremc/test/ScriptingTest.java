@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.test;
 
+import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,12 +46,12 @@ final class ScriptingTest {
     }
 
     @Override
-    public com.soulfiremc.server.InstanceManager instance() {
+    public InstanceManager instance() {
       return null;
     }
 
     @Override
-    public com.soulfiremc.server.SoulFireScheduler scheduler() {
+    public SoulFireScheduler scheduler() {
       return null;
     }
 
@@ -1219,9 +1222,9 @@ final class ScriptingTest {
     var metadata = NodeRegistry.getMetadata("data.get_bots");
 
     var hasExecIn = metadata.inputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "in".equals(p.id()));
     var hasExecOut = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("out"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "out".equals(p.id()));
 
     assertTrue(hasExecIn, "GetBotsNode should have exec input");
     assertTrue(hasExecOut, "GetBotsNode should have exec output");
@@ -1232,9 +1235,9 @@ final class ScriptingTest {
     var metadata = NodeRegistry.getMetadata("data.filter_bots");
 
     var hasExecIn = metadata.inputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "in".equals(p.id()));
     var hasExecOut = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("out"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "out".equals(p.id()));
 
     assertTrue(hasExecIn, "FilterBotsNode should have exec input");
     assertTrue(hasExecOut, "FilterBotsNode should have exec output");
@@ -1245,9 +1248,9 @@ final class ScriptingTest {
     var metadata = NodeRegistry.getMetadata("data.get_bot_by_name");
 
     var hasExecIn = metadata.inputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("in"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "in".equals(p.id()));
     var hasExecOut = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("out"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "out".equals(p.id()));
 
     assertTrue(hasExecIn, "GetBotByNameNode should have exec input");
     assertTrue(hasExecOut, "GetBotByNameNode should have exec output");
@@ -1263,9 +1266,9 @@ final class ScriptingTest {
     var metadata = NodeRegistry.getMetadata("ai.llm_chat");
 
     var hasExecSuccess = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "exec_success".equals(p.id()));
     var hasExecError = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "exec_error".equals(p.id()));
 
     assertTrue(hasExecSuccess, "LLMChatNode should have exec_success port");
     assertTrue(hasExecError, "LLMChatNode should have exec_error port");
@@ -1276,9 +1279,9 @@ final class ScriptingTest {
     var metadata = NodeRegistry.getMetadata("network.web_fetch");
 
     var hasExecSuccess = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "exec_success".equals(p.id()));
     var hasExecError = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "exec_error".equals(p.id()));
 
     assertTrue(hasExecSuccess, "WebFetchNode should have exec_success port");
     assertTrue(hasExecError, "WebFetchNode should have exec_error port");
@@ -1289,9 +1292,9 @@ final class ScriptingTest {
     var metadata = NodeRegistry.getMetadata("integration.discord_webhook");
 
     var hasExecSuccess = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_success"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "exec_success".equals(p.id()));
     var hasExecError = metadata.outputs().stream()
-      .anyMatch(p -> p.type() == PortType.EXEC && p.id().equals("exec_error"));
+      .anyMatch(p -> p.type() == PortType.EXEC && "exec_error".equals(p.id()));
 
     assertTrue(hasExecSuccess, "DiscordWebhookNode should have exec_success port");
     assertTrue(hasExecError, "DiscordWebhookNode should have exec_error port");
@@ -1465,7 +1468,7 @@ final class ScriptingTest {
     var execPortIds = NodeRegistry.getMetadata("flow.branch").outputs().stream()
       .filter(p -> p.type() == PortType.EXEC)
       .map(PortDefinition::id)
-      .collect(java.util.stream.Collectors.toSet());
+      .collect(Collectors.toSet());
     var contextOutputs = new HashMap<>(outputs);
     execPortIds.forEach(contextOutputs::remove);
 

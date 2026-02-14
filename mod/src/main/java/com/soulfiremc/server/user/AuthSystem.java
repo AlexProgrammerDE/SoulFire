@@ -75,7 +75,7 @@ public final class AuthSystem {
         // where UUIDs may be stored in a binary format that doesn't match text comparison
         ctx.update(Tables.USERS)
           .set(Tables.USERS.USERNAME, "old-root-%s".formatted(UUID.randomUUID().toString().substring(0, 6)))
-          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.USERNAME.eq("root"))
           .execute();
       }
@@ -85,7 +85,7 @@ public final class AuthSystem {
       var ctx = DSL.using(cfg);
       var currentRootUser = ctx.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(ROOT_USER_ID.toString())).fetchOne();
       if (currentRootUser == null) {
-        var now = LocalDateTime.now();
+        var now = LocalDateTime.now(ZoneOffset.UTC);
         ctx.insertInto(Tables.USERS)
           .set(Tables.USERS.ID, ROOT_USER_ID.toString())
           .set(Tables.USERS.USERNAME, "root")
@@ -100,7 +100,7 @@ public final class AuthSystem {
       } else {
         ctx.update(Tables.USERS)
           .set(Tables.USERS.ROLE, UserRole.ADMIN.name())
-          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.ID.eq(ROOT_USER_ID.toString()))
           .execute();
         if (ROOT_DEFAULT_EMAIL.equals(currentRootUser.getEmail())) {
@@ -168,8 +168,8 @@ public final class AuthSystem {
       var lastLoginInstant = lastLogin != null ? lastLogin.toInstant(ZoneOffset.UTC) : null;
       if (lastLoginInstant == null || lastLoginInstant.isBefore(Instant.now().minusSeconds(30))) {
         ctx.update(Tables.USERS)
-          .set(Tables.USERS.LAST_LOGIN_AT, LocalDateTime.now())
-          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.USERS.LAST_LOGIN_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.ID.eq(uuid.toString()))
           .execute();
       }

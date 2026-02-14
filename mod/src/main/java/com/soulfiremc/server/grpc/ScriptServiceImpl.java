@@ -285,7 +285,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
 
         var newId = UUID.randomUUID().toString();
-        var now = LocalDateTime.now();
+        var now = LocalDateTime.now(ZoneOffset.UTC);
         ctx.insertInto(Tables.SCRIPTS)
           .set(Tables.SCRIPTS.ID, newId)
           .set(Tables.SCRIPTS.NAME, request.getName())
@@ -372,7 +372,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
 
         var update = ctx.update(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now());
+          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC));
 
         if (request.hasName()) {
           update = update.set(Tables.SCRIPTS.NAME, request.getName());
@@ -512,7 +512,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         if (record.getPaused()) {
           ctx.update(Tables.SCRIPTS)
             .set(Tables.SCRIPTS.PAUSED, false)
-            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now())
+            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
             .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
             .execute();
           record.setPaused(false);
@@ -635,7 +635,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
         ctx.update(Tables.SCRIPTS)
           .set(Tables.SCRIPTS.PAUSED, true)
-          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
           .execute();
       });

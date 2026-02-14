@@ -215,7 +215,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         };
 
         updateStep
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -246,7 +246,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(newSettings))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -284,7 +284,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -318,7 +318,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -354,7 +354,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -390,7 +390,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -426,7 +426,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -465,7 +465,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -499,7 +499,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -537,7 +537,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -575,7 +575,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -611,7 +611,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -648,7 +648,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -801,7 +801,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         var updatedStem = currentSettings.withAccounts(newAccounts);
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });
@@ -856,7 +856,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         var updatedStem = currentSettings.withAccounts(newAccounts);
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });

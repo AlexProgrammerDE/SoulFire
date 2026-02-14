@@ -47,7 +47,7 @@ public final class ExecutionRun {
       .asFlux()
       .next()
       .timeout(Duration.ofSeconds(30))
-      .doOnError(e -> log.warn("Timeout waiting for node {} outputs - "
+      .doOnError(_ -> log.warn("Timeout waiting for node {} outputs - "
         + "DATA edge may point to a node not on the execution path", nodeId))
       .onErrorReturn(Map.of());
   }

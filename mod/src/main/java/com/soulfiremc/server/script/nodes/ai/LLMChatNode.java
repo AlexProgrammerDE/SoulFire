@@ -25,6 +25,7 @@ import com.openai.models.completions.CompletionUsage;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.settings.instance.AISettings;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -132,6 +133,6 @@ public final class LLMChatNode extends AbstractScriptNode {
           "tokensUsed", 0
         );
       }
-    }).subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic());
+    }).subscribeOn(Schedulers.boundedElastic());
   }
 }

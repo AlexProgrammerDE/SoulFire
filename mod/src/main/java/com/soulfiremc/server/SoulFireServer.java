@@ -64,6 +64,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -301,7 +302,7 @@ public final class SoulFireServer {
   }
 
   public UUID createInstance(String friendlyName, SoulFireUser owner) {
-    var now = LocalDateTime.now();
+    var now = LocalDateTime.now(ZoneOffset.UTC);
     var id = UUID.randomUUID();
     dsl().insertInto(Tables.INSTANCES)
       .set(Tables.INSTANCES.ID, id.toString())

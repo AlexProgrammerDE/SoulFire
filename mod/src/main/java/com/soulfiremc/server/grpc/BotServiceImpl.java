@@ -52,6 +52,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Slf4j
@@ -230,7 +231,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();
       });

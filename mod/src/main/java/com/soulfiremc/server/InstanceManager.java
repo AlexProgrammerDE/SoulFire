@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -201,7 +202,7 @@ public final class InstanceManager {
       var newSettings = currentSettings.withAccounts(newAccounts);
       ctx.update(Tables.INSTANCES)
         .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
-        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
     });
@@ -260,7 +261,7 @@ public final class InstanceManager {
         var newSettings = currentSettings.withAccounts(accounts);
         ctx.update(Tables.INSTANCES)
           .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(id.toString()))
           .execute();
       });
@@ -294,7 +295,7 @@ public final class InstanceManager {
       var newSettings = currentSettings.withAccounts(accounts);
       ctx.update(Tables.INSTANCES)
         .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
-        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
     });
@@ -533,7 +534,7 @@ public final class InstanceManager {
     this.sessionLifecycle = sessionLifecycle;
     dsl.update(Tables.INSTANCES)
       .set(Tables.INSTANCES.SESSION_LIFECYCLE, sessionLifecycle.name())
-      .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
+      .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
       .where(Tables.INSTANCES.ID.eq(id.toString()))
       .execute();
   }
@@ -575,7 +576,7 @@ public final class InstanceManager {
         return;
       }
 
-      var now = LocalDateTime.now();
+      var now = LocalDateTime.now(ZoneOffset.UTC);
       ctx.insertInto(Tables.INSTANCE_AUDIT_LOGS)
         .set(Tables.INSTANCE_AUDIT_LOGS.ID, UUID.randomUUID().toString())
         .set(Tables.INSTANCE_AUDIT_LOGS.TYPE, logType.name())

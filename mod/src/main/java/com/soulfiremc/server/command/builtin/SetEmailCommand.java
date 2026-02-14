@@ -24,6 +24,7 @@ import com.soulfiremc.server.command.CommandSourceStack;
 import com.soulfiremc.server.database.generated.Tables;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static com.soulfiremc.server.command.brigadier.BrigadierHelper.*;
 
@@ -43,7 +44,7 @@ public final class SetEmailCommand {
                 c.getSource().soulFire().dsl()
                   .update(Tables.USERS)
                   .set(Tables.USERS.EMAIL, email)
-                  .set(Tables.USERS.UPDATED_AT, LocalDateTime.now())
+                  .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
                   .where(Tables.USERS.ID.eq(c.getSource().source().getUniqueId().toString()))
                   .execute();
                 c.getSource().source().sendInfo("Email of user {} set to {}", c.getSource().source().getUsername(), email);
