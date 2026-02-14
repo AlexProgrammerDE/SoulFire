@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that rounds a number down to the nearest integer.
 /// Input: value
@@ -48,8 +48,8 @@ public final class FloorNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = getDoubleInput(inputs, "value", 0.0);
-    return completed(result("result", Math.floor(value)));
+    return completedMono(result("result", Math.floor(value)));
   }
 }

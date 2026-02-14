@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the current game time.
 /// Outputs: gameTime, dayTime, isDay, isNight
@@ -51,12 +51,12 @@ public final class GetTimeNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
 
     if (level == null) {
-      return completed(results(
+      return completedMono(results(
         "gameTime", 0L,
         "dayTime", 0L,
         "isDay", true,
@@ -70,7 +70,7 @@ public final class GetTimeNode extends AbstractScriptNode {
     // More precisely: 0=6am, 6000=noon, 12000=6pm, 18000=midnight
     var isDay = dayTime >= 0 && dayTime < 12000;
 
-    return completed(results(
+    return completedMono(results(
       "gameTime", gameTime,
       "dayTime", dayTime,
       "isDay", isDay,

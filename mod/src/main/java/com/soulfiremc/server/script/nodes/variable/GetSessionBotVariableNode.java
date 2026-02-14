@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.variable;
 
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// Variable node that retrieves a value from the bot's session metadata.
@@ -56,13 +56,13 @@ public final class GetSessionBotVariableNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var key = getStringInput(inputs, "key", "");
     var defaultValue = inputs.get("defaultValue");
 
     if (key.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false
       ));
@@ -73,18 +73,18 @@ public final class GetSessionBotVariableNode extends AbstractScriptNode {
       var value = sessionVars.get(key);
 
       if (value == null) {
-        return completed(results(
+        return completedMono(results(
           "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
           "found", false
         ));
       }
 
-      return completed(results(
+      return completedMono(results(
         "value", value,
         "found", true
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false
       ));

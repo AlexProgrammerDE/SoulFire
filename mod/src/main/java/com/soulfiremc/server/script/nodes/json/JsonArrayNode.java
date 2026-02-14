@@ -21,9 +21,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonNull;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// JSON node that creates a JSON array from multiple inputs.
 public final class JsonArrayNode extends AbstractScriptNode {
@@ -51,7 +51,7 @@ public final class JsonArrayNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var items = getListInput(inputs, "items");
 
     var array = new JsonArray();
@@ -60,6 +60,6 @@ public final class JsonArrayNode extends AbstractScriptNode {
       array.add(element != null ? element : JsonNull.INSTANCE);
     }
 
-    return completed(result("array", GSON.toJson(array)));
+    return completedMono(result("array", GSON.toJson(array)));
   }
 }

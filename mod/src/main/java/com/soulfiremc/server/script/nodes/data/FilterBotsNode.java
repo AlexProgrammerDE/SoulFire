@@ -18,10 +18,10 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -54,7 +54,7 @@ public final class FilterBotsNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var botValues = getListInput(inputs, "bots");
     var patternStr = getStringInput(inputs, "pattern", ".*");
 
@@ -63,7 +63,7 @@ public final class FilterBotsNode extends AbstractScriptNode {
       pattern = Pattern.compile(patternStr);
     } catch (PatternSyntaxException _) {
       // If pattern is invalid, return empty list
-      return completed(result("bots", List.of()));
+      return completedMono(result("bots", List.of()));
     }
 
     var filtered = botValues.stream()
@@ -72,6 +72,6 @@ public final class FilterBotsNode extends AbstractScriptNode {
       .map(NodeValue::ofBot)
       .toList();
 
-    return completed(result("bots", filtered));
+    return completedMono(result("bots", filtered));
   }
 }

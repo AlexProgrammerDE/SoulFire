@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Base interface for all script nodes in the visual scripting system.
 /// Each node type implements this interface to define its execution behavior.
@@ -46,24 +45,12 @@ public interface ScriptNode {
     return getMetadata().type();
   }
 
-  /// Executes this node with the given runtime and inputs.
-  /// The execution can be asynchronous for operations like pathfinding or block breaking.
-  ///
-  /// @param runtime the node runtime providing access to instance and scheduler
-  /// @param inputs  the resolved input values from connected nodes or default values
-  /// @return a future that completes with the node's output values
-  CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs);
-
-  /// Executes this node reactively.
-  /// Default implementation wraps the CompletableFuture version.
-  /// Override for better reactive behavior (especially for async operations).
+  /// Executes this node reactively with the given runtime and inputs.
   ///
   /// @param runtime the node runtime providing access to instance and scheduler
   /// @param inputs  the resolved input values from connected nodes or default values
   /// @return a Mono that completes with the node's output values
-  default Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    return Mono.fromFuture(() -> execute(runtime, inputs));
-  }
+  Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs);
 
   /// Returns whether this node is a trigger node (entry point for script execution).
   /// Trigger nodes have no execution input and start script flows.

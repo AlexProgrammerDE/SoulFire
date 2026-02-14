@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that raises a number to a power.
 /// Inputs: base, exponent
@@ -49,9 +49,9 @@ public final class PowNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var base = getDoubleInput(inputs, "base", 0.0);
     var exponent = getDoubleInput(inputs, "exponent", 1.0);
-    return completed(result("result", Math.pow(base, exponent)));
+    return completedMono(result("result", Math.pow(base, exponent)));
   }
 }

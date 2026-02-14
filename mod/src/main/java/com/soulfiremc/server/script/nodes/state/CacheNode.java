@@ -18,12 +18,13 @@
 package com.soulfiremc.server.script.nodes.state;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// State node that provides an in-memory key-value cache with optional TTL.
+/// State is scoped per-script via ScriptStateStore.
 public final class CacheNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("state.cache")
@@ -47,22 +48,23 @@ public final class CacheNode extends AbstractScriptNode {
     .addKeywords("cache", "store", "memory", "ttl", "temporary")
     .build();
 
-  private static final Map<String, Map<String, CacheEntry>> CACHES = new ConcurrentHashMap<>();
-
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var operation = getStringInput(inputs, "operation", "get").toLowerCase();
     var key = getStringInput(inputs, "key", "");
     var value = inputs.get("value");
     var ttlMs = getLongInput(inputs, "ttlMs", 0L);
     var namespace = getStringInput(inputs, "namespace", "default");
 
-    var cache = CACHES.computeIfAbsent(namespace, _ -> new ConcurrentHashMap<>());
+    @SuppressWarnings("unchecked")
+    var caches = runtime.stateStore()
+      .<Map<String, Map<String, CacheEntry>>>getOrCreate("cache_namespaces", ConcurrentHashMap::new);
+    var cache = caches.computeIfAbsent(namespace, _ -> new ConcurrentHashMap<>());
 
     return switch (operation) {
       case "get" -> {
@@ -71,13 +73,13 @@ public final class CacheNode extends AbstractScriptNode {
           if (entry != null) {
             cache.remove(key);
           }
-          yield completed(results(
+          yield completedMono(results(
             "value", NodeValue.ofNull(),
             "found", false,
             "success", true
           ));
         }
-        yield completed(results(
+        yield completedMono(results(
           "value", entry.value,
           "found", true,
           "success", true
@@ -86,7 +88,7 @@ public final class CacheNode extends AbstractScriptNode {
       case "set" -> {
         var expiresAt = ttlMs > 0 ? System.currentTimeMillis() + ttlMs : 0;
         cache.put(key, new CacheEntry(value != null ? value : NodeValue.ofNull(), expiresAt));
-        yield completed(results(
+        yield completedMono(results(
           "value", NodeValue.ofNull(),
           "found", false,
           "success", true
@@ -94,7 +96,7 @@ public final class CacheNode extends AbstractScriptNode {
       }
       case "delete" -> {
         var existed = cache.remove(key) != null;
-        yield completed(results(
+        yield completedMono(results(
           "value", NodeValue.ofNull(),
           "found", existed,
           "success", true
@@ -102,7 +104,7 @@ public final class CacheNode extends AbstractScriptNode {
       }
       case "clear" -> {
         cache.clear();
-        yield completed(results(
+        yield completedMono(results(
           "value", NodeValue.ofNull(),
           "found", false,
           "success", true
@@ -114,13 +116,13 @@ public final class CacheNode extends AbstractScriptNode {
         if (entry != null && entry.isExpired()) {
           cache.remove(key);
         }
-        yield completed(results(
+        yield completedMono(results(
           "value", NodeValue.ofNull(),
           "found", found,
           "success", true
         ));
       }
-      default -> completed(results(
+      default -> completedMono(results(
         "value", NodeValue.ofNull(),
         "found", false,
         "success", false

@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Integration node that sends messages to a Discord webhook.
 public final class DiscordWebhookNode extends AbstractScriptNode {
@@ -64,7 +63,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var webhookUrl = getStringInput(inputs, "webhookUrl", "");
     var content = getStringInput(inputs, "content", "");
     var username = getStringInput(inputs, "username", "");
@@ -72,7 +71,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
     var embedJson = getStringInput(inputs, "embedJson", "");
 
     if (webhookUrl.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "exec_error", true,
         "success", false,
         "errorMessage", "Webhook URL is required"
@@ -80,7 +79,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
     }
 
     if (content.isEmpty() && embedJson.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "exec_error", true,
         "success", false,
         "errorMessage", "Either content or embed is required"
@@ -106,7 +105,7 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
         embeds.add(embed);
         payload.add("embeds", embeds);
       } catch (Exception e) {
-        return completed(results(
+        return completedMono(results(
           "exec_error", true,
           "success", false,
           "errorMessage", "Invalid embed JSON: " + e.getMessage()
@@ -144,6 +143,6 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       )))
-      .toFuture();
+;
   }
 }

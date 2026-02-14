@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.level.LightLayer;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the light level at the bot's position.
 /// Outputs: blockLight, skyLight, combinedLight
@@ -51,13 +51,13 @@ public final class GetLightLevelNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
 
     if (level == null || player == null) {
-      return completed(results("blockLight", 0, "skyLight", 0, "combinedLight", 0));
+      return completedMono(results("blockLight", 0, "skyLight", 0, "combinedLight", 0));
     }
 
     var pos = player.blockPosition();
@@ -65,7 +65,7 @@ public final class GetLightLevelNode extends AbstractScriptNode {
     var skyLight = level.getBrightness(LightLayer.SKY, pos);
     var combinedLight = Math.max(blockLight, skyLight);
 
-    return completed(results(
+    return completedMono(results(
       "blockLight", blockLight,
       "skyLight", skyLight,
       "combinedLight", combinedLight

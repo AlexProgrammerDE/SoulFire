@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that converts any value to a string.
 /// Input: value
@@ -48,9 +48,9 @@ public final class ToStringNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
     var result = value != null ? value.toString() : "null";
-    return completed(result("result", result));
+    return completedMono(result("result", result));
   }
 }

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the current weather conditions.
 /// Outputs: isRaining, isThundering, rainLevel, thunderLevel
@@ -51,12 +51,12 @@ public final class GetWeatherNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
 
     if (level == null) {
-      return completed(results(
+      return completedMono(results(
         "isRaining", false,
         "isThundering", false,
         "rainLevel", 0.0f,
@@ -64,7 +64,7 @@ public final class GetWeatherNode extends AbstractScriptNode {
       ));
     }
 
-    return completed(results(
+    return completedMono(results(
       "isRaining", level.isRaining(),
       "isThundering", level.isThundering(),
       "rainLevel", level.getRainLevel(1.0f),

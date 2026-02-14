@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that checks if a value is null.
 /// Input: value
@@ -48,8 +48,8 @@ public final class IsNullNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
-    return completed(result("result", value == null));
+    return completedMono(result("result", value == null));
   }
 }

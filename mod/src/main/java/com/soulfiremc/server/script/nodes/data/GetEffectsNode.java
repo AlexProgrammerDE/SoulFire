@@ -20,10 +20,10 @@ package com.soulfiremc.server.script.nodes.data;
 import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's active potion effects.
 /// Outputs: effectCount, effectNames (comma-separated list)
@@ -53,12 +53,12 @@ public final class GetEffectsNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results(
+      return completedMono(results(
         "effectCount", 0,
         "effectNames", "",
         "hasEffects", false
@@ -72,7 +72,7 @@ public final class GetEffectsNode extends AbstractScriptNode {
       .map(Identifier::getPath)
       .toList();
 
-    return completed(results(
+    return completedMono(results(
       "effectCount", effects.size(),
       "effectNames", String.join(", ", effectNames),
       "hasEffects", !effects.isEmpty()

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.constant;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Constant node that outputs a configurable string value.
 /// Output: value (string)
@@ -47,8 +47,8 @@ public final class StringConstantNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = getStringInput(inputs, "value", "");
-    return completed(result("value", value));
+    return completedMono(result("value", value));
   }
 }

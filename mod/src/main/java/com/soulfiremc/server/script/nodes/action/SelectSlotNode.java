@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that selects a hotbar slot (0-8).
 /// Input: slot (0-8)
@@ -49,7 +49,7 @@ public final class SelectSlotNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var slot = getIntInput(inputs, "slot", 0);
 
@@ -64,6 +64,6 @@ public final class SelectSlotNode extends AbstractScriptNode {
       }
     }));
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

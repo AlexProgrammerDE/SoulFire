@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets various boolean states of the bot.
 /// Outputs: isOnGround, isInWater, isSwimming, isSprinting, isSneaking, isFallFlying
@@ -53,12 +53,12 @@ public final class GetBotStateNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results(
+      return completedMono(results(
         "isOnGround", false,
         "isInWater", false,
         "isSwimming", false,
@@ -68,7 +68,7 @@ public final class GetBotStateNode extends AbstractScriptNode {
       ));
     }
 
-    return completed(results(
+    return completedMono(results(
       "isOnGround", player.onGround(),
       "isInWater", player.isInWater(),
       "isSwimming", player.isSwimming(),

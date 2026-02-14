@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that extracts a substring.
 /// Inputs: text, start (index), end (index, -1 for end of string)
@@ -50,13 +50,13 @@ public final class SubstringNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var start = getIntInput(inputs, "start", 0);
     var end = getIntInput(inputs, "end", -1);
 
     if (text.isEmpty()) {
-      return completed(result("result", ""));
+      return completedMono(result("result", ""));
     }
 
     // Clamp start to valid range
@@ -71,9 +71,9 @@ public final class SubstringNode extends AbstractScriptNode {
 
     // Ensure start <= end
     if (start > end) {
-      return completed(result("result", ""));
+      return completedMono(result("result", ""));
     }
 
-    return completed(result("result", text.substring(start, end)));
+    return completedMono(result("result", text.substring(start, end)));
   }
 }

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that sends a chat message or command.
 /// Input: message (string)
@@ -48,7 +48,7 @@ public final class SendChatNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var message = getStringInput(inputs, "message", "");
 
@@ -56,6 +56,6 @@ public final class SendChatNode extends AbstractScriptNode {
       bot.sendChatMessage(message);
     }
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

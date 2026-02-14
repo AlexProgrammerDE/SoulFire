@@ -20,9 +20,9 @@ package com.soulfiremc.server.script.nodes.json;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// JSON node that parses a JSON string into a usable object.
 public final class JsonParseNode extends AbstractScriptNode {
@@ -50,18 +50,18 @@ public final class JsonParseNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var jsonInput = getStringInput(inputs, "json", "");
 
     try {
       var element = JsonParser.parseString(jsonInput);
-      return completed(results(
+      return completedMono(results(
         "result", NodeValue.fromJson(element),
         "success", true,
         "errorMessage", ""
       ));
     } catch (JsonSyntaxException e) {
-      return completed(results(
+      return completedMono(results(
         "result", NodeValue.ofNull(),
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : "Invalid JSON"

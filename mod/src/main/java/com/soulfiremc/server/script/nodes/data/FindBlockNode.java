@@ -22,9 +22,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that finds the nearest block of a specific type.
 /// Input: blockType (string, e.g., "minecraft:diamond_ore")
@@ -58,7 +58,7 @@ public final class FindBlockNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
@@ -66,7 +66,7 @@ public final class FindBlockNode extends AbstractScriptNode {
     var maxDistance = getIntInput(inputs, "maxDistance", 16);
 
     if (level == null || player == null) {
-      return completed(notFoundResult());
+      return completedMono(notFoundResult());
     }
 
     // Parse block type
@@ -74,7 +74,7 @@ public final class FindBlockNode extends AbstractScriptNode {
     var blockType = BuiltInRegistries.BLOCK.getValue(Identifier.parse(blockTypeId));
 
     if (blockType == null) {
-      return completed(notFoundResult());
+      return completedMono(notFoundResult());
     }
 
     var playerBlockPos = player.blockPosition();
@@ -100,10 +100,10 @@ public final class FindBlockNode extends AbstractScriptNode {
     }
 
     if (nearestPos == null) {
-      return completed(notFoundResult());
+      return completedMono(notFoundResult());
     }
 
-    return completed(results(
+    return completedMono(results(
       "found", true,
       "position", new Vec3(nearestPos.getX(), nearestPos.getY(), nearestPos.getZ()),
       "distance", Math.sqrt(nearestDistSq)

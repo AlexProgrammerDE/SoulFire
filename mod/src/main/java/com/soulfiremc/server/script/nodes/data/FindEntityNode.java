@@ -21,9 +21,9 @@ import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that finds the nearest entity of a specific type.
 /// Input: entityType (string, e.g., "minecraft:zombie", or "any" for any entity)
@@ -58,7 +58,7 @@ public final class FindEntityNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
@@ -66,7 +66,7 @@ public final class FindEntityNode extends AbstractScriptNode {
     var maxDistance = getDoubleInput(inputs, "maxDistance", 32.0);
 
     if (level == null || player == null) {
-      return completed(notFoundResult());
+      return completedMono(notFoundResult());
     }
 
     var playerPos = player.position();
@@ -98,10 +98,10 @@ public final class FindEntityNode extends AbstractScriptNode {
     }
 
     if (nearestEntity == null) {
-      return completed(notFoundResult());
+      return completedMono(notFoundResult());
     }
 
-    return completed(results(
+    return completedMono(results(
       "found", true,
       "position", nearestEntity.position(),
       "entityId", nearestEntity.getId(),

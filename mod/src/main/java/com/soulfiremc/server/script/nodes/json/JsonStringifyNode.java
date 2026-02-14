@@ -20,9 +20,9 @@ package com.soulfiremc.server.script.nodes.json;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// JSON node that converts a value to a JSON string with optional pretty printing.
 public final class JsonStringifyNode extends AbstractScriptNode {
@@ -52,21 +52,21 @@ public final class JsonStringifyNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
     var pretty = getBooleanInput(inputs, "pretty", false);
 
     if (value == null || value.isNull()) {
-      return completed(result("json", "null"));
+      return completedMono(result("json", "null"));
     }
 
     var jsonElement = value.asJsonElement();
     if (jsonElement == null) {
       // For non-JSON values, convert to string
-      return completed(result("json", "\"" + value.toString() + "\""));
+      return completedMono(result("json", "\"" + value.toString() + "\""));
     }
 
     var gson = pretty ? GSON_PRETTY : GSON;
-    return completed(result("json", gson.toJson(jsonElement)));
+    return completedMono(result("json", gson.toJson(jsonElement)));
   }
 }

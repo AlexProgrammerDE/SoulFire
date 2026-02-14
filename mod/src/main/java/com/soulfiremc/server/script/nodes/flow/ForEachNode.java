@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that iterates over a collection.
 /// Self-driving: uses runtime.executeDownstream() to iterate over items,
@@ -53,17 +52,6 @@ public final class ForEachNode extends AbstractScriptNode {
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
-  }
-
-  @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var items = getListInput(inputs, "items");
-    return completed(results(
-      "item", items.isEmpty() ? NodeValue.ofNull() : items.getFirst(),
-      "index", 0,
-      "isComplete", items.isEmpty(),
-      "size", items.size()
-    ));
   }
 
   @Override

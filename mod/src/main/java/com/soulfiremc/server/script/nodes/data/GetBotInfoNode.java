@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets basic information about the bot.
 /// Outputs: name, uuid
@@ -49,10 +49,10 @@ public final class GetBotInfoNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
 
-    return completed(results(
+    return completedMono(results(
       "name", bot.accountName(),
       "uuid", bot.accountProfileId().toString()
     ));

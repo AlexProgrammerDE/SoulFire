@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /// List node that joins list items into a string with a separator.
@@ -50,7 +50,7 @@ public final class JoinToStringNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var list = getListInput(inputs, "list");
     var separator = getStringInput(inputs, "separator", ", ");
 
@@ -58,6 +58,6 @@ public final class JoinToStringNode extends AbstractScriptNode {
       .map(item -> item != null ? item.toString() : "null")
       .collect(Collectors.joining(separator));
 
-    return completed(result("result", result));
+    return completedMono(result("result", result));
   }
 }

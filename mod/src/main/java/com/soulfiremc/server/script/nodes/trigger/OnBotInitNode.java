@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when the bot connection is initialized.
 /// This fires early during connection setup, before the player object is ready.
@@ -51,13 +51,13 @@ public final class OnBotInitNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
 
     var serverAddress = bot != null ? bot.serverAddress().toString() : "";
     var username = bot != null ? bot.accountName() : "";
 
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "serverAddress", serverAddress,
       "username", username

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// List node that checks if a list contains an item.
 /// Inputs: list, item
@@ -49,9 +49,9 @@ public final class ListContainsNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var list = getListInput(inputs, "list");
     var item = inputs.get("item");
-    return completed(result("result", list.contains(item)));
+    return completedMono(result("result", list.contains(item)));
   }
 }

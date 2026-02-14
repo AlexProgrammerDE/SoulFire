@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the biome at the bot's current position.
 /// Outputs: biome (string identifier)
@@ -48,19 +48,19 @@ public final class GetBiomeNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
 
     if (level == null || player == null) {
-      return completed(result("biome", "unknown"));
+      return completedMono(result("biome", "unknown"));
     }
 
     var biomeHolder = level.getBiome(player.blockPosition());
     var biomeKey = biomeHolder.unwrapKey();
     var biomeName = biomeKey.map(key -> key.identifier().toString()).orElse("unknown");
 
-    return completed(result("biome", biomeName));
+    return completedMono(result("biome", biomeName));
   }
 }

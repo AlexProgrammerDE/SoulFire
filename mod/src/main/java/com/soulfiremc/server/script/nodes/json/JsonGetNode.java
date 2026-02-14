@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.json;
 
 import com.google.gson.JsonParser;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /// JSON node that extracts a value from JSON using a path expression.
@@ -53,7 +53,7 @@ public final class JsonGetNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var jsonInput = getStringInput(inputs, "json", "{}");
     var path = getStringInput(inputs, "path", "");
     var defaultValue = inputs.get("defaultValue");
@@ -61,12 +61,12 @@ public final class JsonGetNode extends AbstractScriptNode {
     if (path.isEmpty()) {
       try {
         var element = JsonParser.parseString(jsonInput);
-        return completed(results(
+        return completedMono(results(
           "value", NodeValue.fromJson(element),
           "found", true
         ));
       } catch (Exception _) {
-        return completed(results(
+        return completedMono(results(
           "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
           "found", false
         ));
@@ -82,7 +82,7 @@ public final class JsonGetNode extends AbstractScriptNode {
 
       for (var part : parts) {
         if (current == null || current.isJsonNull()) {
-          return completed(results(
+          return completedMono(results(
             "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
             "found", false
           ));
@@ -96,7 +96,7 @@ public final class JsonGetNode extends AbstractScriptNode {
         // First, access the field if there's a field name
         if (!fieldName.isEmpty()) {
           if (!current.isJsonObject()) {
-            return completed(results(
+            return completedMono(results(
               "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
               "found", false
             ));
@@ -108,14 +108,14 @@ public final class JsonGetNode extends AbstractScriptNode {
         while (arrayIndices.find() && current != null) {
           var index = Integer.parseInt(arrayIndices.group(1));
           if (!current.isJsonArray()) {
-            return completed(results(
+            return completedMono(results(
               "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
               "found", false
             ));
           }
           var array = current.getAsJsonArray();
           if (index < 0 || index >= array.size()) {
-            return completed(results(
+            return completedMono(results(
               "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
               "found", false
             ));
@@ -125,18 +125,18 @@ public final class JsonGetNode extends AbstractScriptNode {
       }
 
       if (current == null) {
-        return completed(results(
+        return completedMono(results(
           "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
           "found", false
         ));
       }
 
-      return completed(results(
+      return completedMono(results(
         "value", NodeValue.fromJson(current),
         "found", true
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false
       ));

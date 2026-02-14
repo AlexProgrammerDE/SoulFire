@@ -18,13 +18,13 @@
 package com.soulfiremc.server.script.nodes.encoding;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Encoding node that computes a cryptographic hash of the input.
 public final class HashNode extends AbstractScriptNode {
@@ -53,7 +53,7 @@ public final class HashNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var input = getStringInput(inputs, "input", "");
     var algorithm = getStringInput(inputs, "algorithm", "SHA-256");
     var encoding = getStringInput(inputs, "encoding", "hex");
@@ -67,12 +67,12 @@ public final class HashNode extends AbstractScriptNode {
         default -> HexFormat.of().formatHex(hashBytes);
       };
 
-      return completed(results(
+      return completedMono(results(
         "hash", result,
         "success", true
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "hash", "",
         "success", false
       ));

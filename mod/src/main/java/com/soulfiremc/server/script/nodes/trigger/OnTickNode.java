@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires every game tick (20 times per second).
 /// Outputs: bot (the bot that ticked), tickCount (ticks since script started)
@@ -48,13 +48,13 @@ public final class OnTickNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     // The bot and tick count are passed through the inputs from the trigger system
     var bot = getBotInput(inputs);
     var tickCount = getLongInput(inputs, "tickCount", 0L);
 
     // Output bot so it can be wired to downstream nodes
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "tickCount", tickCount
     ));

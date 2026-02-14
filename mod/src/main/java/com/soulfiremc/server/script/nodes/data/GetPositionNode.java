@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's current position.
 /// Outputs: position (Vec3)
@@ -49,14 +49,14 @@ public final class GetPositionNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(result("position", Vec3.ZERO));
+      return completedMono(result("position", Vec3.ZERO));
     }
 
-    return completed(result("position", player.position()));
+    return completedMono(result("position", player.position()));
   }
 }

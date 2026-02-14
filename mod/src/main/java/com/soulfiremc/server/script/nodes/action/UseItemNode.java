@@ -20,9 +20,9 @@ package com.soulfiremc.server.script.nodes.action;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.util.MouseClickHelper;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that uses the item in the bot's hand.
 /// Right-clicks to use items, interact with entities, or interact with blocks.
@@ -49,7 +49,7 @@ public final class UseItemNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
 
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
@@ -63,6 +63,6 @@ public final class UseItemNode extends AbstractScriptNode {
       }
     }));
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

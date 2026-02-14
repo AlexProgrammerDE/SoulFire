@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that performs linear interpolation between two values.
 /// Inputs: a (start), b (end), t (interpolation factor 0-1)
@@ -50,7 +50,7 @@ public final class LerpNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = getDoubleInput(inputs, "a", 0.0);
     var b = getDoubleInput(inputs, "b", 1.0);
     var t = getDoubleInput(inputs, "t", 0.5);
@@ -59,6 +59,6 @@ public final class LerpNode extends AbstractScriptNode {
     t = Math.max(0.0, Math.min(1.0, t));
 
     var lerpedValue = a + (b - a) * t;
-    return completed(result("result", lerpedValue));
+    return completedMono(result("result", lerpedValue));
   }
 }

@@ -18,11 +18,11 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /// String node that tests if a string matches a regex pattern and extracts capture groups.
@@ -54,13 +54,13 @@ public final class RegexMatchNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var input = getStringInput(inputs, "input", "");
     var patternStr = getStringInput(inputs, "pattern", "");
     var flags = getStringInput(inputs, "flags", "");
 
     if (patternStr.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "matches", false,
         "fullMatch", "",
         "groups", List.of(),
@@ -100,7 +100,7 @@ public final class RegexMatchNode extends AbstractScriptNode {
           allMatches.add(NodeValue.ofString(matcher.group(0)));
         }
 
-        return completed(results(
+        return completedMono(results(
           "matches", true,
           "fullMatch", fullMatch,
           "groups", groups,
@@ -108,14 +108,14 @@ public final class RegexMatchNode extends AbstractScriptNode {
         ));
       }
 
-      return completed(results(
+      return completedMono(results(
         "matches", false,
         "fullMatch", "",
         "groups", List.of(),
         "allMatches", List.of()
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "matches", false,
         "fullMatch", "",
         "groups", List.of(),

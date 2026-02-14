@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that performs B-spline curve interpolation.
 /// Inputs: controlPoints (list of doubles), t (0-1)
@@ -54,7 +54,7 @@ public final class BSplineNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     // Get control points
     var p0 = getDoubleInput(inputs, "p0", 0.0);
     var p1 = getDoubleInput(inputs, "p1", 0.0);
@@ -79,6 +79,6 @@ public final class BSplineNode extends AbstractScriptNode {
     var b3 = t3 / 6.0;
 
     var splineValue = p0 * b0 + p1 * b1 + p2 * b2 + p3 * b3;
-    return completed(result("result", splineValue));
+    return completedMono(result("result", splineValue));
   }
 }

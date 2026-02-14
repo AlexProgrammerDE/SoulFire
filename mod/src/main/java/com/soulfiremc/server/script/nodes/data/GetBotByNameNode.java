@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets a bot by its name.
 /// Input: name (string, the bot's account name)
@@ -51,11 +51,11 @@ public final class GetBotByNameNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var name = getStringInput(inputs, "name", "");
 
     if (name.isEmpty()) {
-      return completed(results("bot", null, "found", false));
+      return completedMono(results("bot", null, "found", false));
     }
 
     var bot = runtime.instance().botConnections().values().stream()
@@ -63,7 +63,7 @@ public final class GetBotByNameNode extends AbstractScriptNode {
       .findFirst()
       .orElse(null);
 
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "found", bot != null
     ));

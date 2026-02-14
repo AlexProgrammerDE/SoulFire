@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's currently selected hotbar slot.
 /// Outputs: slot (0-8), itemId, itemCount
@@ -51,12 +51,12 @@ public final class GetSelectedSlotNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results("slot", 0, "itemId", "minecraft:air", "itemCount", 0));
+      return completedMono(results("slot", 0, "itemId", "minecraft:air", "itemCount", 0));
     }
 
     var inventory = player.getInventory();
@@ -64,7 +64,7 @@ public final class GetSelectedSlotNode extends AbstractScriptNode {
     var heldItem = inventory.getSelectedItem();
     var itemId = BuiltInRegistries.ITEM.getKey(heldItem.getItem()).toString();
 
-    return completed(results(
+    return completedMono(results(
       "slot", selectedSlot,
       "itemId", itemId,
       "itemCount", heldItem.getCount()

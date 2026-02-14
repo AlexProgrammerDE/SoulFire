@@ -189,7 +189,6 @@ public final class NodeRegistry {
     register(SequenceNode::new);
     register(GateNode::new);
     register(DebounceNode::new);
-    register(DelayNode::new);
     register(RateLimitNode::new);
 
     // Network Nodes

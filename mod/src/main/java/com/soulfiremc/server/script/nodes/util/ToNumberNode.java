@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that parses a string to a number.
 /// Input: value, default
@@ -50,7 +50,7 @@ public final class ToNumberNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
     var defaultValue = getDoubleInput(inputs, "default", 0.0);
 
@@ -58,18 +58,18 @@ public final class ToNumberNode extends AbstractScriptNode {
       // Try to get as number directly
       var asNum = value.asDouble(Double.NaN);
       if (!Double.isNaN(asNum)) {
-        return completed(results("result", asNum, "success", true));
+        return completedMono(results("result", asNum, "success", true));
       }
 
       // Try to parse as string
       try {
         var parsed = Double.parseDouble(value.asString("").trim());
-        return completed(results("result", parsed, "success", true));
+        return completedMono(results("result", parsed, "success", true));
       } catch (NumberFormatException _) {
         // Fall through to default
       }
     }
 
-    return completed(results("result", defaultValue, "success", false));
+    return completedMono(results("result", defaultValue, "success", false));
   }
 }

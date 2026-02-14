@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.constant;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Constant node that outputs a configurable 3D vector (x, y, z).
 /// Outputs: x, y, z (number)
@@ -51,10 +51,10 @@ public final class Vector3ConstantNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);
     var z = getDoubleInput(inputs, "z", 0.0);
-    return completed(results("x", x, "y", y, "z", z));
+    return completedMono(results("x", x, "y", y, "z", z));
   }
 }

@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.variable;
 
 import com.google.gson.JsonNull;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Variable node that stores a value in the bot's persistent metadata (survives disconnects).
 public final class SetPersistentBotVariableNode extends AbstractScriptNode {
@@ -51,14 +51,14 @@ public final class SetPersistentBotVariableNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var namespace = getStringInput(inputs, "namespace", "script");
     var key = getStringInput(inputs, "key", "");
     var value = inputs.get("value");
 
     if (key.isEmpty()) {
-      return completed(result("success", false));
+      return completedMono(result("success", false));
     }
 
     try {
@@ -67,9 +67,9 @@ public final class SetPersistentBotVariableNode extends AbstractScriptNode {
         jsonValue = JsonNull.INSTANCE;
       }
       bot.persistentMetadata().set(namespace, key, jsonValue);
-      return completed(result("success", true));
+      return completedMono(result("success", true));
     } catch (Exception _) {
-      return completed(result("success", false));
+      return completedMono(result("success", false));
     }
   }
 }

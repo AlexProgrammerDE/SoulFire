@@ -18,13 +18,14 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// Flow control node that limits execution rate using a token bucket algorithm.
+/// State is scoped per-script via ScriptStateStore.
 public final class RateLimitNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.rate_limit")
@@ -50,21 +51,22 @@ public final class RateLimitNode extends AbstractScriptNode {
     .addKeywords("rate", "limit", "throttle", "bucket", "spam", "cooldown")
     .build();
 
-  private static final Map<String, TokenBucket> BUCKETS = new ConcurrentHashMap<>();
-
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var key = getStringInput(inputs, "key", "default");
     var maxTokens = getDoubleInput(inputs, "maxTokens", 10.0);
     var refillRate = getDoubleInput(inputs, "refillRate", 1.0);
     var tokensRequired = getDoubleInput(inputs, "tokensRequired", 1.0);
 
-    var bucket = BUCKETS.computeIfAbsent(key, _ -> new TokenBucket(maxTokens, refillRate));
+    @SuppressWarnings("unchecked")
+    var buckets = runtime.stateStore()
+      .<Map<String, TokenBucket>>getOrCreate("rate_limit_buckets", ConcurrentHashMap::new);
+    var bucket = buckets.computeIfAbsent(key, _ -> new TokenBucket(maxTokens, refillRate));
 
     // Update bucket parameters if changed
     bucket.updateParams(maxTokens, refillRate);
@@ -76,7 +78,7 @@ public final class RateLimitNode extends AbstractScriptNode {
     outputs.put("tokensRemaining", NodeValue.of(result.tokensRemaining));
     outputs.put("retryAfterMs", NodeValue.of(result.retryAfterMs));
     outputs.put(result.allowed ? "exec_allowed" : "exec_denied", NodeValue.ofBoolean(true));
-    return completed(outputs);
+    return completedMono(outputs);
   }
 
   private static class TokenBucket {

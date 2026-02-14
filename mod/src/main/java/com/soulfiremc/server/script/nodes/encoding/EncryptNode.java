@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.encoding;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -27,7 +28,6 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Encoding node that encrypts a string using AES encryption.
 public final class EncryptNode extends AbstractScriptNode {
@@ -56,12 +56,12 @@ public final class EncryptNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var plaintext = getStringInput(inputs, "plaintext", "");
     var key = getStringInput(inputs, "key", "");
 
     if (key.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "ciphertext", "",
         "success", false,
         "errorMessage", "Key is required"
@@ -88,13 +88,13 @@ public final class EncryptNode extends AbstractScriptNode {
       System.arraycopy(iv, 0, combined, 0, iv.length);
       System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
 
-      return completed(results(
+      return completedMono(results(
         "ciphertext", Base64.getEncoder().encodeToString(combined),
         "success", true,
         "errorMessage", ""
       ));
     } catch (Exception e) {
-      return completed(results(
+      return completedMono(results(
         "ciphertext", "",
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()

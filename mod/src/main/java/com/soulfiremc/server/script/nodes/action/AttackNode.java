@@ -20,9 +20,9 @@ package com.soulfiremc.server.script.nodes.action;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.util.MouseClickHelper;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that makes the bot attack the entity it's looking at.
 /// Uses the bot's current view direction to determine the target.
@@ -49,7 +49,7 @@ public final class AttackNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
 
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
@@ -63,6 +63,6 @@ public final class AttackNode extends AbstractScriptNode {
       }
     }));
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

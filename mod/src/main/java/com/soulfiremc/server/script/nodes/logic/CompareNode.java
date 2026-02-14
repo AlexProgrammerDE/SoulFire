@@ -18,10 +18,10 @@
 package com.soulfiremc.server.script.nodes.logic;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /// Logic node that compares two values using a specified operator.
 /// Inputs: a, b, operator (one of: ==, !=, <, >, <=, >=)
@@ -51,7 +51,7 @@ public final class CompareNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = inputs.get("a");
     var b = inputs.get("b");
     var operator = getStringInput(inputs, "operator", "==");
@@ -84,6 +84,6 @@ public final class CompareNode extends AbstractScriptNode {
       };
     }
 
-    return completed(result("result", resultValue));
+    return completedMono(result("result", resultValue));
   }
 }

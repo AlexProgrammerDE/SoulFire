@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that creates a Vec3 from x, y, z components.
 /// Inputs: x, y, z
@@ -51,10 +51,10 @@ public final class CreateVector3Node extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);
     var z = getDoubleInput(inputs, "z", 0.0);
-    return completed(result("vector", new Vec3(x, y, z)));
+    return completedMono(result("vector", new Vec3(x, y, z)));
   }
 }

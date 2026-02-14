@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script.nodes.encoding;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -26,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Encoding node that decrypts an AES-encrypted string.
 public final class DecryptNode extends AbstractScriptNode {
@@ -55,12 +55,12 @@ public final class DecryptNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var ciphertext = getStringInput(inputs, "ciphertext", "");
     var key = getStringInput(inputs, "key", "");
 
     if (key.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "plaintext", "",
         "success", false,
         "errorMessage", "Key is required"
@@ -74,7 +74,7 @@ public final class DecryptNode extends AbstractScriptNode {
       var combined = Base64.getDecoder().decode(ciphertext);
 
       if (combined.length < 16) {
-        return completed(results(
+        return completedMono(results(
           "plaintext", "",
           "success", false,
           "errorMessage", "Invalid ciphertext"
@@ -91,13 +91,13 @@ public final class DecryptNode extends AbstractScriptNode {
       cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
       var decrypted = cipher.doFinal(encrypted);
 
-      return completed(results(
+      return completedMono(results(
         "plaintext", new String(decrypted, StandardCharsets.UTF_8),
         "success", true,
         "errorMessage", ""
       ));
     } catch (Exception e) {
-      return completed(results(
+      return completedMono(results(
         "plaintext", "",
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()

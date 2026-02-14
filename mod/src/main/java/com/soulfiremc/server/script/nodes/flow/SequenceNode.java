@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that executes multiple branches in sequence.
 /// Self-driving: uses runtime.executeDownstream() to fire exec_0, exec_1, etc. in order.
@@ -38,6 +37,12 @@ public final class SequenceNode extends AbstractScriptNode {
     .addOutputs(
       PortDefinition.output("exec_0", "Then 0", PortType.EXEC, "First branch"),
       PortDefinition.output("exec_1", "Then 1", PortType.EXEC, "Second branch"),
+      PortDefinition.output("exec_2", "Then 2", PortType.EXEC, "Third branch"),
+      PortDefinition.output("exec_3", "Then 3", PortType.EXEC, "Fourth branch"),
+      PortDefinition.output("exec_4", "Then 4", PortType.EXEC, "Fifth branch"),
+      PortDefinition.output("exec_5", "Then 5", PortType.EXEC, "Sixth branch"),
+      PortDefinition.output("exec_6", "Then 6", PortType.EXEC, "Seventh branch"),
+      PortDefinition.output("exec_7", "Then 7", PortType.EXEC, "Eighth branch"),
       PortDefinition.output("branchCount", "Branch Count", PortType.NUMBER, "Number of branches")
     )
     .description("Executes multiple branches in order")
@@ -49,12 +54,6 @@ public final class SequenceNode extends AbstractScriptNode {
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
-  }
-
-  @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var branchCount = getIntInput(inputs, "branchCount", 2);
-    return completed(result("branchCount", branchCount));
   }
 
   @Override

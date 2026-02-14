@@ -18,11 +18,11 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /// String node that splits a string into a list by a delimiter.
@@ -52,7 +52,7 @@ public final class SplitNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var delimiter = getStringInput(inputs, "delimiter", " ");
 
@@ -66,6 +66,6 @@ public final class SplitNode extends AbstractScriptNode {
       parts = Arrays.asList(text.split(Pattern.quote(delimiter)));
     }
 
-    return completed(result("result", parts));
+    return completedMono(result("result", parts));
   }
 }

@@ -28,6 +28,7 @@ import reactor.core.scheduler.Scheduler;
 /// Per-invocation state (output sinks) lives in ExecutionRun, not here.
 @Getter
 public final class ReactiveScriptContext implements NodeRuntime {
+  private final ScriptStateStore stateStore = new ScriptStateStore();
   private final InstanceManager instance;
   private final Scheduler reactorScheduler;
   private final ScriptEventListener eventListener;

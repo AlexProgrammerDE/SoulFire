@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that converts a string to uppercase.
 /// Input: text
@@ -48,8 +48,8 @@ public final class ToUpperCaseNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
-    return completed(result("result", text.toUpperCase()));
+    return completedMono(result("result", text.toUpperCase()));
   }
 }

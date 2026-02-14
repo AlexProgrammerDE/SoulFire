@@ -20,9 +20,9 @@ package com.soulfiremc.server.script.nodes.data;
 import com.soulfiremc.server.script.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets block information at a specific position.
 /// Inputs: x, y, z (block coordinates)
@@ -57,7 +57,7 @@ public final class GetBlockNode extends AbstractScriptNode {
 
   @SuppressWarnings("deprecation")
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var x = getIntInput(inputs, "x", 0);
@@ -65,7 +65,7 @@ public final class GetBlockNode extends AbstractScriptNode {
     var z = getIntInput(inputs, "z", 0);
 
     if (level == null) {
-      return completed(results("blockId", "minecraft:air", "isAir", true, "isSolid", false));
+      return completedMono(results("blockId", "minecraft:air", "isAir", true, "isSolid", false));
     }
 
     var blockPos = new BlockPos(x, y, z);
@@ -73,7 +73,7 @@ public final class GetBlockNode extends AbstractScriptNode {
     var block = blockState.getBlock();
     var blockId = BuiltInRegistries.BLOCK.getKey(block).toString();
 
-    return completed(results(
+    return completedMono(results(
       "blockId", blockId,
       "isAir", blockState.isAir(),
       "isSolid", blockState.isSolid()

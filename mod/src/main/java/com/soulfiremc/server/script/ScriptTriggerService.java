@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /// Service that manages event subscriptions for trigger nodes in scripts.
 /// When a script is started, this service registers appropriate event listeners
@@ -47,6 +48,46 @@ public final class ScriptTriggerService {
   private final Map<UUID, List<Object>> scriptListeners = new ConcurrentHashMap<>();
   private final Map<String, Sinks.Many<Map<String, NodeValue>>> triggerSinks = new ConcurrentHashMap<>();
   private final Map<String, Disposable> triggerSubscriptions = new ConcurrentHashMap<>();
+
+  /// Registers an event-based trigger with sink, subscription, and handler.
+  private <E extends SoulFireEvent> void registerEventTrigger(
+    UUID scriptId,
+    String nodeId,
+    ScriptGraph graph,
+    ReactiveScriptContext context,
+    ReactiveScriptEngine engine,
+    Class<E> eventClass,
+    Function<E, Map<String, NodeValue>> inputMapper,
+    List<Object> listeners,
+    String triggerName
+  ) {
+    var sinkKey = scriptId + ":" + nodeId;
+
+    var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
+    triggerSinks.put(sinkKey, sink);
+
+    var subscription = sink.asFlux()
+      .flatMap(inputs -> engine.executeFromTrigger(graph, nodeId, context, inputs)
+        .onErrorResume(e -> {
+          log.error("Error in {} trigger execution", triggerName, e);
+          return Mono.empty();
+        }), 1)
+      .subscribe();
+    triggerSubscriptions.put(sinkKey, subscription);
+
+    Consumer<E> handler = event -> {
+      if (context.isCancelled()) {
+        return;
+      }
+      var inputs = inputMapper.apply(event);
+      if (inputs != null) {
+        sink.tryEmitNext(inputs);
+      }
+    };
+    SoulFireAPI.registerListener(eventClass, handler);
+    listeners.add(new EventListenerHolder<>(eventClass, handler));
+    log.debug("Registered {} trigger for script {} node {}", triggerName, scriptId, nodeId);
+  }
 
   /// Registers event listeners for all trigger nodes in the script.
   /// Uses reactive sinks with backpressure for high-frequency triggers.
@@ -67,207 +108,66 @@ public final class ScriptTriggerService {
       switch (node.type()) {
         case "trigger.on_tick" -> {
           var tickCount = new AtomicLong(0);
-          var sinkKey = scriptId + ":" + node.id();
-
-          // Create sink with backpressure buffer
-          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
-          triggerSinks.put(sinkKey, sink);
-
-          // Subscribe to sink and execute trigger (sequential per trigger to avoid races)
-          var subscription = sink.asFlux()
-            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
-              .onErrorResume(e -> {
-                log.error("Error in OnTick trigger execution", e);
-                return Mono.empty();
-              }), 1)  // Sequential execution per trigger
-            .subscribe();
-          triggerSubscriptions.put(sinkKey, subscription);
-
-          // Register event handler that emits to sink
-          Consumer<BotPreTickEvent> handler = event -> {
-            if (context.isCancelled()) {
-              return;
-            }
-
-            var inputs = new HashMap<String, NodeValue>();
-            inputs.put("bot", NodeValue.ofBot(event.connection()));
-            inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
-
-            // tryEmitNext handles backpressure - drops if buffer full
-            sink.tryEmitNext(inputs);
-          };
-          SoulFireAPI.registerListener(BotPreTickEvent.class, handler);
-          listeners.add(new EventListenerHolder<>(BotPreTickEvent.class, handler));
-          log.debug("Registered OnTick trigger for script {} node {}", scriptId, node.id());
+          registerEventTrigger(scriptId, node.id(), graph, context, engine,
+            BotPreTickEvent.class, event -> {
+              var inputs = new HashMap<String, NodeValue>();
+              inputs.put("bot", NodeValue.ofBot(event.connection()));
+              inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
+              return inputs;
+            }, listeners, "OnTick");
         }
 
-        case "trigger.on_chat" -> {
-          var sinkKey = scriptId + ":" + node.id();
-
-          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
-          triggerSinks.put(sinkKey, sink);
-
-          var subscription = sink.asFlux()
-            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
-              .onErrorResume(e -> {
-                log.error("Error in OnChat trigger execution", e);
-                return Mono.empty();
-              }), 1)
-            .subscribe();
-          triggerSubscriptions.put(sinkKey, subscription);
-
-          Consumer<ChatMessageReceiveEvent> handler = event -> {
-            if (context.isCancelled()) {
-              return;
-            }
-
+        case "trigger.on_chat" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
+          ChatMessageReceiveEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("message", NodeValue.ofString(event.parseToPlainText()));
             inputs.put("messagePlainText", NodeValue.ofString(event.parseToPlainText()));
             inputs.put("timestamp", NodeValue.ofNumber(event.timestamp()));
+            return inputs;
+          }, listeners, "OnChat");
 
-            sink.tryEmitNext(inputs);
-          };
-          SoulFireAPI.registerListener(ChatMessageReceiveEvent.class, handler);
-          listeners.add(new EventListenerHolder<>(ChatMessageReceiveEvent.class, handler));
-          log.debug("Registered OnChat trigger for script {} node {}", scriptId, node.id());
-        }
-
-        case "trigger.on_death" -> {
-          var sinkKey = scriptId + ":" + node.id();
-
-          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
-          triggerSinks.put(sinkKey, sink);
-
-          var subscription = sink.asFlux()
-            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
-              .onErrorResume(e -> {
-                log.error("Error in OnDeath trigger execution", e);
-                return Mono.empty();
-              }), 1)
-            .subscribe();
-          triggerSubscriptions.put(sinkKey, subscription);
-
-          Consumer<BotShouldRespawnEvent> handler = event -> {
-            if (context.isCancelled()) {
-              return;
-            }
-
+        case "trigger.on_death" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
+          BotShouldRespawnEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("shouldRespawn", NodeValue.ofBoolean(event.shouldRespawn()));
+            return inputs;
+          }, listeners, "OnDeath");
 
-            sink.tryEmitNext(inputs);
-          };
-          SoulFireAPI.registerListener(BotShouldRespawnEvent.class, handler);
-          listeners.add(new EventListenerHolder<>(BotShouldRespawnEvent.class, handler));
-          log.debug("Registered OnDeath trigger for script {} node {}", scriptId, node.id());
-        }
-
-        case "trigger.on_bot_init" -> {
-          var sinkKey = scriptId + ":" + node.id();
-
-          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
-          triggerSinks.put(sinkKey, sink);
-
-          var subscription = sink.asFlux()
-            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
-              .onErrorResume(e -> {
-                log.error("Error in OnBotInit trigger execution", e);
-                return Mono.empty();
-              }), 1)
-            .subscribe();
-          triggerSubscriptions.put(sinkKey, subscription);
-
-          Consumer<BotConnectionInitEvent> handler = event -> {
-            if (context.isCancelled()) {
-              return;
-            }
-
+        case "trigger.on_bot_init" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
+          BotConnectionInitEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("botName", NodeValue.ofString(event.connection().accountName()));
-
-            sink.tryEmitNext(inputs);
-          };
-          SoulFireAPI.registerListener(BotConnectionInitEvent.class, handler);
-          listeners.add(new EventListenerHolder<>(BotConnectionInitEvent.class, handler));
-          log.debug("Registered OnBotInit trigger for script {} node {}", scriptId, node.id());
-        }
+            return inputs;
+          }, listeners, "OnBotInit");
 
         case "trigger.on_join" -> {
-          // Track which bots have already triggered OnJoin (to ensure it fires only once per bot)
           var triggeredBots = ConcurrentHashMap.<String>newKeySet();
-          var sinkKey = scriptId + ":" + node.id();
-
-          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
-          triggerSinks.put(sinkKey, sink);
-
-          var subscription = sink.asFlux()
-            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
-              .onErrorResume(e -> {
-                log.error("Error in OnJoin trigger execution", e);
-                return Mono.empty();
-              }), 1)
-            .subscribe();
-          triggerSubscriptions.put(sinkKey, subscription);
-
-          // Use tick event to detect when player is ready (fires once per bot when player becomes non-null)
-          Consumer<BotPreTickEvent> handler = event -> {
-            if (context.isCancelled()) {
-              return;
-            }
-
-            var connection = event.connection();
-            var botId = connection.accountName();
-
-            // Only fire once per bot, and only when player is ready
-            if (connection.minecraft().player != null && triggeredBots.add(botId)) {
-              var inputs = new HashMap<String, NodeValue>();
-              inputs.put("bot", NodeValue.ofBot(connection));
-              inputs.put("botName", NodeValue.ofString(connection.accountName()));
-
-              sink.tryEmitNext(inputs);
-            }
-          };
-          SoulFireAPI.registerListener(BotPreTickEvent.class, handler);
-          listeners.add(new EventListenerHolder<>(BotPreTickEvent.class, handler));
-          log.debug("Registered OnJoin trigger for script {} node {}", scriptId, node.id());
+          registerEventTrigger(scriptId, node.id(), graph, context, engine,
+            BotPreTickEvent.class, event -> {
+              var connection = event.connection();
+              var botId = connection.accountName();
+              if (connection.minecraft().player != null && triggeredBots.add(botId)) {
+                var inputs = new HashMap<String, NodeValue>();
+                inputs.put("bot", NodeValue.ofBot(connection));
+                inputs.put("botName", NodeValue.ofString(connection.accountName()));
+                return inputs;
+              }
+              return null;
+            }, listeners, "OnJoin");
         }
 
-        case "trigger.on_damage" -> {
-          var sinkKey = scriptId + ":" + node.id();
-
-          var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
-          triggerSinks.put(sinkKey, sink);
-
-          var subscription = sink.asFlux()
-            .flatMap(inputs -> engine.executeFromTrigger(graph, node.id(), context, inputs)
-              .onErrorResume(e -> {
-                log.error("Error in OnDamage trigger execution", e);
-                return Mono.empty();
-              }), 1)
-            .subscribe();
-          triggerSubscriptions.put(sinkKey, subscription);
-
-          Consumer<BotDamageEvent> handler = event -> {
-            if (context.isCancelled()) {
-              return;
-            }
-
+        case "trigger.on_damage" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
+          BotDamageEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("amount", NodeValue.ofNumber(event.damageAmount()));
             inputs.put("previousHealth", NodeValue.ofNumber(event.previousHealth()));
             inputs.put("newHealth", NodeValue.ofNumber(event.newHealth()));
-
-            sink.tryEmitNext(inputs);
-          };
-          SoulFireAPI.registerListener(BotDamageEvent.class, handler);
-          listeners.add(new EventListenerHolder<>(BotDamageEvent.class, handler));
-          log.debug("Registered OnDamage trigger for script {} node {}", scriptId, node.id());
-        }
+            return inputs;
+          }, listeners, "OnDamage");
 
         case "trigger.on_interval" -> {
           var intervalMs = 1000L;

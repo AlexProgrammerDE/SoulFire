@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that toggles or sets the bot's sprinting state.
 /// Input: enabled (boolean) - whether to sprint
@@ -48,12 +48,12 @@ public final class SprintNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var enabled = getBooleanInput(inputs, "enabled", true);
 
     bot.controlState().sprint(enabled);
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

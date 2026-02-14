@@ -24,10 +24,10 @@ import com.openai.models.chat.completions.ChatCompletionUserMessageParam;
 import com.openai.models.completions.CompletionUsage;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.settings.instance.AISettings;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// AI node that sends a prompt to an LLM and returns the response.
 /// Uses the bot's configured AI settings.
@@ -64,7 +64,7 @@ public final class LLMChatNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var prompt = getStringInput(inputs, "prompt", "");
     var systemPrompt = getStringInput(inputs, "systemPrompt", "");
@@ -73,7 +73,7 @@ public final class LLMChatNode extends AbstractScriptNode {
     var maxTokens = getIntInput(inputs, "maxTokens", 1024);
 
     if (prompt.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "exec_error", true,
         "response", "",
         "success", false,
@@ -82,7 +82,7 @@ public final class LLMChatNode extends AbstractScriptNode {
       ));
     }
 
-    return CompletableFuture.supplyAsync(() -> {
+    return Mono.fromCallable(() -> {
       try {
         var settingsSource = bot.settingsSource();
         var openAiClient = AISettings.create(settingsSource);
@@ -137,6 +137,6 @@ public final class LLMChatNode extends AbstractScriptNode {
           "tokensUsed", 0
         );
       }
-    });
+    }).subscribeOn(reactor.core.scheduler.Schedulers.boundedElastic());
   }
 }

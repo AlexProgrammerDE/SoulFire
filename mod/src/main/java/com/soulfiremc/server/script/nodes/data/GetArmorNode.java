@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's armor information.
 /// Outputs: armorValue, armorToughness
@@ -50,15 +50,15 @@ public final class GetArmorNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results("armorValue", 0.0, "armorToughness", 0.0));
+      return completedMono(results("armorValue", 0.0, "armorToughness", 0.0));
     }
 
-    return completed(results(
+    return completedMono(results(
       "armorValue", player.getArmorValue(),
       "armorToughness", player.getAttributeValue(Attributes.ARMOR_TOUGHNESS)
     ));

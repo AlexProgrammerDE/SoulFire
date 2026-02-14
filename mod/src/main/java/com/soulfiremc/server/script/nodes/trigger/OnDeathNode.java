@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when the bot dies.
 /// Outputs: bot (the bot that died), deathMessage (string)
@@ -48,12 +48,12 @@ public final class OnDeathNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
     var deathMessage = getStringInput(inputs, "deathMessage", "");
 
     // Output data so it can be wired to downstream nodes
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "deathMessage", deathMessage
     ));

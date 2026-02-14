@@ -23,9 +23,9 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the block the bot is looking at.
 /// Outputs: found, blockId, position, distance
@@ -57,14 +57,14 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
     var player = bot.minecraft().player;
     var maxDistance = getDoubleInput(inputs, "maxDistance", 5.0);
 
     if (level == null || player == null) {
-      return completed(results(
+      return completedMono(results(
         "found", false,
         "blockId", "minecraft:air",
         "position", Vec3.ZERO,
@@ -90,7 +90,7 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
       var blockId = BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString();
       var distance = eyePos.distanceTo(hitResult.getLocation());
 
-      return completed(results(
+      return completedMono(results(
         "found", true,
         "blockId", blockId,
         "position", new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()),
@@ -98,7 +98,7 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
       ));
     }
 
-    return completed(results(
+    return completedMono(results(
       "found", false,
       "blockId", "minecraft:air",
       "position", Vec3.ZERO,

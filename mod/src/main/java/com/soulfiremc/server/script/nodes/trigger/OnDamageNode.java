@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when the bot takes damage (health decreases).
 /// Outputs: bot, amount, previousHealth, newHealth
@@ -50,14 +50,14 @@ public final class OnDamageNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     // Trigger nodes pass through inputs from the trigger service
     var bot = getBotInput(inputs);
     var amount = getFloatInput(inputs, "amount", 0f);
     var previousHealth = getFloatInput(inputs, "previousHealth", 0f);
     var newHealth = getFloatInput(inputs, "newHealth", 0f);
 
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "amount", amount,
       "previousHealth", previousHealth,

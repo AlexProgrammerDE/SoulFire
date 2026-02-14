@@ -18,10 +18,10 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that performs a multi-way branch based on a value.
 /// Input: value (the value to switch on)
@@ -41,9 +41,14 @@ public final class SwitchNode extends AbstractScriptNode {
     )
     .addOutputs(
       PortDefinition.output("exec_default", "Default", PortType.EXEC, "Executes if no case matches"),
-      PortDefinition.output("exec_case0", "Case 0", PortType.EXEC, "Executes if first case matches"),
-      PortDefinition.output("exec_case1", "Case 1", PortType.EXEC, "Executes if second case matches"),
-      PortDefinition.output("exec_case2", "Case 2", PortType.EXEC, "Executes if third case matches"),
+      PortDefinition.output("exec_case0", "Case 0", PortType.EXEC, "Executes if case 0 matches"),
+      PortDefinition.output("exec_case1", "Case 1", PortType.EXEC, "Executes if case 1 matches"),
+      PortDefinition.output("exec_case2", "Case 2", PortType.EXEC, "Executes if case 2 matches"),
+      PortDefinition.output("exec_case3", "Case 3", PortType.EXEC, "Executes if case 3 matches"),
+      PortDefinition.output("exec_case4", "Case 4", PortType.EXEC, "Executes if case 4 matches"),
+      PortDefinition.output("exec_case5", "Case 5", PortType.EXEC, "Executes if case 5 matches"),
+      PortDefinition.output("exec_case6", "Case 6", PortType.EXEC, "Executes if case 6 matches"),
+      PortDefinition.output("exec_case7", "Case 7", PortType.EXEC, "Executes if case 7 matches"),
       PortDefinition.output("branch", "Branch", PortType.STRING, "Which case matched"),
       PortDefinition.output("caseIndex", "Case Index", PortType.NUMBER, "Index of matched case (-1 for default)"),
       PortDefinition.output("matched", "Matched", PortType.BOOLEAN, "Whether any case matched")
@@ -60,7 +65,7 @@ public final class SwitchNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = getStringInput(inputs, "value", "");
     var casesStr = getStringInput(inputs, "cases", "");
 
@@ -72,7 +77,7 @@ public final class SwitchNode extends AbstractScriptNode {
         outputs.put("caseIndex", NodeValue.of(i));
         outputs.put("matched", NodeValue.of(true));
         outputs.put("exec_case" + i, NodeValue.ofBoolean(true));
-        return completed(outputs);
+        return completedMono(outputs);
       }
     }
 
@@ -82,6 +87,6 @@ public final class SwitchNode extends AbstractScriptNode {
     outputs.put("caseIndex", NodeValue.of(-1));
     outputs.put("matched", NodeValue.of(false));
     outputs.put("exec_default", NodeValue.ofBoolean(true));
-    return completed(outputs);
+    return completedMono(outputs);
   }
 }

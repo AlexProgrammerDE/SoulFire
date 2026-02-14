@@ -21,9 +21,9 @@ import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that makes the bot look at a specific position.
 /// Inputs: target (Vec3 coordinates to look at)
@@ -51,7 +51,7 @@ public final class LookAtNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var target = getInput(inputs, "target", Vec3.ZERO);
 
@@ -62,6 +62,6 @@ public final class LookAtNode extends AbstractScriptNode {
       }
     }));
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

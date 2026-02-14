@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that splits a Vec3 into x, y, z components.
 /// Input: vector
@@ -51,8 +51,8 @@ public final class SplitVector3Node extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var vector = getInput(inputs, "vector", Vec3.ZERO);
-    return completed(results("x", vector.x(), "y", vector.y(), "z", vector.z()));
+    return completedMono(results("x", vector.x(), "y", vector.y(), "z", vector.z()));
   }
 }

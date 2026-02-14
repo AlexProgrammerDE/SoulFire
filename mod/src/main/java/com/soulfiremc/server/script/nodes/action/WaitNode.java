@@ -22,10 +22,9 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 
-/// Action node that delays execution for a specified duration.
-/// Input: durationMs (milliseconds to wait)
+/// Action node that delays execution for a specified duration with optional jitter.
 public final class WaitNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("action.wait")
@@ -33,15 +32,19 @@ public final class WaitNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.inputWithDefault("durationMs", "Duration (ms)", PortType.NUMBER, "1000", "Time to wait in milliseconds")
+      PortDefinition.inputWithDefault("baseMs", "Duration (ms)", PortType.NUMBER, "1000", "Base delay in milliseconds"),
+      PortDefinition.inputWithDefault("jitterMs", "Jitter (ms)", PortType.NUMBER, "0", "Random jitter +/- this value (0 = no jitter)"),
+      PortDefinition.inputWithDefault("minMs", "Min (ms)", PortType.NUMBER, "0", "Minimum delay (clamp)"),
+      PortDefinition.inputWithDefault("maxMs", "Max (ms)", PortType.NUMBER, "60000", "Maximum delay (clamp)")
     )
     .addOutputs(
-      PortDefinition.execOut()
+      PortDefinition.execOut(),
+      PortDefinition.output("actualMs", "Actual (ms)", PortType.NUMBER, "Actual delay used")
     )
-    .description("Delays execution for a specified duration in milliseconds")
+    .description("Delays execution for a specified duration with optional random jitter")
     .icon("clock")
     .color("#FF9800")
-    .addKeywords("wait", "delay", "sleep", "pause", "timer")
+    .addKeywords("wait", "delay", "sleep", "pause", "timer", "jitter")
     .build();
 
   @Override
@@ -50,19 +53,19 @@ public final class WaitNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    // Delegate to reactive implementation
-    return executeReactive(runtime, inputs).toFuture();
-  }
-
-  @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var durationMs = getLongInput(inputs, "durationMs", 1000L);
+    var baseMs = getLongInput(inputs, "baseMs", 1000L);
+    var jitterMs = getLongInput(inputs, "jitterMs", 0L);
+    var minMs = getLongInput(inputs, "minMs", 0L);
+    var maxMs = getLongInput(inputs, "maxMs", 60000L);
 
-    if (durationMs <= 0) {
-      return completedEmptyMono();
+    var jitter = jitterMs > 0 ? ThreadLocalRandom.current().nextLong(-jitterMs, jitterMs + 1) : 0;
+    var delay = Math.max(minMs, Math.min(maxMs, baseMs + jitter));
+
+    if (delay <= 0) {
+      return completedMono(result("actualMs", 0L));
     }
 
-    return delayedEmptyMono(Duration.ofMillis(durationMs));
+    return delayedMono(Duration.ofMillis(delay), result("actualMs", delay));
   }
 }

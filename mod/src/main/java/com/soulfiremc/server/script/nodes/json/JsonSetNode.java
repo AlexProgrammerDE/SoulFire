@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.json;
 
 import com.google.gson.*;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /// JSON node that sets a value in JSON at a specified path.
@@ -54,13 +54,13 @@ public final class JsonSetNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var jsonInput = getStringInput(inputs, "json", "{}");
     var path = getStringInput(inputs, "path", "");
     var value = inputs.get("value");
 
     if (path.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "result", jsonInput,
         "success", false
       ));
@@ -81,7 +81,7 @@ public final class JsonSetNode extends AbstractScriptNode {
         var part = parts[i];
         current = navigateOrCreate(current, part);
         if (current == null) {
-          return completed(results(
+          return completedMono(results(
             "result", jsonInput,
             "success", false
           ));
@@ -92,12 +92,12 @@ public final class JsonSetNode extends AbstractScriptNode {
       var finalPart = parts[parts.length - 1];
       setAtPath(current, finalPart, valueElement);
 
-      return completed(results(
+      return completedMono(results(
         "result", GSON.toJson(root),
         "success", true
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "result", jsonInput,
         "success", false
       ));

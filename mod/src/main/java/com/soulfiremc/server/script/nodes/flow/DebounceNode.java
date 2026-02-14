@@ -20,18 +20,14 @@ package com.soulfiremc.server.script.nodes.flow;
 import com.soulfiremc.server.script.*;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-/// Flow control node that rate-limits execution.
-/// Input: cooldownMs (milliseconds between allowed executions)
-/// Input: key (string) - unique key for this debounce instance (allows multiple debounces)
-/// Output: allowed (boolean) - whether execution is allowed
-/// Output: remainingMs (long) - milliseconds until next allowed execution
-///
-/// Uses a static map to track last execution times per key.
+/// Flow control node that rate-limits execution by enforcing a cooldown period.
+/// Routes to exec_allowed or exec_denied based on whether the cooldown has elapsed.
+/// State is scoped per-script via ScriptStateStore.
 public final class DebounceNode extends AbstractScriptNode {
   private static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.debounce")
@@ -43,7 +39,8 @@ public final class DebounceNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("key", "Key", PortType.STRING, "\"default\"", "Unique key for this debounce")
     )
     .addOutputs(
-      PortDefinition.execOut(),
+      PortDefinition.output("exec_allowed", "Allowed", PortType.EXEC, "Execution path if cooldown elapsed"),
+      PortDefinition.output("exec_denied", "Denied", PortType.EXEC, "Execution path if still in cooldown"),
       PortDefinition.output("allowed", "Allowed", PortType.BOOLEAN, "Whether execution was allowed"),
       PortDefinition.output("remainingMs", "Remaining (ms)", PortType.NUMBER, "Milliseconds until next allowed execution")
     )
@@ -53,18 +50,9 @@ public final class DebounceNode extends AbstractScriptNode {
     .addKeywords("debounce", "rate limit", "cooldown", "throttle")
     .build();
 
-  // Track last execution time per key using AtomicLong for thread-safe compare-and-set
-  private static final Map<String, AtomicLong> lastExecutionTimes = new ConcurrentHashMap<>();
-
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
-  }
-
-  @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    // Delegate to reactive implementation
-    return executeReactive(runtime, inputs).toFuture();
   }
 
   @Override
@@ -73,6 +61,9 @@ public final class DebounceNode extends AbstractScriptNode {
     var key = getStringInput(inputs, "key", "default");
 
     var now = System.currentTimeMillis();
+    @SuppressWarnings("unchecked")
+    var lastExecutionTimes = runtime.stateStore()
+      .<Map<String, AtomicLong>>getOrCreate("debounce_times", ConcurrentHashMap::new);
     var lastExecutionTime = lastExecutionTimes.computeIfAbsent(key, _ -> new AtomicLong(0));
 
     // Atomic check-and-set to avoid race conditions
@@ -83,19 +74,19 @@ public final class DebounceNode extends AbstractScriptNode {
       if (elapsed >= cooldownMs) {
         // Try to update atomically
         if (lastExecutionTime.compareAndSet(lastExecution, now)) {
-          // Successfully claimed the execution
-          return completedMono(results(
-            "allowed", true,
-            "remainingMs", 0L
-          ));
+          var outputs = new HashMap<String, NodeValue>();
+          outputs.put("allowed", NodeValue.ofBoolean(true));
+          outputs.put("remainingMs", NodeValue.ofNumber(0L));
+          outputs.put("exec_allowed", NodeValue.ofBoolean(true));
+          return completedMono(outputs);
         }
         // Lost race, retry with new value
       } else {
-        // Deny execution (no race condition possible here)
-        return completedMono(results(
-          "allowed", false,
-          "remainingMs", cooldownMs - elapsed
-        ));
+        var outputs = new HashMap<String, NodeValue>();
+        outputs.put("allowed", NodeValue.ofBoolean(false));
+        outputs.put("remainingMs", NodeValue.ofNumber(cooldownMs - elapsed));
+        outputs.put("exec_denied", NodeValue.ofBoolean(true));
+        return completedMono(outputs);
       }
     }
   }

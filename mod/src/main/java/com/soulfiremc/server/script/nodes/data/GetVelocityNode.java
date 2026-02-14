@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's current velocity.
 /// Outputs: velocity (Vec3), speed (magnitude)
@@ -50,18 +50,18 @@ public final class GetVelocityNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results("velocity", Vec3.ZERO, "speed", 0.0));
+      return completedMono(results("velocity", Vec3.ZERO, "speed", 0.0));
     }
 
     var velocity = player.getDeltaMovement();
     var speed = velocity.length();
 
-    return completed(results(
+    return completedMono(results(
       "velocity", velocity,
       "speed", speed
     ));

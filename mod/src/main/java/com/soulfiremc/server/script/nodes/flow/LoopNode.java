@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that repeats execution a specified number of times.
 /// Self-driving: uses runtime.executeDownstream() to iterate over the loop body,
@@ -52,12 +51,6 @@ public final class LoopNode extends AbstractScriptNode {
   @Override
   public NodeMetadata getMetadata() {
     return METADATA;
-  }
-
-  @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var count = getIntInput(inputs, "count", 10);
-    return completed(results("index", 0, "isComplete", count <= 0, "count", count));
   }
 
   @Override

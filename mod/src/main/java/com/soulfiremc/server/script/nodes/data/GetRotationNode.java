@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's current rotation.
 /// Outputs: yaw, pitch (float, in degrees)
@@ -49,15 +49,15 @@ public final class GetRotationNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results("yaw", 0.0f, "pitch", 0.0f));
+      return completedMono(results("yaw", 0.0f, "pitch", 0.0f));
     }
 
-    return completed(results(
+    return completedMono(results(
       "yaw", player.getYRot(),
       "pitch", player.getXRot()
     ));

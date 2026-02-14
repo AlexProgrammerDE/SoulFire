@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that concatenates two strings.
 /// Inputs: a, b
@@ -49,9 +49,9 @@ public final class ConcatNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = getStringInput(inputs, "a", "");
     var b = getStringInput(inputs, "b", "");
-    return completed(result("result", a + b));
+    return completedMono(result("result", a + b));
   }
 }

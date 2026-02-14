@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +53,7 @@ public final class ReplaceNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var search = getStringInput(inputs, "search", "");
     var replacement = getStringInput(inputs, "replacement", "");
@@ -68,6 +68,6 @@ public final class ReplaceNode extends AbstractScriptNode {
       resultText = text.replaceFirst(Pattern.quote(search), Matcher.quoteReplacement(replacement));
     }
 
-    return completed(result("result", resultText));
+    return completedMono(result("result", resultText));
   }
 }

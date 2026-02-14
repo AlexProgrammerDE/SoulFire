@@ -27,7 +27,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Abstract base class for script nodes providing common utility methods.
 /// All subclasses MUST override getMetadata() to provide complete node metadata.
@@ -198,18 +197,6 @@ public abstract class AbstractScriptNode implements ScriptNode {
   protected Map<String, NodeValue> emptyResult() {
     return Map.of();
   }
-
-  /// Helper method to create a completed future with results.
-  protected CompletableFuture<Map<String, NodeValue>> completed(Map<String, NodeValue> results) {
-    return CompletableFuture.completedFuture(results);
-  }
-
-  /// Helper method to create a completed future with empty results.
-  protected CompletableFuture<Map<String, NodeValue>> completedEmpty() {
-    return CompletableFuture.completedFuture(Map.of());
-  }
-
-  // ==================== Reactive Helper Methods ====================
 
   /// Helper method to create a completed Mono with results.
   protected Mono<Map<String, NodeValue>> completedMono(Map<String, NodeValue> results) {

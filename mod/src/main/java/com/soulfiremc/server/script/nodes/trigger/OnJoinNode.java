@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when the bot has fully joined and is ready to interact.
 /// This waits until the player object is initialized (unlike OnBotInit which fires earlier).
@@ -50,14 +50,14 @@ public final class OnJoinNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
 
     var serverAddress = bot != null ? bot.serverAddress().toString() : "";
     var username = bot != null ? bot.accountName() : "";
 
     // Output data so it can be wired to downstream nodes
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "serverAddress", serverAddress,
       "username", username

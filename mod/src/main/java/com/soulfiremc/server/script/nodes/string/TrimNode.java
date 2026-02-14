@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that trims whitespace from both ends of a string.
 /// Input: text
@@ -48,8 +48,8 @@ public final class TrimNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
-    return completed(result("result", text.trim()));
+    return completedMono(result("result", text.trim()));
   }
 }

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that formats a template string with placeholders.
 /// Placeholders use {0}, {1}, {2}, etc. syntax.
@@ -50,7 +50,7 @@ public final class FormatNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var template = getStringInput(inputs, "template", "");
     var args = getListInput(inputs, "args");
 
@@ -61,6 +61,6 @@ public final class FormatNode extends AbstractScriptNode {
       result = result.replace(placeholder, value != null ? value.toString() : "null");
     }
 
-    return completed(result("result", result));
+    return completedMono(result("result", result));
   }
 }

@@ -18,13 +18,13 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that gets the current timestamp in various formats.
 public final class TimestampNode extends AbstractScriptNode {
@@ -53,7 +53,7 @@ public final class TimestampNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var format = getStringInput(inputs, "format", "");
     var timezone = getStringInput(inputs, "timezone", "UTC");
 
@@ -77,7 +77,7 @@ public final class TimestampNode extends AbstractScriptNode {
       }
     }
 
-    return completed(results(
+    return completedMono(results(
       "timestamp", now.toEpochMilli(),
       "formatted", formatted,
       "iso", zoned.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)

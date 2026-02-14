@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.util;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Utility node that checks if a value is null or empty.
 /// Works with strings, collections, and maps.
@@ -49,7 +49,7 @@ public final class IsEmptyNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
 
     boolean isEmpty;
@@ -67,6 +67,6 @@ public final class IsEmptyNode extends AbstractScriptNode {
       }
     }
 
-    return completed(result("result", isEmpty));
+    return completedMono(result("result", isEmpty));
   }
 }

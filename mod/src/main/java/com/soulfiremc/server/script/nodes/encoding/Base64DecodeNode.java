@@ -18,11 +18,11 @@
 package com.soulfiremc.server.script.nodes.encoding;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Encoding node that decodes a Base64 string.
 public final class Base64DecodeNode extends AbstractScriptNode {
@@ -50,19 +50,19 @@ public final class Base64DecodeNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var input = getStringInput(inputs, "input", "");
     var urlSafe = getBooleanInput(inputs, "urlSafe", false);
 
     try {
       var decoder = urlSafe ? Base64.getUrlDecoder() : Base64.getDecoder();
       var decoded = new String(decoder.decode(input), StandardCharsets.UTF_8);
-      return completed(results(
+      return completedMono(results(
         "decoded", decoded,
         "success", true
       ));
     } catch (IllegalArgumentException _) {
-      return completed(results(
+      return completedMono(results(
         "decoded", "",
         "success", false
       ));

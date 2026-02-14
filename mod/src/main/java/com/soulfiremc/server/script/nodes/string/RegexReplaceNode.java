@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 /// String node that replaces matches of a regex pattern with a replacement string.
@@ -52,7 +52,7 @@ public final class RegexReplaceNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var input = getStringInput(inputs, "input", "");
     var patternStr = getStringInput(inputs, "pattern", "");
     var replacement = getStringInput(inputs, "replacement", "");
@@ -60,7 +60,7 @@ public final class RegexReplaceNode extends AbstractScriptNode {
     var flags = getStringInput(inputs, "flags", "");
 
     if (patternStr.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "result", input,
         "count", 0
       ));
@@ -98,12 +98,12 @@ public final class RegexReplaceNode extends AbstractScriptNode {
         result = matcher.replaceFirst(replacement);
       }
 
-      return completed(results(
+      return completedMono(results(
         "result", result,
         "count", count
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "result", input,
         "count", 0
       ));

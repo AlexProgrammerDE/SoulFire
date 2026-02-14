@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.level.Level;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's current dimension.
 /// Outputs: dimension (string), isOverworld, isNether, isEnd
@@ -52,12 +52,12 @@ public final class GetDimensionNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var level = bot.minecraft().level;
 
     if (level == null) {
-      return completed(results(
+      return completedMono(results(
         "dimension", "unknown",
         "isOverworld", false,
         "isNether", false,
@@ -68,7 +68,7 @@ public final class GetDimensionNode extends AbstractScriptNode {
     var dimensionKey = level.dimension();
     var dimensionName = dimensionKey.identifier().toString();
 
-    return completed(results(
+    return completedMono(results(
       "dimension", dimensionName,
       "isOverworld", dimensionKey == Level.OVERWORLD,
       "isNether", dimensionKey == Level.NETHER,

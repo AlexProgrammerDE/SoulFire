@@ -31,7 +31,8 @@ public final class ScriptGraph {
   private final Map<String, GraphNode> nodes;
   private final List<GraphEdge> edges;
   private final Map<String, List<GraphEdge>> outgoingExecutionEdges;
-  private final Map<String, List<GraphEdge>> incomingDataEdges;
+  private final Map<String, List<GraphEdge>> incomingEdgesByHandle;
+  private final Map<String, List<GraphEdge>> incomingDataEdgesByNode;
 
   private ScriptGraph(
     String scriptId,
@@ -46,18 +47,24 @@ public final class ScriptGraph {
 
     // Pre-compute edge lookups for efficient traversal
     var outgoing = new HashMap<String, List<GraphEdge>>();
-    var incoming = new HashMap<String, List<GraphEdge>>();
+    var incomingByHandle = new HashMap<String, List<GraphEdge>>();
+    var incomingDataByNode = new HashMap<String, List<GraphEdge>>();
 
     for (var edge : edges) {
       var sourceKey = edge.sourceNodeId + ":" + edge.sourceHandle;
       outgoing.computeIfAbsent(sourceKey, _ -> new ArrayList<>()).add(edge);
 
       var targetKey = edge.targetNodeId + ":" + edge.targetHandle;
-      incoming.computeIfAbsent(targetKey, _ -> new ArrayList<>()).add(edge);
+      incomingByHandle.computeIfAbsent(targetKey, _ -> new ArrayList<>()).add(edge);
+
+      if (edge.edgeType == EdgeType.DATA) {
+        incomingDataByNode.computeIfAbsent(edge.targetNodeId, _ -> new ArrayList<>()).add(edge);
+      }
     }
 
     this.outgoingExecutionEdges = Collections.unmodifiableMap(outgoing);
-    this.incomingDataEdges = Collections.unmodifiableMap(incoming);
+    this.incomingEdgesByHandle = Collections.unmodifiableMap(incomingByHandle);
+    this.incomingDataEdgesByNode = Collections.unmodifiableMap(incomingDataByNode);
   }
 
   /// Creates a new builder for constructing a ScriptGraph.
@@ -75,7 +82,8 @@ public final class ScriptGraph {
   }
 
   /// Finds all trigger nodes (entry points) in the graph.
-  /// Trigger nodes are nodes with no incoming execution edges.
+  /// Trigger nodes are nodes with no incoming execution edges whose type
+  /// is a registered trigger type (starts with "trigger.").
   ///
   /// @return list of trigger node IDs
   public List<String> findTriggerNodes() {
@@ -88,7 +96,7 @@ public final class ScriptGraph {
 
     var triggers = new ArrayList<String>();
     for (var node : nodes.values()) {
-      if (!nodesWithIncomingExecution.contains(node.id)) {
+      if (!nodesWithIncomingExecution.contains(node.id) && node.type.startsWith("trigger.")) {
         triggers.add(node.id);
       }
     }
@@ -114,14 +122,12 @@ public final class ScriptGraph {
   }
 
   /// Gets all incoming DATA edges for a node.
-  /// Used by ReactiveScriptEngine to wait for upstream dependencies.
+  /// Uses pre-computed map for O(1) lookup instead of scanning all edges.
   ///
   /// @param nodeId the target node ID
   /// @return list of DATA edges targeting this node
   public List<GraphEdge> getIncomingDataEdges(String nodeId) {
-    return edges.stream()
-      .filter(e -> e.edgeType() == EdgeType.DATA && e.targetNodeId().equals(nodeId))
-      .toList();
+    return incomingDataEdgesByNode.getOrDefault(nodeId, List.of());
   }
 
   /// Performs topological sort on the graph nodes.
@@ -139,12 +145,10 @@ public final class ScriptGraph {
       adjList.put(nodeId, new ArrayList<>());
     }
 
-    // Build adjacency list and count in-degrees
+    // Build adjacency list and count in-degrees (include both edge types for cycle detection)
     for (var edge : edges) {
-      if (edge.edgeType == EdgeType.EXECUTION) {
-        adjList.get(edge.sourceNodeId).add(edge.targetNodeId);
-        inDegree.merge(edge.targetNodeId, 1, Integer::sum);
-      }
+      adjList.get(edge.sourceNodeId).add(edge.targetNodeId);
+      inDegree.merge(edge.targetNodeId, 1, Integer::sum);
     }
 
     // Kahn's algorithm

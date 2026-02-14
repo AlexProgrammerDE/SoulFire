@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that makes the bot jump.
 /// Sets the jump control state for one tick.
@@ -48,7 +48,7 @@ public final class JumpNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
 
     // Set jump for this tick
@@ -58,6 +58,6 @@ public final class JumpNode extends AbstractScriptNode {
     bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
       bot.controlState().jump(false)));
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

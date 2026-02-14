@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// List node that returns the length of a list.
 /// Input: list
@@ -48,8 +48,8 @@ public final class ListLengthNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var list = getListInput(inputs, "list");
-    return completed(result("length", list.size()));
+    return completedMono(result("length", list.size()));
   }
 }

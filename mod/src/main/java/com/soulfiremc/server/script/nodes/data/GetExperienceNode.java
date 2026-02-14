@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's experience information.
 /// Outputs: level, totalXp, xpProgress (0-1 progress to next level)
@@ -50,15 +50,15 @@ public final class GetExperienceNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completed(results("level", 0, "totalXp", 0, "xpProgress", 0.0f));
+      return completedMono(results("level", 0, "totalXp", 0, "xpProgress", 0.0f));
     }
 
-    return completed(results(
+    return completedMono(results(
       "level", player.experienceLevel,
       "totalXp", player.totalExperience,
       "xpProgress", player.experienceProgress

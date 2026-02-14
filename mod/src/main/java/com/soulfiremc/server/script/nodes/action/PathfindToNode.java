@@ -23,9 +23,9 @@ import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that pathfinds the bot to a target position.
 /// This is an async operation that completes when the bot reaches the destination.
@@ -56,15 +56,15 @@ public final class PathfindToNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var destination = getInput(inputs, "destination", Vec3.ZERO);
 
     var goal = new PosGoal(SFVec3i.fromDouble(destination));
     var constraint = new PathConstraintImpl(bot);
 
-    return PathExecutor.executePathfinding(bot, goal, constraint)
-      .thenApply(_ -> result("success", true))
-      .exceptionally(_ -> result("success", false));
+    return Mono.fromFuture(PathExecutor.executePathfinding(bot, goal, constraint))
+      .map(_ -> result("success", true))
+      .onErrorReturn(result("success", false));
   }
 }

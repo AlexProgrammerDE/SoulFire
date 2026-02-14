@@ -29,7 +29,6 @@ import reactor.netty.http.client.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Network node that performs HTTP requests with full control over method, headers, and body.
 public final class WebFetchNode extends AbstractScriptNode {
@@ -68,7 +67,7 @@ public final class WebFetchNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var url = getStringInput(inputs, "url", "");
     var method = getStringInput(inputs, "method", "GET").toUpperCase();
     var headersJson = getStringInput(inputs, "headers", "{}");
@@ -76,7 +75,7 @@ public final class WebFetchNode extends AbstractScriptNode {
     var timeout = getLongInput(inputs, "timeout", 30000L);
 
     if (url.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "exec_error", true,
         "response", "",
         "statusCode", 0,
@@ -152,6 +151,6 @@ public final class WebFetchNode extends AbstractScriptNode {
         "success", false,
         "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       )))
-      .toFuture();
+;
   }
 }

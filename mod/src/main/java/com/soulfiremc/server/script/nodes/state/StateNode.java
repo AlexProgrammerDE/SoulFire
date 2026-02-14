@@ -20,11 +20,11 @@ package com.soulfiremc.server.script.nodes.state;
 import com.google.gson.JsonParser;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// State node that provides a simple state machine for bot behavior management.
@@ -62,7 +62,7 @@ public final class StateNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var stateId = getStringInput(inputs, "stateId", "main");
     var operation = getStringInput(inputs, "operation", "get").toLowerCase();
@@ -73,7 +73,7 @@ public final class StateNode extends AbstractScriptNode {
     var stateData = stateMachines.computeIfAbsent(stateId, _ -> new StateData("initial", ""));
 
     return switch (operation) {
-      case "get" -> completed(results(
+      case "get" -> completedMono(results(
         "currentState", stateData.current,
         "previousState", stateData.previous,
         "transitionAllowed", true
@@ -81,7 +81,7 @@ public final class StateNode extends AbstractScriptNode {
       case "set" -> {
         var newData = new StateData(newState, stateData.current);
         stateMachines.put(stateId, newData);
-        yield completed(results(
+        yield completedMono(results(
           "currentState", newState,
           "previousState", stateData.current,
           "transitionAllowed", true
@@ -93,13 +93,13 @@ public final class StateNode extends AbstractScriptNode {
           var newData = new StateData(newState, stateData.current);
           stateMachines.put(stateId, newData);
         }
-        yield completed(results(
+        yield completedMono(results(
           "currentState", allowed ? newState : stateData.current,
           "previousState", stateData.current,
           "transitionAllowed", allowed
         ));
       }
-      default -> completed(results(
+      default -> completedMono(results(
         "currentState", stateData.current,
         "previousState", stateData.previous,
         "transitionAllowed", false

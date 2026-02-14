@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
 import org.checkerframework.checker.units.qual.min;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that constrains a value within a range.
 /// Inputs: value, min, max
@@ -51,12 +51,12 @@ public final class ClampNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = getDoubleInput(inputs, "value", 0.0);
     var min = getDoubleInput(inputs, "min", 0.0);
     var max = getDoubleInput(inputs, "max", 1.0);
 
     var clampedValue = Math.max(min, Math.min(max, value));
-    return completed(result("result", clampedValue));
+    return completedMono(result("result", clampedValue));
   }
 }

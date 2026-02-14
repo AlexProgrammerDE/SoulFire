@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// List node that gets an item at a specific index.
 /// Inputs: list, index
@@ -50,14 +50,14 @@ public final class GetAtNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var list = getListInput(inputs, "list");
     var index = getIntInput(inputs, "index", 0);
 
     if (index >= 0 && index < list.size()) {
-      return completed(results("item", list.get(index), "found", true));
+      return completedMono(results("item", list.get(index), "found", true));
     } else {
-      return completed(results("item", null, "found", false));
+      return completedMono(results("item", null, "found", false));
     }
   }
 }

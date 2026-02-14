@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.phys.Vec3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that calculates the distance between two 3D points.
 /// Inputs: a (Vec3), b (Vec3)
@@ -50,10 +50,10 @@ public final class DistanceNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = getInput(inputs, "a", Vec3.ZERO);
     var b = getInput(inputs, "b", Vec3.ZERO);
     var distance = a.distanceTo(b);
-    return completed(result("distance", distance));
+    return completedMono(result("distance", distance));
   }
 }

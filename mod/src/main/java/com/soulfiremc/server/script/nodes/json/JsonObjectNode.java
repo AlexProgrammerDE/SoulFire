@@ -21,9 +21,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// JSON node that creates a JSON object from key-value pairs.
 public final class JsonObjectNode extends AbstractScriptNode {
@@ -52,7 +52,7 @@ public final class JsonObjectNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var keys = getStringListInput(inputs, "keys");
     var values = getListInput(inputs, "values");
 
@@ -66,6 +66,6 @@ public final class JsonObjectNode extends AbstractScriptNode {
       obj.add(key, element != null ? element : JsonNull.INSTANCE);
     }
 
-    return completed(result("object", GSON.toJson(obj)));
+    return completedMono(result("object", GSON.toJson(obj)));
   }
 }

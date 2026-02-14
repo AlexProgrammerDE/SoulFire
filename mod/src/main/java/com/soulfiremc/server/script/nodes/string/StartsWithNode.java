@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that checks if a string starts with a prefix.
 /// Inputs: text, prefix, ignoreCase
@@ -50,7 +50,7 @@ public final class StartsWithNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var prefix = getStringInput(inputs, "prefix", "");
     var ignoreCase = getBooleanInput(inputs, "ignoreCase", false);
@@ -62,6 +62,6 @@ public final class StartsWithNode extends AbstractScriptNode {
       result = text.startsWith(prefix);
     }
 
-    return completed(result("result", result));
+    return completedMono(result("result", result));
   }
 }

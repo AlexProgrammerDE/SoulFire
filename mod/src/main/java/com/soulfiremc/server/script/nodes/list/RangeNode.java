@@ -18,11 +18,11 @@
 package com.soulfiremc.server.script.nodes.list;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// List node that generates a range of numbers.
 /// Inputs: start, end, step
@@ -52,14 +52,14 @@ public final class RangeNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var start = getDoubleInput(inputs, "start", 0.0);
     var end = getDoubleInput(inputs, "end", 10.0);
     var step = getDoubleInput(inputs, "step", 1.0);
 
     // Prevent infinite loops
     if (step == 0 || (step > 0 && start > end) || (step < 0 && start < end)) {
-      return completed(result("list", List.of()));
+      return completedMono(result("list", List.of()));
     }
 
     // Limit to 10000 elements to prevent memory issues
@@ -76,6 +76,6 @@ public final class RangeNode extends AbstractScriptNode {
       }
     }
 
-    return completed(result("list", list));
+    return completedMono(result("list", list));
   }
 }

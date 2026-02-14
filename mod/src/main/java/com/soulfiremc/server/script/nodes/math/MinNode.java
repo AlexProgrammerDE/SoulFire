@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that returns the minimum of two numbers.
 /// Inputs: a, b
@@ -49,9 +49,9 @@ public final class MinNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = getDoubleInput(inputs, "a", 0.0);
     var b = getDoubleInput(inputs, "b", 0.0);
-    return completed(result("result", Math.min(a, b)));
+    return completedMono(result("result", Math.min(a, b)));
   }
 }

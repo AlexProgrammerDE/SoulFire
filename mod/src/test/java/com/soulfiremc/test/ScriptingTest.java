@@ -32,6 +32,29 @@ import static org.junit.jupiter.api.Assertions.*;
 
 final class ScriptingTest {
 
+  /// Minimal NodeRuntime for tests that need stateStore() (e.g., RateLimitNode, DebounceNode).
+  private static final NodeRuntime TEST_RUNTIME = new NodeRuntime() {
+    private final ScriptStateStore stateStore = new ScriptStateStore();
+
+    @Override
+    public ScriptStateStore stateStore() {
+      return stateStore;
+    }
+
+    @Override
+    public com.soulfiremc.server.InstanceManager instance() {
+      return null;
+    }
+
+    @Override
+    public com.soulfiremc.server.SoulFireScheduler scheduler() {
+      return null;
+    }
+
+    @Override
+    public void log(String level, String message) {}
+  };
+
   // ==================== NodeValue Tests ====================
 
   @Test
@@ -275,7 +298,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -293,7 +316,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -312,7 +335,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -330,7 +353,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -343,7 +366,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(0)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     // The divide node returns 0 when dividing by zero (safe default)
     assertEquals(0.0, result.get("result").asDouble(-1.0), 0.001);
@@ -362,7 +385,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -377,7 +400,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("math.abs");
     var inputs = Map.of("value", NodeValue.ofNumber(input));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -392,7 +415,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("math.floor");
     var inputs = Map.of("value", NodeValue.ofNumber(input));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -407,7 +430,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("math.ceil");
     var inputs = Map.of("value", NodeValue.ofNumber(input));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -423,7 +446,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("math.round");
     var inputs = Map.of("value", NodeValue.ofNumber(input));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -441,7 +464,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -459,7 +482,7 @@ final class ScriptingTest {
       "b", NodeValue.ofNumber(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -477,7 +500,7 @@ final class ScriptingTest {
       "exponent", NodeValue.ofNumber(exp)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -496,7 +519,7 @@ final class ScriptingTest {
       "max", NodeValue.ofNumber(max)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
   }
@@ -526,7 +549,7 @@ final class ScriptingTest {
       "operator", NodeValue.ofString(op)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -545,7 +568,7 @@ final class ScriptingTest {
       "b", NodeValue.ofBoolean(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -564,7 +587,7 @@ final class ScriptingTest {
       "b", NodeValue.ofBoolean(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -578,7 +601,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("logic.not");
     var inputs = Map.of("value", NodeValue.ofBoolean(input));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -597,7 +620,7 @@ final class ScriptingTest {
       "b", NodeValue.ofBoolean(b)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -610,7 +633,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("flow.branch");
     var inputs = Map.of("condition", NodeValue.ofBoolean(condition));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(condition ? "true" : "false", result.get("branch").asString(""));
     assertEquals(condition, result.get("condition").asBoolean(false));
@@ -626,7 +649,7 @@ final class ScriptingTest {
       "b", NodeValue.ofString(" World")
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("Hello World", result.get("result").asString(""));
   }
@@ -640,7 +663,7 @@ final class ScriptingTest {
       "replacement", NodeValue.ofString("Universe")
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("Hello Universe", result.get("result").asString(""));
   }
@@ -653,7 +676,7 @@ final class ScriptingTest {
       "delimiter", NodeValue.ofString(",")
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
     var parts = result.get("result").asStringList();
 
     assertEquals(3, parts.size());
@@ -671,7 +694,7 @@ final class ScriptingTest {
       "end", NodeValue.ofNumber(5)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("Hello", result.get("result").asString(""));
   }
@@ -681,7 +704,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("string.length");
     var inputs = Map.of("text", NodeValue.ofString("Hello"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(5, result.get("length").asInt(0));
   }
@@ -691,7 +714,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("string.to_lower_case");
     var inputs = Map.of("text", NodeValue.ofString("HELLO"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("hello", result.get("result").asString(""));
   }
@@ -701,7 +724,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("string.to_upper_case");
     var inputs = Map.of("text", NodeValue.ofString("hello"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("HELLO", result.get("result").asString(""));
   }
@@ -711,7 +734,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("string.trim");
     var inputs = Map.of("text", NodeValue.ofString("  hello  "));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("hello", result.get("result").asString(""));
   }
@@ -729,7 +752,7 @@ final class ScriptingTest {
       "prefix", NodeValue.ofString(prefix)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -747,7 +770,7 @@ final class ScriptingTest {
       "suffix", NodeValue.ofString(suffix)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -765,7 +788,7 @@ final class ScriptingTest {
       "search", NodeValue.ofString(search)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -779,7 +802,7 @@ final class ScriptingTest {
       "list", NodeValue.of(List.of(1, 2, 3, 4, 5))
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(5, result.get("length").asInt(0));
   }
@@ -792,7 +815,7 @@ final class ScriptingTest {
       "index", NodeValue.ofNumber(1)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("b", result.get("item").asString(""));
   }
@@ -804,7 +827,7 @@ final class ScriptingTest {
       "list", NodeValue.of(List.of("first", "second", "third"))
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("first", result.get("item").asString(""));
   }
@@ -816,7 +839,7 @@ final class ScriptingTest {
       "list", NodeValue.of(List.of("first", "second", "third"))
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("third", result.get("item").asString(""));
   }
@@ -834,7 +857,7 @@ final class ScriptingTest {
       "item", NodeValue.ofString(search)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(expected, result.get("result").asBoolean(false));
   }
@@ -847,7 +870,7 @@ final class ScriptingTest {
       "separator", NodeValue.ofString(", ")
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     // The join uses toString() on NodeValue, which includes JSON formatting (quotes for strings)
     assertEquals("\"a\", \"b\", \"c\"", result.get("result").asString(""));
@@ -861,7 +884,7 @@ final class ScriptingTest {
       "end", NodeValue.ofNumber(5)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
     var list = result.get("list").asList();
 
     assertEquals(4, list.size());
@@ -878,7 +901,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("constant.number");
     var inputs = Map.of("value", NodeValue.ofNumber(42));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(42, result.get("value").asInt(0));
   }
@@ -888,7 +911,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("constant.string");
     var inputs = Map.of("value", NodeValue.ofString("test"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("test", result.get("value").asString(""));
   }
@@ -898,7 +921,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("constant.boolean");
     var inputs = Map.of("value", NodeValue.ofBoolean(true));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.get("value").asBoolean(false));
   }
@@ -910,7 +933,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("util.to_string");
     var inputs = Map.of("value", NodeValue.ofNumber(42));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals("42", result.get("result").asString(""));
   }
@@ -920,7 +943,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("util.to_number");
     var inputs = Map.of("value", NodeValue.ofString("42.5"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertEquals(42.5, result.get("result").asDouble(0.0), 0.001);
   }
@@ -931,7 +954,7 @@ final class ScriptingTest {
     // IsNullNode checks if the input key is absent (Java null), not JSON null
     var inputs = Map.<String, NodeValue>of();
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.get("result").asBoolean(false));
   }
@@ -941,7 +964,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("util.is_null");
     var inputs = Map.of("value", NodeValue.ofString("hello"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertFalse(result.get("result").asBoolean(true));
   }
@@ -951,7 +974,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("util.is_empty");
     var inputs = Map.of("value", NodeValue.ofString(""));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.get("result").asBoolean(false));
   }
@@ -961,7 +984,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("util.is_empty");
     var inputs = Map.of("value", NodeValue.ofString("hello"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertFalse(result.get("result").asBoolean(true));
   }
@@ -1097,7 +1120,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("flow.branch");
     var inputs = Map.of("condition", NodeValue.ofBoolean(true));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.containsKey("exec_true"), "Should contain exec_true key");
     assertFalse(result.containsKey("exec_false"), "Should not contain exec_false key");
@@ -1109,7 +1132,7 @@ final class ScriptingTest {
     var node = NodeRegistry.create("flow.branch");
     var inputs = Map.of("condition", NodeValue.ofBoolean(false));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.containsKey("exec_false"), "Should contain exec_false key");
     assertFalse(result.containsKey("exec_true"), "Should not contain exec_true key");
@@ -1126,7 +1149,7 @@ final class ScriptingTest {
       "cases", NodeValue.ofString("a,b,c")
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.containsKey("exec_case1"), "Should contain exec_case1 key");
     assertFalse(result.containsKey("exec_default"), "Should not contain exec_default key");
@@ -1142,7 +1165,7 @@ final class ScriptingTest {
       "cases", NodeValue.ofString("a,b,c")
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.containsKey("exec_default"), "Should contain exec_default key");
     assertFalse(result.containsKey("exec_case0"), "Should not contain exec_case0 key");
@@ -1159,7 +1182,7 @@ final class ScriptingTest {
     inputs.put("condition", NodeValue.ofBoolean(true));
     inputs.put("value", NodeValue.ofString("test"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.containsKey("exec_allowed"), "Should contain exec_allowed key");
     assertFalse(result.containsKey("exec_blocked"), "Should not contain exec_blocked key");
@@ -1173,7 +1196,7 @@ final class ScriptingTest {
     inputs.put("condition", NodeValue.ofBoolean(false));
     inputs.put("value", NodeValue.ofString("test"));
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(null, inputs).block();
 
     assertTrue(result.containsKey("exec_blocked"), "Should contain exec_blocked key");
     assertFalse(result.containsKey("exec_allowed"), "Should not contain exec_allowed key");
@@ -1192,7 +1215,7 @@ final class ScriptingTest {
       "tokensRequired", NodeValue.ofNumber(1)
     );
 
-    var result = node.execute(null, inputs).join();
+    var result = node.executeReactive(TEST_RUNTIME, inputs).block();
 
     assertTrue(result.containsKey("exec_allowed"), "Should contain exec_allowed key");
     assertTrue(result.get("wasAllowed").asBoolean(false));

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 /// Math node that generates a random number within a range.
@@ -50,7 +50,7 @@ public final class RandomNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var min = getDoubleInput(inputs, "min", 0.0);
     var max = getDoubleInput(inputs, "max", 1.0);
 
@@ -62,6 +62,6 @@ public final class RandomNode extends AbstractScriptNode {
     }
 
     var randomValue = ThreadLocalRandom.current().nextDouble(min, max);
-    return completed(result("result", randomValue));
+    return completedMono(result("result", randomValue));
   }
 }

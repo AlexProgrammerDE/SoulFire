@@ -18,10 +18,10 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that conditionally passes through execution.
 /// Input: condition (boolean) - whether to allow execution to pass through
@@ -58,7 +58,7 @@ public final class GateNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var condition = getBooleanInput(inputs, "condition", true);
     var value = inputs.get("value");
 
@@ -66,6 +66,6 @@ public final class GateNode extends AbstractScriptNode {
     outputs.put("passed", NodeValue.of(condition));
     outputs.put("value", condition ? value : NodeValue.ofNull());
     outputs.put(condition ? "exec_allowed" : "exec_blocked", NodeValue.ofBoolean(true));
-    return completed(outputs);
+    return completedMono(outputs);
   }
 }

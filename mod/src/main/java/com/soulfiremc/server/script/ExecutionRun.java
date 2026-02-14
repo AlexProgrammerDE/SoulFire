@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script;
 
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /// Per-invocation execution state.
 /// Each trigger invocation gets its own ExecutionRun so that concurrent triggers
 /// don't corrupt each other's node output sinks.
+@Slf4j
 public final class ExecutionRun {
   private final ConcurrentHashMap<String, Sinks.One<Map<String, NodeValue>>> nodeOutputSinks =
     new ConcurrentHashMap<>();
@@ -48,8 +50,11 @@ public final class ExecutionRun {
   /// @param nodeId  the node identifier
   /// @param outputs the output values
   public void publishNodeOutputs(String nodeId, Map<String, NodeValue> outputs) {
-    nodeOutputSinks
+    var result = nodeOutputSinks
       .computeIfAbsent(nodeId, _ -> Sinks.one())
       .tryEmitValue(outputs);
+    if (result.isFailure()) {
+      log.warn("Failed to publish outputs for node {}: {}", nodeId, result);
+    }
   }
 }

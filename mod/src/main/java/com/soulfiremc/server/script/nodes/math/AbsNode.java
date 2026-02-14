@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that returns the absolute value of a number.
 /// Input: value
@@ -48,8 +48,8 @@ public final class AbsNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = getDoubleInput(inputs, "value", 0.0);
-    return completed(result("result", Math.abs(value)));
+    return completedMono(result("result", Math.abs(value)));
   }
 }

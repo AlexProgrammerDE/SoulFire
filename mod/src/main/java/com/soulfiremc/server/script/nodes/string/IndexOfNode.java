@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.string;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// String node that finds the index of a substring.
 /// Inputs: text, search, ignoreCase
@@ -50,7 +50,7 @@ public final class IndexOfNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var text = getStringInput(inputs, "text", "");
     var search = getStringInput(inputs, "search", "");
     var ignoreCase = getBooleanInput(inputs, "ignoreCase", false);
@@ -62,6 +62,6 @@ public final class IndexOfNode extends AbstractScriptNode {
       index = text.indexOf(search);
     }
 
-    return completed(result("index", index));
+    return completedMono(result("index", index));
   }
 }

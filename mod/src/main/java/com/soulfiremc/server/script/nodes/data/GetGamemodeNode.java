@@ -19,9 +19,9 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.world.level.GameType;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets the bot's current gamemode.
 /// Outputs: gamemode (string), isSurvival, isCreative, isAdventure, isSpectator
@@ -53,12 +53,12 @@ public final class GetGamemodeNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var gameMode = bot.minecraft().gameMode;
 
     if (gameMode == null) {
-      return completed(results(
+      return completedMono(results(
         "gamemode", "unknown",
         "isSurvival", false,
         "isCreative", false,
@@ -68,7 +68,7 @@ public final class GetGamemodeNode extends AbstractScriptNode {
     }
 
     var currentMode = gameMode.getPlayerMode();
-    return completed(results(
+    return completedMono(results(
       "gamemode", currentMode.getName(),
       "isSurvival", currentMode == GameType.SURVIVAL,
       "isCreative", currentMode == GameType.CREATIVE,

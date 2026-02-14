@@ -20,9 +20,9 @@ package com.soulfiremc.server.script.nodes.variable;
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Variable node that retrieves a value from the bot's persistent metadata.
 public final class GetPersistentBotVariableNode extends AbstractScriptNode {
@@ -53,14 +53,14 @@ public final class GetPersistentBotVariableNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var namespace = getStringInput(inputs, "namespace", "script");
     var key = getStringInput(inputs, "key", "");
     var defaultValue = inputs.get("defaultValue");
 
     if (key.isEmpty()) {
-      return completed(results(
+      return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false
       ));
@@ -71,18 +71,18 @@ public final class GetPersistentBotVariableNode extends AbstractScriptNode {
       var jsonValue = bot.persistentMetadata().get(metaKey);
 
       if (jsonValue == null) {
-        return completed(results(
+        return completedMono(results(
           "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
           "found", false
         ));
       }
 
-      return completed(results(
+      return completedMono(results(
         "value", NodeValue.fromJson(jsonValue),
         "found", true
       ));
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false
       ));

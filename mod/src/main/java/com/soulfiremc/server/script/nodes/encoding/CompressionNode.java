@@ -18,13 +18,13 @@
 package com.soulfiremc.server.script.nodes.encoding;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -55,7 +55,7 @@ public final class CompressionNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var input = getStringInput(inputs, "input", "");
     var decompress = getBooleanInput(inputs, "decompress", false);
 
@@ -67,7 +67,7 @@ public final class CompressionNode extends AbstractScriptNode {
         var decompressed = new String(gzis.readAllBytes(), StandardCharsets.UTF_8);
         gzis.close();
 
-        return completed(results(
+        return completedMono(results(
           "output", decompressed,
           "success", true,
           "ratio", (double) decompressed.length() / compressed.length
@@ -81,14 +81,14 @@ public final class CompressionNode extends AbstractScriptNode {
         var compressed = baos.toByteArray();
         var ratio = compressed.length > 0 ? (double) original.length / compressed.length : 1.0;
 
-        return completed(results(
+        return completedMono(results(
           "output", Base64.getEncoder().encodeToString(compressed),
           "success", true,
           "ratio", ratio
         ));
       }
     } catch (Exception _) {
-      return completed(results(
+      return completedMono(results(
         "output", "",
         "success", false,
         "ratio", 1.0

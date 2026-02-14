@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires when a chat message is received.
 /// Outputs: bot (the bot that received the message), message (Component), messagePlainText, timestamp
@@ -50,7 +50,7 @@ public final class OnChatNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     // Event data is passed through inputs from the trigger system
     var bot = getBotInput(inputs);
     var message = inputs.get("message");
@@ -58,7 +58,7 @@ public final class OnChatNode extends AbstractScriptNode {
     var timestamp = getLongInput(inputs, "timestamp", System.currentTimeMillis());
 
     // Output data so it can be wired to downstream nodes
-    return completed(results(
+    return completedMono(results(
       "bot", bot,
       "message", message,
       "messagePlainText", messagePlainText,

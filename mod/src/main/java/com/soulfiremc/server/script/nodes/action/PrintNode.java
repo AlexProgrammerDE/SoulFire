@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Action node that logs a message for debugging.
 /// Input: message (any), level (string)
@@ -49,7 +49,7 @@ public final class PrintNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     // Get the raw NodeValue since this accepts "any" type
     var messageValue = inputs.get("message");
     var level = getStringInput(inputs, "level", "info");
@@ -66,6 +66,6 @@ public final class PrintNode extends AbstractScriptNode {
     // Log via runtime
     runtime.log(level, messageStr);
 
-    return completedEmpty();
+    return completedEmptyMono();
   }
 }

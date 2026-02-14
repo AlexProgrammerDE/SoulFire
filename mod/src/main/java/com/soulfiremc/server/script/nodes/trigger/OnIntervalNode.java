@@ -18,11 +18,13 @@
 package com.soulfiremc.server.script.nodes.trigger;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Trigger node that fires at a configurable interval.
+/// This trigger does NOT provide a bot in the execution context.
+/// To perform bot actions, use GetBots + ForEachBot downstream.
 /// Input: intervalMs - the interval in milliseconds (default: 1000)
 /// Output: executionCount - number of times this trigger has fired
 public final class OnIntervalNode extends AbstractScriptNode {
@@ -38,7 +40,7 @@ public final class OnIntervalNode extends AbstractScriptNode {
       PortDefinition.output("executionCount", "Execution Count", PortType.NUMBER, "Number of times this trigger has fired")
     )
     .isTrigger(true)
-    .description("Fires at a configurable interval")
+    .description("Fires at a configurable interval. Does not provide a bot — use GetBots + ForEachBot downstream for bot actions.")
     .icon("timer")
     .color("#4CAF50")
     .addKeywords("interval", "timer", "repeat", "periodic", "schedule")
@@ -50,8 +52,8 @@ public final class OnIntervalNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var executionCount = getLongInput(inputs, "executionCount", 1L);
-    return completed(result("executionCount", executionCount));
+    return completedMono(result("executionCount", executionCount));
   }
 }

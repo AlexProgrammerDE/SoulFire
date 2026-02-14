@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.math;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that calculates the tangent of an angle.
 /// Input: angle (in degrees)
@@ -48,8 +48,8 @@ public final class TanNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var angle = getDoubleInput(inputs, "angle", 0.0);
-    return completed(result("result", Math.tan(Math.toRadians(angle))));
+    return completedMono(result("result", Math.tan(Math.toRadians(angle))));
   }
 }

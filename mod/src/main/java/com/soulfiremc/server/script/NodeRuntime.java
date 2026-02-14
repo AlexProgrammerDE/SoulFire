@@ -27,6 +27,12 @@ import java.util.Map;
 /// Provides minimal API surface for nodes - just what they need to execute their logic.
 /// Execution machinery (output storage, cancellation, event listeners) is hidden.
 public interface NodeRuntime {
+  /// Gets the per-script state store for stateful nodes.
+  /// State is scoped to the script execution and cleaned up on deactivation.
+  ///
+  /// @return the script state store
+  ScriptStateStore stateStore();
+
   /// Gets the SoulFire instance for accessing bots and game state.
   ///
   /// @return the instance manager

@@ -209,9 +209,9 @@ public final class ReactiveScriptEngine {
 
     var nodeImpl = NodeRegistry.create(graphNode.type());
 
-    // Muted node bypass — skip execution, pass context through on "out"
+    // Muted node bypass — propagate execution context as outputs so DATA edges pass through
     if (graphNode.muted()) {
-      run.publishNodeOutputs(nodeId, Map.of());
+      run.publishNodeOutputs(nodeId, execContext.values());
       context.eventListener().onNodeCompleted(nodeId, Map.of());
       return executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context, run, execContext);
     }
@@ -311,6 +311,11 @@ public final class ReactiveScriptEngine {
     ExecutionContext execContext
   ) {
     return new NodeRuntime() {
+      @Override
+      public ScriptStateStore stateStore() {
+        return context.stateStore();
+      }
+
       @Override
       public InstanceManager instance() {
         return context.instance();

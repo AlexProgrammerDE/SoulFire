@@ -18,10 +18,10 @@
 package com.soulfiremc.server.script.nodes.flow;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Flow control node that branches execution based on a condition.
 /// Input: condition (boolean)
@@ -55,7 +55,7 @@ public final class BranchNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var condition = getBooleanInput(inputs, "condition", false);
 
     // Include exec handle key so the engine follows the correct branch
@@ -63,6 +63,6 @@ public final class BranchNode extends AbstractScriptNode {
     outputs.put("branch", NodeValue.of(condition ? "true" : "false"));
     outputs.put("condition", NodeValue.of(condition));
     outputs.put(condition ? "exec_true" : "exec_false", NodeValue.ofBoolean(true));
-    return completed(outputs);
+    return completedMono(outputs);
   }
 }

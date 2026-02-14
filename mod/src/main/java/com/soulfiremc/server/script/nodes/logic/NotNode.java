@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.logic;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Logic node that performs logical NOT on a boolean value.
 /// Input: value (boolean)
@@ -48,8 +48,8 @@ public final class NotNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = getBooleanInput(inputs, "value", false);
-    return completed(result("result", !value));
+    return completedMono(result("result", !value));
   }
 }

@@ -21,9 +21,9 @@ import com.ezylang.evalex.EvaluationException;
 import com.ezylang.evalex.Expression;
 import com.ezylang.evalex.parser.ParseException;
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Math node that evaluates a custom mathematical expression.
 /// Inputs: expression (string), variables a through f (double)
@@ -61,7 +61,7 @@ public final class FormulaNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var expressionStr = getStringInput(inputs, "expression", "0");
     var a = getDoubleInput(inputs, "a", 0.0);
     var b = getDoubleInput(inputs, "b", 0.0);
@@ -82,9 +82,9 @@ public final class FormulaNode extends AbstractScriptNode {
       var result = expression.evaluate();
       var doubleResult = result.getNumberValue().doubleValue();
 
-      return completed(result("result", doubleResult));
+      return completedMono(result("result", doubleResult));
     } catch (EvaluationException | ParseException ex) {
-      return completed(results("result", 0.0, "error", ex.getMessage()));
+      return completedMono(results("result", 0.0, "error", ex.getMessage()));
     }
   }
 }

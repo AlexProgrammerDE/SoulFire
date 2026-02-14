@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.logic;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Logic node that performs logical AND on two boolean values.
 /// Inputs: a, b (booleans)
@@ -49,9 +49,9 @@ public final class AndNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var a = getBooleanInput(inputs, "a", false);
     var b = getBooleanInput(inputs, "b", false);
-    return completed(result("result", a && b));
+    return completedMono(result("result", a && b));
   }
 }

@@ -18,9 +18,9 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /// Data node that gets information about an item in a specific inventory slot.
 /// Input: slot (0-35 for main inventory, 36-39 for armor, 40 for offhand)
@@ -52,23 +52,23 @@ public final class GetInventoryNode extends AbstractScriptNode {
   }
 
   @Override
-  public CompletableFuture<Map<String, NodeValue>> execute(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+  public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
     var player = bot.minecraft().player;
     var slot = getIntInput(inputs, "slot", 0);
 
     if (player == null) {
-      return completed(results("itemId", "minecraft:air", "count", 0, "isEmpty", true));
+      return completedMono(results("itemId", "minecraft:air", "count", 0, "isEmpty", true));
     }
 
     var inventory = player.getInventory();
     var item = inventory.getItem(slot);
 
     if (item.isEmpty()) {
-      return completed(results("itemId", "minecraft:air", "count", 0, "isEmpty", true));
+      return completedMono(results("itemId", "minecraft:air", "count", 0, "isEmpty", true));
     }
 
-    return completed(results(
+    return completedMono(results(
       "itemId", item.getItemHolder().getRegisteredName(),
       "count", item.getCount(),
       "isEmpty", false
