@@ -29,6 +29,9 @@ public final class SoulFirePreMainBootstrap {
   }
 
   public static void preMainBootstrap() {
+    // Disable jOOQ tips
+    System.setProperty("org.jooq.no-tips", "true");
+
     // If Velocity's natives are being extracted to a different temporary directory, make sure the
     // Netty natives are extracted there as well
     if (System.getProperty("velocity.natives-tmpdir") != null) {
