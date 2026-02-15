@@ -34,6 +34,7 @@ import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.proxy.ProxyType;
 import com.soulfiremc.server.proxy.SFProxy;
+import com.soulfiremc.server.settings.lib.BotSettingsDelegate;
 import com.soulfiremc.server.settings.lib.BotSettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.shared.SFLogAppender;
@@ -252,6 +253,12 @@ public final class BotConnection {
 
       // Shut down all executors
       scheduler.shutdown();
+    }
+  }
+
+  public void invalidateSettingsCache() {
+    if (settingsSource instanceof BotSettingsDelegate delegate) {
+      delegate.invalidate();
     }
   }
 

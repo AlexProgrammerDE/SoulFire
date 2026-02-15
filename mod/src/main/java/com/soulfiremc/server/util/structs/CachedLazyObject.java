@@ -44,4 +44,8 @@ public final class CachedLazyObject<V> implements Supplier<V> {
     }
     return value;
   }
+
+  public synchronized void invalidate() {
+    invalidAt = 0;
+  }
 }

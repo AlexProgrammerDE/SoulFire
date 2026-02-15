@@ -20,14 +20,18 @@ package com.soulfiremc.server.settings.lib;
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 public final class BotSettingsDelegate implements BotSettingsSource {
-  private final Supplier<BotSettingsSource> source;
+  private final CachedLazyObject<BotSettingsSource> source;
+
+  public void invalidate() {
+    source.invalidate();
+  }
 
   @Override
   public Optional<JsonElement> get(Property<SettingsSource.Bot> property) {

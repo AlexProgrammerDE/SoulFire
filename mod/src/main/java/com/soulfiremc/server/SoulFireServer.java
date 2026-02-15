@@ -247,6 +247,7 @@ public final class SoulFireServer {
   }
 
   public void configUpdateHook() {
+    settingsSource.invalidate();
     setupLogging();
   }
 

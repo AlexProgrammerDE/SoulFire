@@ -20,6 +20,7 @@ package com.soulfiremc.server.grpc;
 import com.google.gson.JsonElement;
 import com.google.protobuf.util.Timestamps;
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SessionLifecycle;
@@ -220,6 +221,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceUpdateMetaResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -251,6 +253,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -289,6 +292,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceUpdateConfigEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -323,6 +327,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceAddAccountResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -359,6 +364,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceRemoveAccountResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -395,6 +401,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceUpdateAccountResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -431,6 +438,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceAddAccountsBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -470,6 +478,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceRemoveAccountsBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -504,6 +513,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceAddProxyResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -542,6 +552,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceRemoveProxyResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -580,6 +591,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceUpdateProxyResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -616,6 +628,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceAddProxiesBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -653,6 +666,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(InstanceRemoveProxiesBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
@@ -808,6 +822,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       // Also update the live bot's persistent metadata if it's connected
       soulFireServer.getInstance(instanceId).ifPresent(instance -> {
+        instance.invalidateSettingsCache();
         var bot = instance.botConnections().get(accountId);
         if (bot != null) {
           bot.persistentMetadata().set(request.getNamespace(), request.getKey(), jsonValue);
@@ -863,6 +878,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       // Also update the live bot's persistent metadata if it's connected
       soulFireServer.getInstance(instanceId).ifPresent(instance -> {
+        instance.invalidateSettingsCache();
         var bot = instance.botConnections().get(accountId);
         if (bot != null) {
           bot.persistentMetadata().remove(request.getNamespace(), request.getKey());

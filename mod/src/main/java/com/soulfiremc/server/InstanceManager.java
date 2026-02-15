@@ -130,6 +130,14 @@ public final class InstanceManager {
     }
   }
 
+  public void invalidateSettingsCache() {
+    settingsSource.invalidate();
+    friendlyNameCache.invalidate();
+    for (var bot : botConnections.values()) {
+      bot.invalidateSettingsCache();
+    }
+  }
+
   private String fetchFriendlyName() {
     var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
 

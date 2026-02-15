@@ -19,14 +19,18 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.util.structs.CachedLazyObject;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 public final class ServerSettingsDelegate implements ServerSettingsSource {
-  private final Supplier<ServerSettingsSource> source;
+  private final CachedLazyObject<ServerSettingsSource> source;
+
+  public void invalidate() {
+    source.invalidate();
+  }
 
   @Override
   public Optional<JsonElement> get(Property<SettingsSource.Server> property) {
