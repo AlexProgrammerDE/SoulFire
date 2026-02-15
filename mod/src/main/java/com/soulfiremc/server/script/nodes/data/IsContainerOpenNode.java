@@ -22,26 +22,23 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-/// Data node that gets the bot's hunger/food information.
-/// Outputs: foodLevel (0-20), saturation (float)
-public final class GetHungerNode extends AbstractScriptNode {
+/// Data node that checks if a container or inventory screen is currently open.
+public final class IsContainerOpenNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("data.get_hunger")
-    .displayName("Get Hunger")
+    .type("data.is_container_open")
+    .displayName("Is Container Open")
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn()
     )
     .addOutputs(
       PortDefinition.execOut(),
-      PortDefinition.output("foodLevel", "Food Level", PortType.NUMBER, "Current food level (0-20)"),
-      PortDefinition.output("saturation", "Saturation", PortType.NUMBER, "Current saturation"),
-      PortDefinition.output("needsFood", "Needs Food", PortType.BOOLEAN, "Whether the bot needs food (food level < 20)")
+      PortDefinition.output("isOpen", "Is Open", PortType.BOOLEAN, "Whether a container or inventory screen is open")
     )
-    .description("Gets the bot's food level and saturation")
-    .icon("utensils")
+    .description("Checks if a container or inventory screen is open")
+    .icon("package-search")
     .color("#9C27B0")
-    .addKeywords("hunger", "food", "saturation", "eat")
+    .addKeywords("container", "inventory", "open", "screen", "check")
     .build();
 
   @Override
@@ -50,14 +47,9 @@ public final class GetHungerNode extends AbstractScriptNode {
     var player = bot.minecraft().player;
 
     if (player == null) {
-      return completedMono(results("foodLevel", 20, "saturation", 5.0f, "needsFood", false));
+      return completedMono(result("isOpen", false));
     }
 
-    var foodData = player.getFoodData();
-    return completedMono(results(
-      "foodLevel", foodData.getFoodLevel(),
-      "saturation", foodData.getSaturationLevel(),
-      "needsFood", foodData.needsFood()
-    ));
+    return completedMono(result("isOpen", player.hasContainerOpen()));
   }
 }

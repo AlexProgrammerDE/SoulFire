@@ -282,6 +282,15 @@ public final class ScriptTriggerService {
           log.debug("Registered and fired OnScriptInit trigger for script {} node {}", scriptId, node.id());
         }
 
+        case "trigger.on_disconnect" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
+          BotDisconnectedEvent.class, event -> {
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("reason", NodeValue.ofString(
+              SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.serialize(event.message())));
+            return inputs;
+          }, listeners, "OnDisconnect");
+
         case "trigger.on_script_end" -> {
           // Store for later execution when script stops
           var endTrigger = new ScriptEndTrigger(graph, node.id(), context, engine);

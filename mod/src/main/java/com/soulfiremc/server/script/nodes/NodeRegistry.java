@@ -66,6 +66,7 @@ public final class NodeRegistry {
     register(OnIntervalNode.METADATA, OnIntervalNode::new);
     register(OnScriptInitNode.METADATA, OnScriptInitNode::new);
     register(OnScriptEndNode.METADATA, OnScriptEndNode::new);
+    register(OnDisconnectNode.METADATA, OnDisconnectNode::new);
 
     // Math Nodes
     register(AddNode.METADATA, AddNode::new);
@@ -147,12 +148,17 @@ public final class NodeRegistry {
     register(SwingHandNode.METADATA, SwingHandNode::new);
     register(UseItemNode.METADATA, UseItemNode::new);
     register(PathfindToNode.METADATA, PathfindToNode::new);
+    register(PathfindAwayFromNode.METADATA, PathfindAwayFromNode::new);
     register(BreakBlockNode.METADATA, BreakBlockNode::new);
     register(PlaceBlockNode.METADATA, PlaceBlockNode::new);
     register(SelectSlotNode.METADATA, SelectSlotNode::new);
     register(SendChatNode.METADATA, SendChatNode::new);
     register(WaitNode.METADATA, WaitNode::new);
     register(PrintNode.METADATA, PrintNode::new);
+    register(ClickSlotNode.METADATA, ClickSlotNode::new);
+    register(OpenInventoryNode.METADATA, OpenInventoryNode::new);
+    register(CloseInventoryNode.METADATA, CloseInventoryNode::new);
+    register(RespawnNode.METADATA, RespawnNode::new);
 
     // Data Nodes
     register(GetPositionNode.METADATA, GetPositionNode::new);
@@ -182,6 +188,8 @@ public final class NodeRegistry {
     register(GetBotInfoNode.METADATA, GetBotInfoNode::new);
     register(GetTargetBlockNode.METADATA, GetTargetBlockNode::new);
     register(GetEffectsNode.METADATA, GetEffectsNode::new);
+    register(FindItemNode.METADATA, FindItemNode::new);
+    register(IsContainerOpenNode.METADATA, IsContainerOpenNode::new);
 
     // Constant Nodes
     register(NumberConstantNode.METADATA, NumberConstantNode::new);
