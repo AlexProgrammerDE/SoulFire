@@ -19,6 +19,7 @@ package com.soulfiremc.server.script;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.bot.ControllingTask;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Mono;
@@ -157,7 +158,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
     var bot = getBotInput(inputs);
     if (bot == null) {
       throw new IllegalStateException("This node requires a bot in the execution context. "
-        + "Ensure it is downstream of a bot-producing trigger (OnTick, OnChat, etc.) "
+        + "Ensure it is downstream of a bot-producing trigger (OnPreEntityTick, OnChat, etc.) "
         + "or a ForEachBot/GetBotByName node.");
     }
     return bot;
@@ -171,6 +172,21 @@ public abstract class AbstractScriptNode implements ScriptNode {
       return null;
     }
     return value.asJsonElement();
+  }
+
+  /// Helper method to run an action on the tick thread.
+  /// When executing synchronously on the tick thread (from entity tick triggers),
+  /// runs the action directly. Otherwise, defers via ControllingTask.singleTick().
+  ///
+  /// @param runtime the node runtime (provides sync/async context)
+  /// @param bot     the bot connection
+  /// @param action  the action to execute on the tick thread
+  protected void runOnTickThread(NodeRuntime runtime, BotConnection bot, Runnable action) {
+    if (runtime.isTickSynchronous()) {
+      action.run();
+    } else {
+      bot.botControl().registerControllingTask(ControllingTask.singleTick(action));
+    }
   }
 
   /// Helper method to create a result map with a single value.

@@ -18,44 +18,36 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.*;
-import com.soulfiremc.server.util.MouseClickHelper;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-/// Action node that uses the item in the bot's hand.
-/// Right-clicks to use items, interact with entities, or interact with blocks.
-public final class UseItemNode extends AbstractScriptNode {
+/// Action node that toggles the bot's right strafe movement (D key).
+/// Input: enabled (boolean) - whether to strafe right
+public final class StrafeRightNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("action.use_item")
-    .displayName("Use Item")
+    .type("action.strafe_right")
+    .displayName("Strafe Right")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.inputWithDefault("enabled", "Enabled", PortType.BOOLEAN, "true", "Whether to strafe right")
     )
     .addOutputs(
       PortDefinition.execOut()
     )
-    .description("Uses the item in the bot's hand (right click)")
-    .icon("mouse-pointer-click")
+    .description("Sets the bot's right strafe movement state (D key)")
+    .icon("arrow-right")
     .color("#FF9800")
-    .addKeywords("use", "item", "right click", "interact", "eat", "drink")
+    .addKeywords("move", "strafe", "right", "d-key", "wasd")
     .build();
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
+    var enabled = getBooleanInput(inputs, "enabled", true);
 
-    runOnTickThread(runtime, bot, () -> {
-      var minecraft = bot.minecraft();
-      var player = minecraft.player;
-      var level = minecraft.level;
-      var gameMode = minecraft.gameMode;
-
-      if (player != null && level != null && gameMode != null) {
-        MouseClickHelper.performRightClick(player, level, gameMode);
-      }
-    });
+    bot.controlState().right(enabled);
 
     return completedEmptyMono();
   }

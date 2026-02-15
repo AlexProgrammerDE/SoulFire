@@ -56,7 +56,8 @@ public final class NodeRegistry {
 
   static {
     // Trigger Nodes
-    register(OnTickNode.METADATA, OnTickNode::new);
+    register(OnPreEntityTickNode.METADATA, OnPreEntityTickNode::new);
+    register(OnPostEntityTickNode.METADATA, OnPostEntityTickNode::new);
     register(OnJoinNode.METADATA, OnJoinNode::new);
     register(OnBotInitNode.METADATA, OnBotInitNode::new);
     register(OnChatNode.METADATA, OnChatNode::new);
@@ -138,7 +139,12 @@ public final class NodeRegistry {
     register(SneakNode.METADATA, SneakNode::new);
     register(SprintNode.METADATA, SprintNode::new);
     register(JumpNode.METADATA, JumpNode::new);
+    register(MoveForwardNode.METADATA, MoveForwardNode::new);
+    register(MoveBackwardNode.METADATA, MoveBackwardNode::new);
+    register(StrafeLeftNode.METADATA, StrafeLeftNode::new);
+    register(StrafeRightNode.METADATA, StrafeRightNode::new);
     register(AttackNode.METADATA, AttackNode::new);
+    register(SwingHandNode.METADATA, SwingHandNode::new);
     register(UseItemNode.METADATA, UseItemNode::new);
     register(PathfindToNode.METADATA, PathfindToNode::new);
     register(BreakBlockNode.METADATA, BreakBlockNode::new);
@@ -156,6 +162,8 @@ public final class NodeRegistry {
     register(GetInventoryNode.METADATA, GetInventoryNode::new);
     register(GetBlockNode.METADATA, GetBlockNode::new);
     register(FindEntityNode.METADATA, FindEntityNode::new);
+    register(CanSeePositionNode.METADATA, CanSeePositionNode::new);
+    register(GetEntityStateNode.METADATA, GetEntityStateNode::new);
     register(FindBlockNode.METADATA, FindBlockNode::new);
     register(GetBotsNode.METADATA, GetBotsNode::new);
     register(FilterBotsNode.METADATA, FilterBotsNode::new);

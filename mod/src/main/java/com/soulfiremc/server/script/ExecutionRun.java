@@ -37,6 +37,22 @@ public final class ExecutionRun {
     new ConcurrentHashMap<>();
   private final AtomicLong executionCount = new AtomicLong(0);
 
+  /// Whether this execution is running synchronously on the tick thread.
+  private final boolean tickSynchronous;
+
+  public ExecutionRun() {
+    this(false);
+  }
+
+  public ExecutionRun(boolean tickSynchronous) {
+    this.tickSynchronous = tickSynchronous;
+  }
+
+  /// Returns whether this execution is running synchronously on the tick thread.
+  public boolean isTickSynchronous() {
+    return tickSynchronous;
+  }
+
   /// Waits for a node to produce outputs within this run.
   ///
   /// @param nodeId the node to wait for

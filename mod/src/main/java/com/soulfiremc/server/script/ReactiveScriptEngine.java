@@ -63,12 +63,48 @@ public final class ReactiveScriptEngine {
     ReactiveScriptContext context,
     Map<String, NodeValue> eventInputs
   ) {
-    return Mono.defer(() -> {
+    return executeFromTriggerInternal(graph, triggerNodeId, context, eventInputs, false);
+  }
+
+  /// Executes a script starting from a specific trigger node, synchronously on the calling thread.
+  /// Used by ScriptTriggerService for tick-based triggers that need to execute
+  /// on the tick thread without scheduler switching.
+  ///
+  /// @param graph         the script graph
+  /// @param triggerNodeId the trigger node to start from
+  /// @param context       the reactive execution context
+  /// @param eventInputs   inputs from the triggering event
+  /// @return a Mono that completes when execution finishes (no scheduler switching)
+  public Mono<Void> executeFromTriggerSync(
+    ScriptGraph graph,
+    String triggerNodeId,
+    ReactiveScriptContext context,
+    Map<String, NodeValue> eventInputs
+  ) {
+    return executeFromTriggerInternal(graph, triggerNodeId, context, eventInputs, true);
+  }
+
+  /// Internal implementation for trigger execution.
+  ///
+  /// @param graph             the script graph
+  /// @param triggerNodeId     the trigger node to start from
+  /// @param context           the reactive execution context
+  /// @param eventInputs       inputs from the triggering event
+  /// @param tickSynchronous   if true, executes on the calling thread (tick thread) without switching schedulers
+  /// @return a Mono that completes when execution finishes
+  private Mono<Void> executeFromTriggerInternal(
+    ScriptGraph graph,
+    String triggerNodeId,
+    ReactiveScriptContext context,
+    Map<String, NodeValue> eventInputs,
+    boolean tickSynchronous
+  ) {
+    var mono = Mono.<Void>defer(() -> {
       if (context.isCancelled()) {
         return Mono.empty();
       }
 
-      var run = new ExecutionRun();
+      var run = new ExecutionRun(tickSynchronous);
 
       var graphNode = graph.getNode(triggerNodeId);
       if (graphNode == null) {
@@ -119,7 +155,10 @@ public final class ReactiveScriptEngine {
           var execContext = ExecutionContext.from(contextOutputs);
           return followExecOutputs(graph, triggerNodeId, metadata, outputs, context, run, execContext);
         });
-    }).subscribeOn(context.getReactorScheduler());
+    });
+
+    // For synchronous tick execution, don't switch schedulers — run on the calling thread
+    return tickSynchronous ? mono : mono.subscribeOn(context.getReactorScheduler());
   }
 
   /// Determines which exec output ports to follow based on node outputs,
@@ -356,6 +395,11 @@ public final class ReactiveScriptEngine {
       @Override
       public SoulFireScheduler scheduler() {
         return context.scheduler();
+      }
+
+      @Override
+      public boolean isTickSynchronous() {
+        return run.isTickSynchronous();
       }
 
       @Override

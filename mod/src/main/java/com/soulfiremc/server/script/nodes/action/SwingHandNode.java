@@ -18,17 +18,17 @@
 package com.soulfiremc.server.script.nodes.action;
 
 import com.soulfiremc.server.script.*;
-import com.soulfiremc.server.util.MouseClickHelper;
+import net.minecraft.world.InteractionHand;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-/// Action node that uses the item in the bot's hand.
-/// Right-clicks to use items, interact with entities, or interact with blocks.
-public final class UseItemNode extends AbstractScriptNode {
+/// Action node that swings the bot's arm without attacking.
+/// Useful for cosmetic swings, fake attacks, or intentional misses.
+public final class SwingHandNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("action.use_item")
-    .displayName("Use Item")
+    .type("action.swing_hand")
+    .displayName("Swing Hand")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn()
@@ -36,10 +36,10 @@ public final class UseItemNode extends AbstractScriptNode {
     .addOutputs(
       PortDefinition.execOut()
     )
-    .description("Uses the item in the bot's hand (right click)")
-    .icon("mouse-pointer-click")
+    .description("Swings the bot's arm without attacking (cosmetic swing)")
+    .icon("hand")
     .color("#FF9800")
-    .addKeywords("use", "item", "right click", "interact", "eat", "drink")
+    .addKeywords("swing", "arm", "wave", "miss", "fake")
     .build();
 
   @Override
@@ -47,13 +47,9 @@ public final class UseItemNode extends AbstractScriptNode {
     var bot = requireBot(inputs);
 
     runOnTickThread(runtime, bot, () -> {
-      var minecraft = bot.minecraft();
-      var player = minecraft.player;
-      var level = minecraft.level;
-      var gameMode = minecraft.gameMode;
-
-      if (player != null && level != null && gameMode != null) {
-        MouseClickHelper.performRightClick(player, level, gameMode);
+      var player = bot.minecraft().player;
+      if (player != null) {
+        player.swing(InteractionHand.MAIN_HAND);
       }
     });
 

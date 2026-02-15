@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.util.MouseClickHelper;
 import reactor.core.publisher.Mono;
@@ -47,7 +46,7 @@ public final class AttackNode extends AbstractScriptNode {
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
 
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+    runOnTickThread(runtime, bot, () -> {
       var minecraft = bot.minecraft();
       var player = minecraft.player;
       var level = minecraft.level;
@@ -56,7 +55,7 @@ public final class AttackNode extends AbstractScriptNode {
       if (player != null && level != null && gameMode != null) {
         MouseClickHelper.performLeftClick(player, level, gameMode);
       }
-    }));
+    });
 
     return completedEmptyMono();
   }

@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
 import reactor.core.publisher.Mono;
 
@@ -46,12 +45,11 @@ public final class JumpNode extends AbstractScriptNode {
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
 
-    // Set jump for this tick
+    // Set jump for this tick, reset after one tick
     bot.controlState().jump(true);
 
-    // Reset jump after one tick
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-      bot.controlState().jump(false)));
+    runOnTickThread(runtime, bot, () ->
+      bot.controlState().jump(false));
 
     return completedEmptyMono();
   }

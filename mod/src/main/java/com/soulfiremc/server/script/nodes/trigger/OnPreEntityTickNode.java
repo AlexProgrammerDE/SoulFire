@@ -22,12 +22,14 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-/// Trigger node that fires every game tick (20 times per second).
+/// Trigger node that fires before entity physics each game tick.
+/// Executes synchronously on the tick thread, so action nodes run immediately.
+/// Use this for rotation and aiming logic that must be applied before entity movement.
 /// Outputs: bot (the bot that ticked), tickCount (ticks since script started)
-public final class OnTickNode extends AbstractScriptNode {
+public final class OnPreEntityTickNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("trigger.on_tick")
-    .displayName("On Tick")
+    .type("trigger.on_pre_entity_tick")
+    .displayName("On Pre Entity Tick")
     .category(CategoryRegistry.TRIGGERS)
     .addInputs()
     .addOutputs(
@@ -36,19 +38,17 @@ public final class OnTickNode extends AbstractScriptNode {
       PortDefinition.output("tickCount", "Tick Count", PortType.NUMBER, "Ticks since script started")
     )
     .isTrigger(true)
-    .description("Fires every game tick (20 times per second) for each bot")
+    .description("Fires before entity physics each tick (synchronous on tick thread)")
     .icon("clock")
     .color("#4CAF50")
-    .addKeywords("tick", "update", "loop", "frame")
+    .addKeywords("tick", "update", "loop", "pre", "entity", "before", "rotation")
     .build();
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    // The bot and tick count are passed through the inputs from the trigger system
     var bot = getBotInput(inputs);
     var tickCount = getLongInput(inputs, "tickCount", 0L);
 
-    // Output bot so it can be wired to downstream nodes
     return completedMono(results(
       "bot", bot,
       "tickCount", tickCount

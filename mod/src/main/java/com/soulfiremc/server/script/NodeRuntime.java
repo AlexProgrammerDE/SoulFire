@@ -50,6 +50,15 @@ public interface NodeRuntime {
   /// @param message the message to log
   void log(String level, String message);
 
+  /// Returns whether this execution is running synchronously on the tick thread.
+  /// When true, action nodes should execute game API calls directly instead of
+  /// deferring via ControllingTask.
+  ///
+  /// @return true if executing synchronously on the tick thread
+  default boolean isTickSynchronous() {
+    return false;
+  }
+
   /// Triggers downstream execution along a named exec handle.
   /// Only functional during reactive engine execution; self-driving nodes
   /// (LoopNode, ForEachNode, etc.) use this to iterate.

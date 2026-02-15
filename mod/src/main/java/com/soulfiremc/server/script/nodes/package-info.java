@@ -19,7 +19,7 @@
 /// Script node implementations for the SoulFire visual scripting system.
 ///
 /// This package contains all built-in script node types organized by category:
-/// - trigger: Entry points that start script execution (OnTickNode, OnChatNode, etc.)
+/// - trigger: Entry points that start script execution (OnPreEntityTickNode, OnChatNode, etc.)
 /// - math: Arithmetic and mathematical operations (AddNode, LerpNode, etc.)
 /// - logic: Boolean operations and comparisons (CompareNode, AndNode, etc.)
 /// - action: Bot control actions (PathfindToNode, AttackNode, etc.)

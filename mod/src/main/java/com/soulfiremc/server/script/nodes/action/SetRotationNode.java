@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.server.script.nodes.action;
 
-import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.script.*;
 import reactor.core.publisher.Mono;
 
@@ -64,13 +63,13 @@ public final class SetRotationNode extends AbstractScriptNode {
     var finalYaw = yaw;
     var finalPitch = pitch;
 
-    bot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+    runOnTickThread(runtime, bot, () -> {
       var player = bot.minecraft().player;
       if (player != null) {
         player.setYRot(finalYaw);
         player.setXRot(finalPitch);
       }
-    }));
+    });
 
     return completedEmptyMono();
   }

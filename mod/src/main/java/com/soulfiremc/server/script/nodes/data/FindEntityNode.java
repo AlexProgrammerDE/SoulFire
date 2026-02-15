@@ -18,9 +18,14 @@
 package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -37,7 +42,11 @@ public final class FindEntityNode extends AbstractScriptNode {
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.inputWithDefault("entityType", "Entity Type", PortType.STRING, "\"any\"", "Entity ID or 'any' for any entity"),
-      PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "32", "Maximum search radius")
+      PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "32", "Maximum search radius"),
+      PortDefinition.inputWithDefault("excludeDead", "Exclude Dead", PortType.BOOLEAN, "true", "Skip dead or non-enemy entities"),
+      PortDefinition.inputWithDefault("playersOnly", "Players Only", PortType.BOOLEAN, "false", "Only return player entities"),
+      PortDefinition.inputWithDefault("excludeBots", "Exclude Bots", PortType.BOOLEAN, "false", "Skip other SoulFire bots in the same instance"),
+      PortDefinition.inputWithDefault("mustBeSeen", "Must Be Seen", PortType.BOOLEAN, "false", "Only return entities with line-of-sight (raytrace)")
     )
     .addOutputs(
       PortDefinition.execOut(),
@@ -59,6 +68,10 @@ public final class FindEntityNode extends AbstractScriptNode {
     var player = bot.minecraft().player;
     var entityTypeInput = getStringInput(inputs, "entityType", "any");
     var maxDistance = getDoubleInput(inputs, "maxDistance", 32.0);
+    var excludeDead = getBooleanInput(inputs, "excludeDead", true);
+    var playersOnly = getBooleanInput(inputs, "playersOnly", false);
+    var excludeBots = getBooleanInput(inputs, "excludeBots", false);
+    var mustBeSeen = getBooleanInput(inputs, "mustBeSeen", false);
 
     if (level == null || player == null) {
       return completedMono(notFoundResult());
@@ -74,18 +87,54 @@ public final class FindEntityNode extends AbstractScriptNode {
     for (var entity : level.entitiesForRendering()) {
       if (entity == player) {
         continue; // Skip self
-
       }
+
       var distSq = entity.distanceToSqr(playerPos);
       if (distSq > maxDistSq || distSq >= nearestDistSq) {
         continue;
       }
 
+      // Entity type filter
       if (!"any".equalsIgnoreCase(entityTypeInput)) {
         var entityTypeId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString();
         if (!entityTypeId.equals(entityTypeInput) && !entityTypeId.equals("minecraft:" + entityTypeInput)) {
           continue;
         }
+      }
+
+      // Players only filter
+      if (playersOnly && !(entity instanceof AbstractClientPlayer)) {
+        continue;
+      }
+
+      // Exclude dead/non-enemy entities
+      if (excludeDead) {
+        if (!entity.isAlive()) {
+          continue;
+        }
+        if (entity instanceof LivingEntity le && !le.canBeSeenAsEnemy()) {
+          continue;
+        }
+        if (entity instanceof AbstractClientPlayer acp && (acp.isCreative() || acp.isSpectator())) {
+          continue;
+        }
+      }
+
+      // Exclude other SoulFire bots in the same instance
+      if (excludeBots) {
+        var isBot = bot.instanceManager().getConnectedBots().stream()
+          .anyMatch(b -> {
+            var p = b.minecraft().player;
+            return p != null && p.getUUID().equals(entity.getUUID());
+          });
+        if (isBot) {
+          continue;
+        }
+      }
+
+      // Line-of-sight check
+      if (mustBeSeen && !canSee(bot, entity.position())) {
+        continue;
       }
 
       nearestEntity = entity;
@@ -102,6 +151,35 @@ public final class FindEntityNode extends AbstractScriptNode {
       "entityId", nearestEntity.getId(),
       "distance", Math.sqrt(nearestDistSq)
     ));
+  }
+
+  private static boolean canSee(com.soulfiremc.server.bot.BotConnection connection, Vec3 target) {
+    var level = connection.minecraft().level;
+    var player = connection.minecraft().player;
+    if (level == null || player == null) {
+      return false;
+    }
+
+    var eye = player.getEyePosition();
+    if (eye.distanceTo(target) >= 256) {
+      return false;
+    }
+
+    var blockVec = BlockPos.containing(target);
+    if (!level.isLoaded(blockVec)) {
+      return false;
+    }
+
+    for (var shape : level.getBlockCollisions(player, new AABB(eye, target))) {
+      var aabb = shape.bounds();
+      if (AABB.clip(
+        aabb.minX, aabb.minY, aabb.minZ, aabb.maxX, aabb.maxY, aabb.maxZ,
+        eye, target
+      ).isPresent()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private Map<String, NodeValue> notFoundResult() {

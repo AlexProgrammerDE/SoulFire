@@ -91,6 +91,39 @@ public final class ScriptTriggerService {
     log.debug("Registered {} trigger for script {} node {}", triggerName, scriptId, nodeId);
   }
 
+  /// Registers a synchronous tick-based trigger that executes on the tick thread.
+  /// Instead of using a sink/subscription pattern, the script is executed directly
+  /// on the event handler thread using .block(), ensuring action nodes can modify
+  /// game state immediately without ControllingTask deferral.
+  private <E extends SoulFireEvent> void registerSyncTickTrigger(
+    UUID scriptId,
+    String nodeId,
+    ScriptGraph graph,
+    ReactiveScriptContext context,
+    ReactiveScriptEngine engine,
+    Class<E> eventClass,
+    Function<E, Map<String, NodeValue>> inputMapper,
+    List<Object> listeners,
+    String triggerName
+  ) {
+    Consumer<E> handler = event -> {
+      if (context.isCancelled()) {
+        return;
+      }
+      var inputs = inputMapper.apply(event);
+      if (inputs != null) {
+        try {
+          engine.executeFromTriggerSync(graph, nodeId, context, inputs).block();
+        } catch (Exception e) {
+          log.error("Error in {} sync trigger execution", triggerName, e);
+        }
+      }
+    };
+    SoulFireAPI.registerListener(eventClass, handler);
+    listeners.add(new EventListenerHolder<>(eventClass, handler));
+    log.debug("Registered sync {} trigger for script {} node {}", triggerName, scriptId, nodeId);
+  }
+
   /// Registers event listeners for all trigger nodes in the script.
   /// Uses reactive sinks with backpressure for high-frequency triggers.
   ///
@@ -108,15 +141,26 @@ public final class ScriptTriggerService {
 
     for (var node : graph.nodes().values()) {
       switch (node.type()) {
-        case "trigger.on_tick" -> {
+        case "trigger.on_pre_entity_tick" -> {
           var tickCount = new AtomicLong(0);
-          registerEventTrigger(scriptId, node.id(), graph, context, engine,
-            BotPreTickEvent.class, event -> {
+          registerSyncTickTrigger(scriptId, node.id(), graph, context, engine,
+            BotPreEntityTickEvent.class, event -> {
               var inputs = new HashMap<String, NodeValue>();
               inputs.put("bot", NodeValue.ofBot(event.connection()));
               inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
               return inputs;
-            }, listeners, "OnTick");
+            }, listeners, "OnPreEntityTick");
+        }
+
+        case "trigger.on_post_entity_tick" -> {
+          var tickCount = new AtomicLong(0);
+          registerSyncTickTrigger(scriptId, node.id(), graph, context, engine,
+            BotPostEntityTickEvent.class, event -> {
+              var inputs = new HashMap<String, NodeValue>();
+              inputs.put("bot", NodeValue.ofBot(event.connection()));
+              inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
+              return inputs;
+            }, listeners, "OnPostEntityTick");
         }
 
         case "trigger.on_chat" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,

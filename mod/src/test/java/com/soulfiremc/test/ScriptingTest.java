@@ -139,7 +139,7 @@ final class ScriptingTest {
   @Test
   void scriptGraphBuilderCreatesGraph() {
     var graph = ScriptGraph.builder("test-id", "Test Script")
-      .addNode("node1", "trigger.on_tick", null)
+      .addNode("node1", "trigger.on_pre_entity_tick", null)
       .addNode("node2", "action.print", Map.of("message", "Hello"))
       .addExecutionEdge("node1", "out", "node2", "in")
       .build();
@@ -156,13 +156,13 @@ final class ScriptingTest {
   @Test
   void scriptGraphGetNode() {
     var graph = ScriptGraph.builder("test-id", "Test Script")
-      .addNode("node1", "trigger.on_tick", null)
+      .addNode("node1", "trigger.on_pre_entity_tick", null)
       .build();
 
     var node = graph.getNode("node1");
     assertNotNull(node);
     assertEquals("node1", node.id());
-    assertEquals("trigger.on_tick", node.type());
+    assertEquals("trigger.on_pre_entity_tick", node.type());
 
     assertNull(graph.getNode("nonexistent"));
   }
@@ -170,7 +170,7 @@ final class ScriptingTest {
   @Test
   void scriptGraphFindTriggerNodes() {
     var graph = ScriptGraph.builder("test-id", "Test Script")
-      .addNode("trigger1", "trigger.on_tick", null)
+      .addNode("trigger1", "trigger.on_pre_entity_tick", null)
       .addNode("trigger2", "trigger.on_join", null)
       .addNode("action1", "action.print", null)
       .addExecutionEdge("trigger1", "out", "action1", "in")
@@ -189,7 +189,7 @@ final class ScriptingTest {
   @Test
   void scriptGraphGetNextExecutionNodes() {
     var graph = ScriptGraph.builder("test-id", "Test Script")
-      .addNode("trigger", "trigger.on_tick", null)
+      .addNode("trigger", "trigger.on_pre_entity_tick", null)
       .addNode("action1", "action.print", null)
       .addNode("action2", "action.print", null)
       .addExecutionEdge("trigger", "out", "action1", "in")
@@ -221,7 +221,7 @@ final class ScriptingTest {
   @Test
   void scriptGraphTopologicalSort() {
     var graph = ScriptGraph.builder("test-id", "Test Script")
-      .addNode("trigger", "trigger.on_tick", null)
+      .addNode("trigger", "trigger.on_pre_entity_tick", null)
       .addNode("action1", "action.print", null)
       .addNode("action2", "action.print", null)
       .addExecutionEdge("trigger", "out", "action1", "in")
@@ -261,7 +261,7 @@ final class ScriptingTest {
     assertTrue(NodeRegistry.isRegistered("logic.and"));
     assertTrue(NodeRegistry.isRegistered("logic.or"));
     assertTrue(NodeRegistry.isRegistered("flow.branch"));
-    assertTrue(NodeRegistry.isRegistered("trigger.on_tick"));
+    assertTrue(NodeRegistry.isRegistered("trigger.on_pre_entity_tick"));
     assertTrue(NodeRegistry.isRegistered("trigger.on_join"));
   }
 
