@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+option java_package = "com.soulfiremc.grpc.generated";
+option java_multiple_files = true;
+
+package soulfire.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// ============================================================================
+// MetricsService - Instance Metrics and Monitoring Service
+// ============================================================================
+//
+// The MetricsService provides real-time metrics and monitoring data for
+// SoulFire instances. It enables clients to:
+//
+// - View time-series metrics (bot counts, network traffic, tick duration, etc.)
+// - View current-state distributions (health histograms, dimension counts, etc.)
+// - Track bot positions on an XZ scatter plot
+//
+// Metrics are collected server-side and stored in a ring buffer, ensuring
+// consistent data across multiple clients. Snapshots are sampled every 3 seconds.
+// ============================================================================
+
+// A single time-series data point sampled at a fixed interval.
+message MetricsSnapshot {
+  // When this snapshot was taken.
+  google.protobuf.Timestamp timestamp = 1;
+
+  // Number of bots currently connected to the Minecraft server.
+  uint32 bots_online = 2;
+  // Total number of bots configured in the instance (online + offline).
+  uint32 bots_total = 3;
+
+  // Cumulative packets sent across all bots since session start.
+  uint64 packets_sent_total = 4;
+  // Cumulative packets received across all bots since session start.
+  uint64 packets_received_total = 5;
+  // Cumulative bytes sent across all bots since session start.
+  uint64 bytes_sent_total = 6;
+  // Cumulative bytes received across all bots since session start.
+  uint64 bytes_received_total = 7;
+
+  // Current rate of packets sent per second (computed from counter deltas).
+  double packets_sent_per_second = 8;
+  // Current rate of packets received per second (computed from counter deltas).
+  double packets_received_per_second = 9;
+  // Current rate of bytes sent per second (computed from counter deltas).
+  double bytes_sent_per_second = 10;
+  // Current rate of bytes received per second (computed from counter deltas).
+  double bytes_received_per_second = 11;
+
+  // Average tick duration across all bots in milliseconds.
+  double avg_tick_duration_ms = 12;
+  // Maximum tick duration observed across all bots in milliseconds.
+  // Reset each sampling interval.
+  double max_tick_duration_ms = 13;
+
+  // Average health across all online bots with player data.
+  // Range: 0 to 20 (Minecraft health points).
+  double avg_health = 14;
+  // Average food level across all online bots with player data.
+  // Range: 0 to 20 (Minecraft food points).
+  double avg_food_level = 15;
+  // Total number of loaded chunks across all online bots.
+  uint32 total_loaded_chunks = 16;
+  // Total number of tracked entities across all online bots.
+  uint32 total_tracked_entities = 17;
+
+  // Connection events since the previous snapshot.
+  uint32 connections = 18;
+  // Disconnection events since the previous snapshot.
+  uint32 disconnections = 19;
+}
+
+// Current-state distributions computed from the latest bot data.
+// These are not time-series; they reflect the current instant.
+message MetricsDistributions {
+  // Health histogram with 10 buckets of width 2: [0,2), [2,4), ..., [18,20].
+  // Each entry is the count of bots whose health falls in that bucket.
+  repeated uint32 health_histogram = 1;
+  // Food level histogram with 10 buckets of width 2: [0,2), [2,4), ..., [18,20].
+  repeated uint32 food_histogram = 2;
+  // Number of bots in each dimension (e.g., "minecraft:overworld" -> 5).
+  map<string, uint32> dimension_counts = 3;
+  // Number of bots in each game mode (e.g., "SURVIVAL" -> 10).
+  map<string, uint32> game_mode_counts = 4;
+  // XZ positions of online bots for scatter plot rendering.
+  repeated BotPosition bot_positions = 5;
+}
+
+// Position of a single bot on the XZ plane.
+message BotPosition {
+  // X coordinate in the Minecraft world.
+  double x = 1;
+  // Z coordinate in the Minecraft world.
+  double z = 2;
+  // Dimension the bot is in (e.g., "minecraft:overworld").
+  string dimension = 3;
+}
+
+// Request to retrieve metrics for a specific instance.
+message GetInstanceMetricsRequest {
+  // The UUID of the SoulFire instance to get metrics for.
+  string instance_id = 1;
+  // If set, only return snapshots taken after this timestamp.
+  // Used for incremental fetching to reduce payload size.
+  optional google.protobuf.Timestamp since = 2;
+}
+
+// Response containing time-series metrics and current distributions.
+message GetInstanceMetricsResponse {
+  // Time-series snapshots ordered oldest to newest.
+  // Contains up to 600 snapshots (30 minutes at 3-second intervals).
+  // If the request included a "since" timestamp, only newer snapshots are returned.
+  repeated MetricsSnapshot snapshots = 1;
+  // Current-state distributions computed from the latest bot data.
+  MetricsDistributions distributions = 2;
+}
+
+// Service for retrieving instance metrics and monitoring data.
+// Metrics are collected server-side and stored in a ring buffer.
+// All operations require appropriate permissions.
+service MetricsService {
+  // Returns time-series metrics and current distributions for an instance.
+  // Supports incremental fetching via the "since" parameter.
+  // Requires: READ_BOT_INFO permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
+  rpc GetInstanceMetrics (GetInstanceMetricsRequest) returns (GetInstanceMetricsResponse) {}
+}

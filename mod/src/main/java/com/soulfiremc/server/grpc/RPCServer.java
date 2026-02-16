@@ -104,6 +104,7 @@ public final class RPCServer {
         .addService(new LoginServiceImpl(soulFireServer))
         .addService(new LogServiceImpl(soulFireServer))
         .addService(new MCAuthServiceImpl(soulFireServer))
+        .addService(new MetricsServiceImpl(soulFireServer))
         .addService(new ProxyCheckServiceImpl(soulFireServer))
         .addService(new ServerServiceImpl(soulFireServer))
         .addService(new UserServiceImpl(soulFireServer))

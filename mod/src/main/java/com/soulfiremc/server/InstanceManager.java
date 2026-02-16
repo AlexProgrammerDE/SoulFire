@@ -29,6 +29,7 @@ import com.soulfiremc.server.api.event.session.SessionStartEvent;
 import com.soulfiremc.server.api.event.session.SessionTickEvent;
 import com.soulfiremc.server.api.metadata.MetadataHolder;
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.metrics.InstanceMetricsCollector;
 import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.database.AuditLogType;
 import com.soulfiremc.server.database.generated.Tables;
@@ -76,6 +77,7 @@ public final class InstanceManager {
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private final CachedLazyObject<String> friendlyNameCache;
   private final SettingsPageRegistry instanceSettingsPageRegistry;
+  private final InstanceMetricsCollector metricsCollector;
   private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
   private SessionLifecycle sessionLifecycle = SessionLifecycle.STOPPED;
 
@@ -87,6 +89,9 @@ public final class InstanceManager {
     this.dsl = dsl;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
     this.friendlyNameCache = new CachedLazyObject<>(this::fetchFriendlyName, 1, TimeUnit.SECONDS);
+
+    this.metricsCollector = new InstanceMetricsCollector(this);
+    SoulFireAPI.registerListenersOfObject(metricsCollector);
 
     try {
       Files.createDirectories(getInstanceObjectStoragePath());
