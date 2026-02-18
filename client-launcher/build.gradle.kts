@@ -71,7 +71,8 @@ tasks.register("printSFCLIFlags", JavaExec::class) {
     "-XX:+UseFastUnorderedTimeStamps",
     "-XX:+UseVectorCmov",
     "-XX:+UseCriticalJavaThreadPriority",
-    "-Dsf.flags.v2=true"
+    "-Dsf.flags.v2=true",
+    "-Dsf.cliHomeDir=."
   )
 
   if (System.getProperty("idea.active") != null) {
@@ -81,6 +82,10 @@ tasks.register("printSFCLIFlags", JavaExec::class) {
   jvmArgs = argsMutable
 
   standardInput = System.`in`
+
+  val runDir = projectDir.resolve("run")
+  runDir.mkdirs()
+  workingDir = runDir
 
   outputs.upToDateWhen { false }
 }

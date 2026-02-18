@@ -23,8 +23,10 @@ import java.nio.file.Path;
 
 public final class SoulFireCLILauncher {
   void main(String[] args) {
+    var cliHomeDir = System.getProperty( "sf.cliHomeDir" );
+
     SoulFireAbstractLauncher.run(
-      Path.of( System.getProperty( "user.home" ) ).resolve( ".soulfire" ),
+      cliHomeDir != null ? Path.of(cliHomeDir) : Path.of( System.getProperty( "user.home" ) ).resolve( ".soulfire" ),
       "com.soulfiremc.bootstrap.client.SoulFireCLIBootstrap",
       args
     );
