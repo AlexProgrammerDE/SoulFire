@@ -66,4 +66,15 @@ public final class ProxySettings implements SettingsObject {
       .minValue(1)
       .maxValue(Integer.MAX_VALUE)
       .build();
+  public static final IntProperty<SettingsSource.Instance> PROXY_CHECK_TIMEOUT =
+    ImmutableIntProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
+      .namespace(NAMESPACE)
+      .key("proxy-check-timeout")
+      .uiName("Proxy check timeout")
+      .description("How long to wait for a proxy check response before considering it failed (seconds)")
+      .defaultValue(30)
+      .minValue(1)
+      .maxValue(Integer.MAX_VALUE)
+      .build();
 }

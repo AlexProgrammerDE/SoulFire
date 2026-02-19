@@ -100,7 +100,7 @@ public final class ProxyCheckServiceImpl extends ProxyCheckServiceGrpc.ProxyChec
                   log.debug("Checking proxy: {}", proxy);
                   connection.connect().join();
 
-                  valid = latch.await(30, TimeUnit.SECONDS);
+                  valid = latch.await(settingsSource.get(ProxySettings.PROXY_CHECK_TIMEOUT), TimeUnit.SECONDS);
                 } finally {
                   SoulFireAPI.unregisterListener(BotPacketPreReceiveEvent.class, listener);
                 }
