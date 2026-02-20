@@ -86,6 +86,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     String edgeType
   ) {}
 
+  private record FlattenedGraph(List<ScriptNodeData> nodes, List<ScriptEdgeData> edges) {}
+
   private record ScriptActivationState(
     UUID scriptId,
     UUID instanceId,
@@ -1145,14 +1147,194 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
   }
 
+  private static String getParentGroupId(ScriptNodeData node) {
+    if (node.data() == null) return null;
+    var element = node.data().get("parentGroupId");
+    if (element == null || element.isJsonNull()) return null;
+    return element.getAsString();
+  }
+
+  private static int computeGroupDepth(String groupId, Map<String, String> groupParentMap) {
+    var depth = 0;
+    var current = groupId;
+    while (true) {
+      var parent = groupParentMap.get(current);
+      if (parent == null) break;
+      depth++;
+      current = parent;
+    }
+    return depth;
+  }
+
+  /// Flattens layout nodes (groups, reroutes, frames, notes, debug) out of the node/edge lists,
+  /// rewiring edges so the resulting graph contains only executable nodes.
+  private static FlattenedGraph flattenLayoutNodes(List<ScriptNodeData> inputNodes, List<ScriptEdgeData> inputEdges) {
+    var nodes = new ArrayList<>(inputNodes);
+    var edges = new ArrayList<>(inputEdges);
+
+    // Phase 1: Remove visual-only nodes (frames and notes)
+    var visualOnlyIds = nodes.stream()
+      .filter(n -> "layout.frame".equals(n.type()) || "layout.note".equals(n.type()))
+      .map(ScriptNodeData::id)
+      .collect(Collectors.toSet());
+    nodes.removeIf(n -> visualOnlyIds.contains(n.id()));
+    edges.removeIf(e -> visualOnlyIds.contains(e.source()) || visualOnlyIds.contains(e.target()));
+
+    // Phase 2: Flatten pass-through nodes (reroute and debug)
+    var passThroughIds = nodes.stream()
+      .filter(n -> "layout.reroute".equals(n.type()) || "layout.debug".equals(n.type()))
+      .map(ScriptNodeData::id)
+      .collect(Collectors.toSet());
+    for (var ptId : passThroughIds) {
+      var incoming = edges.stream().filter(e -> ptId.equals(e.target())).toList();
+      var outgoing = edges.stream().filter(e -> ptId.equals(e.source())).toList();
+      for (var in : incoming) {
+        for (var out : outgoing) {
+          edges.add(new ScriptEdgeData(
+            in.id() + "_" + out.id(),
+            in.source(), in.sourceHandle(),
+            out.target(), out.targetHandle(),
+            out.edgeType()
+          ));
+        }
+      }
+      edges.removeIf(e -> ptId.equals(e.source()) || ptId.equals(e.target()));
+    }
+    nodes.removeIf(n -> passThroughIds.contains(n.id()));
+
+    // Phase 3: Flatten groups (bottom-up for nesting)
+    var groupNodes = nodes.stream()
+      .filter(n -> "layout.group".equals(n.type()))
+      .toList();
+    if (groupNodes.isEmpty()) {
+      return new FlattenedGraph(nodes, edges);
+    }
+
+    // Build groupId -> parentGroupId map for depth computation
+    var groupParentMap = new HashMap<String, String>();
+    for (var g : groupNodes) {
+      var parentId = getParentGroupId(g);
+      if (parentId != null) {
+        groupParentMap.put(g.id(), parentId);
+      }
+    }
+
+    // Sort by depth descending (innermost first)
+    var sortedGroups = new ArrayList<>(groupNodes);
+    sortedGroups.sort(Comparator.comparingInt(
+      (ScriptNodeData g) -> computeGroupDepth(g.id(), groupParentMap)).reversed());
+
+    for (var group : sortedGroups) {
+      var groupId = group.id();
+      var groupParentId = getParentGroupId(group);
+
+      // Find group_input and group_output children
+      ScriptNodeData groupInput = null;
+      ScriptNodeData groupOutput = null;
+      for (var n : nodes) {
+        if (groupId.equals(getParentGroupId(n))) {
+          if ("layout.group_input".equals(n.type())) {
+            groupInput = n;
+          } else if ("layout.group_output".equals(n.type())) {
+            groupOutput = n;
+          }
+        }
+      }
+
+      // Rewire incoming edges (external -> group node becomes external -> internal target)
+      if (groupInput != null) {
+        var incomingToGroup = edges.stream()
+          .filter(e -> groupId.equals(e.target()))
+          .toList();
+        for (var extEdge : incomingToGroup) {
+          var portId = extEdge.targetHandle();
+          // Find the internal edge from groupInput with matching sourceHandle
+          var giId = groupInput.id();
+          var internalEdge = edges.stream()
+            .filter(e -> giId.equals(e.source()) && portId.equals(e.sourceHandle()))
+            .findFirst().orElse(null);
+          if (internalEdge != null) {
+            edges.add(new ScriptEdgeData(
+              extEdge.id() + "_rewired",
+              extEdge.source(), extEdge.sourceHandle(),
+              internalEdge.target(), internalEdge.targetHandle(),
+              extEdge.edgeType()
+            ));
+          }
+        }
+      }
+
+      // Rewire outgoing edges (group node -> external becomes internal source -> external)
+      if (groupOutput != null) {
+        var outgoingFromGroup = edges.stream()
+          .filter(e -> groupId.equals(e.source()))
+          .toList();
+        for (var extEdge : outgoingFromGroup) {
+          var portId = extEdge.sourceHandle();
+          // Find the internal edge to groupOutput with matching targetHandle
+          var goId = groupOutput.id();
+          var internalEdge = edges.stream()
+            .filter(e -> goId.equals(e.target()) && portId.equals(e.targetHandle()))
+            .findFirst().orElse(null);
+          if (internalEdge != null) {
+            edges.add(new ScriptEdgeData(
+              extEdge.id() + "_rewired",
+              internalEdge.source(), internalEdge.sourceHandle(),
+              extEdge.target(), extEdge.targetHandle(),
+              extEdge.edgeType()
+            ));
+          }
+        }
+      }
+
+      // Collect IDs to remove
+      var removeIds = new HashSet<String>();
+      removeIds.add(groupId);
+      if (groupInput != null) removeIds.add(groupInput.id());
+      if (groupOutput != null) removeIds.add(groupOutput.id());
+
+      // Promote children: update parentGroupId of remaining child nodes to the group's own parentGroupId
+      var updatedNodes = new ArrayList<ScriptNodeData>();
+      for (var n : nodes) {
+        if (removeIds.contains(n.id())) continue;
+        if (groupId.equals(getParentGroupId(n))) {
+          // Promote: replace parentGroupId with the group's parent
+          var newData = new HashMap<>(n.data() != null ? n.data() : Map.<String, JsonElement>of());
+          if (groupParentId != null) {
+            newData.put("parentGroupId", GsonInstance.GSON.toJsonTree(groupParentId));
+          } else {
+            newData.remove("parentGroupId");
+          }
+          updatedNodes.add(new ScriptNodeData(n.id(), n.type(), n.position(), newData));
+        } else {
+          updatedNodes.add(n);
+        }
+      }
+      nodes = updatedNodes;
+
+      // Remove all edges referencing the removed nodes
+      edges.removeIf(e -> removeIds.contains(e.source()) || removeIds.contains(e.target()));
+    }
+
+    return new FlattenedGraph(nodes, edges);
+  }
+
   private ScriptGraph buildScriptGraph(ScriptsRecord record) {
     var builder = ScriptGraph.builder(record.getId(), record.getName());
 
-    List<ScriptNodeData> nodes = GsonInstance.GSON.fromJson(record.getNodesJson(), NODE_LIST_TYPE);
-    List<ScriptEdgeData> edges = GsonInstance.GSON.fromJson(record.getEdgesJson(), EDGE_LIST_TYPE);
+    List<ScriptNodeData> rawNodes = GsonInstance.GSON.fromJson(record.getNodesJson(), NODE_LIST_TYPE);
+    List<ScriptEdgeData> rawEdges = GsonInstance.GSON.fromJson(record.getEdgesJson(), EDGE_LIST_TYPE);
+
+    if (rawNodes == null) rawNodes = List.of();
+    if (rawEdges == null) rawEdges = List.of();
+
+    // Flatten layout nodes (groups, reroutes, frames, notes, debug)
+    var flattened = flattenLayoutNodes(rawNodes, rawEdges);
+    var nodes = flattened.nodes();
+    var edges = flattened.edges();
 
     // Add nodes
-    if (nodes != null) {
+    {
       for (var node : nodes) {
         Map<String, Object> defaultInputs = new HashMap<>();
         if (node.data() != null) {
@@ -1165,13 +1347,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
 
     // Add edges
-    if (edges != null) {
-      for (var edge : edges) {
-        if ("EDGE_TYPE_EXECUTION".equals(edge.edgeType())) {
-          builder.addExecutionEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
-        } else {
-          builder.addDataEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
-        }
+    for (var edge : edges) {
+      if ("EDGE_TYPE_EXECUTION".equals(edge.edgeType())) {
+        builder.addExecutionEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
+      } else {
+        builder.addDataEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
       }
     }
 
