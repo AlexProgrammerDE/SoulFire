@@ -21,6 +21,7 @@ import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.util.netty.NettyHelper;
+import com.soulfiremc.server.util.netty.SFTrafficHandler;
 import io.netty.channel.Channel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -47,5 +48,6 @@ public class MixinConnection$1 {
   @Inject(method = "initChannel", at = @At("RETURN"))
   private void setReadTimeout(Channel channel, CallbackInfo ci) {
     channel.pipeline().replace("timeout", "timeout", new ReadTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT)));
+    channel.pipeline().addFirst("sf_traffic", new SFTrafficHandler());
   }
 }

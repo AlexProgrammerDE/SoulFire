@@ -22,6 +22,7 @@ import com.soulfiremc.grpc.generated.BotPosition;
 import com.soulfiremc.grpc.generated.MetricsDistributions;
 import com.soulfiremc.grpc.generated.MetricsSnapshot;
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
 import com.soulfiremc.server.api.event.bot.BotPacketPreSendEvent;
 import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
@@ -154,6 +155,15 @@ public final class InstanceMetricsCollector {
     }
 
     resetCounters();
+  }
+
+  @EventHandler
+  public void onBotConnectionInit(BotConnectionInitEvent event) {
+    if (!isOurInstance(event.connection())) {
+      return;
+    }
+
+    connections.increment();
   }
 
   @EventHandler
@@ -295,6 +305,14 @@ public final class InstanceMetricsCollector {
     prevBytesSent = currentBytesSent;
     prevBytesReceived = currentBytesReceived;
     prevSampleTimeNanos = nowNanos;
+  }
+
+  public void addBytesSent(long bytes) {
+    bytesSent.add(bytes);
+  }
+
+  public void addBytesReceived(long bytes) {
+    bytesReceived.add(bytes);
   }
 
   /// Returns all stored snapshots, optionally filtered by a "since" timestamp.
