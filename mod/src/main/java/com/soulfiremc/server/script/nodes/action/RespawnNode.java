@@ -29,7 +29,8 @@ public final class RespawnNode extends AbstractScriptNode {
     .displayName("Respawn")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut()

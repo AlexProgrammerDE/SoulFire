@@ -30,7 +30,8 @@ public final class GetExperienceNode extends AbstractScriptNode {
     .displayName("Get Experience")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

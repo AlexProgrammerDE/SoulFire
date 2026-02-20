@@ -30,7 +30,8 @@ public final class GetHealthNode extends AbstractScriptNode {
     .displayName("Get Health")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

@@ -41,6 +41,7 @@ public final class FindEntityNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("entityType", "Entity Type", PortType.STRING, "\"any\"", "Entity ID or 'any' for any entity"),
       PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "32", "Maximum search radius"),
       PortDefinition.inputWithDefault("excludeDead", "Exclude Dead", PortType.BOOLEAN, "true", "Skip dead or non-enemy entities"),

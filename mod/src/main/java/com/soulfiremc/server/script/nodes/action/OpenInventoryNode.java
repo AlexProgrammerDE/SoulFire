@@ -29,7 +29,8 @@ public final class OpenInventoryNode extends AbstractScriptNode {
     .displayName("Open Inventory")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut()

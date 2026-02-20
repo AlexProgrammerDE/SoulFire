@@ -31,6 +31,7 @@ public final class StrafeRightNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("enabled", "Enabled", PortType.BOOLEAN, "true", "Whether to strafe right")
     )
     .addOutputs(

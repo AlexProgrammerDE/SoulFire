@@ -33,7 +33,8 @@ public final class GetEffectsNode extends AbstractScriptNode {
     .displayName("Get Effects")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

@@ -37,6 +37,18 @@ public interface PortDefinition {
       .build();
   }
 
+  /// Creates a bot input port (optional).
+  /// When connected, overrides the bot from execution context.
+  static PortDefinition botIn() {
+    return ImmutablePortDefinition.builder()
+      .id(StandardPorts.BOT_IN)
+      .displayName("Bot")
+      .type(PortType.BOT)
+      .required(false)
+      .description("The bot to use (auto-provided by execution context if not connected)")
+      .build();
+  }
+
   /// Creates an execution output port.
   static PortDefinition execOut() {
     return ImmutablePortDefinition.builder()

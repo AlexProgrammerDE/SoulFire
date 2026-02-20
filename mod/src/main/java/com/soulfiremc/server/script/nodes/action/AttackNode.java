@@ -31,7 +31,8 @@ public final class AttackNode extends AbstractScriptNode {
     .displayName("Attack")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut()

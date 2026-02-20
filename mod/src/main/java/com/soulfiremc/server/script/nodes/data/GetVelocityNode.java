@@ -31,7 +31,8 @@ public final class GetVelocityNode extends AbstractScriptNode {
     .displayName("Get Velocity")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

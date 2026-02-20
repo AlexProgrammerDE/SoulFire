@@ -34,6 +34,7 @@ public final class GetBlockNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("x", "X", PortType.NUMBER, "0", "Block X coordinate"),
       PortDefinition.inputWithDefault("y", "Y", PortType.NUMBER, "64", "Block Y coordinate"),
       PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Block Z coordinate")

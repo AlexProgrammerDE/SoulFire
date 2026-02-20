@@ -38,6 +38,7 @@ public final class CanSeePositionNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.input("target", "Target", PortType.VECTOR3, "Position to check visibility to")
     )
     .addOutputs(

@@ -30,7 +30,8 @@ public final class GetHungerNode extends AbstractScriptNode {
     .displayName("Get Hunger")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

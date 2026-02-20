@@ -31,7 +31,8 @@ public final class GetDimensionNode extends AbstractScriptNode {
     .displayName("Get Dimension")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

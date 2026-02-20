@@ -38,6 +38,7 @@ public final class PathfindToNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.input("destination", "Destination", PortType.VECTOR3, "Target position to pathfind to")
     )
     .addOutputs(

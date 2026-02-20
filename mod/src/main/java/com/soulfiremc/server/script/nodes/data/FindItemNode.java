@@ -34,6 +34,7 @@ public final class FindItemNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("itemId", "Item ID", PortType.STRING, "", "Item registry name to search for (empty = any)"),
       PortDefinition.inputWithDefault("foodOnly", "Food Only", PortType.BOOLEAN, "false", "Only match edible food items")
     )

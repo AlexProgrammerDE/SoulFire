@@ -31,7 +31,8 @@ public final class SwingHandNode extends AbstractScriptNode {
     .displayName("Swing Hand")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut()

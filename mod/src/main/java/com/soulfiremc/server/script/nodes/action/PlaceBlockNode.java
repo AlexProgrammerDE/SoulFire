@@ -38,6 +38,7 @@ public final class PlaceBlockNode extends AbstractScriptNode {
           .category(CategoryRegistry.ACTIONS)
           .addInputs(
                   PortDefinition.execIn(),
+      PortDefinition.botIn(),
                   PortDefinition.input("position", "Position", PortType.VECTOR3, "Block position to place at")
           )
           .addOutputs(

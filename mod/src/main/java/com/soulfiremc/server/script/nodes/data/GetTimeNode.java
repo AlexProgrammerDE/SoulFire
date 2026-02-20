@@ -30,7 +30,8 @@ public final class GetTimeNode extends AbstractScriptNode {
     .displayName("Get Time")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

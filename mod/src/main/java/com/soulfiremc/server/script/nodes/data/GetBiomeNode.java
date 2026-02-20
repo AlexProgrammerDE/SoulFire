@@ -30,7 +30,8 @@ public final class GetBiomeNode extends AbstractScriptNode {
     .displayName("Get Biome")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

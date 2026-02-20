@@ -31,7 +31,8 @@ public final class GetGamemodeNode extends AbstractScriptNode {
     .displayName("Get Gamemode")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

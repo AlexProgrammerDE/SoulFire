@@ -32,6 +32,7 @@ public final class ClickSlotNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory menu slot index to click"),
       PortDefinition.inputWithDefault("clickType", "Click Type", PortType.STRING, "left", "Click type: left, right, or shift")
     )

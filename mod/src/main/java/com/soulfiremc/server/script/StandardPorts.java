@@ -24,6 +24,9 @@ public final class StandardPorts {
   public static final String EXEC_IN = "in";
   public static final String EXEC_OUT = "out";
 
+  // Bot input port name
+  public static final String BOT_IN = "bot";
+
   // Branch execution outputs
   public static final String EXEC_TRUE = "exec_true";
   public static final String EXEC_FALSE = "exec_false";

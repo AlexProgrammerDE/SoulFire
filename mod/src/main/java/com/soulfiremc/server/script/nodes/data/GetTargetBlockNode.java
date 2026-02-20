@@ -36,6 +36,7 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "5", "Maximum raycast distance")
     )
     .addOutputs(

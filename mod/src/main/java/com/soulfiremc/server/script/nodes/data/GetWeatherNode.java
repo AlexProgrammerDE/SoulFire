@@ -30,7 +30,8 @@ public final class GetWeatherNode extends AbstractScriptNode {
     .displayName("Get Weather")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

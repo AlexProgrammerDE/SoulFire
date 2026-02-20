@@ -39,6 +39,7 @@ public final class LLMChatNode extends AbstractScriptNode {
     .category(CategoryRegistry.AI)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.input("prompt", "Prompt", PortType.STRING, "The prompt/message to send"),
       PortDefinition.inputWithDefault("systemPrompt", "System Prompt", PortType.STRING, "\"\"", "Optional system prompt for context"),
       PortDefinition.inputWithDefault("model", "Model", PortType.STRING, "\"\"", "Model override (empty = use bot default)"),

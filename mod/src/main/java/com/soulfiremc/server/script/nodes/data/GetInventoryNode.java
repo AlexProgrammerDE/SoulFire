@@ -32,6 +32,7 @@ public final class GetInventoryNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory slot (0-35 main, 36-39 armor, 40 offhand)")
     )
     .addOutputs(

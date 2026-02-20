@@ -31,7 +31,8 @@ public final class GetArmorNode extends AbstractScriptNode {
     .displayName("Get Armor")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

@@ -29,7 +29,8 @@ public final class IsContainerOpenNode extends AbstractScriptNode {
     .displayName("Is Container Open")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

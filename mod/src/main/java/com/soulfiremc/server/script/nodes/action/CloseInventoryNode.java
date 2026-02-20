@@ -29,7 +29,8 @@ public final class CloseInventoryNode extends AbstractScriptNode {
     .displayName("Close Inventory")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut()

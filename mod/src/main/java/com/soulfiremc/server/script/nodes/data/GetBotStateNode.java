@@ -30,7 +30,8 @@ public final class GetBotStateNode extends AbstractScriptNode {
     .displayName("Get Bot State")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

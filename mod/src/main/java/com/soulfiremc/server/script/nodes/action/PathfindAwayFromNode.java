@@ -36,6 +36,7 @@ public final class PathfindAwayFromNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.input("position", "Position", PortType.VECTOR3, "Position to move away from"),
       PortDefinition.inputWithDefault("distance", "Distance", PortType.NUMBER, "10", "Minimum distance to move away")
     )

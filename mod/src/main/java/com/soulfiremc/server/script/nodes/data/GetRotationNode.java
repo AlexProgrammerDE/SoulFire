@@ -30,7 +30,8 @@ public final class GetRotationNode extends AbstractScriptNode {
     .displayName("Get Rotation")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

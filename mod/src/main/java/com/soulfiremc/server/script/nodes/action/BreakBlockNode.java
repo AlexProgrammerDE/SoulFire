@@ -38,6 +38,7 @@ public final class BreakBlockNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.input("position", "Position", PortType.VECTOR3, "Block position to break")
     )
     .addOutputs(

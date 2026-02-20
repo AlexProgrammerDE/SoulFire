@@ -31,7 +31,8 @@ public final class GetSelectedSlotNode extends AbstractScriptNode {
     .displayName("Get Selected Slot")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

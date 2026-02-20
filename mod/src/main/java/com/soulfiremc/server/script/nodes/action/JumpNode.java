@@ -30,7 +30,8 @@ public final class JumpNode extends AbstractScriptNode {
     .displayName("Jump")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut()

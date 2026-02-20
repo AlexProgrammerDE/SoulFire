@@ -31,7 +31,8 @@ public final class GetLightLevelNode extends AbstractScriptNode {
     .displayName("Get Light Level")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

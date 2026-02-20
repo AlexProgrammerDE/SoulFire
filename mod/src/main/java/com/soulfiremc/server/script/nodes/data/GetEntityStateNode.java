@@ -35,6 +35,7 @@ public final class GetEntityStateNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.input("entityId", "Entity ID", PortType.NUMBER, "The entity's ID")
     )
     .addOutputs(

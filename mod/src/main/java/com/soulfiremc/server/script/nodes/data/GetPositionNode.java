@@ -31,7 +31,8 @@ public final class GetPositionNode extends AbstractScriptNode {
     .displayName("Get Position")
     .category(CategoryRegistry.DATA)
     .addInputs(
-      PortDefinition.execIn()
+      PortDefinition.execIn(),
+      PortDefinition.botIn()
     )
     .addOutputs(
       PortDefinition.execOut(),

@@ -31,6 +31,7 @@ public final class SetRotationNode extends AbstractScriptNode {
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("yaw", "Yaw", PortType.NUMBER, "0", "Horizontal rotation (-180 to 180)"),
       PortDefinition.inputWithDefault("pitch", "Pitch", PortType.NUMBER, "0", "Vertical rotation (-90 to 90)")
     )

@@ -37,6 +37,7 @@ public final class FindBlockNode extends AbstractScriptNode {
     .category(CategoryRegistry.DATA)
     .addInputs(
       PortDefinition.execIn(),
+      PortDefinition.botIn(),
       PortDefinition.inputWithDefault("blockType", "Block Type", PortType.STRING, "\"minecraft:diamond_ore\"", "Block ID to search for"),
       PortDefinition.inputWithDefault("maxDistance", "Max Distance", PortType.NUMBER, "16", "Maximum search radius")
     )
