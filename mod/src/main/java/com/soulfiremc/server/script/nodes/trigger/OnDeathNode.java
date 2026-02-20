@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 /// Trigger node that fires when the bot dies.
-/// Outputs: bot (the bot that died), deathMessage (string)
+/// Outputs: bot (the bot that died), shouldRespawn (boolean)
 public final class OnDeathNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("trigger.on_death")
@@ -33,7 +33,7 @@ public final class OnDeathNode extends AbstractScriptNode {
     .addOutputs(
       PortDefinition.execOut(),
       PortDefinition.output("bot", "Bot", PortType.BOT, "The bot that died"),
-      PortDefinition.output("deathMessage", "Death Message", PortType.STRING, "The death message")
+      PortDefinition.output("shouldRespawn", "Should Respawn", PortType.BOOLEAN, "Whether the bot should respawn")
     )
     .isTrigger(true)
     .description("Fires when the bot dies")
@@ -45,12 +45,11 @@ public final class OnDeathNode extends AbstractScriptNode {
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = getBotInput(inputs);
-    var deathMessage = getStringInput(inputs, "deathMessage", "");
+    var shouldRespawn = getBooleanInput(inputs, "shouldRespawn", true);
 
-    // Output data so it can be wired to downstream nodes
     return completedMono(results(
       "bot", bot,
-      "deathMessage", deathMessage
+      "shouldRespawn", shouldRespawn
     ));
   }
 }

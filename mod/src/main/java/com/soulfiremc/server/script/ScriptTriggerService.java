@@ -186,7 +186,6 @@ public final class ScriptTriggerService {
           BotConnectionInitEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
-            inputs.put("botName", NodeValue.ofString(event.connection().accountName()));
             return inputs;
           }, listeners, "OnBotInit");
 
@@ -199,7 +198,6 @@ public final class ScriptTriggerService {
               if (connection.minecraft().player != null && triggeredBots.add(botId)) {
                 var inputs = new HashMap<String, NodeValue>();
                 inputs.put("bot", NodeValue.ofBot(connection));
-                inputs.put("botName", NodeValue.ofString(connection.accountName()));
                 return inputs;
               }
               return null;
@@ -269,11 +267,8 @@ public final class ScriptTriggerService {
 
         case "trigger.on_script_init" -> {
           // Fire immediately when script starts
-          var inputs = new HashMap<String, NodeValue>();
-          inputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
-
           // Execute asynchronously to not block registration
-          engine.executeFromTrigger(graph, node.id(), context, inputs)
+          engine.executeFromTrigger(graph, node.id(), context, Map.of())
             .onErrorResume(e -> {
               log.error("Error in OnScriptInit trigger execution", e);
               return Mono.empty();
@@ -381,11 +376,8 @@ public final class ScriptTriggerService {
   ) {
     void fire() {
       try {
-        var inputs = new HashMap<String, NodeValue>();
-        inputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
-
         // Execute synchronously (block) to ensure cleanup completes before script fully stops
-        engine.executeFromTrigger(graph, nodeId, context, inputs)
+        engine.executeFromTrigger(graph, nodeId, context, Map.of())
           .onErrorResume(e -> {
             log.error("Error in OnScriptEnd trigger execution", e);
             return Mono.empty();
