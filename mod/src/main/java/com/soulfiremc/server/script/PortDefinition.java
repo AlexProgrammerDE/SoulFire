@@ -44,8 +44,8 @@ public interface PortDefinition {
       .id(StandardPorts.BOT_IN)
       .displayName("Bot")
       .type(PortType.BOT)
-      .required(false)
       .description("The bot to use (auto-provided by execution context if not connected)")
+      .required(false)
       .build();
   }
 
@@ -66,8 +66,8 @@ public interface PortDefinition {
       .id(id)
       .displayName(displayName)
       .type(type)
-      .required(true)
       .description(description)
+      .required(true)
       .build();
   }
 
@@ -78,9 +78,9 @@ public interface PortDefinition {
       .id(id)
       .displayName(displayName)
       .type(type)
+      .description(description)
       .required(false)
       .defaultValue(defaultValue)
-      .description(description)
       .build();
   }
 
@@ -102,9 +102,9 @@ public interface PortDefinition {
       .id(id)
       .displayName(displayName)
       .type(PortType.LIST)
+      .description(description)
       .required(true)
       .elementType(elementType)
-      .description(description)
       .build();
   }
 
@@ -115,8 +115,8 @@ public interface PortDefinition {
       .id(id)
       .displayName(displayName)
       .type(PortType.LIST)
-      .elementType(elementType)
       .description(description)
+      .elementType(elementType)
       .build();
   }
 
@@ -134,10 +134,7 @@ public interface PortDefinition {
   @Nullable
   String defaultValue();
 
-  @Value.Default
-  default String description() {
-    return "";
-  }
+  String description();
 
   @Nullable
   PortType elementType();
@@ -158,9 +155,9 @@ public interface PortDefinition {
       .id(id)
       .displayName(displayName)
       .type(type)
+      .description(description)
       .required(false)
       .multiInput(true)
-      .description(description)
       .build();
   }
 }
