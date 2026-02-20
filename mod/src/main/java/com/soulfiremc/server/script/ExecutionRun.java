@@ -55,16 +55,17 @@ public final class ExecutionRun {
 
   /// Waits for a node to produce outputs within this run.
   ///
-  /// @param nodeId the node to wait for
+  /// @param nodeId   the node to wait for
+  /// @param nodeDesc human-readable node descriptor for log messages
   /// @return a Mono that completes with the node's outputs
-  public Mono<Map<String, NodeValue>> awaitNodeOutputs(String nodeId) {
+  public Mono<Map<String, NodeValue>> awaitNodeOutputs(String nodeId, String nodeDesc) {
     return nodeOutputSinks
       .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
       .asFlux()
       .next()
       .timeout(Duration.ofSeconds(30))
       .doOnError(_ -> log.warn("Timeout waiting for node {} outputs - "
-        + "DATA edge may point to a node not on the execution path", nodeId))
+        + "DATA edge may point to a node not on the execution path", nodeDesc))
       .onErrorReturn(Map.of());
   }
 
@@ -72,8 +73,8 @@ public final class ExecutionRun {
   /// Uses replay().latest() so that producers can emit multiple times (loops work)
   /// and consumers always get the most recent value.
   ///
-  /// @param nodeId  the node identifier
-  /// @param outputs the output values
+  /// @param nodeId   the node identifier
+  /// @param outputs  the output values
   public void publishNodeOutputs(String nodeId, Map<String, NodeValue> outputs) {
     var result = nodeOutputSinks
       .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())

@@ -45,6 +45,17 @@ public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
   private static final int MAX_PARALLEL_BRANCHES = 8;
 
+  /// Formats a human-readable node descriptor for log/error messages.
+  private static String describeNode(String nodeId, ScriptGraph graph) {
+    var graphNode = graph.getNode(nodeId);
+    if (graphNode == null) {
+      return nodeId;
+    }
+    var metadata = NodeRegistry.isRegistered(graphNode.type()) ? NodeRegistry.getMetadata(graphNode.type()) : null;
+    var displayName = metadata != null ? metadata.displayName() : graphNode.type();
+    return displayName + " (" + graphNode.type() + ") [" + nodeId + "]";
+  }
+
   public ReactiveScriptEngine() {
     log.info("ReactiveScriptEngine initialized with {} registered node types", NodeRegistry.getRegisteredCount());
   }
@@ -112,9 +123,11 @@ public final class ReactiveScriptEngine {
         return Mono.empty();
       }
 
+      var nodeDesc = describeNode(triggerNodeId, graph);
+
       if (!NodeRegistry.isRegistered(graphNode.type())) {
-        log.warn("No implementation found for trigger node type: {}", graphNode.type());
-        context.eventListener().onNodeError(triggerNodeId, "Unknown node type: " + graphNode.type());
+        log.warn("No implementation found for trigger node: {}", nodeDesc);
+        context.eventListener().onNodeError(triggerNodeId, nodeDesc + ": Unknown node type: " + graphNode.type());
         return Mono.empty();
       }
 
@@ -141,8 +154,8 @@ public final class ReactiveScriptEngine {
         })
         .doOnError(e -> {
           var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-          log.error("Error executing trigger node {}: {}", triggerNodeId, message, e);
-          context.eventListener().onNodeError(triggerNodeId, message);
+          log.error("Error executing trigger node {}: {}", nodeDesc, message, e);
+          context.eventListener().onNodeError(triggerNodeId, nodeDesc + ": " + message);
         })
         .onErrorResume(_ -> Mono.empty())
         .flatMap(outputs -> {
@@ -254,9 +267,11 @@ public final class ReactiveScriptEngine {
       return Mono.empty();
     }
 
+    var nodeDesc = describeNode(nodeId, graph);
+
     if (!run.incrementAndCheckLimit()) {
-      log.error("Execution limit exceeded for node {}", nodeId);
-      context.eventListener().onNodeError(nodeId, "Execution limit exceeded");
+      log.error("Execution limit exceeded for node {}", nodeDesc);
+      context.eventListener().onNodeError(nodeId, nodeDesc + ": Execution limit exceeded");
       return Mono.empty();
     }
 
@@ -266,7 +281,8 @@ public final class ReactiveScriptEngine {
     }
 
     if (!NodeRegistry.isRegistered(graphNode.type())) {
-      context.eventListener().onNodeError(nodeId, "Unknown node type: " + graphNode.type());
+      log.warn("No implementation found for node: {}", nodeDesc);
+      context.eventListener().onNodeError(nodeId, nodeDesc + ": Unknown node type: " + graphNode.type());
       return Mono.empty();
     }
 
@@ -297,7 +313,7 @@ public final class ReactiveScriptEngine {
     }
 
     var upstreamMonos = incomingDataEdges.stream()
-      .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId())
+      .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId(), describeNode(edge.sourceNodeId(), graph))
         .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
           var sourceKey = edge.sourceHandle();
           var targetKey = edge.targetHandle();
@@ -333,6 +349,7 @@ public final class ReactiveScriptEngine {
   ) {
     context.eventListener().onNodeStarted(nodeId);
 
+    var nodeDesc = describeNode(nodeId, graph);
     var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
 
     return nodeImpl.executeReactive(nodeRuntime, inputs)
@@ -342,8 +359,8 @@ public final class ReactiveScriptEngine {
       })
       .doOnError(e -> {
         var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-        log.error("Error executing node {}: {}", nodeId, message, e);
-        context.eventListener().onNodeError(nodeId, message);
+        log.error("Error executing node {}: {}", nodeDesc, message, e);
+        context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message);
       })
       .onErrorResume(e -> {
         var hasErrorPort = metadata.outputs().stream()

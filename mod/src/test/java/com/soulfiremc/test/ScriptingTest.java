@@ -1085,8 +1085,8 @@ final class ScriptingTest {
     run1.publishNodeOutputs("node1", outputs1);
     run2.publishNodeOutputs("node1", outputs2);
 
-    var result1 = run1.awaitNodeOutputs("node1").block();
-    var result2 = run2.awaitNodeOutputs("node1").block();
+    var result1 = run1.awaitNodeOutputs("node1", "node1").block();
+    var result2 = run2.awaitNodeOutputs("node1", "node1").block();
 
     assertNotNull(result1);
     assertNotNull(result2);
@@ -1099,7 +1099,7 @@ final class ScriptingTest {
     var run = new ExecutionRun();
 
     // Start awaiting before publishing
-    var mono = run.awaitNodeOutputs("node1");
+    var mono = run.awaitNodeOutputs("node1", "node1");
     run.publishNodeOutputs("node1", Map.of("value", NodeValue.ofNumber(42)));
 
     var result = mono.block();
@@ -1374,7 +1374,7 @@ final class ScriptingTest {
     run.publishNodeOutputs("node1", Map.of("value", NodeValue.ofNumber(3)));
 
     // Should get the latest value
-    var result = run.awaitNodeOutputs("node1").block();
+    var result = run.awaitNodeOutputs("node1", "node1").block();
     assertNotNull(result);
     assertEquals(3, result.get("value").asInt(0));
   }
