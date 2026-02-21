@@ -25,13 +25,15 @@ import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
 
+import java.net.InetSocketAddress;
+
 public final class NettyHelper {
   public static final String PROXY_NAME = "sf_proxy";
 
   private NettyHelper() {
   }
 
-  public static void addProxy(SFProxy proxy, ChannelPipeline pipeline) {
+  public static void addProxy(SFProxy proxy, ChannelPipeline pipeline, boolean isBedrock) {
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
@@ -48,7 +50,10 @@ public final class NettyHelper {
         }
       }
       case SOCKS5 -> {
-        if (proxy.username() != null && proxy.password() != null) {
+        if (isBedrock) {
+          pipeline.addLast(PROXY_NAME, new Socks5UdpRelayHandler(
+            (InetSocketAddress) proxy.address(), proxy.username(), proxy.password()));
+        } else if (proxy.username() != null && proxy.password() != null) {
           pipeline.addLast(PROXY_NAME, new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
         } else {
           pipeline.addLast(PROXY_NAME, new Socks5ProxyHandler(proxy.address()));

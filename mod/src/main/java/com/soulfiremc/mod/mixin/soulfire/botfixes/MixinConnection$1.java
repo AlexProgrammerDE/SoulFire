@@ -25,6 +25,7 @@ import com.soulfiremc.server.util.netty.SFTrafficHandler;
 import io.netty.channel.Channel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import net.raphimc.viabedrock.api.BedrockProtocolVersion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,12 +36,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinConnection$1 {
   @Inject(method = "initChannel", at = @At("HEAD"))
   private void injectProxyAndWriteTimeout(Channel channel, CallbackInfo ci) {
-    var proxyData = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get().proxy();
+    var botConnection = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get();
+    var proxyData = botConnection.proxy();
     if (proxyData == null) {
       return;
     }
 
-    NettyHelper.addProxy(proxyData, channel.pipeline());
+    var isBedrock = BedrockProtocolVersion.bedrockLatest.equals(botConnection.currentProtocolVersion());
+    NettyHelper.addProxy(proxyData, channel.pipeline(), isBedrock);
 
     channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
