@@ -20,8 +20,10 @@ package com.soulfiremc.server.script;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import lombok.Getter;
+import org.jetbrains.annotations.VisibleForTesting;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 /// Reactive execution context for scripts.
 /// Per-invocation state (output sinks) lives in ExecutionRun, not here.
@@ -43,6 +45,17 @@ public final class ReactiveScriptContext {
   public ReactiveScriptContext(InstanceManager instance, ScriptEventListener eventListener) {
     this.instance = instance;
     this.reactorScheduler = new SoulFireReactorScheduler(instance.scheduler());
+    this.eventListener = eventListener;
+  }
+
+  /// Creates a lightweight context for testing without an InstanceManager.
+  /// Instance and scheduler methods will return null.
+  ///
+  /// @param eventListener listener for script execution events
+  @VisibleForTesting
+  public ReactiveScriptContext(ScriptEventListener eventListener) {
+    this.instance = null;
+    this.reactorScheduler = Schedulers.immediate();
     this.eventListener = eventListener;
   }
 

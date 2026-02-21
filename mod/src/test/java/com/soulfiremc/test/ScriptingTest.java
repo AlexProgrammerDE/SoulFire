@@ -1455,6 +1455,195 @@ final class ScriptingTest {
     assertEquals(2, dataEdges.size(), "AddNode should have 2 incoming data edges");
   }
 
+  // ==================== Data-Only Node Eager Execution Tests ====================
+
+  @Test
+  void hasIncomingExecutionEdgesReturnsTrueForExecTarget() {
+    var graph = ScriptGraph.builder("test", "Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("action", "action.print", null)
+      .addExecutionEdge("trigger", "out", "action", "in")
+      .build();
+
+    assertTrue(graph.hasIncomingExecutionEdges("action"));
+    assertFalse(graph.hasIncomingExecutionEdges("trigger"));
+  }
+
+  @Test
+  void hasIncomingExecutionEdgesReturnsFalseForDataOnlyNode() {
+    var graph = ScriptGraph.builder("test", "Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const", "constant.string", Map.of("value", "hello"))
+      .addNode("action", "action.print", null)
+      .addExecutionEdge("trigger", "out", "action", "in")
+      .addDataEdge("const", "value", "action", "message")
+      .build();
+
+    assertFalse(graph.hasIncomingExecutionEdges("const"),
+      "Data-only node should have no incoming execution edges");
+    assertTrue(graph.hasIncomingExecutionEdges("action"));
+  }
+
+  @Test
+  void markDataNodeTriggeredReturnsTrueOnFirstCall() {
+    var run = new ExecutionRun();
+
+    assertTrue(run.markDataNodeTriggered("node1"));
+    assertFalse(run.markDataNodeTriggered("node1"),
+      "Second call should return false (already triggered)");
+  }
+
+  @Test
+  void markDataNodeTriggeredIsolatedPerNode() {
+    var run = new ExecutionRun();
+
+    assertTrue(run.markDataNodeTriggered("node1"));
+    assertTrue(run.markDataNodeTriggered("node2"),
+      "Different node should be independently triggerable");
+  }
+
+  @Test
+  void dataOnlyConstantNodeExecutedViaDataEdge() {
+    // Graph: trigger --EXEC--> math.add
+    //        constant.number(42) --DATA--> math.add.a
+    //        constant.number(8)  --DATA--> math.add.b
+    // The constants have NO execution edge, only data edges.
+    var graph = ScriptGraph.builder("test-data-only", "Data Only Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const_a", "constant.number", Map.of("value", 42))
+      .addNode("const_b", "constant.number", Map.of("value", 8))
+      .addNode("add", "math.add", null)
+      .addExecutionEdge("trigger", "out", "add", "in")
+      .addDataEdge("const_a", "value", "add", "a")
+      .addDataEdge("const_b", "value", "add", "b")
+      .build();
+
+    var listener = new RecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertTrue(listener.completedNodes.contains("const_a"),
+      "Data-only constant node A should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("const_b"),
+      "Data-only constant node B should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("add"),
+      "Math add node should complete");
+    assertTrue(listener.errorNodes.isEmpty(),
+      "No errors expected, got: " + listener.errorNodes);
+
+    // Verify the add node got the correct values: 42 + 8 = 50
+    var addOutputs = listener.nodeOutputs.get("add");
+    assertNotNull(addOutputs, "Add node should have outputs");
+    assertEquals(50.0, addOutputs.get("result").asDouble(0.0), 0.001);
+  }
+
+  @Test
+  void dataOnlyStringConstantExecutedViaDataEdge() {
+    // Graph: trigger --EXEC--> string.length
+    //        constant.string("hello") --DATA--> string.length.text
+    var graph = ScriptGraph.builder("test-string-const", "String Const Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const", "constant.string", Map.of("value", "hello"))
+      .addNode("len", "string.length", null)
+      .addExecutionEdge("trigger", "out", "len", "in")
+      .addDataEdge("const", "value", "len", "text")
+      .build();
+
+    var listener = new RecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertTrue(listener.completedNodes.contains("const"),
+      "Data-only string constant should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("len"),
+      "String length node should complete");
+    assertTrue(listener.errorNodes.isEmpty(),
+      "No errors expected, got: " + listener.errorNodes);
+
+    var lenOutputs = listener.nodeOutputs.get("len");
+    assertNotNull(lenOutputs);
+    assertEquals(5, lenOutputs.get("length").asInt(0));
+  }
+
+  @Test
+  void chainedDataOnlyNodesExecutedRecursively() {
+    // Graph: trigger --EXEC--> action (uses result of list.first)
+    //        constant.string("a,b,c") --DATA--> string.split.text (data-only)
+    //        string.split --DATA--> list.first.list (data-only)
+    //        list.first --DATA--> string.length.text (on exec path)
+    var graph = ScriptGraph.builder("test-chained-data", "Chained Data Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const", "constant.string", Map.of("value", "hello,world,test"))
+      .addNode("split", "string.split", Map.of("delimiter", ","))
+      .addNode("first", "list.first", null)
+      .addNode("len", "string.length", null)
+      .addExecutionEdge("trigger", "out", "len", "in")
+      .addDataEdge("const", "value", "split", "text")
+      .addDataEdge("split", "result", "first", "list")
+      .addDataEdge("first", "item", "len", "text")
+      .build();
+
+    var listener = new RecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertTrue(listener.completedNodes.contains("const"),
+      "Data-only constant should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("split"),
+      "Data-only split should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("first"),
+      "Data-only list.first should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("len"),
+      "String length node should complete");
+    assertTrue(listener.errorNodes.isEmpty(),
+      "No errors expected, got: " + listener.errorNodes);
+
+    // "hello" has length 5
+    var lenOutputs = listener.nodeOutputs.get("len");
+    assertNotNull(lenOutputs);
+    assertEquals(5, lenOutputs.get("length").asInt(0));
+  }
+
+  @Test
+  void dataOnlyNodeSharedByMultipleConsumers() {
+    // One data-only constant feeds two different print nodes on the exec path.
+    // Uses action.print which has exec in/out ports, so the chain continues.
+    // Graph: trigger --EXEC--> print1 --EXEC--> print2
+    //        constant.string("shared") --DATA--> print1.message
+    //        constant.string("shared") --DATA--> print2.message
+    var graph = ScriptGraph.builder("test-shared-data", "Shared Data Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const", "constant.string", Map.of("value", "shared"))
+      .addNode("print1", "action.print", null)
+      .addNode("print2", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print1", "in")
+      .addExecutionEdge("print1", "out", "print2", "in")
+      .addDataEdge("const", "value", "print1", "message")
+      .addDataEdge("const", "value", "print2", "message")
+      .build();
+
+    var listener = new RecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertTrue(listener.errorNodes.isEmpty(),
+      "No errors expected, got: " + listener.errorNodes);
+    assertTrue(listener.completedNodes.contains("const"),
+      "Data-only constant should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("print1"),
+      "First print node should complete");
+    assertTrue(listener.completedNodes.contains("print2"),
+      "Second print node should complete (same constant consumed twice)");
+  }
+
   @Test
   void executionContextDoesNotContainExecKeys() {
     // Verify that BranchNode outputs include exec keys but filtering works

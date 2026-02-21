@@ -312,26 +312,40 @@ public final class ReactiveScriptEngine {
       return executeNode(nodeImpl, metadata, nodeId, baseInputs, graph, context, run, execContext);
     }
 
-    var upstreamMonos = incomingDataEdges.stream()
-      .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId(), describeNode(edge.sourceNodeId(), graph))
-        .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
-          var sourceKey = edge.sourceHandle();
-          var targetKey = edge.targetHandle();
-          var value = outputs.get(sourceKey);
-          if (value != null) {
-            sink.next(Map.entry(targetKey, value));
-          }
-        }))
+    // Eagerly execute data-only source nodes that aren't on any execution path
+    var dataOnlySourceIds = incomingDataEdges.stream()
+      .map(ScriptGraph.GraphEdge::sourceNodeId)
+      .distinct()
+      .filter(sourceId -> !graph.hasIncomingExecutionEdges(sourceId))
+      .map(sourceId -> executeDataNode(graph, sourceId, context, run))
       .toList();
 
-    return Flux.merge(upstreamMonos)
-      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (_, b) -> b))
-      .map(resolvedInputs -> {
-        var merged = new HashMap<>(baseInputs);
-        merged.putAll(resolvedInputs);
-        return merged;
-      })
-      .flatMap(inputs -> executeNode(nodeImpl, metadata, nodeId, inputs, graph, context, run, execContext));
+    var ensureDataNodes = dataOnlySourceIds.isEmpty()
+      ? Mono.<Void>empty()
+      : Flux.merge(dataOnlySourceIds).then();
+
+    return ensureDataNodes.then(Mono.defer(() -> {
+      var upstreamMonos = incomingDataEdges.stream()
+        .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId(), describeNode(edge.sourceNodeId(), graph))
+          .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
+            var sourceKey = edge.sourceHandle();
+            var targetKey = edge.targetHandle();
+            var value = outputs.get(sourceKey);
+            if (value != null) {
+              sink.next(Map.entry(targetKey, value));
+            }
+          }))
+        .toList();
+
+      return Flux.merge(upstreamMonos)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (_, b) -> b))
+        .map(resolvedInputs -> {
+          var merged = new HashMap<>(baseInputs);
+          merged.putAll(resolvedInputs);
+          return merged;
+        })
+        .flatMap(inputs -> executeNode(nodeImpl, metadata, nodeId, inputs, graph, context, run, execContext));
+    }));
   }
 
   /// Executes a single node with resolved inputs.
@@ -386,6 +400,106 @@ public final class ReactiveScriptEngine {
         var newExecContext = execContext.mergeWith(contextOutputs);
         return followExecOutputs(graph, nodeId, metadata, outputs, context, run, newExecContext);
       });
+  }
+
+  /// Eagerly executes a data-only node that is not on any execution path.
+  /// Called when a downstream node needs this node's outputs via a DATA edge,
+  /// but no EXECUTION edge will ever trigger it.
+  /// Uses ExecutionRun.markDataNodeTriggered to ensure each node runs at most once per invocation.
+  /// Recursively resolves upstream data-only dependencies.
+  private Mono<Void> executeDataNode(
+    ScriptGraph graph,
+    String nodeId,
+    ReactiveScriptContext context,
+    ExecutionRun run
+  ) {
+    if (!run.markDataNodeTriggered(nodeId)) {
+      return Mono.empty();
+    }
+
+    if (context.isCancelled()) {
+      return Mono.empty();
+    }
+
+    var graphNode = graph.getNode(nodeId);
+    if (graphNode == null) {
+      return Mono.empty();
+    }
+
+    var nodeDesc = describeNode(nodeId, graph);
+
+    if (!run.incrementAndCheckLimit()) {
+      log.error("Execution limit exceeded for data node {}", nodeDesc);
+      context.eventListener().onNodeError(nodeId, nodeDesc + ": Execution limit exceeded");
+      return Mono.empty();
+    }
+
+    if (!NodeRegistry.isRegistered(graphNode.type())) {
+      log.warn("No implementation found for data node: {}", nodeDesc);
+      context.eventListener().onNodeError(nodeId, nodeDesc + ": Unknown node type: " + graphNode.type());
+      return Mono.empty();
+    }
+
+    var nodeImpl = NodeRegistry.create(graphNode.type());
+    var metadata = NodeRegistry.getMetadata(graphNode.type());
+
+    var baseInputs = new HashMap<>(NodeRegistry.computeDefaultInputs(metadata));
+    if (graphNode.defaultInputs() != null) {
+      for (var entry : graphNode.defaultInputs().entrySet()) {
+        baseInputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
+      }
+    }
+
+    var incomingDataEdges = graph.getIncomingDataEdges(nodeId);
+
+    // Recursively ensure upstream data-only nodes are executed first
+    var upstreamDataNodeExecutions = incomingDataEdges.stream()
+      .map(ScriptGraph.GraphEdge::sourceNodeId)
+      .distinct()
+      .filter(sourceId -> !graph.hasIncomingExecutionEdges(sourceId))
+      .map(sourceId -> executeDataNode(graph, sourceId, context, run))
+      .toList();
+
+    var ensureUpstream = upstreamDataNodeExecutions.isEmpty()
+      ? Mono.<Void>empty()
+      : Flux.merge(upstreamDataNodeExecutions).then();
+
+    return ensureUpstream.then(Mono.defer(() -> {
+      var upstreamMonos = incomingDataEdges.stream()
+        .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId(), describeNode(edge.sourceNodeId(), graph))
+          .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
+            var value = outputs.get(edge.sourceHandle());
+            if (value != null) {
+              sink.next(Map.entry(edge.targetHandle(), value));
+            }
+          }))
+        .toList();
+
+      return Flux.merge(upstreamMonos)
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (_, b) -> b))
+        .defaultIfEmpty(Map.of())
+        .map(resolvedInputs -> {
+          var merged = new HashMap<>(baseInputs);
+          merged.putAll(resolvedInputs);
+          return merged;
+        })
+        .flatMap(inputs -> {
+          context.eventListener().onNodeStarted(nodeId);
+          var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, ExecutionContext.empty());
+          return nodeImpl.executeReactive(nodeRuntime, inputs)
+            .doOnNext(outputs -> {
+              run.publishNodeOutputs(nodeId, outputs);
+              context.eventListener().onNodeCompleted(nodeId, outputs);
+            })
+            .doOnError(e -> {
+              var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+              log.error("Error executing data node {}: {}", nodeDesc, message, e);
+              context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message);
+            })
+            .onErrorResume(_ -> Mono.empty());
+        })
+        .then();
+    }));
   }
 
   /// Creates a NodeRuntime wrapper that captures the current execution state.

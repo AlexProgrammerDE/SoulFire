@@ -23,6 +23,7 @@ import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -35,6 +36,7 @@ public final class ExecutionRun {
 
   private final ConcurrentHashMap<String, Sinks.Many<Map<String, NodeValue>>> nodeOutputSinks =
     new ConcurrentHashMap<>();
+  private final Set<String> triggeredDataNodes = ConcurrentHashMap.newKeySet();
   private final AtomicLong executionCount = new AtomicLong(0);
 
   /// Whether this execution is running synchronously on the tick thread.
@@ -82,6 +84,16 @@ public final class ExecutionRun {
     if (result.isFailure()) {
       log.warn("Failed to publish outputs for node {}: {}", nodeId, result);
     }
+  }
+
+  /// Marks a data-only node as triggered for eager execution within this run.
+  /// Returns true if this is the first time the node is marked (caller should execute it),
+  /// false if already triggered (caller should skip, another path is handling it).
+  ///
+  /// @param nodeId the data-only node identifier
+  /// @return true if newly marked, false if already triggered
+  public boolean markDataNodeTriggered(String nodeId) {
+    return triggeredDataNodes.add(nodeId);
   }
 
   /// Increments the execution count and checks if the limit has been exceeded.

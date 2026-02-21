@@ -33,6 +33,7 @@ public final class ScriptGraph {
   private final Map<String, List<GraphEdge>> outgoingEdgesByHandle;
   private final Map<String, List<GraphEdge>> incomingEdgesByHandle;
   private final Map<String, List<GraphEdge>> incomingDataEdgesByNode;
+  private final Set<String> nodesWithIncomingExecution;
 
   private ScriptGraph(
     String scriptId,
@@ -65,6 +66,14 @@ public final class ScriptGraph {
     this.outgoingEdgesByHandle = Collections.unmodifiableMap(outgoing);
     this.incomingEdgesByHandle = Collections.unmodifiableMap(incomingByHandle);
     this.incomingDataEdgesByNode = Collections.unmodifiableMap(incomingDataByNode);
+
+    var nodesWithIncomingExec = new HashSet<String>();
+    for (var edge : edges) {
+      if (edge.edgeType == EdgeType.EXECUTION) {
+        nodesWithIncomingExec.add(edge.targetNodeId);
+      }
+    }
+    this.nodesWithIncomingExecution = Collections.unmodifiableSet(nodesWithIncomingExec);
   }
 
   /// Creates a new builder for constructing a ScriptGraph.
@@ -87,13 +96,6 @@ public final class ScriptGraph {
   ///
   /// @return list of trigger node IDs
   public List<String> findTriggerNodes() {
-    var nodesWithIncomingExecution = new HashSet<String>();
-    for (var edge : edges) {
-      if (edge.edgeType == EdgeType.EXECUTION) {
-        nodesWithIncomingExecution.add(edge.targetNodeId);
-      }
-    }
-
     var triggers = new ArrayList<String>();
     for (var node : nodes.values()) {
       if (!nodesWithIncomingExecution.contains(node.id) && node.type.startsWith("trigger.")) {
@@ -101,6 +103,16 @@ public final class ScriptGraph {
       }
     }
     return triggers;
+  }
+
+  /// Returns whether a node has any incoming execution edges.
+  /// Nodes without incoming execution edges that are not triggers will not
+  /// be executed by the engine unless explicitly triggered.
+  ///
+  /// @param nodeId the node identifier
+  /// @return true if the node has at least one incoming execution edge
+  public boolean hasIncomingExecutionEdges(String nodeId) {
+    return nodesWithIncomingExecution.contains(nodeId);
   }
 
   /// Gets the next execution nodes from a given node's output handle.
