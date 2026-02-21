@@ -37,26 +37,26 @@ public final class NettyHelper {
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
-          pipeline.addLast(PROXY_NAME, new HttpProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+          pipeline.addFirst(PROXY_NAME, new HttpProxyHandler(proxy.address(), proxy.username(), proxy.password()));
         } else {
-          pipeline.addLast(PROXY_NAME, new HttpProxyHandler(proxy.address()));
+          pipeline.addFirst(PROXY_NAME, new HttpProxyHandler(proxy.address()));
         }
       }
       case SOCKS4 -> {
         if (proxy.username() != null) {
-          pipeline.addLast(PROXY_NAME, new Socks4ProxyHandler(proxy.address(), proxy.username()));
+          pipeline.addFirst(PROXY_NAME, new Socks4ProxyHandler(proxy.address(), proxy.username()));
         } else {
-          pipeline.addLast(PROXY_NAME, new Socks4ProxyHandler(proxy.address()));
+          pipeline.addFirst(PROXY_NAME, new Socks4ProxyHandler(proxy.address()));
         }
       }
       case SOCKS5 -> {
         if (isBedrock) {
-          pipeline.addLast(PROXY_NAME, new Socks5UdpRelayHandler(
+          pipeline.addFirst(PROXY_NAME, new Socks5UdpRelayHandler(
             (InetSocketAddress) proxy.address(), proxy.username(), proxy.password()));
         } else if (proxy.username() != null && proxy.password() != null) {
-          pipeline.addLast(PROXY_NAME, new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+          pipeline.addFirst(PROXY_NAME, new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
         } else {
-          pipeline.addLast(PROXY_NAME, new Socks5ProxyHandler(proxy.address()));
+          pipeline.addFirst(PROXY_NAME, new Socks5ProxyHandler(proxy.address()));
         }
       }
       default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
