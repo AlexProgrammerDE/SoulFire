@@ -34,7 +34,7 @@ public final class ClickSlotNode extends AbstractScriptNode {
       PortDefinition.execIn(),
       PortDefinition.botIn(),
       PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory menu slot index to click (-999 to drop the carried item)"),
-      PortDefinition.inputWithDefault("clickType", "Click Type", PortType.STRING, "left", "Click type: left, right, or shift")
+      PortDefinition.inputWithDefault("clickType", "Click Type", PortType.STRING, "\"left\"", "Click type: left, right, or shift")
     )
     .addOutputs(
       PortDefinition.execOut()
