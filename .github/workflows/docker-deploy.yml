@@ -25,6 +25,12 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_PASSWORD}}
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # 3.7.0
       - name: Set up Docker Buildx
@@ -46,6 +52,8 @@ jobs:
           tags: |
             alexprogrammerde/soulfire:latest
             alexprogrammerde/soulfire:${{ steps.get-version.outputs.version }}
+            ghcr.io/alexprogrammerde/soulfire:latest
+            ghcr.io/alexprogrammerde/soulfire:${{ steps.get-version.outputs.version }}
       - name: Push README.md to Dockerhub
         uses: christian-korneck/update-container-description-action@d36005551adeaba9698d8d67a296bd16fa91f8e8 # v1
         env:
