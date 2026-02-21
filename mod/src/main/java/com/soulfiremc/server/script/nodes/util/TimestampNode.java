@@ -33,10 +33,12 @@ public final class TimestampNode extends AbstractScriptNode {
     .displayName("Timestamp")
     .category(CategoryRegistry.UTILITY)
     .addInputs(
+      PortDefinition.execIn(),
       PortDefinition.inputWithDefault("format", "Format", PortType.STRING, "\"\"", "Date format pattern (empty = epoch ms)"),
       PortDefinition.inputWithDefault("timezone", "Timezone", PortType.STRING, "\"UTC\"", "Timezone ID (e.g., America/New_York)")
     )
     .addOutputs(
+      PortDefinition.execOut(),
       PortDefinition.output("timestamp", "Timestamp", PortType.NUMBER, "Epoch milliseconds"),
       PortDefinition.output("formatted", "Formatted", PortType.STRING, "Formatted date string"),
       PortDefinition.output("iso", "ISO", PortType.STRING, "ISO 8601 formatted string")
