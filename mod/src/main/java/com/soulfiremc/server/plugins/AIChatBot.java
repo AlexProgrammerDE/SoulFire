@@ -96,11 +96,11 @@ public final class AIChatBot extends InternalPlugin {
 
       var chatHistory = new ArrayList<>(requestModel.messages());
       chatHistory.add(ChatCompletionMessageParam.ofAssistant(ChatCompletionAssistantMessageParam.builder()
-        .content(ChatCompletionAssistantMessageParam.Content.ofText(message))
+        .content(ChatCompletionAssistantMessageParam.Content.ofText(response))
         .build()
       ));
-      if (chatHistory.size() > settingsSource.get(AIChatBotSettings.HISTORY_LENGTH)) {
-        chatHistory.removeFirst();
+      while (chatHistory.size() > settingsSource.get(AIChatBotSettings.HISTORY_LENGTH) && chatHistory.size() > 1) {
+        chatHistory.remove(1);
       }
 
       event.connection().metadata().set(PLAYER_CONVERSATIONS, requestModel.toBuilder()
