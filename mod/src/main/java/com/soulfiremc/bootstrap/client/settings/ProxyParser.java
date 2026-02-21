@@ -40,6 +40,26 @@ public abstract class ProxyParser {
     return new ProxyParser() {
       @Override
       public SFProxy parse(String proxyData) {
+        // Support user:pass@host:port format
+        var atIndex = proxyData.lastIndexOf('@');
+        if (atIndex != -1) {
+          var userInfo = proxyData.substring(0, atIndex);
+          var hostPort = proxyData.substring(atIndex + 1);
+          var hostPortSplit = hostPort.split(":");
+          if (hostPortSplit.length < 2) {
+            throw new IllegalArgumentException("Proxy must have at least a host and a port!");
+          }
+
+          var host = hostPortSplit[0];
+          var port = Integer.parseInt(hostPortSplit[1]);
+          var userInfoSplit = userInfo.split(":");
+          var username = getIndexOrNull(userInfoSplit, 0);
+          var password = getIndexOrNull(userInfoSplit, 1);
+
+          return new SFProxy(type, new InetSocketAddress(host, port), username, password);
+        }
+
+        // Standard host:port:user:pass format
         var split = proxyData.split(":");
 
         if (split.length < 2) {
