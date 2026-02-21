@@ -61,4 +61,24 @@ public final class MetricsServiceImpl extends MetricsServiceGrpc.MetricsServiceI
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
+
+  @Override
+  public void getServerMetrics(GetServerMetricsRequest request, StreamObserver<GetServerMetricsResponse> responseObserver) {
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.READ_SERVER_CONFIG));
+
+    try {
+      var since = request.hasSince() ? request.getSince() : null;
+      var snapshots = soulFireServer.serverMetricsCollector().getSnapshots(since);
+
+      var response = GetServerMetricsResponse.newBuilder()
+        .addAllSnapshots(snapshots)
+        .build();
+
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting server metrics", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
 }

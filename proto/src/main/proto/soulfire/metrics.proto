@@ -118,6 +118,62 @@ message GetInstanceMetricsResponse {
   MetricsDistributions distributions = 2;
 }
 
+// A single server-level system metrics data point sampled at a fixed interval.
+message ServerMetricsSnapshot {
+  // When this snapshot was taken.
+  google.protobuf.Timestamp timestamp = 1;
+
+  // JVM process CPU load (0.0 to 1.0, or -1.0 if unavailable).
+  double process_cpu_load = 2;
+  // System-wide CPU load (0.0 to 1.0, or -1.0 if unavailable).
+  double system_cpu_load = 3;
+
+  // Heap memory currently used in bytes.
+  uint64 heap_used_bytes = 4;
+  // Heap memory committed (reserved by JVM) in bytes.
+  uint64 heap_committed_bytes = 5;
+  // Maximum heap memory in bytes (-1 if undefined).
+  int64 heap_max_bytes = 6;
+  // Non-heap memory currently used in bytes.
+  uint64 non_heap_used_bytes = 7;
+
+  // Current live thread count.
+  uint32 thread_count = 8;
+  // Current daemon thread count.
+  uint32 daemon_thread_count = 9;
+
+  // Cumulative GC collection count across all collectors.
+  uint64 gc_collection_count = 10;
+  // Cumulative GC collection time in milliseconds across all collectors.
+  uint64 gc_collection_time_ms = 11;
+
+  // JVM uptime in milliseconds.
+  uint64 uptime_ms = 12;
+  // Number of available processors.
+  uint32 available_processors = 13;
+
+  // Total bots online across all instances.
+  uint32 total_bots_online = 14;
+  // Total bots configured across all instances.
+  uint32 total_bots_total = 15;
+  // Number of active (non-stopped) instances.
+  uint32 active_instances = 16;
+}
+
+// Request to retrieve server-level system metrics.
+message GetServerMetricsRequest {
+  // If set, only return snapshots taken after this timestamp.
+  // Used for incremental fetching to reduce payload size.
+  optional google.protobuf.Timestamp since = 1;
+}
+
+// Response containing server-level system metrics time-series.
+message GetServerMetricsResponse {
+  // Time-series snapshots ordered oldest to newest.
+  // Contains up to 600 snapshots (30 minutes at 3-second intervals).
+  repeated ServerMetricsSnapshot snapshots = 1;
+}
+
 // Service for retrieving instance metrics and monitoring data.
 // Metrics are collected server-side and stored in a ring buffer.
 // All operations require appropriate permissions.
@@ -127,4 +183,9 @@ service MetricsService {
   // Requires: READ_BOT_INFO permission on the instance
   // Errors: NOT_FOUND if instance does not exist
   rpc GetInstanceMetrics (GetInstanceMetricsRequest) returns (GetInstanceMetricsResponse) {}
+
+  // Returns server-level system metrics (CPU, memory, threads, GC, aggregate bots).
+  // Supports incremental fetching via the "since" parameter.
+  // Requires: READ_SERVER_CONFIG global permission
+  rpc GetServerMetrics (GetServerMetricsRequest) returns (GetServerMetricsResponse) {}
 }

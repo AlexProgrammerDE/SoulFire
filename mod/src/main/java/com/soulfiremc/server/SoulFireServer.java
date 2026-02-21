@@ -31,6 +31,7 @@ import com.soulfiremc.server.database.InstanceConstants;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
+import com.soulfiremc.server.metrics.ServerMetricsCollector;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
@@ -92,6 +93,7 @@ public final class SoulFireServer {
   private final AuthSystem authSystem;
   private final SettingsPageRegistry settingsPageRegistry;
   private final ServerCommandManager serverCommandManager;
+  private final ServerMetricsCollector serverMetricsCollector;
   private final ShutdownManager shutdownManager;
   private final DatabaseManager.DatabaseContext databaseContext;
   private final SecretKey jwtSecretKey;
@@ -188,6 +190,8 @@ public final class SoulFireServer {
     this.settingsPageRegistry = serverSettingsRegistryFuture.join();
     this.sparkPlugin = sparkStart.join();
     this.serverCommandManager = serverCommandManagerFuture.join();
+    this.serverMetricsCollector = new ServerMetricsCollector(this);
+    this.scheduler.scheduleWithFixedDelay(serverMetricsCollector::sampleSnapshot, 3, 3, TimeUnit.SECONDS);
 
     // Via is ready, we can now set up all config stuff
     setupLogging();
