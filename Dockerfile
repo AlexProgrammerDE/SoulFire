@@ -24,6 +24,15 @@ USER soulfire
 
 EXPOSE 38765/tcp
 
+LABEL org.opencontainers.image.source="https://github.com/AlexProgrammerDE/SoulFire" \
+      org.opencontainers.image.description="SoulFire Dedicated Server" \
+      org.opencontainers.image.licenses="AGPL-3.0-only" \
+      org.opencontainers.image.title="SoulFire" \
+      org.opencontainers.image.vendor="AlexProgrammerDE"
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=5 \
+  CMD curl -f http://localhost:38765/health || exit 1
+
 # Start the process using dumb-init
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["/bin/bash", "/soulfire/start.sh"]
