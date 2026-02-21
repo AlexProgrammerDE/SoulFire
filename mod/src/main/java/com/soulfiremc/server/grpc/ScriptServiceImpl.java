@@ -48,6 +48,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -559,13 +560,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           existingState.observerRef()
         ));
 
-        // Send script started event
-        responseObserver.onNext(ScriptEvent.newBuilder()
-          .setScriptStarted(ScriptStarted.newBuilder()
-            .setScriptId(scriptId.toString())
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .build())
-          .build());
+        // Send script started event once the stream is ready
+        // (Armeria requires headers to be sent before messages, which happens after this method returns)
+        sendScriptStartedWhenReady(serverObserver, scriptId);
 
         log.info("Client attached to already-running script {}", scriptId);
         return;
@@ -605,13 +602,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       );
       activeScripts.put(scriptId, activationState);
 
-      // Send script started event
-      responseObserver.onNext(ScriptEvent.newBuilder()
-        .setScriptStarted(ScriptStarted.newBuilder()
-          .setScriptId(scriptId.toString())
-          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-          .build())
-        .build());
+      // Send script started event once the stream is ready
+      // (Armeria requires headers to be sent before messages, which happens after this method returns)
+      sendScriptStartedWhenReady(serverObserver, scriptId);
 
       log.info("Script {} resumed with {} triggers", scriptId, graph.findTriggerNodes().size());
 
@@ -1379,6 +1372,24 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return GsonInstance.GSON.fromJson(element, Map.class);
     }
     return element.toString();
+  }
+
+  /// Defers sending the ScriptStarted event until the stream is ready.
+  /// Armeria requires response headers to be sent before any messages,
+  /// which only happens after the RPC handler method returns.
+  private void sendScriptStartedWhenReady(ServerCallStreamObserver<ScriptEvent> observer, UUID scriptId) {
+    var event = ScriptEvent.newBuilder()
+      .setScriptStarted(ScriptStarted.newBuilder()
+        .setScriptId(scriptId.toString())
+        .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+        .build())
+      .build();
+    var sent = new AtomicBoolean(false);
+    observer.setOnReadyHandler(() -> {
+      if (sent.compareAndSet(false, true)) {
+        observer.onNext(event);
+      }
+    });
   }
 
   /// Sends an event to the observer if it's present and not cancelled.
