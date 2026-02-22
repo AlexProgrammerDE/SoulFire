@@ -1,14 +1,4 @@
 #!/bin/bash
-
-# When piped (curl | bash), stdin is the pipe, not the terminal.
-# Save the script to a temp file and re-execute so whiptail can read input.
-if [ ! -t 0 ]; then
-  _sf_script=$(mktemp)
-  trap 'rm -f "$_sf_script"' EXIT
-  cat > "$_sf_script"
-  exec bash "$_sf_script" "$@" </dev/tty
-fi
-
 set -euo pipefail
 
 INSTALL_DIR="/opt/soulfire"
