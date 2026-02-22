@@ -22,7 +22,7 @@ dependencies {
   minecraft("com.mojang:minecraft:1.21.11_unobfuscated")
   implementation("net.fabricmc:fabric-loader:0.18.4")
 
-  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.5-SNAPSHOT-UNOBF"
+  val viaFabricPlusNotation = "com.viaversion:viafabricplus:4.4.8-SNAPSHOT-UNOBF"
   implementation(viaFabricPlusNotation) {
     exclude("org.lz4")
   }
