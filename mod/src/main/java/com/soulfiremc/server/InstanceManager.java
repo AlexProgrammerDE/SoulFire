@@ -69,6 +69,7 @@ public final class InstanceManager {
   public static final ThreadLocal<InstanceManager> CURRENT = new InheritableThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
+  private final MetadataHolder<JsonElement> persistentMetadata = new MetadataHolder<>();
   private final UUID id;
   private final SoulFireScheduler scheduler;
   private final InstanceSettingsDelegate settingsSource;
@@ -89,6 +90,7 @@ public final class InstanceManager {
     this.dsl = dsl;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
     this.friendlyNameCache = new CachedLazyObject<>(this::fetchFriendlyName, 1, TimeUnit.SECONDS);
+    initPersistentMetadata();
 
     this.metricsCollector = new InstanceMetricsCollector(this);
     SoulFireAPI.registerListenersOfObject(metricsCollector);
@@ -121,6 +123,14 @@ public final class InstanceManager {
 
     if (settingsSource.get(BotSettings.RESTORE_ON_REBOOT)) {
       switchToState(null, lastState);
+    }
+  }
+
+  private void initPersistentMetadata() {
+    var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
+    if (record != null) {
+      var stem = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+      persistentMetadata.resetFrom(stem.persistentMetadata());
     }
   }
 
@@ -189,7 +199,10 @@ public final class InstanceManager {
       });
     }
 
-    if (dirtyBots.isEmpty()) {
+    var dirtyInstanceMetadata = persistentMetadata.exportIfDirty();
+    dirtyInstanceMetadata.ifPresent(_ -> persistentMetadata.markClean());
+
+    if (dirtyBots.isEmpty() && dirtyInstanceMetadata.isEmpty()) {
       return;
     }
 
@@ -201,20 +214,27 @@ public final class InstanceManager {
       }
 
       var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
-      var newAccounts = currentSettings.accounts().stream()
-        .map(account -> {
-          for (var dirtyEntry : dirtyBots) {
-            if (account.profileId().equals(dirtyEntry.getKey())) {
-              return account.withPersistentMetadata(dirtyEntry.getValue());
-            }
-          }
-          return account;
-        })
-        .toList();
 
-      var newSettings = currentSettings.withAccounts(newAccounts);
+      if (!dirtyBots.isEmpty()) {
+        var newAccounts = currentSettings.accounts().stream()
+          .map(account -> {
+            for (var dirtyEntry : dirtyBots) {
+              if (account.profileId().equals(dirtyEntry.getKey())) {
+                return account.withPersistentMetadata(dirtyEntry.getValue());
+              }
+            }
+            return account;
+          })
+          .toList();
+        currentSettings = currentSettings.withAccounts(newAccounts);
+      }
+
+      if (dirtyInstanceMetadata.isPresent()) {
+        currentSettings = currentSettings.withPersistentMetadata(dirtyInstanceMetadata.get());
+      }
+
       ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(currentSettings.serializeToTree()))
         .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();

@@ -15,5 +15,5 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/// Bot variable storage script nodes.
+/// Bot and instance variable storage script nodes.
 package com.soulfiremc.server.script.nodes.variable;

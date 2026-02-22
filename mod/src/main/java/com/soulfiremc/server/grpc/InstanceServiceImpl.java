@@ -894,4 +894,117 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }
+
+  @Override
+  public void getInstanceMetadata(GetInstanceMetadataRequest request, StreamObserver<GetInstanceMetadataResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
+
+    try {
+      var dsl = soulFireServer.dsl();
+      var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+      if (record == null) {
+        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+      }
+
+      var settings = parseSettings(record.getSettings());
+
+      responseObserver.onNext(GetInstanceMetadataResponse.newBuilder()
+        .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(settings.persistentMetadata()))
+        .build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error getting instance metadata", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
+  public void setInstanceMetadataEntry(SetInstanceMetadataEntryRequest request, StreamObserver<SetInstanceMetadataEntryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
+
+    try {
+      var jsonValue = SettingsSource.Stem.valueToJsonElement(request.getValue());
+
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+        }
+
+        var currentSettings = parseSettings(record.getSettings());
+        var newMetadata = SettingsSource.Stem.withUpdatedEntry(
+          currentSettings.persistentMetadata(),
+          request.getNamespace(),
+          request.getKey(),
+          jsonValue);
+
+        var updatedStem = currentSettings.withPersistentMetadata(newMetadata);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
+      });
+
+      // Also update the live instance's persistent metadata if loaded
+      soulFireServer.getInstance(instanceId).ifPresent(instance -> {
+        instance.invalidateSettingsCache();
+        instance.persistentMetadata().set(request.getNamespace(), request.getKey(), jsonValue);
+        instance.persistentMetadata().markClean();
+      });
+
+      responseObserver.onNext(SetInstanceMetadataEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error setting instance metadata entry", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
+  public void deleteInstanceMetadataEntry(DeleteInstanceMetadataEntryRequest request, StreamObserver<DeleteInstanceMetadataEntryResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
+
+    try {
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+        }
+
+        var currentSettings = parseSettings(record.getSettings());
+        var newMetadata = SettingsSource.Stem.withDeletedEntry(
+          currentSettings.persistentMetadata(),
+          request.getNamespace(),
+          request.getKey());
+
+        var updatedStem = currentSettings.withPersistentMetadata(newMetadata);
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(updatedStem))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
+      });
+
+      // Also update the live instance's persistent metadata if loaded
+      soulFireServer.getInstance(instanceId).ifPresent(instance -> {
+        instance.invalidateSettingsCache();
+        instance.persistentMetadata().remove(request.getNamespace(), request.getKey());
+        instance.persistentMetadata().markClean();
+      });
+
+      responseObserver.onNext(DeleteInstanceMetadataEntryResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      log.error("Error deleting instance metadata entry", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
 }

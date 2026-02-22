@@ -24,6 +24,7 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.property.Property;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import lombok.With;
@@ -62,8 +63,9 @@ public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mapped
   @With
   public record Stem(Map<String, Map<String, JsonElement>> settings,
                      List<MinecraftAccount> accounts,
-                     List<SFProxy> proxies) implements SettingsSource.Stem<SettingsSource.Instance> {
-    public static final Stem EMPTY = new Stem(Map.of(), List.of(), List.of());
+                     List<SFProxy> proxies,
+                     Map<String, Map<String, JsonElement>> persistentMetadata) implements SettingsSource.Stem<SettingsSource.Instance> {
+    public static final Stem EMPTY = new Stem(Map.of(), List.of(), List.of(), Map.of());
     private static final Gson PROFILE_GSON =
       GsonInstance.GSON.newBuilder()
         .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
@@ -78,6 +80,7 @@ public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mapped
       }
 
       accounts = List.copyOf(newAccounts.values());
+      persistentMetadata = SFHelpers.nullToEmptyMap(persistentMetadata);
     }
 
     public static Stem deserialize(JsonElement json) {
@@ -89,7 +92,8 @@ public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mapped
         new Stem(
           SettingsSource.Stem.settingsFromProto(request.getSettingsList()),
           request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList(),
-          request.getProxiesList().stream().map(SFProxy::fromProto).toList()
+          request.getProxiesList().stream().map(SFProxy::fromProto).toList(),
+          SettingsSource.Stem.settingsFromProto(request.getPersistentMetadataList())
         );
     }
 
@@ -102,6 +106,7 @@ public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mapped
         .addAllSettings(this.settingsToProto())
         .addAllAccounts(this.accounts.stream().map(MinecraftAccount::toProto).toList())
         .addAllProxies(this.proxies.stream().map(SFProxy::toProto).toList())
+        .addAllPersistentMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(this.persistentMetadata))
         .build();
     }
 

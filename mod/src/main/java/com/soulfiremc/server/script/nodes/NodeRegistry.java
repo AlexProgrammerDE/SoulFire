@@ -244,6 +244,10 @@ public final class NodeRegistry {
     register(GetPersistentBotVariableNode.METADATA, GetPersistentBotVariableNode::new);
     register(SetSessionBotVariableNode.METADATA, SetSessionBotVariableNode::new);
     register(GetSessionBotVariableNode.METADATA, GetSessionBotVariableNode::new);
+    register(SetPersistentInstanceVariableNode.METADATA, SetPersistentInstanceVariableNode::new);
+    register(GetPersistentInstanceVariableNode.METADATA, GetPersistentInstanceVariableNode::new);
+    register(SetSessionInstanceVariableNode.METADATA, SetSessionInstanceVariableNode::new);
+    register(GetSessionInstanceVariableNode.METADATA, GetSessionInstanceVariableNode::new);
   }
 
   private NodeRegistry() {

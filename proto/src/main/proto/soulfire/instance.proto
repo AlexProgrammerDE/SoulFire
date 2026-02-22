@@ -30,6 +30,11 @@ message InstanceConfig {
   repeated MinecraftAccountProto accounts = 2;
   // List of proxies available to this instance for routing bot connections.
   repeated ProxyProto proxies = 3;
+  // Persistent metadata stored with the instance across sessions.
+  // Organized as namespace -> key -> value mappings.
+  // Used by plugins and the system to store instance-specific state
+  // that should persist across restarts.
+  repeated SettingsNamespace persistent_metadata = 4;
 }
 
 // Request to create a new instance.
@@ -443,6 +448,52 @@ message DeleteAccountMetadataEntryRequest {
 message DeleteAccountMetadataEntryResponse {
 }
 
+// Request to get persistent metadata for an instance.
+// Persistent metadata survives restarts and is stored with the instance.
+message GetInstanceMetadataRequest {
+  // The unique identifier (UUID) of the instance.
+  string instance_id = 1;
+}
+
+// Response containing the persistent metadata for an instance.
+message GetInstanceMetadataResponse {
+  // Metadata organized by namespace. Each namespace contains
+  // key-value pairs of metadata.
+  repeated SettingsNamespace metadata = 1;
+}
+
+// Request to set a single persistent metadata entry for an instance.
+message SetInstanceMetadataEntryRequest {
+  // The unique identifier (UUID) of the instance.
+  string instance_id = 1;
+  // The namespace for the metadata entry.
+  string namespace = 2;
+  // The key for the metadata entry within the namespace.
+  string key = 3;
+  // The value to set. Supports JSON value types.
+  google.protobuf.Value value = 4;
+}
+
+// Response after successfully setting an instance metadata entry.
+// Empty response indicates success.
+message SetInstanceMetadataEntryResponse {
+}
+
+// Request to delete a persistent metadata entry from an instance.
+message DeleteInstanceMetadataEntryRequest {
+  // The unique identifier (UUID) of the instance.
+  string instance_id = 1;
+  // The namespace of the metadata entry to delete.
+  string namespace = 2;
+  // The key of the metadata entry to delete.
+  string key = 3;
+}
+
+// Response after successfully deleting an instance metadata entry.
+// Empty response indicates success.
+message DeleteInstanceMetadataEntryResponse {
+}
+
 // Response containing the audit log entries for an instance.
 message InstanceAuditLogResponse {
   // Types of actions that are recorded in the audit log.
@@ -625,4 +676,21 @@ service InstanceService {
   // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
   // Errors: NOT_FOUND if instance does not exist
   rpc DeleteAccountMetadataEntry (DeleteAccountMetadataEntryRequest) returns (DeleteAccountMetadataEntryResponse) {}
+
+  // Gets persistent metadata for the instance itself.
+  // Persistent metadata survives restarts and session changes.
+  // Requires: READ_INSTANCE permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
+  rpc GetInstanceMetadata (GetInstanceMetadataRequest) returns (GetInstanceMetadataResponse) {}
+
+  // Sets a single persistent metadata entry for the instance.
+  // Creates the namespace and key if they don't exist, or updates if they do.
+  // Requires: UPDATE_INSTANCE_META permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
+  rpc SetInstanceMetadataEntry (SetInstanceMetadataEntryRequest) returns (SetInstanceMetadataEntryResponse) {}
+
+  // Deletes a persistent metadata entry from the instance.
+  // Requires: UPDATE_INSTANCE_META permission on the instance
+  // Errors: NOT_FOUND if instance does not exist
+  rpc DeleteInstanceMetadataEntry (DeleteInstanceMetadataEntryRequest) returns (DeleteInstanceMetadataEntryResponse) {}
 }
