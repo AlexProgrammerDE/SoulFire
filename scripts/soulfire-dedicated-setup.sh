@@ -601,17 +601,16 @@ wait_for_healthy() {
     local state
     state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
     if [[ "$state" == "running" ]]; then
+      echo "" >&2
       msg_ok "SoulFire is running"
       return 0
     fi
     ((attempts++))
-    printf "\r  Waiting for container to start... (%ds)" "$attempts" >&2
+    printf "\r\e[34m[INFO]\e[0m Waiting for container to start... (%ds/%ds)" "$attempts" "$max_attempts" >&2
     sleep 1
   done
   echo "" >&2
-  msg_warn "Container did not become healthy within ${max_attempts}s"
-  msg_warn "Check logs with: docker compose -f $COMPOSE_FILE logs"
-  return 0
+  return 1
 }
 
 # --- Fresh install flow ---
@@ -638,7 +637,10 @@ do_fresh_install() {
   docker compose -f "$COMPOSE_FILE" up -d
 
   msg_info "Waiting for SoulFire to start..."
-  wait_for_healthy
+  if ! wait_for_healthy; then
+    tui_msgbox "Slow Start" \
+      "SoulFire is taking longer than expected to start.\nThis is normal on first run while Java initializes.\n\nCheck status with:\n  docker compose -f $COMPOSE_FILE ps\n  docker compose -f $COMPOSE_FILE logs app"
+  fi
 
   local access_url
   case "$SSL_MODE" in
@@ -660,11 +662,13 @@ do_attach() {
   local state
   state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
   if [[ "$state" != "running" ]]; then
-    msg_info "Container is not running (state: ${state:-not found}). Waiting..."
+    msg_warn "Container is not running yet (state: ${state:-not found})"
+    msg_info "Waiting for SoulFire to start..."
     wait_for_healthy
     state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
     if [[ "$state" != "running" ]]; then
-      msg_error "Container failed to start. Check logs with: docker compose -f $COMPOSE_FILE logs app"
+      tui_msgbox "Container Not Ready" \
+        "The SoulFire container failed to start.\n\nCurrent state: ${state:-not found}\n\nCheck logs for details:\n  docker compose -f $COMPOSE_FILE logs app"
       return
     fi
   fi
