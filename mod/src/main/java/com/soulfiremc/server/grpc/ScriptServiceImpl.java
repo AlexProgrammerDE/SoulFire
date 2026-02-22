@@ -34,6 +34,7 @@ import com.soulfiremc.server.script.PortDefinition;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.structs.GsonInstance;
+import com.linecorp.armeria.server.ServiceRequestContext;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
@@ -48,7 +49,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -1404,10 +1404,15 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
         .build())
       .build();
-    var sent = new AtomicBoolean(false);
-    observer.setOnReadyHandler(() -> {
-      if (sent.compareAndSet(false, true)) {
+    var context = ServiceRequestContext.current();
+    context.eventLoop().execute(() -> {
+      if (observer.isCancelled()) {
+        return;
+      }
+      try {
         observer.onNext(event);
+      } catch (Exception e) {
+        log.debug("Error sending script started event", e);
       }
     });
   }
