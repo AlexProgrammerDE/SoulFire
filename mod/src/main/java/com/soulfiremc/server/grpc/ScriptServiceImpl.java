@@ -148,7 +148,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       );
       activeScripts.put(scriptId, activationState);
 
-      log.info("Started script {} with {} triggers", scriptId, graph.findTriggerNodes().size());
+      var dataEdges = graph.dataEdges();
+      log.info("Started script {} with {} triggers, {} data edges: {}", scriptId,
+        graph.findTriggerNodes().size(), dataEdges.size(),
+        dataEdges.stream().map(e -> e.sourceNodeId() + "." + e.sourceHandle() + " -> " + e.targetNodeId() + "." + e.targetHandle()).toList());
     } catch (Exception e) {
       log.error("Failed to start script {}", scriptId, e);
     }
@@ -606,7 +609,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // (Armeria requires headers to be sent before messages, which happens after this method returns)
       sendScriptStartedWhenReady(serverObserver, scriptId);
 
-      log.info("Script {} resumed with {} triggers", scriptId, graph.findTriggerNodes().size());
+      var dataEdges = graph.dataEdges();
+      log.info("Script {} resumed with {} triggers, {} data edges: {}", scriptId,
+        graph.findTriggerNodes().size(), dataEdges.size(),
+        dataEdges.stream().map(e -> e.sourceNodeId() + "." + e.sourceHandle() + " -> " + e.targetNodeId() + "." + e.targetHandle()).toList());
 
     } catch (StatusRuntimeException e) {
       throw e;
@@ -1360,6 +1366,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       if ("EDGE_TYPE_EXECUTION".equals(edge.edgeType())) {
         builder.addExecutionEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
       } else {
+        log.debug("Graph {}: DATA edge {}.{} -> {}.{}", record.getName(),
+          edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
         builder.addDataEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
       }
     }

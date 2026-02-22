@@ -143,10 +143,11 @@ public final class ReactiveScriptEngine {
           inputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
         }
       }
-      if (log.isDebugEnabled() && !eventInputs.isEmpty()) {
-        log.debug("Trigger {} eventInputs keys: {}", nodeDesc, eventInputs.keySet());
-      }
       inputs.putAll(eventInputs);
+      if (log.isDebugEnabled() && !eventInputs.isEmpty()) {
+        log.debug("Trigger {} eventInputs: {}", nodeDesc, eventInputs.entrySet().stream()
+          .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toDebugString())));
+      }
 
       context.eventListener().onNodeStarted(triggerNodeId);
 
@@ -160,6 +161,10 @@ public final class ReactiveScriptEngine {
 
       return nodeImpl.executeReactive(nodeRuntime, inputs)
         .doOnNext(outputs -> {
+          if (log.isDebugEnabled()) {
+            log.debug("Trigger {} outputs: {}", nodeDesc, outputs.entrySet().stream()
+              .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toDebugString())));
+          }
           run.publishNodeOutputs(triggerNodeId, outputs);
           context.eventListener().onNodeCompleted(triggerNodeId, outputs);
         })
@@ -342,7 +347,13 @@ public final class ReactiveScriptEngine {
             var targetKey = edge.targetHandle();
             var value = outputs.get(sourceKey);
             if (value != null) {
+              if (log.isDebugEnabled()) {
+                log.debug("DATA edge {}.{} -> {}.{}: {}", edge.sourceNodeId(), sourceKey, nodeId, targetKey, value.toDebugString());
+              }
               sink.next(Map.entry(targetKey, value));
+            } else {
+              log.warn("DATA edge {}.{} -> {}.{}: source key NOT FOUND in outputs (available: {})",
+                edge.sourceNodeId(), sourceKey, nodeId, targetKey, outputs.keySet());
             }
           }))
         .toList();

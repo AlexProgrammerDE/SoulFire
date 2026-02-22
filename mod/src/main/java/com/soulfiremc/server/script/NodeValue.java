@@ -231,6 +231,18 @@ public sealed interface NodeValue {
     return null;
   }
 
+  /// Returns a short debug string showing type and truncated value.
+  default String toDebugString() {
+    return switch (this) {
+      case Json(JsonElement el) -> {
+        var str = el.toString();
+        yield "Json(" + (str.length() > 50 ? str.substring(0, 50) + "..." : str) + ")";
+      }
+      case Bot(BotConnection bot1) -> "Bot(" + bot1.accountName() + ")";
+      case ValueList(List<NodeValue> items) -> "List[" + items.size() + "]";
+    };
+  }
+
   /// JSON-serializable value (strings, numbers, booleans, arrays, objects, null).
   record Json(JsonElement element) implements NodeValue {
     @Override

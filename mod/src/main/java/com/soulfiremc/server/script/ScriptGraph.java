@@ -81,6 +81,11 @@ public final class ScriptGraph {
     return new Builder(scriptId, scriptName);
   }
 
+  /// Returns all DATA edges in the graph for diagnostic purposes.
+  public List<GraphEdge> dataEdges() {
+    return edges.stream().filter(e -> e.edgeType == EdgeType.DATA).toList();
+  }
+
   /// Gets a node by its ID.
   ///
   /// @param nodeId the node identifier
