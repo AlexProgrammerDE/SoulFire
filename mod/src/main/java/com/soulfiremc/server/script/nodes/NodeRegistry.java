@@ -156,6 +156,8 @@ public final class NodeRegistry {
     register(WaitNode.METADATA, WaitNode::new);
     register(PrintNode.METADATA, PrintNode::new);
     register(ClickSlotNode.METADATA, ClickSlotNode::new);
+    register(DropItemNode.METADATA, DropItemNode::new);
+    register(DropSlotNode.METADATA, DropSlotNode::new);
     register(OpenInventoryNode.METADATA, OpenInventoryNode::new);
     register(CloseInventoryNode.METADATA, CloseInventoryNode::new);
     register(RespawnNode.METADATA, RespawnNode::new);

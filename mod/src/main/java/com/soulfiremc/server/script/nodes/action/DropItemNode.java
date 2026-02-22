@@ -23,47 +23,42 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-/// Action node that performs an inventory slot click.
-/// Supports left click, right click, and shift click operations.
-public final class ClickSlotNode extends AbstractScriptNode {
+/// Action node that drops whatever item is currently held on the cursor.
+/// Equivalent to left-clicking outside the inventory window (slot -999).
+/// Use right-click mode to drop only one item from the cursor stack.
+public final class DropItemNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("action.click_slot")
-    .displayName("Click Slot")
+    .type("action.drop_item")
+    .displayName("Drop Item")
     .category(CategoryRegistry.ACTIONS)
     .addInputs(
       PortDefinition.execIn(),
       PortDefinition.botIn(),
-      PortDefinition.inputWithDefault("slot", "Slot", PortType.NUMBER, "0", "Inventory menu slot index to click (-999 to drop the carried item)"),
-      PortDefinition.inputWithDefault("clickType", "Click Type", PortType.STRING, "\"left\"", "Click type: left, right, or shift")
+      PortDefinition.inputWithDefault("dropAll", "Drop All", PortType.BOOLEAN, "true", "Drop entire stack (true) or one item (false)")
     )
     .addOutputs(
       PortDefinition.execOut()
     )
-    .description("Clicks an inventory slot (left, right, or shift click)")
-    .icon("mouse-pointer-click")
+    .description("Drops the item currently held on the cursor")
+    .icon("hand")
     .color("#FF9800")
-    .addKeywords("click", "slot", "inventory", "move", "item", "swap")
+    .addKeywords("drop", "item", "cursor", "throw", "discard")
     .build();
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var bot = requireBot(inputs);
-    var slot = getIntInput(inputs, "slot", 0);
-    var clickTypeStr = getStringInput(inputs, "clickType", "left");
+    var dropAll = getBooleanInput(inputs, "dropAll", true);
 
-    var clickType = switch (clickTypeStr.toLowerCase()) {
-      case "right" -> ClickType.PICKUP;
-      case "shift" -> ClickType.QUICK_MOVE;
-      default -> ClickType.PICKUP;
-    };
-    var button = "right".equalsIgnoreCase(clickTypeStr) ? 1 : 0;
+    // Button 0 = drop entire stack (left click outside), button 1 = drop one item (right click outside)
+    var button = dropAll ? 0 : 1;
 
     runOnTickThread(runtime, bot, () -> {
       var player = bot.minecraft().player;
       var gameMode = bot.minecraft().gameMode;
       if (player != null && gameMode != null) {
         gameMode.handleInventoryMouseClick(
-          player.containerMenu.containerId, slot, button, clickType, player
+          player.containerMenu.containerId, -999, button, ClickType.PICKUP, player
         );
       }
     });
