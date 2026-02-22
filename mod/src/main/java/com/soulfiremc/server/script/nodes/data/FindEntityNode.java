@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.script.nodes.data;
 
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.script.*;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
@@ -154,7 +155,7 @@ public final class FindEntityNode extends AbstractScriptNode {
     ));
   }
 
-  private static boolean canSee(com.soulfiremc.server.bot.BotConnection connection, Vec3 target) {
+  private static boolean canSee(BotConnection connection, Vec3 target) {
     var level = connection.minecraft().level;
     var player = connection.minecraft().player;
     if (level == null || player == null) {

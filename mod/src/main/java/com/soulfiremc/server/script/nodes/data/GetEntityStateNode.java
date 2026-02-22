@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.data;
 
 import com.soulfiremc.server.script.*;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -110,7 +111,7 @@ public final class GetEntityStateNode extends AbstractScriptNode {
     return completedMono(buildResult(found, player));
   }
 
-  private Map<String, NodeValue> buildResult(Entity entity, net.minecraft.client.player.LocalPlayer player) {
+  private Map<String, NodeValue> buildResult(Entity entity, LocalPlayer player) {
     var health = 0.0;
     var maxHealth = 0.0;
     var isAlive = entity.isAlive();

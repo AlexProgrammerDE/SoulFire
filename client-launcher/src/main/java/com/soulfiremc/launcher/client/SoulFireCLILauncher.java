@@ -26,7 +26,7 @@ public final class SoulFireCLILauncher {
     var cliHomeDir = System.getProperty( "sf.cliHomeDir" );
 
     SoulFireAbstractLauncher.run(
-      cliHomeDir != null ? Path.of(cliHomeDir) : Path.of( System.getProperty( "user.home" ) ).resolve( ".soulfire" ),
+      cliHomeDir != null ? Path.of( cliHomeDir ) : Path.of( System.getProperty( "user.home" ) ).resolve( ".soulfire" ),
       "com.soulfiremc.bootstrap.client.SoulFireCLIBootstrap",
       args
     );

@@ -56,7 +56,7 @@ public final class ClickSlotNode extends AbstractScriptNode {
       case "shift" -> ClickType.QUICK_MOVE;
       default -> ClickType.PICKUP;
     };
-    var button = clickTypeStr.equalsIgnoreCase("right") ? 1 : 0;
+    var button = "right".equalsIgnoreCase(clickTypeStr) ? 1 : 0;
 
     runOnTickThread(runtime, bot, () -> {
       var player = bot.minecraft().player;

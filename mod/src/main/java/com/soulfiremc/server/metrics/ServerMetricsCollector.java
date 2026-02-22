@@ -21,6 +21,7 @@ import com.google.protobuf.Timestamp;
 import com.soulfiremc.grpc.generated.ServerMetricsSnapshot;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.SessionLifecycle;
+import com.sun.management.OperatingSystemMXBean;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
@@ -50,7 +51,7 @@ public final class ServerMetricsCollector {
     var processCpuLoad = -1.0;
     var systemCpuLoad = -1.0;
     var osBean = ManagementFactory.getOperatingSystemMXBean();
-    if (osBean instanceof com.sun.management.OperatingSystemMXBean sunOsBean) {
+    if (osBean instanceof OperatingSystemMXBean sunOsBean) {
       processCpuLoad = sunOsBean.getProcessCpuLoad();
       systemCpuLoad = sunOsBean.getCpuLoad();
     }

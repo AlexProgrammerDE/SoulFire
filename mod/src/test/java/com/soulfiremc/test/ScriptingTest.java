@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -1707,8 +1709,8 @@ final class ScriptingTest {
   void repeatUntilLoopsUntilConditionMet() {
     // Test: loop body executes 3 times, then ResultNode sets checkResult=true.
     var node = NodeRegistry.create("flow.repeat_until");
-    var loopCount = new java.util.concurrent.atomic.AtomicInteger(0);
-    var checkResult = new java.util.concurrent.atomic.AtomicBoolean(false);
+    var loopCount = new AtomicInteger(0);
+    var checkResult = new AtomicBoolean(false);
 
     var runtime = new NodeRuntime() {
       @Override
@@ -1757,8 +1759,8 @@ final class ScriptingTest {
   void repeatUntilBodyExecutesAtLeastOnce() {
     // Even if check immediately returns true, body runs once (do-while).
     var node = NodeRegistry.create("flow.repeat_until");
-    var loopCount = new java.util.concurrent.atomic.AtomicInteger(0);
-    var checkResult = new java.util.concurrent.atomic.AtomicBoolean(false);
+    var loopCount = new AtomicInteger(0);
+    var checkResult = new AtomicBoolean(false);
 
     var runtime = new NodeRuntime() {
       @Override
@@ -1806,7 +1808,7 @@ final class ScriptingTest {
   void repeatUntilRespectsMaxIterations() {
     // Test safety limit: checkResult never set to true, maxIterations stops the loop.
     var node = NodeRegistry.create("flow.repeat_until");
-    var loopCount = new java.util.concurrent.atomic.AtomicInteger(0);
+    var loopCount = new AtomicInteger(0);
 
     var runtime = new NodeRuntime() {
       @Override
@@ -1848,7 +1850,7 @@ final class ScriptingTest {
   void repeatUntilWithNoCheckConnectionLoopsToMax() {
     // When nothing is connected to exec_check, checkResult stays false → loops to max.
     var node = NodeRegistry.create("flow.repeat_until");
-    var loopCount = new java.util.concurrent.atomic.AtomicInteger(0);
+    var loopCount = new AtomicInteger(0);
 
     var runtime = new NodeRuntime() {
       @Override
@@ -1889,8 +1891,8 @@ final class ScriptingTest {
   void repeatUntilExecDoneFires() {
     // Verify that exec_done fires after condition is met.
     var node = NodeRegistry.create("flow.repeat_until");
-    var doneFired = new java.util.concurrent.atomic.AtomicBoolean(false);
-    var checkResult = new java.util.concurrent.atomic.AtomicBoolean(false);
+    var doneFired = new AtomicBoolean(false);
+    var checkResult = new AtomicBoolean(false);
 
     var runtime = new NodeRuntime() {
       @Override
@@ -1936,7 +1938,7 @@ final class ScriptingTest {
   void resultNodeSetsCheckResult() {
     // Test ResultNode directly: it should call setCheckResult on the runtime.
     var node = NodeRegistry.create("flow.result");
-    var checkResult = new java.util.concurrent.atomic.AtomicBoolean(false);
+    var checkResult = new AtomicBoolean(false);
 
     var runtime = new NodeRuntime() {
       @Override
@@ -1962,7 +1964,7 @@ final class ScriptingTest {
   @Test
   void resultNodeDefaultsToFalse() {
     var node = NodeRegistry.create("flow.result");
-    var checkResult = new java.util.concurrent.atomic.AtomicBoolean(true);
+    var checkResult = new AtomicBoolean(true);
 
     var runtime = new NodeRuntime() {
       @Override

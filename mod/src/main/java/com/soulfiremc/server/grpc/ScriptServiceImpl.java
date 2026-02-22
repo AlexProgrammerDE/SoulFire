@@ -1141,9 +1141,13 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   }
 
   private static String getParentGroupId(ScriptNodeData node) {
-    if (node.data() == null) return null;
+    if (node.data() == null) {
+      return null;
+    }
     var element = node.data().get("parentGroupId");
-    if (element == null || element.isJsonNull()) return null;
+    if (element == null || element.isJsonNull()) {
+      return null;
+    }
     return element.getAsString();
   }
 
@@ -1152,7 +1156,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     var current = groupId;
     while (true) {
       var parent = groupParentMap.get(current);
-      if (parent == null) break;
+      if (parent == null) {
+        break;
+      }
       depth++;
       current = parent;
     }
@@ -1283,13 +1289,19 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Collect IDs to remove
       var removeIds = new HashSet<String>();
       removeIds.add(groupId);
-      if (groupInput != null) removeIds.add(groupInput.id());
-      if (groupOutput != null) removeIds.add(groupOutput.id());
+      if (groupInput != null) {
+        removeIds.add(groupInput.id());
+      }
+      if (groupOutput != null) {
+        removeIds.add(groupOutput.id());
+      }
 
       // Promote children: update parentGroupId of remaining child nodes to the group's own parentGroupId
       var updatedNodes = new ArrayList<ScriptNodeData>();
       for (var n : nodes) {
-        if (removeIds.contains(n.id())) continue;
+        if (removeIds.contains(n.id())) {
+          continue;
+        }
         if (groupId.equals(getParentGroupId(n))) {
           // Promote: replace parentGroupId with the group's parent
           var newData = new HashMap<>(n.data() != null ? n.data() : Map.<String, JsonElement>of());
@@ -1318,8 +1330,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     List<ScriptNodeData> rawNodes = GsonInstance.GSON.fromJson(record.getNodesJson(), NODE_LIST_TYPE);
     List<ScriptEdgeData> rawEdges = GsonInstance.GSON.fromJson(record.getEdgesJson(), EDGE_LIST_TYPE);
 
-    if (rawNodes == null) rawNodes = List.of();
-    if (rawEdges == null) rawEdges = List.of();
+    if (rawNodes == null) {
+      rawNodes = List.of();
+    }
+    if (rawEdges == null) {
+      rawEdges = List.of();
+    }
 
     // Flatten layout nodes (groups, reroutes, frames, notes, debug)
     var flattened = flattenLayoutNodes(rawNodes, rawEdges);
