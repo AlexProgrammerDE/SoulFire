@@ -305,6 +305,12 @@ public final class ScriptTriggerService {
           listeners.add(endTrigger);
           log.debug("Registered OnScriptEnd trigger for script {} node {}", scriptId, node.id());
         }
+
+        default -> {
+          if (node.type().startsWith("trigger.")) {
+            log.warn("Unsupported trigger node type '{}' for script {} node {}", node.type(), scriptId, node.id());
+          }
+        }
       }
     }
 
