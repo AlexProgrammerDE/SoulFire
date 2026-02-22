@@ -22,6 +22,7 @@ import com.soulfiremc.server.script.ReactiveScriptContext;
 import com.soulfiremc.server.script.ReactiveScriptEngine;
 import com.soulfiremc.server.script.ScriptGraph;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -309,6 +310,81 @@ final class ScriptEngineTest {
     assertNoErrors(listener);
     assertTrue(countNodeExecutions(listener, "print_999") > 0,
       "All 1000 nodes should execute without StackOverflowError");
+  }
+
+  @Test
+  @Timeout(5)
+  void loopNodeDataEdgeResolvesWithoutTimeout() {
+    // Loop(count=3) → Print with DATA edge Loop.index → Print.message
+    // This tests that on-path DATA edges from self-driving loop nodes resolve without timeout
+    var graph = ScriptGraph.builder("test-loop-data-edge", "Loop Data Edge Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("loop", "flow.loop", Map.of("count", 3))
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "loop", "in")
+      .addExecutionEdge("loop", "exec_loop", "print", "in")
+      .addDataEdge("loop", "index", "print", "message")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertEquals(3, listener.logMessages.size(),
+      "Loop should produce 3 print messages, got: " + listener.logMessages);
+  }
+
+  @Test
+  @Timeout(5)
+  void loopNodeDataEdgeToIndirectDownstream() {
+    // Loop(count=3) → Print1 → Print2 with DATA edge Loop.index → Print2.message
+    // Tests DATA edge from loop node to a non-immediately-downstream node in the loop body
+    var graph = ScriptGraph.builder("test-loop-indirect-data", "Loop Indirect Data Edge Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("loop", "flow.loop", Map.of("count", 3))
+      .addNode("print1", "action.print", Map.of("message", "step"))
+      .addNode("print2", "action.print", null)
+      .addExecutionEdge("trigger", "out", "loop", "in")
+      .addExecutionEdge("loop", "exec_loop", "print1", "in")
+      .addExecutionEdge("print1", "out", "print2", "in")
+      .addDataEdge("loop", "index", "print2", "message")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertEquals(6, listener.logMessages.size(),
+      "Should have 6 log messages (3 from print1 + 3 from print2), got: " + listener.logMessages);
+  }
+
+  @Test
+  @Timeout(5)
+  void forEachDataEdgeResolvesWithoutTimeout() {
+    // Trigger → ForEach(items from data-only Range) → Print with DATA edge ForEach.index → Print.message
+    var graph = ScriptGraph.builder("test-foreach-data-edge", "ForEach Data Edge Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("range", "list.range", Map.of("start", 0, "end", 3, "step", 1))
+      .addNode("foreach", "flow.foreach", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "foreach", "in")
+      .addDataEdge("range", "list", "foreach", "items")
+      .addExecutionEdge("foreach", "exec_loop", "print", "in")
+      .addDataEdge("foreach", "index", "print", "message")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertEquals(3, listener.logMessages.size(),
+      "ForEach should produce 3 print messages, got: " + listener.logMessages);
   }
 
   /// Extended RecordingEventListener that also captures log messages from Print nodes.

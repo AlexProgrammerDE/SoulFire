@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script;
 
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
@@ -35,6 +36,8 @@ public final class ExecutionRun {
   private static final long MAX_EXECUTION_COUNT = 100_000;
 
   private final ConcurrentHashMap<String, Sinks.Many<Map<String, NodeValue>>> nodeOutputSinks =
+    new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Map<String, NodeValue>> publishedOutputs =
     new ConcurrentHashMap<>();
   private final Set<String> triggeredDataNodes = ConcurrentHashMap.newKeySet();
   private final AtomicLong executionCount = new AtomicLong(0);
@@ -79,12 +82,22 @@ public final class ExecutionRun {
   /// @param nodeId   the node identifier
   /// @param outputs  the output values
   public void publishNodeOutputs(String nodeId, Map<String, NodeValue> outputs) {
+    publishedOutputs.put(nodeId, outputs);
     var result = nodeOutputSinks
       .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
       .tryEmitNext(outputs);
     if (result.isFailure()) {
       log.warn("Failed to publish outputs for node {}: {}", nodeId, result);
     }
+  }
+
+  /// Returns the most recently published outputs for a node, or null if none published yet.
+  /// Used for non-blocking synchronous resolution of on-path DATA edges.
+  ///
+  /// @param nodeId the node identifier
+  /// @return the published outputs, or null if not yet available
+  public @Nullable Map<String, NodeValue> getPublishedOutputs(String nodeId) {
+    return publishedOutputs.get(nodeId);
   }
 
   /// Marks a data-only node as triggered for eager execution within this run.

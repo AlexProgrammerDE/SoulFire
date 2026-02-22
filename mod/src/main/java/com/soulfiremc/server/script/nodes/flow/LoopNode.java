@@ -58,11 +58,11 @@ public final class LoopNode extends AbstractScriptNode {
         "isComplete", NodeValue.ofBoolean(false),
         "count", NodeValue.ofNumber(count)
       )))
-      .then(runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
+      .then(Mono.defer(() -> runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
         "index", NodeValue.ofNumber(count),
         "isComplete", NodeValue.ofBoolean(true),
         "count", NodeValue.ofNumber(count)
-      )))
+      ))))
       // Return final outputs without exec handle keys so the engine's
       // dynamic routing finds nothing active and exits cleanly
       .thenReturn(results("index", count, "isComplete", true, "count", count));

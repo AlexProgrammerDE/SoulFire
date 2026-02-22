@@ -390,29 +390,66 @@ public final class ReactiveScriptEngine {
       : Flux.merge(dataOnlySourceIds).then();
 
     return ensureDataNodes.then(Mono.defer(() -> {
-      var upstreamMonos = incomingDataEdges.stream()
-        .map(edge -> run.awaitNodeOutputs(edge.sourceNodeId(), describeNode(edge.sourceNodeId(), graph))
-          .<Map.Entry<String, NodeValue>>handle((outputs, sink) -> {
-            var sourceKey = edge.sourceHandle();
-            var targetKey = edge.targetHandle();
-            var value = outputs.get(sourceKey);
-            if (value != null) {
-              if (log.isDebugEnabled()) {
-                log.debug("DATA edge {}.{} -> {}.{}: {}", edge.sourceNodeId(), sourceKey, nodeId, targetKey, value.toDebugString());
-              }
-              sink.next(Map.entry(targetKey, value));
-            } else {
-              log.warn("DATA edge {}.{} -> {}.{}: source key NOT FOUND in outputs (available: {})",
-                edge.sourceNodeId(), sourceKey, nodeId, targetKey, outputs.keySet());
-            }
-          }))
-        .toList();
+      // Split DATA edges into on-path (source has incoming exec edges) and off-path (data-only)
+      var onPathResolved = new HashMap<String, NodeValue>();
+      var offPathMonos = new java.util.ArrayList<Mono<Map.Entry<String, NodeValue>>>();
 
-      return Flux.merge(upstreamMonos)
+      for (var edge : incomingDataEdges) {
+        var sourceKey = edge.sourceHandle();
+        var targetKey = edge.targetHandle();
+
+        if (graph.hasIncomingExecutionEdges(edge.sourceNodeId())) {
+          // On-path: resolve synchronously from published outputs or exec context
+          var published = run.getPublishedOutputs(edge.sourceNodeId());
+          NodeValue value = null;
+          if (published != null) {
+            value = published.get(sourceKey);
+          }
+          if (value == null) {
+            // Fall back to execution context values
+            value = execContext.values().get(sourceKey);
+          }
+          if (value != null) {
+            if (log.isDebugEnabled()) {
+              log.debug("DATA edge {}.{} -> {}.{} (on-path): {}", edge.sourceNodeId(), sourceKey, nodeId, targetKey, value.toDebugString());
+            }
+            onPathResolved.put(targetKey, value);
+          } else {
+            log.warn("DATA edge {}.{} -> {}.{}: on-path source value not available (published: {}, execContext: {})",
+              edge.sourceNodeId(), sourceKey, nodeId, targetKey,
+              published != null ? published.keySet() : "null", execContext.values().keySet());
+          }
+        } else {
+          // Off-path (data-only): use existing awaitNodeOutputs with timeout
+          offPathMonos.add(run.awaitNodeOutputs(edge.sourceNodeId(), describeNode(edge.sourceNodeId(), graph))
+            .handle((outputs, sink) -> {
+              var value = outputs.get(sourceKey);
+              if (value != null) {
+                if (log.isDebugEnabled()) {
+                  log.debug("DATA edge {}.{} -> {}.{} (off-path): {}", edge.sourceNodeId(), sourceKey, nodeId, targetKey, value.toDebugString());
+                }
+                sink.next(Map.entry(targetKey, value));
+              } else {
+                log.warn("DATA edge {}.{} -> {}.{}: source key NOT FOUND in outputs (available: {})",
+                  edge.sourceNodeId(), sourceKey, nodeId, targetKey, outputs.keySet());
+              }
+            }));
+        }
+      }
+
+      if (offPathMonos.isEmpty()) {
+        // All DATA edges resolved synchronously
+        var merged = new HashMap<>(baseInputs);
+        merged.putAll(onPathResolved);
+        return executeNode(nodeImpl, metadata, nodeId, merged, graph, context, run, execContext);
+      }
+
+      return Flux.merge(offPathMonos)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (_, b) -> b))
-        .map(resolvedInputs -> {
+        .map(offPathInputs -> {
           var merged = new HashMap<>(baseInputs);
-          merged.putAll(resolvedInputs);
+          merged.putAll(onPathResolved);
+          merged.putAll(offPathInputs);
           return merged;
         })
         .flatMap(inputs -> executeNode(nodeImpl, metadata, nodeId, inputs, graph, context, run, execContext));

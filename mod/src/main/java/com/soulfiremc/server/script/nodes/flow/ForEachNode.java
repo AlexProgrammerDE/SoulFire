@@ -61,12 +61,12 @@ public final class ForEachNode extends AbstractScriptNode {
         "isComplete", NodeValue.ofBoolean(false),
         "size", NodeValue.ofNumber(size)
       )))
-      .then(runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
+      .then(Mono.defer(() -> runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
         "item", NodeValue.ofNull(),
         "index", NodeValue.ofNumber(size),
         "isComplete", NodeValue.ofBoolean(true),
         "size", NodeValue.ofNumber(size)
-      )))
+      ))))
       .thenReturn(results("index", size, "isComplete", true, "size", size));
   }
 }

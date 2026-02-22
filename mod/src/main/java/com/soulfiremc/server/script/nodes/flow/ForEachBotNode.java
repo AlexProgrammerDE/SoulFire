@@ -64,12 +64,12 @@ public final class ForEachBotNode extends AbstractScriptNode {
           "isComplete", NodeValue.ofBoolean(false)
         ));
       })
-      .then(runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
+      .then(Mono.defer(() -> runtime.executeDownstream(StandardPorts.EXEC_DONE, Map.of(
         "bot", NodeValue.ofNull(),
         "index", NodeValue.ofNumber(count),
         "count", NodeValue.ofNumber(count),
         "isComplete", NodeValue.ofBoolean(true)
-      )))
+      ))))
       .thenReturn(results("index", count, "count", count, "isComplete", true));
   }
 }
