@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -392,7 +393,7 @@ public final class ReactiveScriptEngine {
     return ensureDataNodes.then(Mono.defer(() -> {
       // Split DATA edges into on-path (source has incoming exec edges) and off-path (data-only)
       var onPathResolved = new HashMap<String, NodeValue>();
-      var offPathMonos = new java.util.ArrayList<Mono<Map.Entry<String, NodeValue>>>();
+      var offPathMonos = new ArrayList<Mono<Map.Entry<String, NodeValue>>>();
 
       for (var edge : incomingDataEdges) {
         var sourceKey = edge.sourceHandle();
