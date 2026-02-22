@@ -167,9 +167,12 @@ public final class ScriptTriggerService {
           ChatMessageReceiveEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
-            inputs.put("message", NodeValue.ofString(
-              SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.serialize(event.message())));
-            inputs.put("messagePlainText", NodeValue.ofString(event.parseToPlainText()));
+            var legacyMessage = SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.serialize(event.message());
+            var plainText = event.parseToPlainText();
+            log.debug("OnChat trigger inputs: legacyMessage='{}', plainText='{}', componentClass={}",
+              legacyMessage, plainText, event.message().getClass().getSimpleName());
+            inputs.put("message", NodeValue.ofString(legacyMessage));
+            inputs.put("messagePlainText", NodeValue.ofString(plainText));
             inputs.put("timestamp", NodeValue.ofNumber(event.timestamp()));
             return inputs;
           }, listeners, "OnChat");

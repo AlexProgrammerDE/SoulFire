@@ -143,6 +143,9 @@ public final class ReactiveScriptEngine {
           inputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
         }
       }
+      if (log.isDebugEnabled() && !eventInputs.isEmpty()) {
+        log.debug("Trigger {} eventInputs keys: {}", nodeDesc, eventInputs.keySet());
+      }
       inputs.putAll(eventInputs);
 
       context.eventListener().onNodeStarted(triggerNodeId);

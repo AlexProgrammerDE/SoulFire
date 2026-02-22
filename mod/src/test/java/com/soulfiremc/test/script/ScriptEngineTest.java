@@ -18,10 +18,14 @@
 package com.soulfiremc.test.script;
 
 import com.soulfiremc.server.script.NodeValue;
+import com.soulfiremc.server.script.ReactiveScriptContext;
+import com.soulfiremc.server.script.ReactiveScriptEngine;
 import com.soulfiremc.server.script.ScriptGraph;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.soulfiremc.test.script.ScriptTestHelper.*;
@@ -185,5 +189,113 @@ final class ScriptEngineTest {
     var triggerStartCount = countNodeExecutions(listener, "trigger");
     assertEquals(1, triggerStartCount,
       "Trigger should be executed exactly once, not re-executed as a data-only node");
+  }
+
+  @Test
+  void onChatPlainTextToPrintViaDataEdge() {
+    // Exact scenario: OnChat → Print with messagePlainText DATA edge
+    var graph = ScriptGraph.builder("test-onchat-print-plain", "OnChat Print Plain Text")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
+      .addDataEdge("trigger", "messagePlainText", "print", "message")
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("Hello from chat"));
+    eventInputs.put("message", NodeValue.ofString("§aHello from chat"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("trigger"),
+      "Trigger node should complete");
+    assertTrue(listener.completedNodes.contains("print"),
+      "Print node should complete");
+
+    // Verify the trigger outputs contain the event data
+    var triggerOutputs = listener.nodeOutputs.get("trigger");
+    assertNotNull(triggerOutputs, "Trigger should have outputs");
+    assertEquals("Hello from chat", triggerOutputs.get("messagePlainText").asString("MISSING"),
+      "Trigger should output messagePlainText from event inputs");
+    assertEquals("§aHello from chat", triggerOutputs.get("message").asString("MISSING"),
+      "Trigger should output message from event inputs");
+
+    // Verify the print node logged the correct message
+    assertEquals(1, listener.logMessages.size(), "Print should log exactly one message");
+    assertEquals("Hello from chat", listener.logMessages.getFirst(),
+      "Print should output the plain text message via DATA edge");
+  }
+
+  @Test
+  void onChatMessageToPrintViaDataEdge() {
+    // Exact scenario: OnChat → Print with message (legacy format) DATA edge
+    var graph = ScriptGraph.builder("test-onchat-print-message", "OnChat Print Message")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
+      .addDataEdge("trigger", "message", "print", "message")
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("Hello from chat"));
+    eventInputs.put("message", NodeValue.ofString("§aHello from chat"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("print"),
+      "Print node should complete");
+
+    assertEquals(1, listener.logMessages.size(), "Print should log exactly one message");
+    assertEquals("§aHello from chat", listener.logMessages.getFirst(),
+      "Print should output the legacy message via DATA edge");
+  }
+
+  @Test
+  void onChatPrintReceivesExecContextWithoutDataEdge() {
+    // When there's no DATA edge, Print should still receive trigger outputs via exec context
+    var graph = ScriptGraph.builder("test-onchat-print-context", "OnChat Print Exec Context")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("Hello via context"));
+    eventInputs.put("message", NodeValue.ofString("§aHello via context"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("print"),
+      "Print node should complete");
+
+    // Without a DATA edge, Print gets "message" from exec context (the trigger's output)
+    assertEquals(1, listener.logMessages.size(), "Print should log exactly one message");
+    assertEquals("§aHello via context", listener.logMessages.getFirst(),
+      "Print should receive message from execution context when no DATA edge exists");
+  }
+
+  /// Extended RecordingEventListener that also captures log messages from Print nodes.
+  private static class LogRecordingEventListener extends RecordingEventListener {
+    final List<String> logMessages = new ArrayList<>();
+
+    @Override
+    public void onLog(String level, String message) {
+      logMessages.add(message);
+    }
   }
 }
