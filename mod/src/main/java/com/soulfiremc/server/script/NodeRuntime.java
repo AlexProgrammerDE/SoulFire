@@ -69,4 +69,27 @@ public interface NodeRuntime {
   default Mono<Void> executeDownstream(String handle, Map<String, NodeValue> outputs) {
     throw new UnsupportedOperationException("Only available during reactive engine execution");
   }
+
+  /// Sets the check result flag for condition-based loops.
+  /// Called by ResultNode to communicate a boolean back to the enclosing loop.
+  ///
+  /// @param value the boolean result
+  default void setCheckResult(boolean value) {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
+
+  /// Gets and resets the check result flag.
+  /// Called by loop nodes (e.g., RepeatUntilNode) after executing a check chain.
+  ///
+  /// @return the check result before reset
+  default boolean getAndResetCheckResult() {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
+
+  /// Resets all data-only node trigger flags, allowing them to re-execute
+  /// with fresh upstream values. Called by loop nodes before evaluating
+  /// check chains so that data-only condition nodes get re-evaluated.
+  default void resetDataNodeTriggers() {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
 }

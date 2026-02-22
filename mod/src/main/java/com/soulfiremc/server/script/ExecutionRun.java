@@ -38,6 +38,7 @@ public final class ExecutionRun {
     new ConcurrentHashMap<>();
   private final Set<String> triggeredDataNodes = ConcurrentHashMap.newKeySet();
   private final AtomicLong executionCount = new AtomicLong(0);
+  private volatile boolean checkResult;
 
   /// Whether this execution is running synchronously on the tick thread.
   private final boolean tickSynchronous;
@@ -94,6 +95,31 @@ public final class ExecutionRun {
   /// @return true if newly marked, false if already triggered
   public boolean markDataNodeTriggered(String nodeId) {
     return triggeredDataNodes.add(nodeId);
+  }
+
+  /// Sets the check result flag, used by ResultNode to communicate
+  /// a boolean condition back to loop nodes (e.g., RepeatUntilNode).
+  ///
+  /// @param value the boolean result
+  public void setCheckResult(boolean value) {
+    this.checkResult = value;
+  }
+
+  /// Gets and resets the check result flag.
+  /// Returns the current value and resets it to false.
+  ///
+  /// @return the check result before reset
+  public boolean getAndResetCheckResult() {
+    var result = this.checkResult;
+    this.checkResult = false;
+    return result;
+  }
+
+  /// Resets all data-only node trigger flags, allowing them to re-execute.
+  /// Used by loop nodes before evaluating check chains so that data-only
+  /// nodes (e.g., CompareNode) can re-evaluate with fresh upstream values.
+  public void resetDataNodeTriggers() {
+    triggeredDataNodes.clear();
   }
 
   /// Increments the execution count and checks if the limit has been exceeded.

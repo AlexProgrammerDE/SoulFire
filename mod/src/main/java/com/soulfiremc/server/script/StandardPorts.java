@@ -34,6 +34,7 @@ public final class StandardPorts {
   // Loop execution outputs
   public static final String EXEC_LOOP = "exec_loop";
   public static final String EXEC_DONE = "exec_done";
+  public static final String EXEC_CHECK = "exec_check";
 
   // Success/error execution outputs
   public static final String EXEC_SUCCESS = "exec_success";

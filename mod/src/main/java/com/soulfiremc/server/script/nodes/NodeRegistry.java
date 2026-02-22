@@ -204,6 +204,8 @@ public final class NodeRegistry {
     register(ForEachNode.METADATA, ForEachNode::new);
     register(ForEachBotNode.METADATA, ForEachBotNode::new);
     register(SequenceNode.METADATA, SequenceNode::new);
+    register(RepeatUntilNode.METADATA, RepeatUntilNode::new);
+    register(ResultNode.METADATA, ResultNode::new);
     register(GateNode.METADATA, GateNode::new);
     register(DebounceNode.METADATA, DebounceNode::new);
     register(RateLimitNode.METADATA, RateLimitNode::new);

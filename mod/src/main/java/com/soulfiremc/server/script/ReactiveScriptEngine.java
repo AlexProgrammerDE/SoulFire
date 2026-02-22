@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
 /// - Error routing: Nodes with exec_error ports route errors; others stop the branch
 /// - Muted bypass: Muted nodes pass execution context through unchanged
 /// - Per-invocation isolation: Each trigger creates its own ExecutionRun
+/// - Check result: Condition-based loops use ResultNode + setCheckResult/getAndResetCheckResult
+///   to communicate boolean results from check chains back to the loop node
 @Slf4j
 public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
@@ -200,7 +202,6 @@ public final class ReactiveScriptEngine {
       .toList();
 
     if (execPorts.isEmpty()) {
-      // Node has no exec output ports — terminal node
       return Mono.empty();
     }
 
@@ -232,7 +233,7 @@ public final class ReactiveScriptEngine {
   /// @param context      the script execution context
   /// @param run          the per-invocation execution run
   /// @param execContext  the accumulated execution context flowing along execution edges
-  /// @return a Mono that completes when all downstream nodes finish
+  /// @return a Mono that completes when downstream execution finishes
   private Mono<Void> executeDownstream(
     ScriptGraph graph,
     String fromNodeId,
@@ -510,7 +511,11 @@ public final class ReactiveScriptEngine {
 
   /// Creates a NodeRuntime wrapper that captures the current execution state.
   /// Self-driving nodes (loops, sequences) use runtime.executeDownstream() to
-  /// call back into the engine.
+  /// call back into the engine. Condition-based loops use ResultNode +
+  /// setCheckResult/getAndResetCheckResult to read boolean results from check chains.
+  ///
+  /// executeDownstream publishes the caller's outputs to the run before delegating,
+  /// enabling DATA edges from self-driving nodes to downstream chain nodes.
   private NodeRuntime createNodeRuntime(
     ScriptGraph graph,
     String nodeId,
@@ -546,8 +551,24 @@ public final class ReactiveScriptEngine {
 
       @Override
       public Mono<Void> executeDownstream(String handle, Map<String, NodeValue> outputs) {
+        run.publishNodeOutputs(nodeId, outputs);
         var newCtx = execContext.mergeWith(outputs);
         return ReactiveScriptEngine.this.executeDownstream(graph, nodeId, handle, context, run, newCtx);
+      }
+
+      @Override
+      public void setCheckResult(boolean value) {
+        run.setCheckResult(value);
+      }
+
+      @Override
+      public boolean getAndResetCheckResult() {
+        return run.getAndResetCheckResult();
+      }
+
+      @Override
+      public void resetDataNodeTriggers() {
+        run.resetDataNodeTriggers();
       }
     };
   }
