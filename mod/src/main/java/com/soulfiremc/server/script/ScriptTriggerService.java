@@ -194,8 +194,18 @@ public final class ScriptTriggerService {
 
         case "trigger.on_join" -> {
           var triggeredBots = ConcurrentHashMap.<String>newKeySet();
+
+          // Listen for disconnect events to clear the bot from triggeredBots,
+          // allowing the trigger to fire again on the next session/reconnect.
+          Consumer<BotDisconnectedEvent> disconnectHandler = event ->
+            triggeredBots.remove(event.connection().accountName());
+          SoulFireAPI.registerListener(BotDisconnectedEvent.class, disconnectHandler);
+          listeners.add(new EventListenerHolder<>(BotDisconnectedEvent.class, disconnectHandler));
+
+          // Use BotPostEntityTickEvent instead of BotPreTickEvent so the player's
+          // position data has been processed by the time the trigger fires.
           registerEventTrigger(scriptId, node.id(), graph, context, engine,
-            BotPreTickEvent.class, event -> {
+            BotPostEntityTickEvent.class, event -> {
               var connection = event.connection();
               var botId = connection.accountName();
               if (connection.minecraft().player != null && triggeredBots.add(botId)) {
