@@ -1645,6 +1645,56 @@ final class ScriptingTest {
   }
 
   @Test
+  void triggerDataEdgeNotReExecuted() {
+    // Regression test: When a trigger node's output is wired via a DATA edge to a
+    // downstream node, the engine should NOT re-execute the trigger as a "data-only" node.
+    // Trigger nodes have no incoming execution edges, so the engine's data-only detection
+    // incorrectly identifies them as data-only nodes and re-executes them without event inputs.
+    //
+    // This simulates: OnChat --EXEC--> StringLength
+    //                  OnChat.messagePlainText --DATA--> StringLength.text
+    // The trigger provides "messagePlainText" via eventInputs, so it must NOT be re-executed.
+    var graph = ScriptGraph.builder("test-trigger-data-edge", "Trigger Data Edge Test")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("len", "string.length", null)
+      .addExecutionEdge("trigger", "out", "len", "in")
+      .addDataEdge("trigger", "messagePlainText", "len", "text")
+      .build();
+
+    var listener = new RecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+
+    // Simulate the event inputs that ScriptTriggerService would provide
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("hello world"));
+    eventInputs.put("message", NodeValue.ofString("hello world"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertTrue(listener.errorNodes.isEmpty(),
+      "No errors expected, got: " + listener.errorNodes);
+    assertTrue(listener.completedNodes.contains("trigger"),
+      "Trigger node should complete");
+    assertTrue(listener.completedNodes.contains("len"),
+      "StringLength node should complete");
+
+    // Verify the string length node got the event data (not empty string from re-execution)
+    var lenOutputs = listener.nodeOutputs.get("len");
+    assertNotNull(lenOutputs, "StringLength node should have outputs");
+    assertEquals(11, lenOutputs.get("length").asInt(0),
+      "StringLength should see 'hello world' (length 11) from event inputs, not empty string from re-execution");
+
+    // Verify the trigger was only executed once (not re-executed as a data-only node)
+    var triggerStartCount = listener.startedNodes.stream()
+      .filter("trigger"::equals)
+      .count();
+    assertEquals(1, triggerStartCount,
+      "Trigger should be executed exactly once, not re-executed as a data-only node");
+  }
+
+  @Test
   void executionContextDoesNotContainExecKeys() {
     // Verify that BranchNode outputs include exec keys but filtering works
     var node = NodeRegistry.create("flow.branch");

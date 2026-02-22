@@ -147,6 +147,12 @@ public final class ReactiveScriptEngine {
 
       var nodeRuntime = createNodeRuntime(graph, triggerNodeId, context, run, ExecutionContext.empty());
 
+      // Mark the trigger as already triggered so that downstream DATA edges
+      // pointing back at this trigger won't re-execute it as a "data-only" node
+      // (trigger nodes have no incoming execution edges, which would otherwise
+      // cause them to be misidentified as data-only nodes).
+      run.markDataNodeTriggered(triggerNodeId);
+
       return nodeImpl.executeReactive(nodeRuntime, inputs)
         .doOnNext(outputs -> {
           run.publishNodeOutputs(triggerNodeId, outputs);
