@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test;
+package com.soulfiremc.test.script;
 
 import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.ScriptGraph;
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.soulfiremc.test.ScriptTestHelper.*;
+import static com.soulfiremc.test.script.ScriptTestHelper.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /// Integration tests for the reactive script engine: data edges, data-only nodes, trigger data edges.

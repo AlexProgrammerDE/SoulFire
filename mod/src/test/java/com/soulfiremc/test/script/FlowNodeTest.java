@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test;
+package com.soulfiremc.test.script;
 
 import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.PortDefinition;
@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.soulfiremc.test.ScriptTestHelper.executeNode;
+import static com.soulfiremc.test.script.ScriptTestHelper.executeNode;
 import static org.junit.jupiter.api.Assertions.*;
 
 /// Tests for flow control nodes: branch, switch, gate, rate limit routing and metadata.

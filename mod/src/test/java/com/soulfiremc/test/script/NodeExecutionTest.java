@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.soulfiremc.test;
+package com.soulfiremc.test.script;
 
 import com.soulfiremc.server.script.NodeValue;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.List;
 import java.util.Map;
 
-import static com.soulfiremc.test.ScriptTestHelper.executeNode;
+import static com.soulfiremc.test.script.ScriptTestHelper.executeNode;
 import static org.junit.jupiter.api.Assertions.*;
 
 /// Tests for pure node execution: math, logic, string, list, constant, and utility nodes.
