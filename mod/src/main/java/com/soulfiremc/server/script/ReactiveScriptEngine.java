@@ -42,10 +42,22 @@ import java.util.stream.Collectors;
 /// - Per-invocation isolation: Each trigger creates its own ExecutionRun
 /// - Check result: Condition-based loops use ResultNode + setCheckResult/getAndResetCheckResult
 ///   to communicate boolean results from check chains back to the loop node
+/// - Stack-safe: Uses Reactor's expand() operator for iterative chain execution,
+///   preventing StackOverflowError from deeply nested flatMap operator chains
 @Slf4j
 public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
   private static final int MAX_PARALLEL_BRANCHES = 8;
+
+  /// Result of executing a single node: its outputs and the updated execution context.
+  /// Used by expand() to iteratively determine the next nodes to execute.
+  private record NodeExecResult(
+    String nodeId, NodeMetadata metadata,
+    Map<String, NodeValue> outputs, ExecutionContext execContext
+  ) {}
+
+  /// A pending execution task: a node ID and the execution context to use.
+  private record ExecTask(String nodeId, ExecutionContext execCtx) {}
 
   /// Formats a human-readable node descriptor for log/error messages.
   private static String describeNode(String nodeId, ScriptGraph graph) {
@@ -192,6 +204,7 @@ public final class ReactiveScriptEngine {
 
   /// Determines which exec output ports to follow based on node outputs,
   /// then executes downstream for each active port.
+  /// Only used for the trigger node — downstream chain execution uses expand() via executeDownstream.
   ///
   /// Convention: if any exec output port IDs appear as keys in the outputs map,
   /// follow those. Otherwise fall back to "out".
@@ -233,7 +246,9 @@ public final class ReactiveScriptEngine {
   }
 
   /// Executes all nodes connected to an execution output handle.
-  /// Uses Flux.flatMap for parallel execution with bounded concurrency.
+  /// Uses Reactor's expand() operator for iterative (stack-safe) chain execution:
+  /// each node is executed, its exec outputs are resolved into next tasks, and
+  /// expand() processes them from an internal queue without growing the call stack.
   ///
   /// @param graph        the script graph
   /// @param fromNodeId   the source node ID
@@ -256,22 +271,57 @@ public final class ReactiveScriptEngine {
     }
 
     return Flux.fromIterable(nextNodes)
-      .flatMap(
-        nodeId -> executeNodeWithDependencies(graph, nodeId, context, run, execContext),
-        MAX_PARALLEL_BRANCHES
+      .map(nodeId -> new ExecTask(nodeId, execContext))
+      .expand(task ->
+        executeNodeWithDependencies(graph, task.nodeId(), context, run, task.execCtx())
+          .flatMapMany(result -> getNextExecTasks(graph, result))
       )
       .then();
   }
 
+  /// Determines the next ExecTasks to process based on a node's execution result.
+  /// Implements the same exec port routing logic as followExecOutputs, but returns
+  /// tasks for expand() instead of recursively calling executeDownstream.
+  private Flux<ExecTask> getNextExecTasks(ScriptGraph graph, NodeExecResult result) {
+    var execPorts = result.metadata().outputs().stream()
+      .filter(p -> p.type() == PortType.EXEC)
+      .map(PortDefinition::id)
+      .toList();
+
+    if (execPorts.isEmpty()) {
+      return Flux.empty();
+    }
+
+    var active = execPorts.stream()
+      .filter(result.outputs()::containsKey)
+      .toList();
+
+    if (active.isEmpty()) {
+      if (execPorts.size() == 1 && StandardPorts.EXEC_OUT.equals(execPorts.getFirst())) {
+        active = List.of(StandardPorts.EXEC_OUT);
+      } else {
+        return Flux.empty();
+      }
+    }
+
+    return Flux.fromIterable(active)
+      .flatMap(handle -> {
+        var nextNodes = graph.getNextExecutionNodes(result.nodeId(), handle);
+        return Flux.fromIterable(nextNodes)
+          .map(nextId -> new ExecTask(nextId, result.execContext()));
+      });
+  }
+
   /// Executes a node after waiting for all its DATA dependencies.
-  /// This is the key improvement: proper fan-in synchronization.
+  /// Returns a NodeExecResult containing the node's outputs and updated execution context,
+  /// which expand() uses to determine the next nodes to execute.
   ///
   /// Input resolution priority (highest to lowest):
   /// 1. Explicit DATA wire values
   /// 2. Execution context values (upstream outputs flowing along execution edges)
   /// 3. Graph-level default inputs
   /// 4. Node metadata default inputs
-  private Mono<Void> executeNodeWithDependencies(
+  private Mono<NodeExecResult> executeNodeWithDependencies(
     ScriptGraph graph,
     String nodeId,
     ReactiveScriptContext context,
@@ -308,7 +358,7 @@ public final class ReactiveScriptEngine {
     if (graphNode.muted()) {
       run.publishNodeOutputs(nodeId, execContext.values());
       context.eventListener().onNodeCompleted(nodeId, Map.of());
-      return executeDownstream(graph, nodeId, StandardPorts.EXEC_OUT, context, run, execContext);
+      return Mono.just(new NodeExecResult(nodeId, metadata, Map.of(), execContext));
     }
 
     // Collect all DATA edges targeting this node
@@ -369,10 +419,10 @@ public final class ReactiveScriptEngine {
     }));
   }
 
-  /// Executes a single node with resolved inputs.
-  /// After execution, follows dynamic exec output routing.
+  /// Executes a single node with resolved inputs and returns the result.
+  /// Does NOT follow exec outputs — that is handled iteratively by expand() in executeDownstream.
   /// Error handling: nodes with exec_error ports route errors; others stop the branch.
-  private Mono<Void> executeNode(
+  private Mono<NodeExecResult> executeNode(
     ScriptNode nodeImpl,
     NodeMetadata metadata,
     String nodeId,
@@ -411,7 +461,7 @@ public final class ReactiveScriptEngine {
         // No error port — stop this branch
         return Mono.empty();
       })
-      .flatMap(outputs -> {
+      .map(outputs -> {
         var execPortIds = metadata.outputs().stream()
           .filter(p -> p.type() == PortType.EXEC)
           .map(PortDefinition::id)
@@ -419,7 +469,7 @@ public final class ReactiveScriptEngine {
         var contextOutputs = new HashMap<>(outputs);
         execPortIds.forEach(contextOutputs::remove);
         var newExecContext = execContext.mergeWith(contextOutputs);
-        return followExecOutputs(graph, nodeId, metadata, outputs, context, run, newExecContext);
+        return new NodeExecResult(nodeId, metadata, outputs, newExecContext);
       });
   }
 

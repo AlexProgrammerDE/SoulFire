@@ -289,6 +289,28 @@ final class ScriptEngineTest {
       "Print should receive message from execution context when no DATA edge exists");
   }
 
+  @Test
+  void longLinearChainDoesNotOverflowStack() {
+    // A long chain of sequential nodes causes deeply nested flatMap operators.
+    // Each node adds ~3-4 Reactor operators; 1000 nodes = ~3000-4000 nested operators.
+    var builder = ScriptGraph.builder("test-long-chain", "Long Chain Test")
+      .addNode("trigger", "trigger.on_script_init", null);
+
+    var prevNode = "trigger";
+    for (var i = 0; i < 1000; i++) {
+      var nodeId = "print_" + i;
+      builder.addNode(nodeId, "action.print", Map.of("message", "node " + i));
+      builder.addExecutionEdge(prevNode, "out", nodeId, "in");
+      prevNode = nodeId;
+    }
+
+    var listener = runGraph(builder.build(), "trigger");
+
+    assertNoErrors(listener);
+    assertTrue(countNodeExecutions(listener, "print_999") > 0,
+      "All 1000 nodes should execute without StackOverflowError");
+  }
+
   /// Extended RecordingEventListener that also captures log messages from Print nodes.
   private static class LogRecordingEventListener extends RecordingEventListener {
     final List<String> logMessages = new ArrayList<>();
