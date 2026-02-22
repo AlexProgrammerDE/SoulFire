@@ -589,10 +589,29 @@ confirm_http_warning() {
   fi
 }
 
-# --- Installation state ---
+# --- Container helpers ---
 
 is_installed() {
   [[ -f "$COMPOSE_FILE" ]]
+}
+
+wait_for_healthy() {
+  local attempts=0 max_attempts=60
+  while [[ $attempts -lt $max_attempts ]]; do
+    local state
+    state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
+    if [[ "$state" == "running" ]]; then
+      msg_ok "SoulFire is running"
+      return 0
+    fi
+    ((attempts++))
+    printf "\r  Waiting for container to start... (%ds)" "$attempts" >&2
+    sleep 1
+  done
+  echo "" >&2
+  msg_warn "Container did not become healthy within ${max_attempts}s"
+  msg_warn "Check logs with: docker compose -f $COMPOSE_FILE logs"
+  return 0
 }
 
 # --- Fresh install flow ---
@@ -618,6 +637,9 @@ do_fresh_install() {
   docker compose -f "$COMPOSE_FILE" pull
   docker compose -f "$COMPOSE_FILE" up -d
 
+  msg_info "Waiting for SoulFire to start..."
+  wait_for_healthy
+
   local access_url
   case "$SSL_MODE" in
     cloudflared) access_url="the URL configured in your Cloudflare tunnel" ;;
@@ -635,6 +657,17 @@ do_fresh_install() {
 # --- Management menu ---
 
 do_attach() {
+  local state
+  state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
+  if [[ "$state" != "running" ]]; then
+    msg_info "Container is not running (state: ${state:-not found}). Waiting..."
+    wait_for_healthy
+    state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
+    if [[ "$state" != "running" ]]; then
+      msg_error "Container failed to start. Check logs with: docker compose -f $COMPOSE_FILE logs app"
+      return
+    fi
+  fi
   msg_info "Attaching to SoulFire console (type 'exit' to detach)..."
   docker compose -f "$COMPOSE_FILE" exec app bash || true
 }
