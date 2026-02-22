@@ -55,10 +55,6 @@ public final class UUIDHelper {
     return UUID.fromString(idBuff.toString());
   }
 
-  public static String convertToNoDashes(UUID uuid) {
-    return uuid.toString().replace("-", "");
-  }
-
   public static @Nullable UUID tryParseUniqueIdOrNull(@Nullable String str) {
     return tryParseUniqueId(str).orElse(null);
   }

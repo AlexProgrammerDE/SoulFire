@@ -20,6 +20,7 @@ package com.soulfiremc.server.plugins;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.util.UndashedUuid;
 import com.soulfiremc.grpc.generated.StringSetting;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
@@ -31,7 +32,6 @@ import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import com.soulfiremc.shared.UUIDHelper;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -311,7 +311,7 @@ public final class ForwardingBypass extends InternalPlugin {
         .append(LEGACY_SEPARATOR)
         .append(playerAddress)
         .append(LEGACY_SEPARATOR)
-        .append(UUIDHelper.convertToNoDashes(profile.id()))
+        .append(UndashedUuid.toString(profile.id()))
         .append(LEGACY_SEPARATOR);
       GsonInstance.GSON.toJson(propertiesTransform.apply(profile.properties().values().stream().toList()), data);
       return data.toString();

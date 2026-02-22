@@ -17,12 +17,12 @@
  */
 package com.soulfiremc.server.bot;
 
+import com.mojang.util.UndashedUuid;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import com.soulfiremc.shared.UUIDHelper;
 import io.netty.handler.codec.http.HttpStatusClass;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +58,7 @@ public final class SFSessionService {
             GsonInstance.GSON.toJson(
               new JoinServerRequest(
                 authenticationToken,
-                UUIDHelper.convertToNoDashes(botConnection.accountProfileId()),
+                UndashedUuid.toString(botConnection.accountProfileId()),
                 serverId)))))
       .responseSingle(
         (res, content) -> {
