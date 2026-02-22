@@ -642,6 +642,11 @@ public final class ReactiveScriptEngine {
       }
 
       @Override
+      public reactor.core.scheduler.Scheduler reactorScheduler() {
+        return context.getReactorScheduler();
+      }
+
+      @Override
       public boolean isTickSynchronous() {
         return run.isTickSynchronous();
       }

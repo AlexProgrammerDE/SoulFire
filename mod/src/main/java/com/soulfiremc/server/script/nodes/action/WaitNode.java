@@ -61,6 +61,7 @@ public final class WaitNode extends AbstractScriptNode {
       return completedMono(result("actualMs", 0L));
     }
 
-    return delayedMono(Duration.ofMillis(delay), result("actualMs", delay));
+    return Mono.delay(Duration.ofMillis(delay), runtime.reactorScheduler())
+      .thenReturn(result("actualMs", delay));
   }
 }

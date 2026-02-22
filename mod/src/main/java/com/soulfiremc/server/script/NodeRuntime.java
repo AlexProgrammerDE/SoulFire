@@ -20,6 +20,8 @@ package com.soulfiremc.server.script;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Map;
 
@@ -42,6 +44,13 @@ public interface NodeRuntime {
   ///
   /// @return the instance scheduler
   SoulFireScheduler scheduler();
+
+  /// Gets the Reactor scheduler for reactive timing operations.
+  ///
+  /// @return the reactor scheduler
+  default Scheduler reactorScheduler() {
+    return Schedulers.parallel();
+  }
 
   /// Logs a message from script execution.
   /// Used by Print node and other debugging nodes.
