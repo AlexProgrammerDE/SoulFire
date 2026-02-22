@@ -41,6 +41,24 @@ public final class ServerMetricsCollector {
 
   public ServerMetricsCollector(SoulFireServer soulFireServer) {
     this.soulFireServer = soulFireServer;
+    prefillSnapshots();
+  }
+
+  /// Pre-fills the ring buffer with zero-valued snapshots so charts
+  /// always display the full 30-minute window from the start.
+  private void prefillSnapshots() {
+    var now = Instant.now();
+    for (var i = MAX_SNAPSHOTS - 1; i >= 0; i--) {
+      var ts = now.minusSeconds((long) i * 3);
+      snapshots.addLast(ServerMetricsSnapshot.newBuilder()
+        .setTimestamp(Timestamp.newBuilder()
+          .setSeconds(ts.getEpochSecond())
+          .setNanos(ts.getNano())
+          .build())
+        .setProcessCpuLoad(-1)
+        .setSystemCpuLoad(-1)
+        .build());
+    }
   }
 
   public void sampleSnapshot() {

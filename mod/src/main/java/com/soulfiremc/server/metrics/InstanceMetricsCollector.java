@@ -85,6 +85,22 @@ public final class InstanceMetricsCollector {
 
   public InstanceMetricsCollector(InstanceManager instanceManager) {
     this.instanceManager = instanceManager;
+    prefillSnapshots();
+  }
+
+  /// Pre-fills the ring buffer with zero-valued snapshots so charts
+  /// always display the full 30-minute window from the start.
+  private void prefillSnapshots() {
+    var now = Instant.now();
+    for (var i = MAX_SNAPSHOTS - 1; i >= 0; i--) {
+      var ts = now.minusSeconds((long) i * 3);
+      snapshots.addLast(MetricsSnapshot.newBuilder()
+        .setTimestamp(Timestamp.newBuilder()
+          .setSeconds(ts.getEpochSecond())
+          .setNanos(ts.getNano())
+          .build())
+        .build());
+    }
   }
 
   @EventHandler
@@ -197,6 +213,7 @@ public final class InstanceMetricsCollector {
     tickCounter = 0;
     synchronized (snapshots) {
       snapshots.clear();
+      prefillSnapshots();
     }
   }
 
