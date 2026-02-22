@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 INSTALL_DIR="/opt/soulfire"
 COMPOSE_FILE="$INSTALL_DIR/docker-compose.yml"
