@@ -605,7 +605,7 @@ wait_for_healthy() {
       msg_ok "SoulFire is running"
       return 0
     fi
-    ((attempts++))
+    attempts=$((attempts + 1))
     printf "\r\e[34m[INFO]\e[0m Waiting for container to start... (%ds/%ds)" "$attempts" "$max_attempts" >&2
     sleep 1
   done
