@@ -55,7 +55,7 @@ public final class ReactiveScriptContext {
   @VisibleForTesting
   public ReactiveScriptContext(ScriptEventListener eventListener) {
     this.instance = null;
-    this.reactorScheduler = Schedulers.immediate();
+    this.reactorScheduler = Schedulers.parallel();
     this.eventListener = eventListener;
   }
 
