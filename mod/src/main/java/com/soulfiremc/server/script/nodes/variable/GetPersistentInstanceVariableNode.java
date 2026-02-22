@@ -20,11 +20,13 @@ package com.soulfiremc.server.script.nodes.variable;
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.script.*;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
 /// Variable node that retrieves a value from the instance's persistent metadata.
+@Slf4j
 public final class GetPersistentInstanceVariableNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("variable.get_persistent_instance")
@@ -75,7 +77,8 @@ public final class GetPersistentInstanceVariableNode extends AbstractScriptNode 
         "value", NodeValue.fromJson(jsonValue),
         "found", true
       ));
-    } catch (Exception _) {
+    } catch (Exception e) {
+      log.warn("Failed to get persistent instance variable '{}/{}'", namespace, key, e);
       return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false

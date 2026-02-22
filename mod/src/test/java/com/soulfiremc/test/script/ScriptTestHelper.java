@@ -17,10 +17,15 @@
  */
 package com.soulfiremc.test.script;
 
+import com.google.gson.JsonElement;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
+import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
+import net.lenni0451.reflect.Fields;
+import net.lenni0451.reflect.Objects;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -197,5 +202,47 @@ final class ScriptTestHelper {
     boolean doneFired() {
       return doneFired.get();
     }
+  }
+
+  /// Creates a mock BotConnection with working metadata and persistentMetadata holders.
+  /// Uses lenni0451 Reflect to bypass the complex constructor.
+  static BotConnection createMockBot() {
+    var bot = Objects.allocate(BotConnection.class);
+    Fields.setObject(bot, Fields.getDeclaredField(BotConnection.class, "metadata"), new MetadataHolder<>());
+    Fields.setObject(bot, Fields.getDeclaredField(BotConnection.class, "persistentMetadata"), new MetadataHolder<JsonElement>());
+    return bot;
+  }
+
+  /// Creates a mock InstanceManager with working metadata and persistentMetadata holders.
+  /// Uses lenni0451 Reflect to bypass the complex constructor.
+  static InstanceManager createMockInstance() {
+    var instance = Objects.allocate(InstanceManager.class);
+    Fields.setObject(instance, Fields.getDeclaredField(InstanceManager.class, "metadata"), new MetadataHolder<>());
+    Fields.setObject(instance, Fields.getDeclaredField(InstanceManager.class, "persistentMetadata"), new MetadataHolder<JsonElement>());
+    return instance;
+  }
+
+  /// Creates a NodeRuntime backed by a mock InstanceManager.
+  static NodeRuntime createRuntimeWithInstance() {
+    var mockInstance = createMockInstance();
+    return new NodeRuntime() {
+      @Override
+      public ScriptStateStore stateStore() {
+        return new ScriptStateStore();
+      }
+
+      @Override
+      public InstanceManager instance() {
+        return mockInstance;
+      }
+
+      @Override
+      public SoulFireScheduler scheduler() {
+        return null;
+      }
+
+      @Override
+      public void log(String level, String message) {}
+    };
   }
 }

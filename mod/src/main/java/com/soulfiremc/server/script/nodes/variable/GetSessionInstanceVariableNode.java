@@ -19,12 +19,14 @@ package com.soulfiremc.server.script.nodes.variable;
 
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.script.*;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// Variable node that retrieves a value from the instance's session metadata.
+@Slf4j
 public final class GetSessionInstanceVariableNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("variable.get_session_instance")
@@ -76,7 +78,8 @@ public final class GetSessionInstanceVariableNode extends AbstractScriptNode {
         "value", value,
         "found", true
       ));
-    } catch (Exception _) {
+    } catch (Exception e) {
+      log.warn("Failed to get session instance variable '{}'", key, e);
       return completedMono(results(
         "value", defaultValue != null ? defaultValue : NodeValue.ofNull(),
         "found", false

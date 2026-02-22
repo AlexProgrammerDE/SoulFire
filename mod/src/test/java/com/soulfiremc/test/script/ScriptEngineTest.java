@@ -387,6 +387,60 @@ final class ScriptEngineTest {
       "ForEach should produce 3 print messages, got: " + listener.logMessages);
   }
 
+  @Test
+  @Timeout(5)
+  void waitNodeCompletesWithinTimeout() {
+    var graph = ScriptGraph.builder("test-wait-node", "Wait Node Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("wait", "action.wait", Map.of("baseMs", 10, "jitterMs", 0))
+      .addNode("print", "action.print", Map.of("message", "after wait"))
+      .addExecutionEdge("trigger", "out", "wait", "in")
+      .addExecutionEdge("wait", "out", "print", "in")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTrigger(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("wait"),
+      "Wait node should complete");
+    assertTrue(listener.completedNodes.contains("print"),
+      "Print node after wait should complete");
+    assertEquals(1, listener.logMessages.size(),
+      "Print should log exactly one message");
+    assertEquals("after wait", listener.logMessages.getFirst(),
+      "Print should output 'after wait'");
+  }
+
+  @Test
+  @Timeout(5)
+  void waitNodeCompletesWithSyncExecution() {
+    var graph = ScriptGraph.builder("test-wait-sync", "Wait Sync Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("wait", "action.wait", Map.of("baseMs", 10, "jitterMs", 0))
+      .addNode("print", "action.print", Map.of("message", "after sync wait"))
+      .addExecutionEdge("trigger", "out", "wait", "in")
+      .addExecutionEdge("wait", "out", "print", "in")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("wait"),
+      "Wait node should complete in sync mode");
+    assertTrue(listener.completedNodes.contains("print"),
+      "Print node after wait should complete in sync mode");
+    assertEquals(1, listener.logMessages.size(),
+      "Print should log exactly one message");
+    assertEquals("after sync wait", listener.logMessages.getFirst(),
+      "Print should output 'after sync wait'");
+  }
+
   /// Extended RecordingEventListener that also captures log messages from Print nodes.
   private static class LogRecordingEventListener extends RecordingEventListener {
     final List<String> logMessages = new ArrayList<>();

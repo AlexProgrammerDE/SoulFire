@@ -19,12 +19,14 @@ package com.soulfiremc.server.script.nodes.variable;
 
 import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.script.*;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /// Variable node that stores a value in the instance's session metadata (lost on restart).
+@Slf4j
 public final class SetSessionInstanceVariableNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("variable.set_session_instance")
@@ -61,7 +63,8 @@ public final class SetSessionInstanceVariableNode extends AbstractScriptNode {
       var sessionVars = runtime.instance().metadata().getOrSet(SESSION_VARS_KEY, ConcurrentHashMap::new);
       sessionVars.put(key, value != null ? value : NodeValue.ofNull());
       return completedMono(result("success", true));
-    } catch (Exception _) {
+    } catch (Exception e) {
+      log.warn("Failed to set session instance variable '{}'", key, e);
       return completedMono(result("success", false));
     }
   }
