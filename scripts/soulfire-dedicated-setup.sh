@@ -664,7 +664,9 @@ do_attach() {
   if [[ "$state" != "running" ]]; then
     msg_warn "Container is not running yet (state: ${state:-not found})"
     msg_info "Waiting for SoulFire to start..."
-    wait_for_healthy
+    if ! wait_for_healthy; then
+      true  # timed out, check state below
+    fi
     state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
     if [[ "$state" != "running" ]]; then
       tui_msgbox "Container Not Ready" \
