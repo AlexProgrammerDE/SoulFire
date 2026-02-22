@@ -148,10 +148,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       );
       activeScripts.put(scriptId, activationState);
 
-      var dataEdges = graph.dataEdges();
-      log.info("Started script {} with {} triggers, {} data edges: {}", scriptId,
-        graph.findTriggerNodes().size(), dataEdges.size(),
-        dataEdges.stream().map(e -> e.sourceNodeId() + "." + e.sourceHandle() + " -> " + e.targetNodeId() + "." + e.targetHandle()).toList());
+      log.info("Started script {} with {} triggers, {} data edges", scriptId,
+        graph.findTriggerNodes().size(), graph.dataEdges().size());
     } catch (Exception e) {
       log.error("Failed to start script {}", scriptId, e);
     }
@@ -609,10 +607,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // (Armeria requires headers to be sent before messages, which happens after this method returns)
       sendScriptStartedWhenReady(serverObserver, scriptId);
 
-      var dataEdges = graph.dataEdges();
-      log.info("Script {} resumed with {} triggers, {} data edges: {}", scriptId,
-        graph.findTriggerNodes().size(), dataEdges.size(),
-        dataEdges.stream().map(e -> e.sourceNodeId() + "." + e.sourceHandle() + " -> " + e.targetNodeId() + "." + e.targetHandle()).toList());
+      log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
+        graph.findTriggerNodes().size(), graph.dataEdges().size());
 
     } catch (StatusRuntimeException e) {
       throw e;
