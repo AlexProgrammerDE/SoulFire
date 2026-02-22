@@ -1,4 +1,5 @@
 #!/bin/bash
+set +e
 
 INSTALL_DIR="/opt/soulfire"
 COMPOSE_FILE="$INSTALL_DIR/docker-compose.yml"
@@ -595,21 +596,25 @@ is_installed() {
 }
 
 wait_for_healthy() {
-  local attempts=0 max_attempts=60
-  while [[ $attempts -lt $max_attempts ]]; do
-    local state
-    state=$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null) || true
-    if [[ "$state" == "running" ]]; then
-      echo "" >&2
+  local attempts=0
+  local max_attempts=60
+  local state=""
+  while true; do
+    if [ "$attempts" -ge "$max_attempts" ]; then
+      echo ""
+      msg_warn "Container did not start within ${max_attempts}s"
+      return 1
+    fi
+    state="$(docker compose -f "$COMPOSE_FILE" ps --format '{{.State}}' app 2>/dev/null)" || state="unknown"
+    if [ "$state" = "running" ]; then
+      echo ""
       msg_ok "SoulFire is running"
       return 0
     fi
     attempts=$((attempts + 1))
-    printf "\r\e[34m[INFO]\e[0m Waiting for container to start... (%ds/%ds)" "$attempts" "$max_attempts" >&2
+    echo -ne "\r\e[34m[INFO]\e[0m Waiting for container to start... (${attempts}s/${max_attempts}s) [state: ${state}]"
     sleep 1
   done
-  echo "" >&2
-  return 1
 }
 
 # --- Fresh install flow ---
