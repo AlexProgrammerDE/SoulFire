@@ -45,6 +45,6 @@ public final class IsNullNode extends AbstractScriptNode {
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
     var value = inputs.get("value");
-    return completedMono(result("result", value == null));
+    return completedMono(result("result", value == null || value.isNull()));
   }
 }

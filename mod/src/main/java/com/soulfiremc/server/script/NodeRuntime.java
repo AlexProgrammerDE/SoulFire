@@ -109,4 +109,16 @@ public interface NodeRuntime {
   default void resetDataNodeTriggers() {
     throw new UnsupportedOperationException("Only available during reactive engine execution");
   }
+
+  /// Pushes a new check context for nested loop support.
+  /// Called by loop nodes before starting their check chain evaluation.
+  default void pushCheckContext() {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
+
+  /// Pops the current check context after loop iteration completes.
+  /// Called by loop nodes when they are done with their check chain.
+  default void popCheckContext() {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
 }

@@ -415,14 +415,21 @@ public final class ScriptTriggerService {
     ReactiveScriptEngine engine
   ) {
     void fire() {
+      var latch = new java.util.concurrent.CountDownLatch(1);
       try {
-        // Execute synchronously (block) to ensure cleanup completes before script fully stops
         engine.executeFromTrigger(graph, nodeId, context, Map.of())
           .onErrorResume(e -> {
             log.error("Error in OnScriptEnd trigger execution", e);
             return Mono.empty();
           })
-          .block(Duration.ofSeconds(5));
+          .doFinally(_ -> latch.countDown())
+          .subscribe();
+        if (!latch.await(5, TimeUnit.SECONDS)) {
+          log.warn("OnScriptEnd trigger timed out after 5 seconds for node {}", nodeId);
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        log.warn("OnScriptEnd trigger interrupted for node {}", nodeId);
       } catch (Exception e) {
         log.error("Error firing OnScriptEnd trigger", e);
       }

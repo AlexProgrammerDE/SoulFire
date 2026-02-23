@@ -61,6 +61,8 @@ import java.util.stream.Collectors;
 public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImplBase {
   private static final Type NODE_LIST_TYPE = new TypeToken<List<ScriptNodeData>>() {}.getType();
   private static final Type EDGE_LIST_TYPE = new TypeToken<List<ScriptEdgeData>>() {}.getType();
+  private static final int MAX_NAME_LENGTH = 128;
+  private static final int MAX_DESCRIPTION_LENGTH = 1024;
 
   private final SoulFireServer soulFireServer;
   private final ScriptTriggerService triggerService = new ScriptTriggerService();
@@ -109,12 +111,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     var scriptId = UUID.fromString(record.getId());
     var instanceId = UUID.fromString(record.getInstanceId());
 
-    // Check if already running
-    if (activeScripts.containsKey(scriptId)) {
-      log.debug("Script {} is already running", scriptId);
-      return;
-    }
-
     try {
       // Build the script graph from the record
       var graph = buildScriptGraph(record);
@@ -132,11 +128,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Create reactive context for trigger execution
       var context = new ReactiveScriptContext(instanceManager, eventListener);
 
-      // Register triggers for event-driven execution
-      var engine = new ReactiveScriptEngine();
-      triggerService.registerTriggers(scriptId, graph, context, engine);
-
-      // Store active script state (no observer for internal scripts)
+      // Atomically check-and-set to avoid race condition
       var activationState = new ScriptActivationState(
         scriptId,
         instanceId,
@@ -146,7 +138,15 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         context,
         null
       );
-      activeScripts.put(scriptId, activationState);
+      var existing = activeScripts.putIfAbsent(scriptId, activationState);
+      if (existing != null) {
+        log.debug("Script {} is already running, skipping start", scriptId);
+        return;
+      }
+
+      // Register triggers for event-driven execution
+      var engine = new ReactiveScriptEngine();
+      triggerService.registerTriggers(scriptId, graph, context, engine);
 
       log.info("Started script {} with {} triggers, {} data edges", scriptId,
         graph.findTriggerNodes().size(), graph.dataEdges().size());
@@ -260,11 +260,13 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onScriptCompleted(boolean success) {
+        activeScripts.remove(scriptId);
         log.debug("[Script {}] Execution chain completed: {}", scriptId, success ? "success" : "failure");
       }
 
       @Override
       public void onScriptCancelled() {
+        activeScripts.remove(scriptId);
         log.debug("[Script {}] Execution cancelled", scriptId);
       }
 
@@ -284,6 +286,18 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     var instanceId = UUID.fromString(request.getInstanceId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    if (request.getName().isBlank()) {
+      throw Status.INVALID_ARGUMENT.withDescription("Script name must not be empty").asRuntimeException();
+    }
+    if (request.getName().length() > MAX_NAME_LENGTH) {
+      throw Status.INVALID_ARGUMENT
+        .withDescription("Script name must not exceed " + MAX_NAME_LENGTH + " characters").asRuntimeException();
+    }
+    if (request.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
+      throw Status.INVALID_ARGUMENT
+        .withDescription("Script description must not exceed " + MAX_DESCRIPTION_LENGTH + " characters").asRuntimeException();
+    }
 
     try {
       var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
@@ -371,6 +385,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
+    if (request.hasName()) {
+      if (request.getName().isBlank()) {
+        throw Status.INVALID_ARGUMENT.withDescription("Script name must not be empty").asRuntimeException();
+      }
+      if (request.getName().length() > MAX_NAME_LENGTH) {
+        throw Status.INVALID_ARGUMENT
+          .withDescription("Script name must not exceed " + MAX_NAME_LENGTH + " characters").asRuntimeException();
+      }
+    }
+    if (request.hasDescription() && request.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
+      throw Status.INVALID_ARGUMENT
+        .withDescription("Script description must not exceed " + MAX_DESCRIPTION_LENGTH + " characters").asRuntimeException();
+    }
+
     try {
       var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
         var ctx = DSL.using(cfg);
@@ -436,9 +464,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
-      // Stop the script if it's running
-      stopScriptInternal(scriptId);
-
       soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
         var record = ctx.selectFrom(Tables.SCRIPTS)
@@ -448,6 +473,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
+
+        // Stop the script if it's running (after ownership check)
+        stopScriptInternal(scriptId);
+
         ctx.deleteFrom(Tables.SCRIPTS)
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
           .execute();
@@ -814,28 +843,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
       }
 
-      // Add biomes - these require a registry access from a level, use built-in keys
+      // Add biomes - use reflection on Biomes class to dynamically list all known biome keys
       if (specificRegistry == null || "biomes".equals(specificRegistry)) {
-        // Use the built-in biome keys since we don't have level access here
-        var biomeKeys = List.of(
-          "minecraft:plains", "minecraft:sunflower_plains", "minecraft:snowy_plains", "minecraft:ice_spikes",
-          "minecraft:desert", "minecraft:swamp", "minecraft:mangrove_swamp", "minecraft:forest",
-          "minecraft:flower_forest", "minecraft:birch_forest", "minecraft:dark_forest", "minecraft:old_growth_birch_forest",
-          "minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga", "minecraft:taiga", "minecraft:snowy_taiga",
-          "minecraft:savanna", "minecraft:savanna_plateau", "minecraft:windswept_hills", "minecraft:windswept_gravelly_hills",
-          "minecraft:windswept_forest", "minecraft:windswept_savanna", "minecraft:jungle", "minecraft:sparse_jungle",
-          "minecraft:bamboo_jungle", "minecraft:badlands", "minecraft:eroded_badlands", "minecraft:wooded_badlands",
-          "minecraft:meadow", "minecraft:cherry_grove", "minecraft:grove", "minecraft:snowy_slopes",
-          "minecraft:frozen_peaks", "minecraft:jagged_peaks", "minecraft:stony_peaks", "minecraft:river",
-          "minecraft:frozen_river", "minecraft:beach", "minecraft:snowy_beach", "minecraft:stony_shore",
-          "minecraft:warm_ocean", "minecraft:lukewarm_ocean", "minecraft:deep_lukewarm_ocean", "minecraft:ocean",
-          "minecraft:deep_ocean", "minecraft:cold_ocean", "minecraft:deep_cold_ocean", "minecraft:frozen_ocean",
-          "minecraft:deep_frozen_ocean", "minecraft:mushroom_fields", "minecraft:dripstone_caves", "minecraft:lush_caves",
-          "minecraft:deep_dark", "minecraft:nether_wastes", "minecraft:warped_forest", "minecraft:crimson_forest",
-          "minecraft:soul_sand_valley", "minecraft:basalt_deltas", "minecraft:the_end", "minecraft:end_highlands",
-          "minecraft:end_midlands", "minecraft:small_end_islands", "minecraft:end_barrens", "minecraft:the_void"
-        );
-        for (var biomeId : biomeKeys) {
+        var biomeIds = getBiomeIds();
+        for (var biomeId : biomeIds) {
           responseBuilder.addBiomes(RegistryEntry.newBuilder()
             .setId(biomeId)
             .setDisplayName(formatRegistryId(biomeId))
@@ -1090,14 +1101,23 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return List.of();
     }
     return edgeDataList.stream()
-      .map(data -> ScriptEdge.newBuilder()
-        .setId(data.id())
-        .setSource(data.source())
-        .setSourceHandle(data.sourceHandle())
-        .setTarget(data.target())
-        .setTargetHandle(data.targetHandle())
-        .setEdgeType(EdgeType.valueOf(data.edgeType()))
-        .build())
+      .map(data -> {
+        EdgeType edgeType;
+        try {
+          edgeType = EdgeType.valueOf(data.edgeType());
+        } catch (IllegalArgumentException e) {
+          log.warn("Unknown edge type '{}' in edge {}, defaulting to EDGE_TYPE_DATA", data.edgeType(), data.id());
+          edgeType = EdgeType.EDGE_TYPE_DATA;
+        }
+        return ScriptEdge.newBuilder()
+          .setId(data.id())
+          .setSource(data.source())
+          .setSourceHandle(data.sourceHandle())
+          .setTarget(data.target())
+          .setTargetHandle(data.targetHandle())
+          .setEdgeType(edgeType)
+          .build();
+      })
       .toList();
   }
 
@@ -1605,6 +1625,31 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       return Value.newBuilder().setStructValue(structBuilder.build()).build();
     }
     return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
+  }
+
+  /// Gets all known biome IDs via reflection on net.minecraft.world.level.biome.Biomes.
+  /// Falls back to empty list if the class is not available.
+  @SuppressWarnings("unchecked")
+  private static List<String> getBiomeIds() {
+    try {
+      var biomesClass = Class.forName("net.minecraft.world.level.biome.Biomes");
+      var biomeIds = new ArrayList<String>();
+      for (var field : biomesClass.getDeclaredFields()) {
+        if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+          && field.getType() == net.minecraft.resources.ResourceKey.class) {
+          try {
+            var key = (net.minecraft.resources.ResourceKey<?>) field.get(null);
+            biomeIds.add(key.identifier().toString());
+          } catch (IllegalAccessException _) {
+            // skip inaccessible fields
+          }
+        }
+      }
+      return biomeIds;
+    } catch (ClassNotFoundException _) {
+      log.warn("Biomes class not found, returning empty biome list");
+      return List.of();
+    }
   }
 
   /// Formats a registry ID (e.g., "minecraft:diamond_ore") into a display name (e.g., "Diamond Ore").

@@ -29,6 +29,9 @@ import java.util.regex.PatternSyntaxException;
 /// Input: bots (List of BotConnection), pattern (regex string)
 /// Output: bots (List of BotConnection matching pattern)
 public final class FilterBotsNode extends AbstractScriptNode {
+  private static final Map<String, Pattern> PATTERN_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+  private static final int MAX_CACHE_SIZE = 128;
+
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("data.filter_bots")
     .displayName("Filter Bots")
@@ -53,13 +56,18 @@ public final class FilterBotsNode extends AbstractScriptNode {
     var botValues = getListInput(inputs, "bots");
     var patternStr = getStringInput(inputs, "pattern", ".*");
 
-    Pattern pattern;
-    try {
-      pattern = Pattern.compile(patternStr);
-    } catch (PatternSyntaxException _) {
-      // If pattern is invalid, return empty list
-      return completedMono(result("bots", List.of()));
+    var cached = PATTERN_CACHE.get(patternStr);
+    if (cached == null) {
+      try {
+        cached = Pattern.compile(patternStr);
+        if (PATTERN_CACHE.size() < MAX_CACHE_SIZE) {
+          PATTERN_CACHE.put(patternStr, cached);
+        }
+      } catch (PatternSyntaxException _) {
+        return completedMono(result("bots", List.of()));
+      }
     }
+    var pattern = cached;
 
     var filtered = botValues.stream()
       .map(NodeValue::asBot)

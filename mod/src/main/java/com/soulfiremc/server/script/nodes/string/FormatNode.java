@@ -53,7 +53,7 @@ public final class FormatNode extends AbstractScriptNode {
     for (int i = 0; i < args.size(); i++) {
       var placeholder = "{" + i + "}";
       var value = args.get(i);
-      result = result.replace(placeholder, value != null ? value.toString() : "null");
+      result = result.replace(placeholder, value != null ? value.asString(value.toString()) : "null");
     }
 
     return completedMono(result("result", result));

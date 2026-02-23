@@ -39,6 +39,7 @@ import com.soulfiremc.server.script.nodes.string.*;
 import com.soulfiremc.server.script.nodes.trigger.*;
 import com.soulfiremc.server.script.nodes.util.*;
 import com.soulfiremc.server.script.nodes.variable.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -51,6 +52,7 @@ import java.util.function.Supplier;
 
 /// Registry of all available script node types.
 /// Metadata is stored separately from node instances — nodes are pure executors.
+@Slf4j
 public final class NodeRegistry {
   private static final Map<String, Supplier<ScriptNode>> FACTORIES = new ConcurrentHashMap<>();
   private static final Map<String, NodeMetadata> METADATA_MAP = new ConcurrentHashMap<>();
@@ -270,12 +272,18 @@ public final class NodeRegistry {
     var type = metadata.type();
 
     // Validate statelessness: nodes are cached singletons, so they must not have mutable fields
+    // Walk the entire class hierarchy to catch fields in superclasses too
     var instance = factory.get();
-    for (var field : instance.getClass().getDeclaredFields()) {
-      if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
-        throw new IllegalStateException("Node " + type + " has mutable instance field '" + field.getName()
-          + "'. Script nodes must be stateless (cached as singletons).");
+    var clazz = (Class<?>) instance.getClass();
+    while (clazz != null && clazz != Object.class) {
+      for (var field : clazz.getDeclaredFields()) {
+        if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+          throw new IllegalStateException("Node " + type + " has mutable instance field '"
+            + field.getName() + "' (from " + clazz.getSimpleName()
+            + "). Script nodes must be stateless (cached as singletons).");
+        }
       }
+      clazz = clazz.getSuperclass();
     }
 
     METADATA_MAP.put(type, metadata);
@@ -327,8 +335,16 @@ public final class NodeRegistry {
         if (defaultValueStr != null && !defaultValueStr.isEmpty()) {
           try {
             var jsonElement = JsonParser.parseString(defaultValueStr);
+            // Validate type compatibility
+            if (input.type() == PortType.NUMBER && !jsonElement.isJsonPrimitive()) {
+              log.warn("Node {} port '{}' has non-numeric default: {}", metadata.type(), input.id(), defaultValueStr);
+            }
+            if (input.type() == PortType.BOOLEAN && (!jsonElement.isJsonPrimitive() || !jsonElement.getAsJsonPrimitive().isBoolean())) {
+              log.warn("Node {} port '{}' has non-boolean default: {}", metadata.type(), input.id(), defaultValueStr);
+            }
             defaults.put(input.id(), NodeValue.fromJson(jsonElement));
-          } catch (Exception _) {
+          } catch (Exception e) {
+            log.warn("Node {} port '{}' has unparseable default: {}", metadata.type(), input.id(), defaultValueStr);
             defaults.put(input.id(), NodeValue.ofString(defaultValueStr));
           }
         }

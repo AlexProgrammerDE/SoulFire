@@ -50,6 +50,9 @@ public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
   private static final int MAX_PARALLEL_BRANCHES = 8;
 
+  /// Maximum time a single node execution can take before being timed out.
+  private static final java.time.Duration NODE_EXECUTION_TIMEOUT = java.time.Duration.ofSeconds(30);
+
   /// Result of executing a single node: its outputs and the updated execution context.
   /// Used by expand() to iteratively determine the next nodes to execute.
   private record NodeExecResult(
@@ -406,9 +409,11 @@ public final class ReactiveScriptEngine {
             }
             onPathResolved.put(targetKey, value);
           } else {
-            log.warn("DATA edge {}.{} -> {}.{}: on-path source value not available (published: {}, execContext: {})",
-              edge.sourceNodeId(), sourceKey, nodeId, targetKey,
+            var msg = "DATA edge " + edge.sourceNodeId() + "." + sourceKey
+              + " -> " + nodeId + "." + targetKey + ": on-path source value not available";
+            log.warn("{} (published: {}, execContext: {})", msg,
               published != null ? published.keySet() : "null", execContext.values().keySet());
+            context.eventListener().onNodeError(nodeId, msg);
           }
         } else {
           // Off-path (data-only): use existing awaitNodeOutputs with timeout
@@ -465,7 +470,12 @@ public final class ReactiveScriptEngine {
     var nodeDesc = describeNode(nodeId, graph);
     var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
 
-    return Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs))
+    var nodeMono = Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs));
+    // Add per-node timeout for async execution (skip for tick-synchronous to avoid interrupting tick thread)
+    if (!run.isTickSynchronous()) {
+      nodeMono = nodeMono.timeout(NODE_EXECUTION_TIMEOUT);
+    }
+    return nodeMono
       .doOnNext(outputs -> {
         run.publishNodeOutputs(nodeId, outputs);
         context.eventListener().onNodeCompleted(nodeId, outputs);
@@ -666,6 +676,16 @@ public final class ReactiveScriptEngine {
       @Override
       public void resetDataNodeTriggers() {
         run.resetDataNodeTriggers();
+      }
+
+      @Override
+      public void pushCheckContext() {
+        run.pushCheckContext();
+      }
+
+      @Override
+      public void popCheckContext() {
+        run.popCheckContext();
       }
     };
   }

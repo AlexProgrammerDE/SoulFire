@@ -48,9 +48,8 @@ public final class SetSessionBotVariableNode extends AbstractScriptNode {
     .addKeywords("variable", "session", "temporary", "store", "set", "memory")
     .build();
 
-  // Static storage for session variables, keyed by bot ID
   private static final MetadataKey<ConcurrentHashMap<String, NodeValue>> SESSION_VARS_KEY =
-    MetadataKey.of("script_session", "variables", ConcurrentHashMap.class);
+    SessionVariableKeys.SESSION_BOT_VARS_KEY;
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

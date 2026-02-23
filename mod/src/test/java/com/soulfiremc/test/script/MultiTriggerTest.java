@@ -166,6 +166,53 @@ final class MultiTriggerTest {
       "No nodes should start for nonexistent trigger");
   }
 
+  @Test
+  void concurrentTriggersDontCorruptState() throws InterruptedException {
+    // Graph with trigger → loop(3) → print
+    var graph = ScriptGraph.builder("test-concurrent", "Concurrent Triggers")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("loop", "flow.loop", Map.of("count", 3))
+      .addNode("print", "action.print", Map.of("message", "iteration"))
+      .addExecutionEdge("trigger", "out", "loop", "in")
+      .addExecutionEdge("loop", "exec_loop", "print", "in")
+      .build();
+
+    var threads = new ArrayList<Thread>();
+    var listeners = java.util.Collections.synchronizedList(new ArrayList<RecordingEventListener>());
+    var errors = java.util.Collections.synchronizedList(new ArrayList<Throwable>());
+
+    for (var i = 0; i < 4; i++) {
+      var thread = new Thread(() -> {
+        try {
+          var listener = new RecordingEventListener();
+          var context = new ReactiveScriptContext(listener);
+          var engine = new ReactiveScriptEngine();
+          engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+          listeners.add(listener);
+        } catch (Throwable t) {
+          errors.add(t);
+        }
+      });
+      threads.add(thread);
+    }
+
+    for (var thread : threads) {
+      thread.start();
+    }
+    for (var thread : threads) {
+      thread.join(5000);
+    }
+
+    assertTrue(errors.isEmpty(), "No errors should occur: " + errors);
+    assertEquals(4, listeners.size(), "All 4 executions should complete");
+    for (var listener : listeners) {
+      assertTrue(listener.errorNodes.isEmpty(),
+        "No errors in execution: " + listener.errorNodes);
+      assertEquals(3, listener.startedNodes.stream().filter("print"::equals).count(),
+        "Each execution should run print 3 times");
+    }
+  }
+
   /// Extended RecordingEventListener that also captures log messages.
   private static class LogRecordingEventListener extends RecordingEventListener {
     final List<String> logMessages = new ArrayList<>();

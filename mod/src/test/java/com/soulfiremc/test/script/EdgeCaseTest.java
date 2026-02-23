@@ -195,12 +195,12 @@ final class EdgeCaseTest {
 
   @Test
   void isNullWithJsonNull() {
-    // NodeValue.ofNull() produces Json(JsonNull.INSTANCE), which is not Java null.
-    // IsNullNode checks for Java null (missing from map), not JSON null.
+    // NodeValue.ofNull() produces Json(JsonNull.INSTANCE).
+    // IsNullNode now checks both Java null (missing from map) and JSON null.
     var outputs = executeNode("util.is_null", Map.of(
       "value", NodeValue.ofNull()
     ));
-    assertFalse(outputs.get("result").asBoolean(true),
-      "JSON null is a present value, not a missing input");
+    assertTrue(outputs.get("result").asBoolean(false),
+      "JSON null should be treated as null by IsNullNode");
   }
 }

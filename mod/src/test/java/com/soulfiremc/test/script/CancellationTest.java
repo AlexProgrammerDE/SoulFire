@@ -88,6 +88,9 @@ final class CancellationTest {
     // print1 should have completed (it triggered the cancel)
     assertTrue(cancellingListener.completedNodes.contains("print1"),
       "print1 should complete before cancel takes effect");
+    // print2 should not execute because cancel fired before it started
+    assertFalse(cancellingListener.completedNodes.contains("print2"),
+      "print2 should not execute because cancel fired before it started");
     // print3 should definitely not run
     assertFalse(cancellingListener.completedNodes.contains("print3"),
       "print3 should not execute after cancellation");

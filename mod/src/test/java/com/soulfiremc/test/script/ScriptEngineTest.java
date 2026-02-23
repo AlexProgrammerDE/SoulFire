@@ -449,6 +449,76 @@ final class ScriptEngineTest {
       "Print should output 'after sync wait'");
   }
 
+  @Test
+  @Timeout(5)
+  void cancelDuringWaitStopsExecution() {
+    // Graph: trigger → wait(1s) → print
+    // Start execution, cancel after 100ms
+    // Verify print never runs
+    var graph = ScriptGraph.builder("test-cancel-wait", "Cancel During Wait")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("wait", "action.wait", Map.of("baseMs", 2000, "jitterMs", 0))
+      .addNode("print", "action.print", Map.of("message", "should not run"))
+      .addExecutionEdge("trigger", "out", "wait", "in")
+      .addExecutionEdge("wait", "out", "print", "in")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+
+    // Start async execution and cancel after 100ms
+    var disposable = engine.executeFromTrigger(graph, "trigger", context, Map.of())
+      .subscribe();
+
+    try {
+      Thread.sleep(100);
+    } catch (InterruptedException _) {
+      Thread.currentThread().interrupt();
+    }
+    context.cancel();
+    disposable.dispose();
+
+    assertFalse(listener.completedNodes.contains("print"),
+      "Print node should not execute after cancel during wait");
+  }
+
+  @Test
+  void printNodeWithMessage() {
+    var graph = ScriptGraph.builder("test-print-msg", "Print Message Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("print", "action.print", Map.of("message", "hello world"))
+      .addExecutionEdge("trigger", "out", "print", "in")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertEquals(1, listener.logMessages.size(), "Should have one log message");
+    assertEquals("hello world", listener.logMessages.getFirst());
+  }
+
+  @Test
+  void printNodeWithNullMessage() {
+    // Print with no message connection should output "null"
+    var graph = ScriptGraph.builder("test-print-null", "Print Null Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertFalse(listener.logMessages.isEmpty(), "Print should produce a log message");
+  }
+
   /// Extended RecordingEventListener that also captures log messages from Print nodes.
   private static class LogRecordingEventListener extends RecordingEventListener {
     final List<String> logMessages = new ArrayList<>();

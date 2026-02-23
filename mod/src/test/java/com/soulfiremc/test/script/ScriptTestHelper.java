@@ -138,14 +138,19 @@ final class ScriptTestHelper {
 
   /// Mock NodeRuntime for self-driving node tests (RepeatUntil, etc.).
   /// Tracks loop count, done-fired state, and check result.
+  /// Supports stack-based check context for nested loops.
   /// Use {@link #onDownstream} to customize executeDownstream behavior.
   static class MockNodeRuntime implements NodeRuntime {
     private final ScriptStateStore stateStore = new ScriptStateStore();
-    private final AtomicBoolean checkResult = new AtomicBoolean(false);
-    private final AtomicBoolean wasCheckResultSet = new AtomicBoolean(false);
+    private final java.util.Deque<boolean[]> checkResultStack = new java.util.ArrayDeque<>();
     private final AtomicInteger loopCount = new AtomicInteger(0);
     private final AtomicBoolean doneFired = new AtomicBoolean(false);
     private BiConsumer<String, Map<String, NodeValue>> downstreamHandler = (_, _) -> {};
+
+    MockNodeRuntime() {
+      // Initialize with one context (matching ExecutionRun behavior)
+      checkResultStack.push(new boolean[]{false, false});
+    }
 
     /// Sets a custom handler for executeDownstream calls.
     /// The handler receives the handle name and the outputs map.
@@ -174,33 +179,52 @@ final class ScriptTestHelper {
 
     @Override
     public Mono<Void> executeDownstream(String handle, Map<String, NodeValue> outputs) {
-      if (StandardPorts.EXEC_LOOP.equals(handle)) {
-        loopCount.incrementAndGet();
-      }
-      if (StandardPorts.EXEC_DONE.equals(handle)) {
-        doneFired.set(true);
-      }
-      downstreamHandler.accept(handle, outputs);
-      return Mono.empty();
+      return Mono.fromRunnable(() -> {
+        if (StandardPorts.EXEC_LOOP.equals(handle)) {
+          loopCount.incrementAndGet();
+        }
+        if (StandardPorts.EXEC_DONE.equals(handle)) {
+          doneFired.set(true);
+        }
+        downstreamHandler.accept(handle, outputs);
+      });
     }
 
     @Override
     public void setCheckResult(boolean value) {
-      wasCheckResultSet.set(true);
-      checkResult.set(value);
+      var top = checkResultStack.peek();
+      if (top != null) {
+        top[0] = true;
+        top[1] = value;
+      }
     }
 
     @Override
     public boolean wasCheckResultSet() {
-      return wasCheckResultSet.get();
+      var top = checkResultStack.peek();
+      return top != null && top[0];
     }
 
     @Override
     public boolean getAndResetCheckResult() {
-      wasCheckResultSet.set(false);
-      var v = checkResult.get();
-      checkResult.set(false);
-      return v;
+      var top = checkResultStack.peek();
+      if (top != null) {
+        var result = top[1];
+        top[0] = false;
+        top[1] = false;
+        return result;
+      }
+      return false;
+    }
+
+    @Override
+    public void pushCheckContext() {
+      checkResultStack.push(new boolean[]{false, false});
+    }
+
+    @Override
+    public void popCheckContext() {
+      checkResultStack.poll();
     }
 
     @Override

@@ -49,7 +49,7 @@ public final class GetSessionInstanceVariableNode extends AbstractScriptNode {
     .build();
 
   private static final MetadataKey<ConcurrentHashMap<String, NodeValue>> SESSION_VARS_KEY =
-    MetadataKey.of("script_session", "instance_variables", ConcurrentHashMap.class);
+    SessionVariableKeys.SESSION_INSTANCE_VARS_KEY;
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

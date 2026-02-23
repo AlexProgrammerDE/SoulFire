@@ -34,7 +34,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /// don't corrupt each other's node output sinks.
 @Slf4j
 public final class ExecutionRun {
-  private static final long MAX_EXECUTION_COUNT = 100_000;
+  private static final long DEFAULT_MAX_EXECUTION_COUNT = 100_000;
+  private static final Duration DEFAULT_DATA_EDGE_TIMEOUT = Duration.ofSeconds(10);
 
   private final ConcurrentHashMap<String, Sinks.Many<Map<String, NodeValue>>> nodeOutputSinks =
     new ConcurrentHashMap<>();
@@ -42,18 +43,29 @@ public final class ExecutionRun {
     new ConcurrentHashMap<>();
   private final Set<String> triggeredDataNodes = ConcurrentHashMap.newKeySet();
   private final AtomicLong executionCount = new AtomicLong(0);
-  private final AtomicBoolean checkResult = new AtomicBoolean(false);
-  private final AtomicBoolean wasCheckResultSet = new AtomicBoolean(false);
+
+  /// Stack-based check result for nested loop support.
+  private final java.util.Deque<boolean[]> checkResultStack = new java.util.concurrent.ConcurrentLinkedDeque<>();
 
   /// Whether this execution is running synchronously on the tick thread.
   private final boolean tickSynchronous;
+  private final Duration dataEdgeTimeout;
+  private final long maxExecutionCount;
 
   public ExecutionRun() {
     this(false);
   }
 
   public ExecutionRun(boolean tickSynchronous) {
+    this(tickSynchronous, DEFAULT_DATA_EDGE_TIMEOUT, DEFAULT_MAX_EXECUTION_COUNT);
+  }
+
+  public ExecutionRun(boolean tickSynchronous, Duration dataEdgeTimeout, long maxExecutionCount) {
     this.tickSynchronous = tickSynchronous;
+    this.dataEdgeTimeout = dataEdgeTimeout;
+    this.maxExecutionCount = maxExecutionCount;
+    // Initialize with one context for the top-level execution
+    pushCheckContext();
   }
 
   /// Returns whether this execution is running synchronously on the tick thread.
@@ -71,7 +83,7 @@ public final class ExecutionRun {
       .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
       .asFlux()
       .next()
-      .timeout(Duration.ofSeconds(10))
+      .timeout(dataEdgeTimeout)
       .doOnError(_ -> log.error("Timeout waiting for node {} outputs - "
         + "DATA edge may point to a node not on the execution path", nodeDesc))
       .onErrorReturn(Map.of());
@@ -120,29 +132,49 @@ public final class ExecutionRun {
     return triggeredDataNodes.add(nodeId);
   }
 
+  /// Pushes a new check context onto the stack for nested loop support.
+  public void pushCheckContext() {
+    checkResultStack.push(new boolean[]{false, false});
+  }
+
+  /// Pops the current check context from the stack.
+  public void popCheckContext() {
+    checkResultStack.poll();
+  }
+
   /// Sets the check result flag, used by ResultNode to communicate
   /// a boolean condition back to loop nodes (e.g., RepeatUntilNode).
   ///
   /// @param value the boolean result
   public void setCheckResult(boolean value) {
-    this.wasCheckResultSet.set(true);
-    this.checkResult.set(value);
+    var top = checkResultStack.peek();
+    if (top != null) {
+      top[0] = true; // wasSet
+      top[1] = value; // result
+    }
   }
 
   /// Returns whether setCheckResult was called since the last reset.
   ///
   /// @return true if a ResultNode set the check result
   public boolean wasCheckResultSet() {
-    return wasCheckResultSet.get();
+    var top = checkResultStack.peek();
+    return top != null && top[0];
   }
 
-  /// Gets and resets the check result flag atomically.
+  /// Gets and resets the check result flag.
   /// Returns the current value and resets it to false.
   ///
   /// @return the check result before reset
   public boolean getAndResetCheckResult() {
-    wasCheckResultSet.set(false);
-    return this.checkResult.getAndSet(false);
+    var top = checkResultStack.peek();
+    if (top != null) {
+      var result = top[1];
+      top[0] = false;
+      top[1] = false;
+      return result;
+    }
+    return false;
   }
 
   /// Resets all data-only node trigger flags, allowing them to re-execute.
@@ -156,6 +188,6 @@ public final class ExecutionRun {
   ///
   /// @return true if execution is allowed, false if the limit has been exceeded
   public boolean incrementAndCheckLimit() {
-    return executionCount.incrementAndGet() <= MAX_EXECUTION_COUNT;
+    return executionCount.incrementAndGet() <= maxExecutionCount;
   }
 }

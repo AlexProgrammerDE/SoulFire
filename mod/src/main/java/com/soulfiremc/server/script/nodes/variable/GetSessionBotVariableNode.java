@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 /// Variable node that retrieves a value from the bot's session metadata.
 @Slf4j
 public final class GetSessionBotVariableNode extends AbstractScriptNode {
@@ -49,9 +50,8 @@ public final class GetSessionBotVariableNode extends AbstractScriptNode {
     .addKeywords("variable", "session", "temporary", "get", "retrieve", "memory")
     .build();
 
-  // Same static key as SetSessionBotVariableNode
   private static final MetadataKey<ConcurrentHashMap<String, NodeValue>> SESSION_VARS_KEY =
-    MetadataKey.of("script_session", "variables", ConcurrentHashMap.class);
+    SessionVariableKeys.SESSION_BOT_VARS_KEY;
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

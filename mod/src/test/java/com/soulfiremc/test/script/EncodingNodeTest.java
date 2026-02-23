@@ -176,4 +176,86 @@ final class EncodingNodeTest {
       outputs.get("hash").asString(""),
       "SHA-256 of empty string should match known hash");
   }
+
+  // --- Compression ---
+
+  @Test
+  void compressDecompressRoundTrip() {
+    var original = "Hello, World! This is a test of GZIP compression.";
+    var compressed = executeNode("encoding.compress", Map.of(
+      "input", NodeValue.ofString(original),
+      "decompress", NodeValue.ofBoolean(false)
+    ));
+    assertTrue(compressed.get("success").asBoolean(false), "Compression should succeed");
+    assertFalse(compressed.get("output").asString("").isEmpty(), "Compressed output should not be empty");
+
+    var decompressed = executeNode("encoding.compress", Map.of(
+      "input", compressed.get("output"),
+      "decompress", NodeValue.ofBoolean(true)
+    ));
+    assertTrue(decompressed.get("success").asBoolean(false), "Decompression should succeed");
+    assertEquals(original, decompressed.get("output").asString(""),
+      "Decompressed data should match original");
+  }
+
+  @Test
+  void compressInvalidDecompressInput() {
+    var outputs = executeNode("encoding.compress", Map.of(
+      "input", NodeValue.ofString("not-valid-gzip-base64"),
+      "decompress", NodeValue.ofBoolean(true)
+    ));
+    assertFalse(outputs.get("success").asBoolean(true),
+      "Decompressing invalid input should fail");
+  }
+
+  // --- Encryption ---
+
+  @Test
+  void encryptDecryptRoundTrip() {
+    var original = "Secret message for testing";
+    var key = "my-secret-key";
+
+    var encrypted = executeNode("encoding.encrypt", Map.of(
+      "plaintext", NodeValue.ofString(original),
+      "key", NodeValue.ofString(key)
+    ));
+    assertTrue(encrypted.get("success").asBoolean(false), "Encryption should succeed");
+    assertFalse(encrypted.get("ciphertext").asString("").isEmpty(),
+      "Ciphertext should not be empty");
+
+    var decrypted = executeNode("encoding.decrypt", Map.of(
+      "ciphertext", encrypted.get("ciphertext"),
+      "key", NodeValue.ofString(key)
+    ));
+    assertTrue(decrypted.get("success").asBoolean(false), "Decryption should succeed");
+    assertEquals(original, decrypted.get("plaintext").asString(""),
+      "Decrypted text should match original");
+  }
+
+  @Test
+  void encryptDecryptWrongKeyFails() {
+    var original = "Secret message";
+    var encrypted = executeNode("encoding.encrypt", Map.of(
+      "plaintext", NodeValue.ofString(original),
+      "key", NodeValue.ofString("correct-key")
+    ));
+    assertTrue(encrypted.get("success").asBoolean(false));
+
+    var decrypted = executeNode("encoding.decrypt", Map.of(
+      "ciphertext", encrypted.get("ciphertext"),
+      "key", NodeValue.ofString("wrong-key")
+    ));
+    assertFalse(decrypted.get("success").asBoolean(true),
+      "Decryption with wrong key should fail");
+  }
+
+  @Test
+  void encryptEmptyKeyFails() {
+    var outputs = executeNode("encoding.encrypt", Map.of(
+      "plaintext", NodeValue.ofString("test"),
+      "key", NodeValue.ofString("")
+    ));
+    assertFalse(outputs.get("success").asBoolean(true),
+      "Encryption with empty key should fail");
+  }
 }

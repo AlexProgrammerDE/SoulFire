@@ -22,7 +22,9 @@ import com.soulfiremc.server.script.nodes.NodeRegistry;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -126,4 +128,63 @@ final class NodeRegistryTest {
       assertEquals(type, metadata.type(), "Node metadata type doesn't match registered type");
     }
   }
+
+  @Test
+  void registerRejectsMutableFieldInSuperclass() {
+    var metadata = NodeMetadata.builder()
+      .type("test.mutable_superclass_node")
+      .displayName("Mutable Superclass Node")
+      .category(CategoryRegistry.ACTIONS)
+      .icon("box")
+      .build();
+
+    assertThrows(IllegalStateException.class, () ->
+        NodeRegistry.register(metadata, MutableSuperclassTestNode::new),
+      "Should reject node with mutable instance field inherited from superclass");
+  }
+
+  @Test
+  void allNodeOutputKeysMatchMetadata() {
+    for (var type : NodeRegistry.getRegisteredTypes()) {
+      var metadata = NodeRegistry.getMetadata(type);
+      if (metadata.isTrigger()) continue;
+      // Skip nodes requiring a bot input
+      if (metadata.inputs().stream().anyMatch(p -> p.type() == PortType.BOT && p.required())) continue;
+      // Skip nodes requiring exec input (need engine context)
+      if (metadata.inputs().stream().anyMatch(p -> p.type() == PortType.EXEC)) continue;
+
+      var node = NodeRegistry.create(type);
+      var defaults = NodeRegistry.computeDefaultInputs(metadata);
+      try {
+        var outputs = node.executeReactive(ScriptTestHelper.TEST_RUNTIME, defaults)
+          .block(Duration.ofSeconds(2));
+        if (outputs != null) {
+          var declaredOutputIds = metadata.outputs().stream()
+            .map(PortDefinition::id)
+            .collect(Collectors.toSet());
+          for (var key : outputs.keySet()) {
+            assertTrue(declaredOutputIds.contains(key),
+              "Node " + type + " returned undeclared output key '" + key
+                + "'. Declared: " + declaredOutputIds);
+          }
+        }
+      } catch (Exception _) {
+        // Node may fail without proper runtime context; that's OK for this test
+      }
+    }
+  }
+
+  /// Base class with a mutable field for testing hierarchy walk.
+  static class MutableBase implements ScriptNode {
+    @SuppressWarnings("unused")
+    private int baseCounter = 0;
+
+    @Override
+    public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+      return Mono.just(Map.of());
+    }
+  }
+
+  /// Test node inheriting a mutable field from superclass (should be rejected).
+  static class MutableSuperclassTestNode extends MutableBase {}
 }

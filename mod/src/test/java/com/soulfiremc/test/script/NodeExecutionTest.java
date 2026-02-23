@@ -522,6 +522,13 @@ final class NodeExecutionTest {
   }
 
   @Test
+  void isNullNodeExecutesWithJsonNull() {
+    var result = executeNode("util.is_null", Map.of("value", NodeValue.ofNull()));
+    assertTrue(result.get("result").asBoolean(false),
+      "isNull should return true for JSON null (NodeValue.ofNull())");
+  }
+
+  @Test
   void isNullNodeExecutesWithPresentValue() {
     var result = executeNode("util.is_null", Map.of("value", NodeValue.ofString("hello")));
     assertFalse(result.get("result").asBoolean(true));
@@ -537,5 +544,169 @@ final class NodeExecutionTest {
   void isEmptyNodeExecutesWithNonEmptyString() {
     var result = executeNode("util.is_empty", Map.of("value", NodeValue.ofString("hello")));
     assertFalse(result.get("result").asBoolean(true));
+  }
+
+  // ==================== Math Nodes: Trig & Advanced ====================
+
+  @Test
+  void sinNodeExecutes() {
+    var result = executeNode("math.sin", Map.of("angle", NodeValue.ofNumber(90)));
+    assertEquals(1.0, result.get("result").asDouble(0.0), 0.001);
+  }
+
+  @Test
+  void sinNodeZero() {
+    var result = executeNode("math.sin", Map.of("angle", NodeValue.ofNumber(0)));
+    assertEquals(0.0, result.get("result").asDouble(1.0), 0.001);
+  }
+
+  @Test
+  void cosNodeExecutes() {
+    var result = executeNode("math.cos", Map.of("angle", NodeValue.ofNumber(0)));
+    assertEquals(1.0, result.get("result").asDouble(0.0), 0.001);
+  }
+
+  @Test
+  void cosNode90Degrees() {
+    var result = executeNode("math.cos", Map.of("angle", NodeValue.ofNumber(90)));
+    assertEquals(0.0, result.get("result").asDouble(1.0), 0.001);
+  }
+
+  @Test
+  void tanNodeExecutes() {
+    var result = executeNode("math.tan", Map.of("angle", NodeValue.ofNumber(45)));
+    assertEquals(1.0, result.get("result").asDouble(0.0), 0.001);
+  }
+
+  @Test
+  void tanNodeZero() {
+    var result = executeNode("math.tan", Map.of("angle", NodeValue.ofNumber(0)));
+    assertEquals(0.0, result.get("result").asDouble(1.0), 0.001);
+  }
+
+  @Test
+  void sqrtNodeExecutes() {
+    var result = executeNode("math.sqrt", Map.of("value", NodeValue.ofNumber(16)));
+    assertEquals(4.0, result.get("result").asDouble(0.0), 0.001);
+  }
+
+  @Test
+  void sqrtNodeZero() {
+    var result = executeNode("math.sqrt", Map.of("value", NodeValue.ofNumber(0)));
+    assertEquals(0.0, result.get("result").asDouble(1.0), 0.001);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+    "0, 10, 0.5, 5.0",
+    "0, 10, 0, 0.0",
+    "0, 10, 1, 10.0",
+    "5, 15, 0.5, 10.0"
+  })
+  void lerpNodeExecutes(double a, double b, double t, double expected) {
+    var result = executeNode("math.lerp", Map.of(
+      "a", NodeValue.ofNumber(a),
+      "b", NodeValue.ofNumber(b),
+      "t", NodeValue.ofNumber(t)
+    ));
+    assertEquals(expected, result.get("result").asDouble(0.0), 0.001);
+  }
+
+  @Test
+  void lerpNodeClampsT() {
+    var result = executeNode("math.lerp", Map.of(
+      "a", NodeValue.ofNumber(0),
+      "b", NodeValue.ofNumber(10),
+      "t", NodeValue.ofNumber(2.0)
+    ));
+    assertEquals(10.0, result.get("result").asDouble(0.0), 0.001,
+      "t > 1 should be clamped to 1");
+  }
+
+  // ==================== String Nodes: Format & IndexOf ====================
+
+  @Test
+  void formatNodeSinglePlaceholder() {
+    var result = executeNode("string.format", Map.of(
+      "template", NodeValue.ofString("Hello {0}!"),
+      "args", NodeValue.of(List.of("World"))
+    ));
+    assertEquals("Hello World!", result.get("result").asString(""));
+  }
+
+  @Test
+  void formatNodeMultiplePlaceholders() {
+    var result = executeNode("string.format", Map.of(
+      "template", NodeValue.ofString("{0} + {1} = {2}"),
+      "args", NodeValue.of(List.of("1", "2", "3"))
+    ));
+    assertEquals("1 + 2 = 3", result.get("result").asString(""));
+  }
+
+  @Test
+  void formatNodeNoArgsUnchanged() {
+    var result = executeNode("string.format", Map.of(
+      "template", NodeValue.ofString("No placeholders here"),
+      "args", NodeValue.of(List.of())
+    ));
+    assertEquals("No placeholders here", result.get("result").asString(""));
+  }
+
+  @Test
+  void formatNodeStringArgNoQuotes() {
+    var result = executeNode("string.format", Map.of(
+      "template", NodeValue.ofString("Name: {0}"),
+      "args", NodeValue.of(List.of("Alice"))
+    ));
+    assertEquals("Name: Alice", result.get("result").asString(""),
+      "String args should not include JSON quotes");
+  }
+
+  @Test
+  void formatNodeNumberArg() {
+    var result = executeNode("string.format", Map.of(
+      "template", NodeValue.ofString("Value: {0}"),
+      "args", NodeValue.of(List.of(42))
+    ));
+    assertEquals("Value: 42", result.get("result").asString(""));
+  }
+
+  @Test
+  void indexOfNodeFound() {
+    var result = executeNode("string.index_of", Map.of(
+      "text", NodeValue.ofString("Hello World"),
+      "search", NodeValue.ofString("World")
+    ));
+    assertEquals(6, result.get("index").asInt(-1));
+  }
+
+  @Test
+  void indexOfNodeNotFound() {
+    var result = executeNode("string.index_of", Map.of(
+      "text", NodeValue.ofString("Hello World"),
+      "search", NodeValue.ofString("Missing")
+    ));
+    assertEquals(-1, result.get("index").asInt(0));
+  }
+
+  @Test
+  void indexOfNodeIgnoreCase() {
+    var result = executeNode("string.index_of", Map.of(
+      "text", NodeValue.ofString("Hello World"),
+      "search", NodeValue.ofString("hello"),
+      "ignoreCase", NodeValue.ofBoolean(true)
+    ));
+    assertEquals(0, result.get("index").asInt(-1));
+  }
+
+  @Test
+  void indexOfNodeCaseSensitive() {
+    var result = executeNode("string.index_of", Map.of(
+      "text", NodeValue.ofString("Hello World"),
+      "search", NodeValue.ofString("hello"),
+      "ignoreCase", NodeValue.ofBoolean(false)
+    ));
+    assertEquals(-1, result.get("index").asInt(0),
+      "Case-sensitive search should not match 'hello' in 'Hello World'");
   }
 }
