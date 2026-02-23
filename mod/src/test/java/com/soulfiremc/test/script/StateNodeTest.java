@@ -76,7 +76,7 @@ final class StateNodeTest {
   }
 
   @Test
-  void cacheGetExpiredReturnsNull() throws InterruptedException {
+  void cacheGetExpiredReturnsNull() throws Exception {
     var runtime = ScriptTestHelper.TEST_RUNTIME;
     var ns = "test-ttl-" + System.nanoTime();
 
@@ -160,7 +160,7 @@ final class StateNodeTest {
   }
 
   @Test
-  void cacheHasReturnsFalseForExpired() throws InterruptedException {
+  void cacheHasReturnsFalseForExpired() throws Exception {
     var runtime = ScriptTestHelper.TEST_RUNTIME;
     var ns = "test-has-ttl-" + System.nanoTime();
 
@@ -249,7 +249,7 @@ final class StateNodeTest {
   }
 
   @Test
-  void debounceAfterCooldownAllowed() throws InterruptedException {
+  void debounceAfterCooldownAllowed() throws Exception {
     var runtime = ScriptTestHelper.TEST_RUNTIME;
     var key = "debounce-cooldown-" + System.nanoTime();
 

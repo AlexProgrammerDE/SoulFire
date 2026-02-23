@@ -21,10 +21,7 @@ import com.soulfiremc.server.script.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.soulfiremc.test.script.ScriptTestHelper.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -167,7 +164,7 @@ final class MultiTriggerTest {
   }
 
   @Test
-  void concurrentTriggersDontCorruptState() throws InterruptedException {
+  void concurrentTriggersDontCorruptState() throws Exception {
     // Graph with trigger → loop(3) → print
     var graph = ScriptGraph.builder("test-concurrent", "Concurrent Triggers")
       .addNode("trigger", "trigger.on_script_init", null)
@@ -178,8 +175,8 @@ final class MultiTriggerTest {
       .build();
 
     var threads = new ArrayList<Thread>();
-    var listeners = java.util.Collections.synchronizedList(new ArrayList<RecordingEventListener>());
-    var errors = java.util.Collections.synchronizedList(new ArrayList<Throwable>());
+    var listeners = Collections.synchronizedList(new ArrayList<RecordingEventListener>());
+    var errors = Collections.synchronizedList(new ArrayList<Throwable>());
 
     for (var i = 0; i < 4; i++) {
       var thread = new Thread(() -> {

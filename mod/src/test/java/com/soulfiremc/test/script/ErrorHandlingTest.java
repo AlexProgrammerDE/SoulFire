@@ -133,8 +133,7 @@ final class ErrorHandlingTest {
       "Error handler should execute");
     var fetchOutputs = listener.nodeOutputs.get("fetch");
     assertNotNull(fetchOutputs, "Fetch should have outputs");
-    assertEquals(false, fetchOutputs.get("success").asBoolean(true),
-      "Success should be false on error");
+    assertFalse(fetchOutputs.get("success").asBoolean(true), "Success should be false on error");
     assertFalse(fetchOutputs.get("errorMessage").asString("").isEmpty(),
       "Error message should be populated");
   }

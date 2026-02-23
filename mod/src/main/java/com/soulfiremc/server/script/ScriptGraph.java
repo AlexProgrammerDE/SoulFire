@@ -431,10 +431,7 @@ public final class ScriptGraph {
       if (source == PortType.NUMBER && target == PortType.BOOLEAN) {
         return true; // truthy coercion
       }
-      if (source == PortType.BOOLEAN && target == PortType.NUMBER) {
-        return true; // boolean to number coercion
-      }
-      return false;
+      return source == PortType.BOOLEAN && target == PortType.NUMBER;
     }
 
     /// Builds the ScriptGraph after validation.

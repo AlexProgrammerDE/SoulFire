@@ -23,9 +23,11 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
+import java.util.Deque;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,7 +47,7 @@ public final class ExecutionRun {
   private final AtomicLong executionCount = new AtomicLong(0);
 
   /// Stack-based check result for nested loop support.
-  private final java.util.Deque<boolean[]> checkResultStack = new java.util.concurrent.ConcurrentLinkedDeque<>();
+  private final Deque<boolean[]> checkResultStack = new ConcurrentLinkedDeque<>();
 
   /// Whether this execution is running synchronously on the tick thread.
   private final boolean tickSynchronous;

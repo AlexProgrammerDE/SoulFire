@@ -20,6 +20,7 @@ package com.soulfiremc.server.script.nodes.data;
 import com.soulfiremc.server.script.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import reactor.core.publisher.Mono;
@@ -80,7 +81,7 @@ public final class GetTargetBlockNode extends AbstractScriptNode {
     ));
 
     if (hitResult.getType() == HitResult.Type.BLOCK) {
-      var blockHit = (net.minecraft.world.phys.BlockHitResult) hitResult;
+      var blockHit = (BlockHitResult) hitResult;
       var blockPos = blockHit.getBlockPos();
       var blockState = level.getBlockState(blockPos);
       var blockId = BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString();

@@ -28,7 +28,9 @@ import net.lenni0451.reflect.Fields;
 import net.lenni0451.reflect.Objects;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,7 +144,7 @@ final class ScriptTestHelper {
   /// Use {@link #onDownstream} to customize executeDownstream behavior.
   static class MockNodeRuntime implements NodeRuntime {
     private final ScriptStateStore stateStore = new ScriptStateStore();
-    private final java.util.Deque<boolean[]> checkResultStack = new java.util.ArrayDeque<>();
+    private final Deque<boolean[]> checkResultStack = new ArrayDeque<>();
     private final AtomicInteger loopCount = new AtomicInteger(0);
     private final AtomicBoolean doneFired = new AtomicBoolean(false);
     private BiConsumer<String, Map<String, NodeValue>> downstreamHandler = (_, _) -> {};

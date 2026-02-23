@@ -94,7 +94,7 @@ final class NodeRegistryTest {
   /// Test node with a mutable instance field (should be rejected).
   static class MutableTestNode implements ScriptNode {
     @SuppressWarnings("unused")
-    private int counter = 0;
+    private int counter;
 
     @Override
     public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
@@ -147,11 +147,17 @@ final class NodeRegistryTest {
   void allNodeOutputKeysMatchMetadata() {
     for (var type : NodeRegistry.getRegisteredTypes()) {
       var metadata = NodeRegistry.getMetadata(type);
-      if (metadata.isTrigger()) continue;
+      if (metadata.isTrigger()) {
+        continue;
+      }
       // Skip nodes requiring a bot input
-      if (metadata.inputs().stream().anyMatch(p -> p.type() == PortType.BOT && p.required())) continue;
+      if (metadata.inputs().stream().anyMatch(p -> p.type() == PortType.BOT && p.required())) {
+        continue;
+      }
       // Skip nodes requiring exec input (need engine context)
-      if (metadata.inputs().stream().anyMatch(p -> p.type() == PortType.EXEC)) continue;
+      if (metadata.inputs().stream().anyMatch(p -> p.type() == PortType.EXEC)) {
+        continue;
+      }
 
       var node = NodeRegistry.create(type);
       var defaults = NodeRegistry.computeDefaultInputs(metadata);
@@ -177,7 +183,7 @@ final class NodeRegistryTest {
   /// Base class with a mutable field for testing hierarchy walk.
   static class MutableBase implements ScriptNode {
     @SuppressWarnings("unused")
-    private int baseCounter = 0;
+    private int baseCounter;
 
     @Override
     public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {

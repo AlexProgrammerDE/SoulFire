@@ -20,6 +20,7 @@ package com.soulfiremc.test.script;
 import com.soulfiremc.server.script.NodeValue;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.soulfiremc.test.script.ScriptTestHelper.executeNode;
@@ -226,8 +227,8 @@ final class JsonNodeTest {
   @Test
   void jsonObjectFromKeysAndValues() {
     var outputs = executeNode("json.object", Map.of(
-      "keys", NodeValue.of(java.util.List.of("name", "age")),
-      "values", NodeValue.of(java.util.List.of("Alex", 25))
+      "keys", NodeValue.of(List.of("name", "age")),
+      "values", NodeValue.of(List.of("Alex", 25))
     ));
     var obj = outputs.get("object").asString("");
     assertTrue(obj.contains("\"name\""), "Should contain key 'name'");
@@ -239,8 +240,8 @@ final class JsonNodeTest {
   void jsonObjectMismatchedLengths() {
     // More keys than values: should use only matching pairs
     var outputs = executeNode("json.object", Map.of(
-      "keys", NodeValue.of(java.util.List.of("a", "b", "c")),
-      "values", NodeValue.of(java.util.List.of("1"))
+      "keys", NodeValue.of(List.of("a", "b", "c")),
+      "values", NodeValue.of(List.of("1"))
     ));
     var obj = outputs.get("object").asString("");
     assertTrue(obj.contains("\"a\""), "Should contain first key");
@@ -252,7 +253,7 @@ final class JsonNodeTest {
   @Test
   void jsonArrayFromItems() {
     var outputs = executeNode("json.array", Map.of(
-      "items", NodeValue.of(java.util.List.of(1, 2, 3))
+      "items", NodeValue.of(List.of(1, 2, 3))
     ));
     var arr = outputs.get("array").asString("");
     assertEquals("[1,2,3]", arr);
@@ -261,7 +262,7 @@ final class JsonNodeTest {
   @Test
   void jsonArrayWithStrings() {
     var outputs = executeNode("json.array", Map.of(
-      "items", NodeValue.of(java.util.List.of("a", "b"))
+      "items", NodeValue.of(List.of("a", "b"))
     ));
     var arr = outputs.get("array").asString("");
     assertEquals("[\"a\",\"b\"]", arr);

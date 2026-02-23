@@ -20,6 +20,7 @@ package com.soulfiremc.test.script;
 import com.soulfiremc.server.script.NodeValue;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.soulfiremc.test.script.ScriptTestHelper.executeNode;
@@ -140,7 +141,7 @@ final class EdgeCaseTest {
   @Test
   void listFirstOnEmptyList() {
     var outputs = executeNode("list.first", Map.of(
-      "list", NodeValue.of(java.util.List.of())
+      "list", NodeValue.of(List.of())
     ));
     assertTrue(outputs.get("item").isNull(),
       "First on empty list should return null");
@@ -149,7 +150,7 @@ final class EdgeCaseTest {
   @Test
   void listLastOnEmptyList() {
     var outputs = executeNode("list.last", Map.of(
-      "list", NodeValue.of(java.util.List.of())
+      "list", NodeValue.of(List.of())
     ));
     assertTrue(outputs.get("item").isNull(),
       "Last on empty list should return null");
@@ -158,7 +159,7 @@ final class EdgeCaseTest {
   @Test
   void listGetAtOutOfBounds() {
     var outputs = executeNode("list.get_at", Map.of(
-      "list", NodeValue.of(java.util.List.of(1, 2, 3)),
+      "list", NodeValue.of(List.of(1, 2, 3)),
       "index", NodeValue.ofNumber(10)
     ));
     assertTrue(outputs.get("item").isNull(),
@@ -168,7 +169,7 @@ final class EdgeCaseTest {
   @Test
   void listLengthEmpty() {
     var outputs = executeNode("list.length", Map.of(
-      "list", NodeValue.of(java.util.List.of())
+      "list", NodeValue.of(List.of())
     ));
     assertEquals(0, outputs.get("length").asInt(-1));
   }

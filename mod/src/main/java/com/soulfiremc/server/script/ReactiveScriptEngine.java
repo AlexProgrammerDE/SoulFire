@@ -23,7 +23,9 @@ import com.soulfiremc.server.script.nodes.NodeRegistry;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +53,7 @@ public final class ReactiveScriptEngine {
   private static final int MAX_PARALLEL_BRANCHES = 8;
 
   /// Maximum time a single node execution can take before being timed out.
-  private static final java.time.Duration NODE_EXECUTION_TIMEOUT = java.time.Duration.ofSeconds(30);
+  private static final Duration NODE_EXECUTION_TIMEOUT = Duration.ofSeconds(30);
 
   /// Result of executing a single node: its outputs and the updated execution context.
   /// Used by expand() to iteratively determine the next nodes to execute.
@@ -637,7 +639,7 @@ public final class ReactiveScriptEngine {
       }
 
       @Override
-      public reactor.core.scheduler.Scheduler reactorScheduler() {
+      public Scheduler reactorScheduler() {
         return context.getReactorScheduler();
       }
 

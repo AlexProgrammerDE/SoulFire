@@ -30,6 +30,7 @@ import reactor.core.publisher.Sinks;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -415,7 +416,7 @@ public final class ScriptTriggerService {
     ReactiveScriptEngine engine
   ) {
     void fire() {
-      var latch = new java.util.concurrent.CountDownLatch(1);
+      var latch = new CountDownLatch(1);
       try {
         engine.executeFromTrigger(graph, nodeId, context, Map.of())
           .onErrorResume(e -> {
@@ -427,7 +428,7 @@ public final class ScriptTriggerService {
         if (!latch.await(5, TimeUnit.SECONDS)) {
           log.warn("OnScriptEnd trigger timed out after 5 seconds for node {}", nodeId);
         }
-      } catch (InterruptedException e) {
+      } catch (InterruptedException _) {
         Thread.currentThread().interrupt();
         log.warn("OnScriptEnd trigger interrupted for node {}", nodeId);
       } catch (Exception e) {

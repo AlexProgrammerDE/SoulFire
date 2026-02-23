@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -29,7 +30,7 @@ import java.util.regex.PatternSyntaxException;
 /// Input: bots (List of BotConnection), pattern (regex string)
 /// Output: bots (List of BotConnection matching pattern)
 public final class FilterBotsNode extends AbstractScriptNode {
-  private static final Map<String, Pattern> PATTERN_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+  private static final Map<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
   private static final int MAX_CACHE_SIZE = 128;
 
   public static final NodeMetadata METADATA = NodeMetadata.builder()

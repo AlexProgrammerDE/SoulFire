@@ -24,7 +24,8 @@ import org.junit.jupiter.api.Timeout;
 import java.util.Map;
 
 import static com.soulfiremc.test.script.ScriptTestHelper.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /// Tests for script cancellation via ReactiveScriptContext.cancel().
 @Timeout(5)

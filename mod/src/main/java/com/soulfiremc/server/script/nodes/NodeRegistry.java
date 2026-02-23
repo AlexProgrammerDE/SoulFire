@@ -343,7 +343,7 @@ public final class NodeRegistry {
               log.warn("Node {} port '{}' has non-boolean default: {}", metadata.type(), input.id(), defaultValueStr);
             }
             defaults.put(input.id(), NodeValue.fromJson(jsonElement));
-          } catch (Exception e) {
+          } catch (Exception _) {
             log.warn("Node {} port '{}' has unparseable default: {}", metadata.type(), input.id(), defaultValueStr);
             defaults.put(input.id(), NodeValue.ofString(defaultValueStr));
           }

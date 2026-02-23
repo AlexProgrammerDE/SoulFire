@@ -42,8 +42,10 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
 import org.jooq.impl.DSL;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -1105,7 +1107,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         EdgeType edgeType;
         try {
           edgeType = EdgeType.valueOf(data.edgeType());
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException _) {
           log.warn("Unknown edge type '{}' in edge {}, defaulting to EDGE_TYPE_DATA", data.edgeType(), data.id());
           edgeType = EdgeType.EDGE_TYPE_DATA;
         }
@@ -1635,10 +1637,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var biomesClass = Class.forName("net.minecraft.world.level.biome.Biomes");
       var biomeIds = new ArrayList<String>();
       for (var field : biomesClass.getDeclaredFields()) {
-        if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
-          && field.getType() == net.minecraft.resources.ResourceKey.class) {
+        if (Modifier.isStatic(field.getModifiers())
+          && field.getType() == ResourceKey.class) {
           try {
-            var key = (net.minecraft.resources.ResourceKey<?>) field.get(null);
+            var key = (ResourceKey<?>) field.get(null);
             biomeIds.add(key.identifier().toString());
           } catch (IllegalAccessException _) {
             // skip inaccessible fields
