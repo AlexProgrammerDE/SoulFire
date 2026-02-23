@@ -267,9 +267,14 @@ public final class BotConnection {
       return;
     }
 
-    var chatScreen = new ChatScreen("", false);
-    chatScreen.init(minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
-    chatScreen.handleChatInput(message, false);
+    try {
+      var chatScreen = new ChatScreen("", false);
+      chatScreen.init(minecraft.getWindow().getGuiScaledWidth(), minecraft.getWindow().getGuiScaledHeight());
+      chatScreen.handleChatInput(message, false);
+    } catch (NullPointerException e) {
+      // Player may disconnect between our null check and ChatScreen accessing minecraft.player
+      log.debug("Failed to send chat message, player likely disconnected", e);
+    }
   }
 
   private record BotRunnableWrapper(BotConnection botConnection) implements SoulFireScheduler.RunnableWrapper {
