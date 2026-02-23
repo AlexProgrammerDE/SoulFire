@@ -557,6 +557,123 @@ final class ScriptEngineTest {
       "Error should mention missing required input");
   }
 
+  // ==================== Execution Context vs Graph Default Priority Tests ====================
+
+  @Test
+  void graphDefaultNotOverriddenByExecContext() {
+    // Regression test: trigger outputs "message" via exec context, but downstream node
+    // has "message" explicitly set as graph default. The graph default must win.
+    // This was the root cause of bots being kicked for "Invalid characters in chat" when
+    // on_chat trigger's "message" (containing section symbols) silently overwrote send_chat's
+    // configured "/afk" input.
+    var graph = ScriptGraph.builder("test-graph-default-priority", "Graph Default Priority")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print", "action.print", Map.of("message", "/afk"))
+      .addExecutionEdge("trigger", "out", "print", "in")
+      // No DATA edge: "message" only flows via execution context
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("hello"));
+    eventInputs.put("message", NodeValue.ofString("§aHello with formatting"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertEquals(1, listener.logMessages.size(), "Print should log exactly one message");
+    assertEquals("/afk", listener.logMessages.getFirst(),
+      "Graph default '/afk' must NOT be overridden by trigger's 'message' in execution context");
+  }
+
+  @Test
+  void dataEdgeStillOverridesGraphDefault() {
+    // When a DATA edge explicitly wires trigger.message → print.message,
+    // the wired value should take priority over the graph default.
+    var graph = ScriptGraph.builder("test-data-edge-priority", "Data Edge Priority")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print", "action.print", Map.of("message", "/afk"))
+      .addExecutionEdge("trigger", "out", "print", "in")
+      .addDataEdge("trigger", "message", "print", "message")
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("hello"));
+    eventInputs.put("message", NodeValue.ofString("§aWired value"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertEquals(1, listener.logMessages.size(), "Print should log exactly one message");
+    assertEquals("§aWired value", listener.logMessages.getFirst(),
+      "DATA edge value must override graph default when explicitly wired");
+  }
+
+  @Test
+  void execContextStillFillsUnsetInputs() {
+    // When a downstream node has NO graph default for an input, execution context
+    // should still flow through and fill it (backwards compatibility).
+    var graph = ScriptGraph.builder("test-exec-context-fills", "Exec Context Fills Unset")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
+      // No graph default for "message", no DATA edge
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("hello"));
+    eventInputs.put("message", NodeValue.ofString("§aFrom context"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertEquals(1, listener.logMessages.size(), "Print should log exactly one message");
+    assertEquals("§aFrom context", listener.logMessages.getFirst(),
+      "Execution context should fill inputs that have no graph default set");
+  }
+
+  @Test
+  void graphDefaultPreservedAcrossChainedNodes() {
+    // Trigger → print1 (no graph default) → print2 (has graph default "custom")
+    // print1 should receive trigger's "message" via exec context.
+    // print2's graph default should NOT be overridden by exec context.
+    var graph = ScriptGraph.builder("test-chain-default", "Chained Graph Default")
+      .addNode("trigger", "trigger.on_chat", null)
+      .addNode("print1", "action.print", null)
+      .addNode("print2", "action.print", Map.of("message", "custom"))
+      .addExecutionEdge("trigger", "out", "print1", "in")
+      .addExecutionEdge("print1", "out", "print2", "in")
+      .build();
+
+    var eventInputs = new HashMap<String, NodeValue>();
+    eventInputs.put("messagePlainText", NodeValue.ofString("hello"));
+    eventInputs.put("message", NodeValue.ofString("§aFrom trigger"));
+    eventInputs.put("timestamp", NodeValue.ofNumber(System.currentTimeMillis()));
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, eventInputs).block();
+
+    assertNoErrors(listener);
+    assertEquals(2, listener.logMessages.size(), "Should have 2 log messages");
+    assertEquals("§aFrom trigger", listener.logMessages.get(0),
+      "print1 (no graph default) should receive message from exec context");
+    assertEquals("custom", listener.logMessages.get(1),
+      "print2 (has graph default) must keep its graph default, not exec context");
+  }
+
   /// Extended RecordingEventListener that also captures log messages from Print nodes.
   private static class LogRecordingEventListener extends RecordingEventListener {
     final List<String> logMessages = new ArrayList<>();
