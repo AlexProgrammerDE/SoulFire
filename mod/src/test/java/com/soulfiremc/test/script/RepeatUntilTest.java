@@ -363,4 +363,180 @@ final class RepeatUntilTest {
     assertEquals(3, repeatOutputs.get("index").asInt(-1),
       "Should stop after 3 iterations (i=0,1,2)");
   }
+
+  // ==================== Nested Loop Tests ====================
+
+  @Test
+  void nestedRepeatUntilEngineIntegration() {
+    // Do-while semantics: compare(index >= N) → body runs N+1 times
+    // Outer: index >= 2 → 3 body iterations (i=0,1,2), finalIndex=3
+    // Inner: index >= 1 → 2 body iterations (j=0,1), finalIndex=2
+    // Total inner body executions: 3 * 2 = 6
+    var graph = ScriptGraph.builder("test-nested-repeat", "Nested RepeatUntil")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("outer", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner_body", "action.print", Map.of("message", "inner"))
+      .addNode("inner_compare", "logic.compare", Map.of("b", 1, "operator", ">="))
+      .addNode("inner_result", "flow.result", null)
+      .addNode("outer_compare", "logic.compare", Map.of("b", 2, "operator", ">="))
+      .addNode("outer_result", "flow.result", null)
+      .addNode("done_print", "action.print", Map.of("message", "done"))
+      // Execution edges
+      .addExecutionEdge("trigger", "out", "outer", "in")
+      .addExecutionEdge("outer", "exec_loop", "inner", "in")
+      .addExecutionEdge("inner", "exec_loop", "inner_body", "in")
+      .addExecutionEdge("inner", "exec_check", "inner_result", "in")
+      .addExecutionEdge("outer", "exec_check", "outer_result", "in")
+      .addExecutionEdge("outer", "exec_done", "done_print", "in")
+      // Data edges: inner loop condition
+      .addDataEdge("inner", "index", "inner_compare", "a")
+      .addDataEdge("inner_compare", "result", "inner_result", "value")
+      // Data edges: outer loop condition
+      .addDataEdge("outer", "index", "outer_compare", "a")
+      .addDataEdge("outer_compare", "result", "outer_result", "value")
+      .build();
+
+    var listener = runGraph(graph, "trigger");
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("outer"),
+      "Outer RepeatUntil should complete");
+    assertTrue(listener.completedNodes.contains("done_print"),
+      "Done print should fire");
+
+    var outerOutputs = listener.nodeOutputs.get("outer");
+    assertNotNull(outerOutputs, "Outer should have outputs");
+    assertTrue(outerOutputs.get("conditionMet").asBoolean(false),
+      "Outer condition should be met");
+    assertEquals(3, outerOutputs.get("index").asInt(-1),
+      "Outer final index should be 3");
+
+    assertEquals(6, countNodeExecutions(listener, "inner_body"),
+      "Inner body should execute 6 times total (3 outer * 2 inner)");
+  }
+
+  @Test
+  void nestedRepeatUntilWithDifferentIterationCounts() {
+    // Outer: index >= 1 → 2 body iterations
+    // Inner: index >= 3 → 4 body iterations
+    // Total inner body: 2 * 4 = 8
+    var graph = ScriptGraph.builder("test-nested-asymmetric", "Nested Asymmetric")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("outer", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner_body", "action.print", Map.of("message", "inner"))
+      .addNode("inner_compare", "logic.compare", Map.of("b", 3, "operator", ">="))
+      .addNode("inner_result", "flow.result", null)
+      .addNode("outer_compare", "logic.compare", Map.of("b", 1, "operator", ">="))
+      .addNode("outer_result", "flow.result", null)
+      .addNode("done_print", "action.print", Map.of("message", "done"))
+      .addExecutionEdge("trigger", "out", "outer", "in")
+      .addExecutionEdge("outer", "exec_loop", "inner", "in")
+      .addExecutionEdge("inner", "exec_loop", "inner_body", "in")
+      .addExecutionEdge("inner", "exec_check", "inner_result", "in")
+      .addExecutionEdge("outer", "exec_check", "outer_result", "in")
+      .addExecutionEdge("outer", "exec_done", "done_print", "in")
+      .addDataEdge("inner", "index", "inner_compare", "a")
+      .addDataEdge("inner_compare", "result", "inner_result", "value")
+      .addDataEdge("outer", "index", "outer_compare", "a")
+      .addDataEdge("outer_compare", "result", "outer_result", "value")
+      .build();
+
+    var listener = runGraph(graph, "trigger");
+
+    assertNoErrors(listener);
+
+    var outerOutputs = listener.nodeOutputs.get("outer");
+    assertNotNull(outerOutputs, "Outer should have outputs");
+    assertTrue(outerOutputs.get("conditionMet").asBoolean(false),
+      "Outer condition should be met");
+
+    assertEquals(8, countNodeExecutions(listener, "inner_body"),
+      "Inner body should execute 8 times total (2 outer * 4 inner)");
+  }
+
+  @Test
+  void tripleNestedRepeatUntil() {
+    // Each level: index >= 1 → 2 body iterations
+    // Total innermost body: 2 * 2 * 2 = 8
+    var graph = ScriptGraph.builder("test-triple-nested", "Triple Nested")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("outer", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("middle", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner_body", "action.print", Map.of("message", "inner"))
+      .addNode("inner_cmp", "logic.compare", Map.of("b", 1, "operator", ">="))
+      .addNode("inner_result", "flow.result", null)
+      .addNode("middle_cmp", "logic.compare", Map.of("b", 1, "operator", ">="))
+      .addNode("middle_result", "flow.result", null)
+      .addNode("outer_cmp", "logic.compare", Map.of("b", 1, "operator", ">="))
+      .addNode("outer_result", "flow.result", null)
+      .addNode("done_print", "action.print", Map.of("message", "done"))
+      // Execution wiring
+      .addExecutionEdge("trigger", "out", "outer", "in")
+      .addExecutionEdge("outer", "exec_loop", "middle", "in")
+      .addExecutionEdge("middle", "exec_loop", "inner", "in")
+      .addExecutionEdge("inner", "exec_loop", "inner_body", "in")
+      .addExecutionEdge("inner", "exec_check", "inner_result", "in")
+      .addExecutionEdge("middle", "exec_check", "middle_result", "in")
+      .addExecutionEdge("outer", "exec_check", "outer_result", "in")
+      .addExecutionEdge("outer", "exec_done", "done_print", "in")
+      // Data wiring
+      .addDataEdge("inner", "index", "inner_cmp", "a")
+      .addDataEdge("inner_cmp", "result", "inner_result", "value")
+      .addDataEdge("middle", "index", "middle_cmp", "a")
+      .addDataEdge("middle_cmp", "result", "middle_result", "value")
+      .addDataEdge("outer", "index", "outer_cmp", "a")
+      .addDataEdge("outer_cmp", "result", "outer_result", "value")
+      .build();
+
+    var listener = runGraph(graph, "trigger");
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("done_print"),
+      "Done print should fire");
+
+    assertEquals(8, countNodeExecutions(listener, "inner_body"),
+      "Innermost body should execute 8 times (2*2*2)");
+  }
+
+  @Test
+  void nestedRepeatUntilInnerMaxIterationsHit() {
+    // Outer: index >= 1 → 2 body iterations
+    // Inner: maxIterations=3 but condition never met → 3 body iterations
+    // Total inner body: 2 * 3 = 6
+    var graph = ScriptGraph.builder("test-nested-max", "Nested Max Iterations")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("outer", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("inner", "flow.repeat_until", Map.of("maxIterations", 3))
+      .addNode("inner_body", "action.print", Map.of("message", "inner"))
+      .addNode("false_const", "constant.boolean", Map.of("value", false))
+      .addNode("inner_result", "flow.result", null)
+      .addNode("outer_compare", "logic.compare", Map.of("b", 1, "operator", ">="))
+      .addNode("outer_result", "flow.result", null)
+      .addNode("done_print", "action.print", Map.of("message", "done"))
+      .addExecutionEdge("trigger", "out", "outer", "in")
+      .addExecutionEdge("outer", "exec_loop", "inner", "in")
+      .addExecutionEdge("inner", "exec_loop", "inner_body", "in")
+      .addExecutionEdge("inner", "exec_check", "inner_result", "in")
+      .addExecutionEdge("outer", "exec_check", "outer_result", "in")
+      .addExecutionEdge("outer", "exec_done", "done_print", "in")
+      .addDataEdge("false_const", "value", "inner_result", "value")
+      .addDataEdge("outer", "index", "outer_compare", "a")
+      .addDataEdge("outer_compare", "result", "outer_result", "value")
+      .build();
+
+    var listener = runGraph(graph, "trigger");
+
+    assertNoErrors(listener);
+
+    var outerOutputs = listener.nodeOutputs.get("outer");
+    assertNotNull(outerOutputs, "Outer should have outputs");
+    assertTrue(outerOutputs.get("conditionMet").asBoolean(false),
+      "Outer condition should be met");
+
+    assertEquals(6, countNodeExecutions(listener, "inner_body"),
+      "Inner body should execute 6 times (2 outer * 3 inner max)");
+  }
 }

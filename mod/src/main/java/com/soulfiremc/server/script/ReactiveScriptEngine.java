@@ -372,14 +372,16 @@ public final class ReactiveScriptEngine {
     // Collect all DATA edges targeting this node
     var incomingDataEdges = graph.getIncomingDataEdges(nodeId);
 
-    // Build the base inputs: node defaults < graph defaults < execution context
+    // Build the base inputs: node defaults < execution context < graph defaults < DATA edges
+    // Graph defaults (user-set values) take priority over execution context to prevent
+    // upstream output names from silently overriding explicitly configured node inputs.
     var baseInputs = new HashMap<>(NodeRegistry.computeDefaultInputs(metadata));
+    baseInputs.putAll(execContext.values());
     if (graphNode.defaultInputs() != null) {
       for (var entry : graphNode.defaultInputs().entrySet()) {
         baseInputs.put(entry.getKey(), NodeValue.of(entry.getValue()));
       }
     }
-    baseInputs.putAll(execContext.values());
 
     if (incomingDataEdges.isEmpty()) {
       return executeNode(nodeImpl, metadata, nodeId, baseInputs, graph, context, run, execContext);
