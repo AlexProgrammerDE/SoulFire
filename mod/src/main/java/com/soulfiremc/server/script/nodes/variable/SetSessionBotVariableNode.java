@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public final class SetSessionBotVariableNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("variable.set_session")
-    .displayName("Set Session Variable")
+    .type("variable.set_session_bot")
+    .displayName("Set Session Bot Variable")
     .category(CategoryRegistry.VARIABLE)
     .addInputs(
       PortDefinition.execIn(),
@@ -45,7 +45,7 @@ public final class SetSessionBotVariableNode extends AbstractScriptNode {
     .description("Stores a value in the bot's session metadata (lost on disconnect)")
     .icon("upload")
     .color("#10B981")
-    .addKeywords("variable", "session", "temporary", "store", "set", "memory")
+    .addKeywords("variable", "session", "bot", "temporary", "store", "set", "memory")
     .build();
 
   private static final MetadataKey<ConcurrentHashMap<String, NodeValue>> SESSION_VARS_KEY =

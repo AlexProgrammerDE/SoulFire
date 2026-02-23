@@ -28,8 +28,8 @@ import java.util.Map;
 @Slf4j
 public final class SetPersistentBotVariableNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("variable.set_persistent")
-    .displayName("Set Persistent Variable")
+    .type("variable.set_persistent_bot")
+    .displayName("Set Persistent Bot Variable")
     .category(CategoryRegistry.VARIABLE)
     .addInputs(
       PortDefinition.execIn(),
@@ -45,7 +45,7 @@ public final class SetPersistentBotVariableNode extends AbstractScriptNode {
     .description("Stores a value in the bot's persistent metadata (survives disconnects)")
     .icon("save")
     .color("#10B981")
-    .addKeywords("variable", "persistent", "save", "store", "set", "permanent")
+    .addKeywords("variable", "persistent", "bot", "save", "store", "set", "permanent")
     .build();
 
   @Override

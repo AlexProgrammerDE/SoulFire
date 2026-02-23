@@ -30,8 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public final class GetSessionBotVariableNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
-    .type("variable.get_session")
-    .displayName("Get Session Variable")
+    .type("variable.get_session_bot")
+    .displayName("Get Session Bot Variable")
     .category(CategoryRegistry.VARIABLE)
     .addInputs(
       PortDefinition.execIn(),
@@ -47,7 +47,7 @@ public final class GetSessionBotVariableNode extends AbstractScriptNode {
     .description("Retrieves a value from the bot's session metadata")
     .icon("file-input")
     .color("#10B981")
-    .addKeywords("variable", "session", "temporary", "get", "retrieve", "memory")
+    .addKeywords("variable", "session", "bot", "temporary", "get", "retrieve", "memory")
     .build();
 
   private static final MetadataKey<ConcurrentHashMap<String, NodeValue>> SESSION_VARS_KEY =

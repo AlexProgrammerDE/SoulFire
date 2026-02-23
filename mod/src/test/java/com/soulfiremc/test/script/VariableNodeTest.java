@@ -39,14 +39,14 @@ final class VariableNodeTest {
     setInputs.put("key", NodeValue.ofString("test_key"));
     setInputs.put("value", NodeValue.ofString("hello world"));
 
-    var setResult = executeNode("variable.set_session", null, setInputs);
+    var setResult = executeNode("variable.set_session_bot", null, setInputs);
     assertTrue(setResult.get("success").asBoolean(false), "Set should succeed");
 
     var getInputs = new HashMap<String, NodeValue>();
     getInputs.put("bot", botValue);
     getInputs.put("key", NodeValue.ofString("test_key"));
 
-    var getResult = executeNode("variable.get_session", null, getInputs);
+    var getResult = executeNode("variable.get_session_bot", null, getInputs);
     assertTrue(getResult.get("found").asBoolean(false), "Variable should be found");
     assertEquals("hello world", getResult.get("value").asString("MISSING"));
   }
@@ -61,7 +61,7 @@ final class VariableNodeTest {
     getInputs.put("key", NodeValue.ofString("nonexistent"));
     getInputs.put("defaultValue", NodeValue.ofString("fallback"));
 
-    var getResult = executeNode("variable.get_session", null, getInputs);
+    var getResult = executeNode("variable.get_session_bot", null, getInputs);
     assertFalse(getResult.get("found").asBoolean(true), "Variable should not be found");
     assertEquals("fallback", getResult.get("value").asString("MISSING"),
       "Should return default value");
@@ -77,7 +77,7 @@ final class VariableNodeTest {
     setInputs.put("key", NodeValue.ofString(""));
     setInputs.put("value", NodeValue.ofString("value"));
 
-    var setResult = executeNode("variable.set_session", null, setInputs);
+    var setResult = executeNode("variable.set_session_bot", null, setInputs);
     assertFalse(setResult.get("success").asBoolean(true), "Set with empty key should fail");
   }
 
@@ -92,7 +92,7 @@ final class VariableNodeTest {
     setInputs.put("key", NodeValue.ofString("score"));
     setInputs.put("value", NodeValue.ofNumber(42));
 
-    var setResult = executeNode("variable.set_persistent", null, setInputs);
+    var setResult = executeNode("variable.set_persistent_bot", null, setInputs);
     assertTrue(setResult.get("success").asBoolean(false), "Set should succeed");
 
     var getInputs = new HashMap<String, NodeValue>();
@@ -100,7 +100,7 @@ final class VariableNodeTest {
     getInputs.put("namespace", NodeValue.ofString("script"));
     getInputs.put("key", NodeValue.ofString("score"));
 
-    var getResult = executeNode("variable.get_persistent", null, getInputs);
+    var getResult = executeNode("variable.get_persistent_bot", null, getInputs);
     assertTrue(getResult.get("found").asBoolean(false), "Variable should be found");
     assertEquals(42, getResult.get("value").asInt(0), "Should return stored value");
   }
