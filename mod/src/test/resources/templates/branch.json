@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {"id": "trigger", "type": "trigger.on_script_init"},
+    {"id": "const_true", "type": "constant.boolean", "defaultInputs": {"value": true}},
+    {"id": "branch", "type": "flow.branch"},
+    {"id": "print_true", "type": "action.print", "defaultInputs": {"message": "true branch"}},
+    {"id": "print_false", "type": "action.print", "defaultInputs": {"message": "false branch"}}
+  ],
+  "edges": [
+    {"source": "trigger", "sourceHandle": "out", "target": "branch", "targetHandle": "in", "edgeType": "EXECUTION"},
+    {"source": "const_true", "sourceHandle": "value", "target": "branch", "targetHandle": "condition", "edgeType": "DATA"},
+    {"source": "branch", "sourceHandle": "exec_true", "target": "print_true", "targetHandle": "in", "edgeType": "EXECUTION"},
+    {"source": "branch", "sourceHandle": "exec_false", "target": "print_false", "targetHandle": "in", "edgeType": "EXECUTION"}
+  ]
+}

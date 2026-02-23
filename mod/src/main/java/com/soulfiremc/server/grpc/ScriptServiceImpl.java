@@ -336,9 +336,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         startScriptInternal(scriptRecord);
       }
 
-      responseObserver.onNext(CreateScriptResponse.newBuilder()
-        .setScript(recordToScriptData(scriptRecord))
-        .build());
+      var createResponse = CreateScriptResponse.newBuilder()
+        .setScript(recordToScriptData(scriptRecord));
+      for (var diag : collectGraphWarnings(scriptRecord)) {
+        createResponse.addDiagnostics(diag);
+      }
+      responseObserver.onNext(createResponse.build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
@@ -446,9 +449,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         stopScriptInternal(scriptId);
       }
 
-      responseObserver.onNext(UpdateScriptResponse.newBuilder()
-        .setScript(recordToScriptData(scriptRecord))
-        .build());
+      var updateResponse = UpdateScriptResponse.newBuilder()
+        .setScript(recordToScriptData(scriptRecord));
+      for (var diag : collectGraphWarnings(scriptRecord)) {
+        updateResponse.addDiagnostics(diag);
+      }
+      responseObserver.onNext(updateResponse.build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
@@ -603,8 +609,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       }
 
       // Script is not running, start it
-      // Build the script graph from the record
-      var graph = buildScriptGraph(scriptRecord);
+      // Build the script graph from the record and apply constant folding
+      var graph = ConstantFolding.fold(buildScriptGraph(scriptRecord));
 
       // Get the instance manager
       var instanceManager = soulFireServer.getInstance(instanceId)
@@ -864,102 +870,49 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
   }
 
+  /// Port type display metadata (colors, shapes, styles).
+  private record PortTypeDisplayInfo(
+    com.soulfiremc.server.script.PortType serverType,
+    PortType protoType,
+    String color,
+    String displayName,
+    HandleShape handleShape,
+    EdgeStyle edgeStyle
+  ) {}
+
+  private static final List<PortTypeDisplayInfo> PORT_TYPE_DISPLAY = List.of(
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.EXEC, PortType.PORT_TYPE_EXEC, "#ffffff", "Execution", HandleShape.HANDLE_SHAPE_SQUARE, EdgeStyle.EDGE_STYLE_ANIMATED),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.NUMBER, PortType.PORT_TYPE_NUMBER, "#22c55e", "Number", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.BOOLEAN, PortType.PORT_TYPE_BOOLEAN, "#ef4444", "Boolean", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.STRING, PortType.PORT_TYPE_STRING, "#eab308", "String", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.VECTOR3, PortType.PORT_TYPE_VECTOR3, "#3b82f6", "Vector3", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.ENTITY, PortType.PORT_TYPE_ENTITY, "#a855f7", "Entity", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.BOT, PortType.PORT_TYPE_BOT, "#f97316", "Bot", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.BLOCK, PortType.PORT_TYPE_BLOCK, "#06b6d4", "Block", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.ITEM, PortType.PORT_TYPE_ITEM, "#ec4899", "Item", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.LIST, PortType.PORT_TYPE_LIST, "#8b5cf6", "List", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.ANY, PortType.PORT_TYPE_ANY, "#6b7280", "Any", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT)
+  );
+
   /// Returns port type metadata for data-driven port rendering.
+  /// Uses TypeCompatibility as the single source of truth for compatible_from lists.
   private List<PortTypeMetadata> getPortTypeMetadata() {
-    return List.of(
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_EXEC)
-        .setColor("#ffffff")
-        .setDisplayName("Execution")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_SQUARE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_ANIMATED)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_NUMBER)
-        .setColor("#22c55e")
-        .setDisplayName("Number")
-        .addCompatibleFrom(PortType.PORT_TYPE_STRING)
-        .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_BOOLEAN)
-        .setColor("#ef4444")
-        .setDisplayName("Boolean")
-        .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
-        .addCompatibleFrom(PortType.PORT_TYPE_STRING)
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_STRING)
-        .setColor("#eab308")
-        .setDisplayName("String")
-        .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
-        .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_VECTOR3)
-        .setColor("#3b82f6")
-        .setDisplayName("Vector3")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_ENTITY)
-        .setColor("#a855f7")
-        .setDisplayName("Entity")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_BOT)
-        .setColor("#f97316")
-        .setDisplayName("Bot")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_BLOCK)
-        .setColor("#06b6d4")
-        .setDisplayName("Block")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_ITEM)
-        .setColor("#ec4899")
-        .setDisplayName("Item")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_LIST)
-        .setColor("#8b5cf6")
-        .setDisplayName("List")
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build(),
-      PortTypeMetadata.newBuilder()
-        .setPortType(PortType.PORT_TYPE_ANY)
-        .setColor("#6b7280")
-        .setDisplayName("Any")
-        .addCompatibleFrom(PortType.PORT_TYPE_NUMBER)
-        .addCompatibleFrom(PortType.PORT_TYPE_STRING)
-        .addCompatibleFrom(PortType.PORT_TYPE_BOOLEAN)
-        .addCompatibleFrom(PortType.PORT_TYPE_VECTOR3)
-        .addCompatibleFrom(PortType.PORT_TYPE_ENTITY)
-        .addCompatibleFrom(PortType.PORT_TYPE_BOT)
-        .addCompatibleFrom(PortType.PORT_TYPE_BLOCK)
-        .addCompatibleFrom(PortType.PORT_TYPE_ITEM)
-        .addCompatibleFrom(PortType.PORT_TYPE_LIST)
-        .setHandleShape(HandleShape.HANDLE_SHAPE_CIRCLE)
-        .setEdgeStyle(EdgeStyle.EDGE_STYLE_DEFAULT)
-        .build()
-    );
+    var result = new ArrayList<PortTypeMetadata>();
+    for (var info : PORT_TYPE_DISPLAY) {
+      var builder = PortTypeMetadata.newBuilder()
+        .setPortType(info.protoType())
+        .setColor(info.color())
+        .setDisplayName(info.displayName())
+        .setHandleShape(info.handleShape())
+        .setEdgeStyle(info.edgeStyle());
+
+      for (var compatibleType : TypeCompatibility.getCompatibleFrom(info.serverType())) {
+        builder.addCompatibleFrom(portTypeToProto(compatibleType));
+      }
+
+      result.add(builder.build());
+    }
+    return result;
   }
 
   private CategoryDefinition categoryToProto(NodeCategory category) {
@@ -984,7 +937,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       .setIcon(metadata.icon())
       .setIsLayoutNode(metadata.isLayoutNode())
       .setSupportsMuting(metadata.supportsMuting())
-      .setSupportsPreview(metadata.supportsPreview());
+      .setSupportsPreview(metadata.supportsPreview())
+      .setIsExpensive(metadata.isExpensive());
 
     if (metadata.color() != null) {
       builder.setColor(metadata.color());
@@ -1375,6 +1329,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     var nodes = flattened.nodes();
     var edges = flattened.edges();
 
+    if (nodes.size() > 500) {
+      log.warn("Script '{}' has {} nodes after group inlining (recommended max: 500)",
+        record.getName(), nodes.size());
+    }
+
     // Add nodes
     {
       for (var node : nodes) {
@@ -1481,9 +1440,15 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
+        onNodeCompleted(nodeId, outputs, 0);
+      }
+
+      @Override
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
         var builder = NodeCompleted.newBuilder()
           .setNodeId(nodeId)
-          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
+          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+          .setExecutionTimeNanos(executionTimeNanos);
         for (var entry : outputs.entrySet()) {
           builder.putOutputs(entry.getKey(), nodeValueToProtoValue(entry.getValue()));
         }
@@ -1548,6 +1513,16 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             .setLevel(level)
             .setMessage(message)
             .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+            .build())
+          .build());
+      }
+
+      @Override
+      public void onExecutionStats(long nodeCount, long maxCount) {
+        sendToObserver(observerRef, ScriptEvent.newBuilder()
+          .setExecutionStats(ExecutionStats.newBuilder()
+            .setNodeCount(nodeCount)
+            .setMaxCount(maxCount)
             .build())
           .build());
       }
@@ -1652,6 +1627,217 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       log.warn("Biomes class not found, returning empty biome list");
       return List.of();
     }
+  }
+
+  @Override
+  public void validateScript(ValidateScriptRequest request, StreamObserver<ValidateScriptResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
+      PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
+
+    try {
+      var responseBuilder = ValidateScriptResponse.newBuilder();
+
+      List<ScriptNodeData> rawNodes = request.getNodesList().stream()
+        .map(node -> new ScriptNodeData(
+          node.getId(),
+          node.getType(),
+          new PositionData(node.getPosition().getX(), node.getPosition().getY()),
+          node.getDataMap().entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> valueToJsonElement(e.getValue())))
+        ))
+        .toList();
+      List<ScriptEdgeData> rawEdges = request.getEdgesList().stream()
+        .map(edge -> new ScriptEdgeData(
+          edge.getId(),
+          edge.getSource(),
+          edge.getSourceHandle(),
+          edge.getTarget(),
+          edge.getTargetHandle(),
+          edge.getEdgeType().name()
+        ))
+        .toList();
+
+      var flattened = flattenLayoutNodes(new ArrayList<>(rawNodes), new ArrayList<>(rawEdges));
+      var builder = ScriptGraph.builder("validate", "Validation");
+
+      for (var node : flattened.nodes()) {
+        Map<String, Object> defaultInputs = new HashMap<>();
+        if (node.data() != null) {
+          for (var entry : node.data().entrySet()) {
+            defaultInputs.put(entry.getKey(), jsonElementToObject(entry.getValue()));
+          }
+        }
+        builder.addNode(node.id(), node.type(), defaultInputs);
+      }
+
+      for (var edge : flattened.edges()) {
+        if ("EDGE_TYPE_EXECUTION".equals(edge.edgeType())) {
+          builder.addExecutionEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
+        } else {
+          builder.addDataEdge(edge.source(), edge.sourceHandle(), edge.target(), edge.targetHandle());
+        }
+      }
+
+      try {
+        var graph = builder.build();
+        // Build succeeded, return warnings only
+        for (var warning : graph.warnings()) {
+          responseBuilder.addDiagnostics(diagnosticToProto(warning));
+        }
+      } catch (ScriptGraphValidationException e) {
+        for (var diagnostic : e.diagnostics()) {
+          responseBuilder.addDiagnostics(diagnosticToProto(diagnostic));
+        }
+      }
+
+      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (Throwable t) {
+      log.error("Error validating script", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  private static ValidationDiagnostic diagnosticToProto(ScriptGraph.ValidationDiagnostic d) {
+    var builder = ValidationDiagnostic.newBuilder()
+      .setMessage(d.message())
+      .setSeverity(d.severity() == ScriptGraph.Severity.ERROR
+        ? DiagnosticSeverity.DIAGNOSTIC_ERROR
+        : DiagnosticSeverity.DIAGNOSTIC_WARNING);
+    if (d.nodeId() != null) {
+      builder.setNodeId(d.nodeId());
+    }
+    if (d.edgeId() != null) {
+      builder.setEdgeId(d.edgeId());
+    }
+    return builder.build();
+  }
+
+  /// Collects warnings from building a script graph, returning empty list on validation failure.
+  private List<ValidationDiagnostic> collectGraphWarnings(ScriptsRecord record) {
+    try {
+      var graph = buildScriptGraph(record);
+      return graph.warnings().stream()
+        .map(ScriptServiceImpl::diagnosticToProto)
+        .toList();
+    } catch (ScriptGraphValidationException _) {
+      return List.of();
+    } catch (Exception _) {
+      return List.of();
+    }
+  }
+
+  @Override
+  public void dryRunScript(DryRunScriptRequest request, StreamObserver<ScriptEvent> responseObserver) {
+    var instanceId = UUID.fromString(request.getInstanceId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
+      PermissionContext.instance(InstancePermission.CHANGE_INSTANCE_STATE, instanceId));
+
+    try {
+      var scriptId = UUID.fromString(request.getScriptId());
+      var triggerNodeId = request.getTriggerNodeId();
+
+      var record = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var r = ctx.selectFrom(Tables.SCRIPTS)
+          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+          .fetchOne();
+        if (r == null || !r.getInstanceId().equals(instanceId.toString())) {
+          throw Status.NOT_FOUND.withDescription(
+            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+        }
+        return r;
+      });
+
+      var graph = buildScriptGraph(record);
+
+      // Build mock inputs from proto values
+      var mockInputs = new HashMap<String, NodeValue>();
+      for (var entry : request.getMockInputsMap().entrySet()) {
+        mockInputs.put(entry.getKey(), protoValueToNodeValue(entry.getValue()));
+      }
+
+      // Create a simple event listener that streams events directly to the client
+      var eventListener = new ScriptEventListener() {
+        private void send(ScriptEvent event) {
+          try {
+            responseObserver.onNext(event);
+          } catch (Exception _) {
+            // Client disconnected
+          }
+        }
+
+        @Override
+        public void onNodeStarted(String nodeId) {
+          send(ScriptEvent.newBuilder()
+            .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId).build())
+            .build());
+        }
+
+        @Override
+        public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
+          send(ScriptEvent.newBuilder()
+            .setNodeCompleted(NodeCompleted.newBuilder().setNodeId(nodeId).build())
+            .build());
+        }
+
+        @Override
+        public void onNodeError(String nodeId, String error) {
+          send(ScriptEvent.newBuilder()
+            .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error).build())
+            .build());
+        }
+
+        @Override
+        public void onLog(String level, String message) {
+          send(ScriptEvent.newBuilder()
+            .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message).build())
+            .build());
+        }
+
+        @Override
+        public void onScriptCompleted(boolean success) {
+          send(ScriptEvent.newBuilder()
+            .setScriptCompleted(ScriptCompleted.newBuilder().setSuccess(success).build())
+            .build());
+        }
+
+        @Override
+        public void onScriptCancelled() {}
+      };
+
+      // Execute using dry-run context (no InstanceManager)
+      var context = new ReactiveScriptContext(eventListener);
+      var engine = new ReactiveScriptEngine();
+
+      engine.executeFromTriggerSync(graph, triggerNodeId, context, mockInputs)
+        .doFinally(_ -> responseObserver.onCompleted())
+        .subscribe(
+          _ -> {},
+          e -> {
+            log.error("Error in dry run execution", e);
+            responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+          }
+        );
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      log.error("Error in dry run", e);
+      throw Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+    }
+  }
+
+  /// Converts a proto Value to a NodeValue.
+  private static NodeValue protoValueToNodeValue(com.google.protobuf.Value value) {
+    return switch (value.getKindCase()) {
+      case NUMBER_VALUE -> NodeValue.ofNumber(value.getNumberValue());
+      case STRING_VALUE -> NodeValue.ofString(value.getStringValue());
+      case BOOL_VALUE -> NodeValue.ofBoolean(value.getBoolValue());
+      default -> NodeValue.ofString(value.toString());
+    };
   }
 
   /// Formats a registry ID (e.g., "minecraft:diamond_ore") into a display name (e.g., "Diamond Ore").

@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {"id": "trigger", "type": "trigger.on_script_init"},
+    {"id": "const_a", "type": "constant.number", "defaultInputs": {"value": 10}},
+    {"id": "const_b", "type": "constant.number", "defaultInputs": {"value": 20}},
+    {"id": "add", "type": "math.add"},
+    {"id": "print", "type": "action.print"}
+  ],
+  "edges": [
+    {"source": "trigger", "sourceHandle": "out", "target": "print", "edgeType": "EXECUTION", "targetHandle": "in"},
+    {"source": "const_a", "sourceHandle": "value", "target": "add", "targetHandle": "a", "edgeType": "DATA"},
+    {"source": "const_b", "sourceHandle": "value", "target": "add", "targetHandle": "b", "edgeType": "DATA"},
+    {"source": "add", "sourceHandle": "result", "target": "print", "targetHandle": "message", "edgeType": "DATA"}
+  ]
+}

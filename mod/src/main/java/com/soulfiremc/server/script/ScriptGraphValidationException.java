@@ -21,14 +21,29 @@ import java.util.List;
 
 /// Thrown when a ScriptGraph fails validation during construction.
 public final class ScriptGraphValidationException extends RuntimeException {
-  private final List<String> errors;
+  private final List<ScriptGraph.ValidationDiagnostic> diagnostics;
 
-  public ScriptGraphValidationException(List<String> errors) {
-    super("Script graph validation failed:\n" + String.join("\n", errors));
-    this.errors = List.copyOf(errors);
+  public ScriptGraphValidationException(List<ScriptGraph.ValidationDiagnostic> diagnostics) {
+    super("Script graph validation failed:\n" + formatDiagnostics(diagnostics));
+    this.diagnostics = List.copyOf(diagnostics);
   }
 
+  /// Returns all diagnostics (both errors and warnings).
+  public List<ScriptGraph.ValidationDiagnostic> diagnostics() {
+    return diagnostics;
+  }
+
+  /// Returns error messages as strings for backward compatibility.
   public List<String> errors() {
-    return errors;
+    return diagnostics.stream()
+      .filter(d -> d.severity() == ScriptGraph.Severity.ERROR)
+      .map(ScriptGraph.ValidationDiagnostic::message)
+      .toList();
+  }
+
+  private static String formatDiagnostics(List<ScriptGraph.ValidationDiagnostic> diagnostics) {
+    return String.join("\n", diagnostics.stream()
+      .map(d -> "[" + d.severity() + "] " + d.message())
+      .toList());
   }
 }

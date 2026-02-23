@@ -45,6 +45,8 @@ public final class WaitNode extends AbstractScriptNode {
     .icon("clock")
     .color("#FF9800")
     .addKeywords("wait", "delay", "sleep", "pause", "timer", "jitter")
+    .isExpensive(true)
+    .blocksThread(true)
     .build();
 
   @Override

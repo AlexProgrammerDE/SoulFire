@@ -156,6 +156,9 @@ message NodeTypeDefinition {
   bool supports_muting = 14;
   // Whether this node supports inline preview of its output.
   bool supports_preview = 15;
+  // Whether this node is expensive (slow, may block).
+  // Used for visual warnings in tick-path analysis.
+  bool is_expensive = 16;
 }
 
 // Represents a single node in the visual script graph.
@@ -252,6 +255,21 @@ message ScriptData {
   // Scripts run by default. When paused, they won't be started on server startup
   // or when created/updated.
   bool paused = 8;
+  // Optional resource quotas for this script.
+  ScriptQuotas quotas = 9;
+}
+
+// Resource quotas for limiting script execution.
+// All fields are optional; unset fields use server defaults.
+message ScriptQuotas {
+  // Maximum number of node executions per trigger invocation.
+  optional int64 max_execution_count = 1;
+  // Maximum wall-clock time for a single trigger execution in milliseconds.
+  optional int64 max_execution_time_ms = 2;
+  // Maximum number of concurrent trigger invocations.
+  optional int32 max_concurrent_triggers = 3;
+  // Maximum number of entries in the script's state store.
+  optional int64 max_state_store_entries = 4;
 }
 
 // Summary information about a script for listing purposes.
@@ -327,6 +345,16 @@ message NodeCompleted {
   map<string, google.protobuf.Value> outputs = 2;
   // When the node completed execution.
   google.protobuf.Timestamp timestamp = 3;
+  // Execution time in nanoseconds for profiling.
+  int64 execution_time_nanos = 4;
+}
+
+// Execution statistics emitted when a trigger chain completes.
+message ExecutionStats {
+  // Total number of node executions in this chain.
+  int64 node_count = 1;
+  // Maximum allowed node executions.
+  int64 max_count = 2;
 }
 
 // Event emitted when a node encounters an error during execution.
@@ -373,6 +401,26 @@ message ScriptCompleted {
   google.protobuf.Timestamp timestamp = 3;
 }
 
+// Severity level for validation diagnostics.
+enum DiagnosticSeverity {
+  // Error that prevents script execution.
+  DIAGNOSTIC_ERROR = 0;
+  // Warning that does not prevent execution but may indicate issues.
+  DIAGNOSTIC_WARNING = 1;
+}
+
+// A structured validation diagnostic with node/edge context and severity.
+message ValidationDiagnostic {
+  // The node related to this diagnostic, or empty for graph-level issues.
+  string node_id = 1;
+  // A composite edge key related to this diagnostic, or empty.
+  string edge_id = 2;
+  // Human-readable description of the issue.
+  string message = 3;
+  // Severity level of this diagnostic.
+  DiagnosticSeverity severity = 4;
+}
+
 // Union type for all script execution events.
 // Streamed to clients during script activation to provide real-time feedback.
 // Events represent individual trigger chain executions, not script lifecycle.
@@ -391,6 +439,8 @@ message ScriptEvent {
     ScriptStarted script_started = 5;
     // A script logged a message.
     ScriptLog script_log = 6;
+    // Execution statistics for a completed trigger chain.
+    ExecutionStats execution_stats = 7;
   }
 }
 
@@ -420,6 +470,8 @@ message CreateScriptRequest {
 message CreateScriptResponse {
   // The complete script data including the generated ID.
   ScriptData script = 1;
+  // Validation diagnostics (warnings) from building the script graph.
+  repeated ValidationDiagnostic diagnostics = 2;
 }
 
 // Request to retrieve a specific script by ID.
@@ -476,6 +528,8 @@ message UpdateScriptRequest {
 message UpdateScriptResponse {
   // The updated script data.
   ScriptData script = 1;
+  // Validation diagnostics (warnings) from building the script graph.
+  repeated ValidationDiagnostic diagnostics = 2;
 }
 
 // Request to delete a script.
@@ -659,6 +713,34 @@ message RegistryEntry {
   string category = 4;
 }
 
+// Request to validate a script graph without saving it.
+message ValidateScriptRequest {
+  // The instance context for validation.
+  string instance_id = 1;
+  // The nodes to validate.
+  repeated ScriptNode nodes = 2;
+  // The edges to validate.
+  repeated ScriptEdge edges = 3;
+}
+
+// Response containing validation diagnostics.
+message ValidateScriptResponse {
+  // All diagnostics (errors and warnings) for the script graph.
+  repeated ValidationDiagnostic diagnostics = 1;
+}
+
+// Request to dry-run a script from a specific trigger node with mock inputs.
+message DryRunScriptRequest {
+  // The instance ID for context (may be used for registry data).
+  string instance_id = 1;
+  // The ID of the saved script to dry-run.
+  string script_id = 2;
+  // The trigger node ID to start execution from.
+  string trigger_node_id = 3;
+  // Mock input values for the trigger (port ID -> value).
+  map<string, google.protobuf.Value> mock_inputs = 4;
+}
+
 // Response containing Minecraft registry data.
 message GetRegistryDataResponse {
   // Block types (e.g., "minecraft:stone", "minecraft:diamond_ore").
@@ -777,4 +859,14 @@ service ScriptService {
   // Returns blocks, entities, items, and biomes that can be used in scripts.
   // This endpoint is cacheable - registry data only changes between server versions.
   rpc GetRegistryData (GetRegistryDataRequest) returns (GetRegistryDataResponse) {}
+
+  // Validates a script graph without saving it.
+  // Returns all diagnostics (errors and warnings) for the given nodes and edges.
+  // Useful for live validation in the editor without requiring a save.
+  rpc ValidateScript (ValidateScriptRequest) returns (ValidateScriptResponse) {}
+
+  // Dry-runs a script from a specified trigger with mock inputs.
+  // Executes the graph without requiring an active instance.
+  // Returns execution events as a stream for the editor to display.
+  rpc DryRunScript (DryRunScriptRequest) returns (stream ScriptEvent) {}
 }

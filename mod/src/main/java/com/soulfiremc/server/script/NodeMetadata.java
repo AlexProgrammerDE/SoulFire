@@ -123,6 +123,20 @@ public interface NodeMetadata {
     return false;
   }
 
+  /// Whether this node is expensive (slow but non-blocking).
+  /// Used for static analysis warnings.
+  @Value.Default
+  default boolean isExpensive() {
+    return false;
+  }
+
+  /// Whether this node blocks the calling thread (I/O, waits, network).
+  /// Nodes that block the thread are unsafe in tick-synchronous paths.
+  @Value.Default
+  default boolean blocksThread() {
+    return false;
+  }
+
   /// Cached set of EXEC output port IDs for this node type.
   /// Used by the engine to avoid recomputing per node execution.
   @Value.Lazy

@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
-  private static final int MAX_PARALLEL_BRANCHES = 8;
+  static final int MAX_PARALLEL_BRANCHES = 8;
 
   /// Maximum time a single node execution can take before being timed out.
   private static final Duration NODE_EXECUTION_TIMEOUT = Duration.ofSeconds(30);
@@ -130,12 +130,15 @@ public final class ReactiveScriptEngine {
     Map<String, NodeValue> eventInputs,
     boolean tickSynchronous
   ) {
+    var runHolder = new java.util.concurrent.atomic.AtomicReference<ExecutionRun>();
     var mono = Mono.<Void>defer(() -> {
       if (context.isCancelled()) {
         return Mono.empty();
       }
 
-      var run = new ExecutionRun(tickSynchronous);
+      var run = new ExecutionRun(tickSynchronous, ExecutionRun.DEFAULT_DATA_EDGE_TIMEOUT,
+        ExecutionRun.DEFAULT_MAX_EXECUTION_COUNT, context.eventListener());
+      runHolder.set(run);
 
       var graphNode = graph.getNode(triggerNodeId);
       if (graphNode == null) {
@@ -201,8 +204,17 @@ public final class ReactiveScriptEngine {
         });
     });
 
-    // For synchronous tick execution, don't switch schedulers — run on the calling thread
-    return tickSynchronous ? mono : mono.subscribeOn(context.getReactorScheduler());
+    var monoWithStats = mono
+      .doFinally(_ -> {
+        var run = runHolder.get();
+        if (run != null) {
+          context.eventListener().onExecutionStats(
+            run.getExecutionCount(), run.getMaxExecutionCount());
+        }
+      });
+
+    // For synchronous tick execution, don't switch schedulers - run on the calling thread
+    return tickSynchronous ? monoWithStats : monoWithStats.subscribeOn(context.getReactorScheduler());
   }
 
   /// Determines which exec output ports to follow based on node outputs,
@@ -373,10 +385,15 @@ public final class ReactiveScriptEngine {
       return executeNode(nodeImpl, metadata, nodeId, baseInputs, graph, context, run, execContext);
     }
 
-    // Eagerly execute data-only source nodes that aren't on any execution path
+    // Item 18+21: Only eagerly execute data-only sources for declared ports, sorted for deterministic ordering
+    var declaredInputIds = metadata.inputs().stream()
+      .map(PortDefinition::id)
+      .collect(Collectors.toSet());
     var dataOnlySourceIds = incomingDataEdges.stream()
+      .filter(edge -> declaredInputIds.contains(edge.targetHandle()))
       .map(ScriptGraph.GraphEdge::sourceNodeId)
       .distinct()
+      .sorted() // Item 18: deterministic ordering for reproducible execution
       .filter(sourceId -> !graph.hasIncomingExecutionEdges(sourceId))
       .map(sourceId -> executeDataNode(graph, sourceId, context, run))
       .toList();
@@ -472,6 +489,34 @@ public final class ReactiveScriptEngine {
     var nodeDesc = describeNode(nodeId, graph);
     var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
 
+    // Item 9: Input contract validation
+    for (var port : metadata.inputs()) {
+      if (port.required() && port.type() != PortType.EXEC && !inputs.containsKey(port.id())) {
+        context.eventListener().onNodeError(nodeId, nodeDesc + ": Missing required input: " + port.id());
+        return Mono.empty();
+      }
+    }
+
+    // Item 11: Runtime type assertions on DATA edge inputs
+    for (var edge : graph.getIncomingDataEdges(nodeId)) {
+      var value = inputs.get(edge.targetHandle());
+      if (value == null) {
+        continue;
+      }
+      var targetNode = graph.getNode(nodeId);
+      if (targetNode == null || !NodeRegistry.isRegistered(targetNode.type())) {
+        continue;
+      }
+      var portMeta = NodeRegistry.getMetadata(targetNode.type());
+      var portDef = portMeta.inputs().stream()
+        .filter(p -> p.id().equals(edge.targetHandle())).findFirst();
+      if (portDef.isPresent() && !NodeValueTypeChecker.matches(value, portDef.get().type())) {
+        context.eventListener().onLog("warn", "Type mismatch at runtime: port '" + edge.targetHandle()
+          + "' expected " + portDef.get().type() + ", got " + NodeValueTypeChecker.describeActualType(value));
+      }
+    }
+
+    var startNanos = System.nanoTime();
     var nodeMono = Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs));
     // Add per-node timeout for async execution (skip for tick-synchronous to avoid interrupting tick thread)
     if (!run.isTickSynchronous()) {
@@ -479,8 +524,22 @@ public final class ReactiveScriptEngine {
     }
     return nodeMono
       .doOnNext(outputs -> {
+        var executionTimeNanos = System.nanoTime() - startNanos;
+        // Item 10: Output contract validation
+        for (var port : metadata.outputs()) {
+          if (port.type() != PortType.EXEC) {
+            var hasOutgoingEdge = graph.edges().stream().anyMatch(e ->
+              e.edgeType() == ScriptGraph.EdgeType.DATA
+                && e.sourceNodeId().equals(nodeId)
+                && e.sourceHandle().equals(port.id()));
+            if (hasOutgoingEdge && !outputs.containsKey(port.id())) {
+              context.eventListener().onLog("warn",
+                "Node did not produce expected output: " + port.id());
+            }
+          }
+        }
         run.publishNodeOutputs(nodeId, outputs);
-        context.eventListener().onNodeCompleted(nodeId, outputs);
+        context.eventListener().onNodeCompleted(nodeId, outputs, executionTimeNanos);
       })
       .doOnError(e -> {
         var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();

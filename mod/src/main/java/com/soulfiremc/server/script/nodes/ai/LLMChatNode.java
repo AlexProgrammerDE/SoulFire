@@ -58,6 +58,8 @@ public final class LLMChatNode extends AbstractScriptNode {
     .icon("brain")
     .color("#A855F7")
     .addKeywords("ai", "llm", "gpt", "chat", "openai", "prompt", "completion", "generate")
+    .isExpensive(true)
+    .blocksThread(true)
     .build();
 
   @Override

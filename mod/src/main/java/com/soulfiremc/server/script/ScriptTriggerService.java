@@ -48,10 +48,19 @@ public final class ScriptTriggerService {
   /// Buffer size for backpressure (events beyond this are dropped).
   private static final int TRIGGER_BUFFER_SIZE = 64;
 
+  /// TTL for idempotency tokens to prevent duplicate event processing.
+  private static final long IDEMPOTENCY_TTL_MS = 5_000;
+
+  /// Max entries in the idempotency cache.
+  private static final int IDEMPOTENCY_MAX_ENTRIES = 1_000;
+
   private record ScriptRegistration(List<Object> listeners, Set<String> sinkKeys) {}
   private final Map<UUID, ScriptRegistration> scriptRegistrations = new ConcurrentHashMap<>();
   private final Map<String, Sinks.Many<Map<String, NodeValue>>> triggerSinks = new ConcurrentHashMap<>();
   private final Map<String, Disposable> triggerSubscriptions = new ConcurrentHashMap<>();
+
+  /// Per-script idempotency token cache: token -> expiry timestamp
+  private final Map<UUID, Map<String, Long>> idempotencyTokens = new ConcurrentHashMap<>();
 
   /// Registers an event-based trigger with sink, subscription, and handler.
   private <E extends SoulFireEvent> void registerEventTrigger(
@@ -72,12 +81,20 @@ public final class ScriptTriggerService {
     var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
     triggerSinks.put(sinkKey, sink);
 
+    var executing = new AtomicBoolean(false);
     var subscription = sink.asFlux()
-      .flatMap(inputs -> engine.executeFromTrigger(graph, nodeId, context, inputs)
-        .onErrorResume(e -> {
-          log.error("Error in {} trigger execution", triggerName, e);
+      .flatMap(inputs -> {
+        if (!executing.compareAndSet(false, true)) {
+          context.eventListener().onLog("warn", "Skipping overlapping " + triggerName + " trigger invocation");
           return Mono.empty();
-        }), 1)
+        }
+        return engine.executeFromTrigger(graph, nodeId, context, inputs)
+          .doFinally(_ -> executing.set(false))
+          .onErrorResume(e -> {
+            log.error("Error in {} trigger execution", triggerName, e);
+            return Mono.empty();
+          });
+      }, 1)
       .subscribe();
     triggerSubscriptions.put(sinkKey, subscription);
 
@@ -87,7 +104,15 @@ public final class ScriptTriggerService {
       }
       var inputs = inputMapper.apply(event);
       if (inputs != null) {
-        sink.tryEmitNext(inputs);
+        // Item 32: Idempotency token check
+        if (isDuplicateEvent(scriptId, nodeId, inputs)) {
+          return;
+        }
+        var result = sink.tryEmitNext(inputs);
+        if (result == Sinks.EmitResult.FAIL_OVERFLOW) {
+          context.eventListener().onLog("warn",
+            "Trigger buffer overflow: event dropped (" + TRIGGER_BUFFER_SIZE + "-event limit)");
+        }
       }
     };
     SoulFireAPI.registerListener(eventClass, handler);
@@ -374,6 +399,9 @@ public final class ScriptTriggerService {
       }
     }
 
+    // 4. Clean up idempotency token cache
+    idempotencyTokens.remove(scriptId);
+
     log.info("Unregistered {} trigger(s) for script {}", listeners.size(), scriptId);
   }
 
@@ -383,6 +411,25 @@ public final class ScriptTriggerService {
   /// @return true if the script has registered triggers
   public boolean hasActiveTriggers(UUID scriptId) {
     return scriptRegistrations.containsKey(scriptId);
+  }
+
+  /// Checks whether an event is a duplicate using idempotency tokens.
+  /// Computes a token from trigger node ID + hash of input values + time window.
+  private boolean isDuplicateEvent(UUID scriptId, String nodeId, Map<String, NodeValue> inputs) {
+    var tokenCache = idempotencyTokens.computeIfAbsent(scriptId, _ -> new ConcurrentHashMap<>());
+    var now = System.currentTimeMillis();
+
+    // Evict expired entries if cache is large
+    if (tokenCache.size() > IDEMPOTENCY_MAX_ENTRIES) {
+      tokenCache.entrySet().removeIf(e -> e.getValue() < now);
+    }
+
+    // Compute token: nodeId + hash of input values + time window (quantized to TTL)
+    var timeWindow = now / IDEMPOTENCY_TTL_MS;
+    var token = nodeId + ":" + inputs.hashCode() + ":" + timeWindow;
+
+    var existing = tokenCache.putIfAbsent(token, now + IDEMPOTENCY_TTL_MS);
+    return existing != null && existing > now;
   }
 
   /// Holder for event listeners that enables proper unregistration.

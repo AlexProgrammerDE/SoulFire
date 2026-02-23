@@ -165,6 +165,40 @@ final class ScriptEngineTest {
   }
 
   @Test
+  void dataOnlyNodeExecutedExactlyOnceWithMultipleConsumers() {
+    // Item 20: Verify result caching - a data-only node consumed by multiple downstream
+    // nodes should execute exactly once per trigger invocation.
+    var graph = ScriptGraph.builder("test-data-cache", "Data Cache Test")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("const", "constant.number", Map.of("value", 42))
+      .addNode("add1", "math.add", Map.of("a", 0))
+      .addNode("add2", "math.add", Map.of("a", 0))
+      .addNode("print1", "action.print", null)
+      .addNode("print2", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print1", "in")
+      .addExecutionEdge("print1", "out", "print2", "in")
+      .addDataEdge("const", "value", "add1", "b")
+      .addDataEdge("const", "value", "add2", "b")
+      .addDataEdge("add1", "result", "print1", "message")
+      .addDataEdge("add2", "result", "print2", "message")
+      .build();
+
+    var listener = runGraph(graph, "trigger");
+
+    assertNoErrors(listener);
+    assertEquals(1, countNodeExecutions(listener, "const"),
+      "Data-only constant node should execute exactly once, not once per consumer");
+    assertTrue(listener.completedNodes.contains("add1"),
+      "First add node should complete");
+    assertTrue(listener.completedNodes.contains("add2"),
+      "Second add node should complete");
+    assertTrue(listener.completedNodes.contains("print1"),
+      "First print node should complete");
+    assertTrue(listener.completedNodes.contains("print2"),
+      "Second print node should complete");
+  }
+
+  @Test
   void triggerDataEdgeNotReExecuted() {
     var graph = ScriptGraph.builder("test-trigger-data-edge", "Trigger Data Edge Test")
       .addNode("trigger", "trigger.on_chat", null)
@@ -503,7 +537,7 @@ final class ScriptEngineTest {
 
   @Test
   void printNodeWithNullMessage() {
-    // Print with no message connection should output "null"
+    // Print with no message connection should report missing required input (Item 9)
     var graph = ScriptGraph.builder("test-print-null", "Print Null Test")
       .addNode("trigger", "trigger.on_script_init", null)
       .addNode("print", "action.print", null)
@@ -515,8 +549,12 @@ final class ScriptEngineTest {
     var engine = new ReactiveScriptEngine();
     engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
 
-    assertNoErrors(listener);
-    assertFalse(listener.logMessages.isEmpty(), "Print should produce a log message");
+    // Input contract validation rejects the node because 'message' is a required input
+    assertFalse(listener.errorNodes.isEmpty(),
+      "Should report error for missing required input");
+    assertTrue(listener.errorNodes.values().stream()
+        .anyMatch(msg -> msg.contains("Missing required input")),
+      "Error should mention missing required input");
   }
 
   /// Extended RecordingEventListener that also captures log messages from Print nodes.

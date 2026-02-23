@@ -55,6 +55,23 @@ public interface ScriptEventListener {
     // Default no-op implementation
   }
 
+  /// Called when a node completes with execution time for profiling.
+  ///
+  /// @param nodeId             the node identifier
+  /// @param outputs            the output values produced
+  /// @param executionTimeNanos execution time in nanoseconds
+  default void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
+    onNodeCompleted(nodeId, outputs);
+  }
+
+  /// Called when a trigger chain completes with execution statistics.
+  ///
+  /// @param nodeCount the total number of node executions
+  /// @param maxCount  the maximum allowed node executions
+  default void onExecutionStats(long nodeCount, long maxCount) {
+    // Default no-op implementation
+  }
+
   /// A no-op implementation of ScriptEventListener.
   ScriptEventListener NOOP = new ScriptEventListener() {
     @Override

@@ -17,14 +17,18 @@
  */
 package com.soulfiremc.server.script;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /// Per-script state container with typed key access.
 /// State is scoped to the ReactiveScriptContext and is automatically
 /// cleaned up when the script deactivates (context is GC'd).
+@Slf4j
 public final class ScriptStateStore {
   private final ConcurrentHashMap<String, Object> store = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<String, Class<?>> typeRegistry = new ConcurrentHashMap<>();
 
   /// Gets an existing value or creates a new one using the factory.
   ///
@@ -38,6 +42,7 @@ public final class ScriptStateStore {
   }
 
   /// Gets an existing value or creates a new one, with runtime type checking.
+  /// Records the type on first access and warns if a different type is used later.
   ///
   /// @param key     the state key
   /// @param type    the expected type
@@ -46,6 +51,12 @@ public final class ScriptStateStore {
   /// @return the existing or newly created value
   /// @throws IllegalStateException if existing value has a different type
   public <T> T getOrCreate(String key, Class<T> type, Supplier<T> factory) {
+    var previousType = typeRegistry.putIfAbsent(key, type);
+    if (previousType != null && previousType != type) {
+      log.warn("State key '{}' accessed with type {} but was created as {}",
+        key, type.getSimpleName(), previousType.getSimpleName());
+    }
+
     var existing = store.get(key);
     if (existing != null) {
       if (!type.isInstance(existing)) {
@@ -61,5 +72,6 @@ public final class ScriptStateStore {
   /// Called when a script is cancelled.
   public void clear() {
     store.clear();
+    typeRegistry.clear();
   }
 }

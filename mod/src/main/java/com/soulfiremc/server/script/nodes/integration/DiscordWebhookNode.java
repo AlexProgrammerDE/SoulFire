@@ -53,6 +53,8 @@ public final class DiscordWebhookNode extends AbstractScriptNode {
     .icon("message-circle")
     .color("#5865F2")
     .addKeywords("discord", "webhook", "notify", "message", "alert", "integration")
+    .isExpensive(true)
+    .blocksThread(true)
     .build();
 
   private static final Gson GSON = new Gson();

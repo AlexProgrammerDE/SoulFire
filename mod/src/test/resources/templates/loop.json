@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    {"id": "trigger", "type": "trigger.on_script_init"},
+    {"id": "loop", "type": "flow.loop", "defaultInputs": {"count": 5}},
+    {"id": "print", "type": "action.print"}
+  ],
+  "edges": [
+    {"source": "trigger", "sourceHandle": "out", "target": "loop", "targetHandle": "in", "edgeType": "EXECUTION"},
+    {"source": "loop", "sourceHandle": "exec_loop", "target": "print", "targetHandle": "in", "edgeType": "EXECUTION"},
+    {"source": "loop", "sourceHandle": "index", "target": "print", "targetHandle": "message", "edgeType": "DATA"}
+  ]
+}

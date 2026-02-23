@@ -57,6 +57,8 @@ public final class WebFetchNode extends AbstractScriptNode {
     .icon("globe")
     .color("#06B6D4")
     .addKeywords("http", "fetch", "request", "api", "rest", "web", "url", "get", "post")
+    .isExpensive(true)
+    .blocksThread(true)
     .build();
 
   private static final Gson GSON = new Gson();

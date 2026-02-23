@@ -23,6 +23,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /// Represents the graph structure of a visual script.
 /// Contains nodes and edges that define the execution flow and data connections.
@@ -36,17 +37,36 @@ public final class ScriptGraph {
   private final Map<String, List<GraphEdge>> incomingEdgesByHandle;
   private final Map<String, List<GraphEdge>> incomingDataEdgesByNode;
   private final Set<String> nodesWithIncomingExecution;
+  private final List<ValidationDiagnostic> warnings;
+
+  /// Severity levels for validation diagnostics.
+  public enum Severity { ERROR, WARNING }
+
+  /// A structured validation diagnostic with node/edge context and severity.
+  ///
+  /// @param nodeId   the node related to this diagnostic, or null for graph-level issues
+  /// @param edgeId   a composite edge key related to this diagnostic, or null
+  /// @param message  human-readable description
+  /// @param severity whether this is an error (blocks build) or warning (informational)
+  public record ValidationDiagnostic(
+    @Nullable String nodeId,
+    @Nullable String edgeId,
+    String message,
+    Severity severity
+  ) {}
 
   private ScriptGraph(
     String scriptId,
     String scriptName,
     Map<String, GraphNode> nodes,
-    List<GraphEdge> edges
+    List<GraphEdge> edges,
+    List<ValidationDiagnostic> warnings
   ) {
     this.scriptId = scriptId;
     this.scriptName = scriptName;
     this.nodes = Collections.unmodifiableMap(nodes);
     this.edges = Collections.unmodifiableList(edges);
+    this.warnings = List.copyOf(warnings);
 
     // Pre-compute edge lookups for efficient traversal
     var outgoing = new HashMap<String, List<GraphEdge>>();
@@ -63,6 +83,11 @@ public final class ScriptGraph {
       if (edge.edgeType == EdgeType.DATA) {
         incomingDataByNode.computeIfAbsent(edge.targetNodeId, _ -> new ArrayList<>()).add(edge);
       }
+    }
+
+    // Sort each outgoing edge list by targetNodeId for deterministic traversal
+    for (var edgeList : outgoing.values()) {
+      edgeList.sort(Comparator.comparing(GraphEdge::targetNodeId));
     }
 
     this.outgoingEdgesByHandle = Collections.unmodifiableMap(outgoing);
@@ -178,8 +203,8 @@ public final class ScriptGraph {
       inDegree.merge(edge.targetNodeId, 1, Integer::sum);
     }
 
-    // Kahn's algorithm
-    var queue = new ArrayDeque<String>();
+    // Kahn's algorithm with sorted initial queue for deterministic ordering
+    var queue = new PriorityQueue<String>();
     for (var entry : inDegree.entrySet()) {
       if (entry.getValue() == 0) {
         queue.add(entry.getKey());
@@ -287,25 +312,28 @@ public final class ScriptGraph {
       return addEdge(new GraphEdge(sourceNodeId, sourceHandle, targetNodeId, targetHandle, EdgeType.DATA));
     }
 
-    /// Validates the graph structure and returns a list of error messages.
-    /// Returns an empty list if the graph is valid.
-    private List<String> validate() {
-      var errors = new ArrayList<String>();
+    /// Validates the graph structure and returns a list of diagnostics.
+    private List<ValidationDiagnostic> validate() {
+      var diagnostics = new ArrayList<ValidationDiagnostic>();
 
       // 1. Validate all edges reference existing nodes
       for (var edge : edges) {
+        var edgeKey = edge.sourceNodeId() + "->" + edge.targetNodeId();
         if (!nodes.containsKey(edge.sourceNodeId())) {
-          errors.add("Edge references non-existent source node: " + edge.sourceNodeId());
+          diagnostics.add(new ValidationDiagnostic(null, edgeKey,
+            "Edge references non-existent source node: " + edge.sourceNodeId(), Severity.ERROR));
         }
         if (!nodes.containsKey(edge.targetNodeId())) {
-          errors.add("Edge references non-existent target node: " + edge.targetNodeId());
+          diagnostics.add(new ValidationDiagnostic(null, edgeKey,
+            "Edge references non-existent target node: " + edge.targetNodeId(), Severity.ERROR));
         }
       }
 
       // 2. Validate no self-loops
       for (var edge : edges) {
         if (edge.sourceNodeId().equals(edge.targetNodeId())) {
-          errors.add("Self-loop detected on node: " + edge.sourceNodeId());
+          diagnostics.add(new ValidationDiagnostic(edge.sourceNodeId(), null,
+            "Self-loop detected on node: " + edge.sourceNodeId(), Severity.ERROR));
         }
       }
 
@@ -315,12 +343,13 @@ public final class ScriptGraph {
         var key = edge.sourceNodeId() + ":" + edge.sourceHandle() + "->"
           + edge.targetNodeId() + ":" + edge.targetHandle() + ":" + edge.edgeType();
         if (!edgeKeys.add(key)) {
-          errors.add("Duplicate edge: " + key);
+          diagnostics.add(new ValidationDiagnostic(null, key,
+            "Duplicate edge: " + key, Severity.ERROR));
         }
       }
 
       // 4. Detect cycles using Kahn's algorithm
-      if (errors.isEmpty()) {
+      if (diagnostics.stream().noneMatch(d -> d.severity() == Severity.ERROR)) {
         var inDegree = new HashMap<String, Integer>();
         var adjList = new HashMap<String, List<String>>();
         for (var nodeId : nodes.keySet()) {
@@ -350,25 +379,30 @@ public final class ScriptGraph {
           }
         }
         if (count != nodes.size()) {
-          errors.add("Script graph contains cycles - cannot determine execution order");
+          diagnostics.add(new ValidationDiagnostic(null, null,
+            "Script graph contains cycles - cannot determine execution order", Severity.ERROR));
         }
       }
 
       // 5. Validate node types against NodeRegistry
       for (var node : nodes.values()) {
         if (!node.type().startsWith("layout.") && !NodeRegistry.isRegistered(node.type())) {
-          errors.add("Unknown node type '" + node.type() + "' for node " + node.id());
+          diagnostics.add(new ValidationDiagnostic(node.id(), null,
+            "Unknown node type '" + node.type() + "' for node " + node.id(), Severity.ERROR));
         }
       }
 
       // 6. Validate edge handles against port metadata
       for (var edge : edges) {
+        var edgeKey = edge.sourceNodeId() + ":" + edge.sourceHandle() + "->"
+          + edge.targetNodeId() + ":" + edge.targetHandle();
         var sourceNode = nodes.get(edge.sourceNodeId());
         if (sourceNode != null && NodeRegistry.isRegistered(sourceNode.type())) {
           var metadata = NodeRegistry.getMetadata(sourceNode.type());
           var validOutputIds = metadata.outputs().stream().map(PortDefinition::id).collect(Collectors.toSet());
           if (!validOutputIds.contains(edge.sourceHandle())) {
-            errors.add("Edge from " + edge.sourceNodeId() + " references unknown output '" + edge.sourceHandle() + "'");
+            diagnostics.add(new ValidationDiagnostic(edge.sourceNodeId(), edgeKey,
+              "Edge from " + edge.sourceNodeId() + " references unknown output '" + edge.sourceHandle() + "'", Severity.ERROR));
           }
         }
         var targetNode = nodes.get(edge.targetNodeId());
@@ -376,12 +410,13 @@ public final class ScriptGraph {
           var metadata = NodeRegistry.getMetadata(targetNode.type());
           var validInputIds = metadata.inputs().stream().map(PortDefinition::id).collect(Collectors.toSet());
           if (!validInputIds.contains(edge.targetHandle())) {
-            errors.add("Edge to " + edge.targetNodeId() + " references unknown input '" + edge.targetHandle() + "'");
+            diagnostics.add(new ValidationDiagnostic(edge.targetNodeId(), edgeKey,
+              "Edge to " + edge.targetNodeId() + " references unknown input '" + edge.targetHandle() + "'", Severity.ERROR));
           }
         }
       }
 
-      // 7. Port type compatibility checking (Point 1)
+      // 7. Port type compatibility checking
       for (var edge : edges) {
         if (edge.edgeType() != EdgeType.DATA) {
           continue;
@@ -402,47 +437,270 @@ public final class ScriptGraph {
           .filter(p -> p.id().equals(edge.targetHandle())).findFirst();
         if (sourcePort.isPresent() && targetPort.isPresent()) {
           if (!isTypeCompatible(sourcePort.get().type(), targetPort.get().type())) {
-            errors.add("Type mismatch: " + edge.sourceNodeId() + "." + edge.sourceHandle()
-              + " (" + sourcePort.get().type() + ") -> " + edge.targetNodeId() + "." + edge.targetHandle()
-              + " (" + targetPort.get().type() + ")");
+            var edgeKey = edge.sourceNodeId() + ":" + edge.sourceHandle() + "->"
+              + edge.targetNodeId() + ":" + edge.targetHandle();
+            diagnostics.add(new ValidationDiagnostic(edge.targetNodeId(), edgeKey,
+              "Type mismatch: " + edge.sourceNodeId() + "." + edge.sourceHandle()
+                + " (" + sourcePort.get().type() + ") -> " + edge.targetNodeId() + "." + edge.targetHandle()
+                + " (" + targetPort.get().type() + ")", Severity.ERROR));
           }
         }
       }
 
-      // 8. Required input connection validation (Point 2)
-      // Note: This is intentionally NOT added to errors because required inputs
-      // can be fulfilled at runtime via the execution context (parent node outputs
-      // propagated through exec edges). Only data-only nodes strictly need DATA edges.
+      // 8. Fan-in ambiguity: multiple DATA edges to a non-multi-input port
+      var dataEdgeCountByTarget = new HashMap<String, Integer>();
+      for (var edge : edges) {
+        if (edge.edgeType() == EdgeType.DATA) {
+          var key = edge.targetNodeId() + ":" + edge.targetHandle();
+          dataEdgeCountByTarget.merge(key, 1, Integer::sum);
+        }
+      }
+      for (var entry : dataEdgeCountByTarget.entrySet()) {
+        if (entry.getValue() > 1) {
+          var parts = entry.getKey().split(":", 2);
+          var targetNodeId = parts[0];
+          var targetHandle = parts[1];
+          var targetNode = nodes.get(targetNodeId);
+          if (targetNode != null && NodeRegistry.isRegistered(targetNode.type())) {
+            var metadata = NodeRegistry.getMetadata(targetNode.type());
+            var port = metadata.inputs().stream()
+              .filter(p -> p.id().equals(targetHandle)).findFirst();
+            if (port.isPresent() && !port.get().multiInput()) {
+              diagnostics.add(new ValidationDiagnostic(targetNodeId, entry.getKey(),
+                "Multiple data edges to non-multi-input port '" + targetHandle + "'", Severity.ERROR));
+            }
+          }
+        }
+      }
 
-      return errors;
+      // 9. Unreachable required input detection (warning)
+      for (var node : nodes.values()) {
+        if (!NodeRegistry.isRegistered(node.type())) {
+          continue;
+        }
+        var metadata = NodeRegistry.getMetadata(node.type());
+        for (var input : metadata.inputs()) {
+          if (!input.required() || input.type() == PortType.EXEC) {
+            continue;
+          }
+          var inKey = node.id() + ":" + input.id();
+          var hasDataEdge = edges.stream().anyMatch(e ->
+            e.edgeType() == EdgeType.DATA
+              && e.targetNodeId().equals(node.id())
+              && e.targetHandle().equals(input.id()));
+          var hasDefault = input.defaultValue() != null
+            || (node.defaultInputs() != null && node.defaultInputs().containsKey(input.id()));
+          if (!hasDataEdge && !hasDefault) {
+            diagnostics.add(new ValidationDiagnostic(node.id(), null,
+              "Required input '" + input.id() + "' on node " + node.id() + " has no connection or default", Severity.WARNING));
+          }
+        }
+      }
+
+      // 10. Unused output detection (warning): nodes with no connected outputs at all
+      for (var node : nodes.values()) {
+        if (!NodeRegistry.isRegistered(node.type())) {
+          continue;
+        }
+        var metadata = NodeRegistry.getMetadata(node.type());
+        if (metadata.isTrigger()) {
+          continue;
+        }
+        var hasAnyOutgoing = edges.stream().anyMatch(e -> e.sourceNodeId().equals(node.id()));
+        if (!hasAnyOutgoing && !metadata.outputs().isEmpty()) {
+          diagnostics.add(new ValidationDiagnostic(node.id(), null,
+            "Node has no connected outputs", Severity.WARNING));
+        }
+      }
+
+      // 11. Parallel branch overflow detection (warning)
+      var execOutCountByNode = new HashMap<String, Integer>();
+      for (var edge : edges) {
+        if (edge.edgeType() == EdgeType.EXECUTION) {
+          execOutCountByNode.merge(edge.sourceNodeId(), 1, Integer::sum);
+        }
+      }
+      for (var entry : execOutCountByNode.entrySet()) {
+        if (entry.getValue() > ReactiveScriptEngine.MAX_PARALLEL_BRANCHES) {
+          diagnostics.add(new ValidationDiagnostic(entry.getKey(), null,
+            "Node has " + entry.getValue() + " parallel branches, exceeding limit of "
+              + ReactiveScriptEngine.MAX_PARALLEL_BRANCHES + ". Excess branches will execute sequentially.",
+            Severity.WARNING));
+        }
+      }
+
+      // 12. Dead node detection: find nodes not reachable from any trigger
+      if (diagnostics.stream().noneMatch(d -> d.severity() == Severity.ERROR)) {
+        var nodesWithIncomingExec = new HashSet<String>();
+        for (var edge : edges) {
+          if (edge.edgeType() == EdgeType.EXECUTION) {
+            nodesWithIncomingExec.add(edge.targetNodeId());
+          }
+        }
+
+        // Find trigger nodes
+        var triggerNodes = new ArrayList<String>();
+        for (var node : nodes.values()) {
+          if (nodesWithIncomingExec.contains(node.id())) {
+            continue;
+          }
+          if (NodeRegistry.isRegistered(node.type()) && NodeRegistry.getMetadata(node.type()).isTrigger()) {
+            triggerNodes.add(node.id());
+          }
+        }
+
+        // BFS from all triggers following all edges (both directions for data edges)
+        var reachable = new HashSet<String>();
+        var bfsQueue = new ArrayDeque<>(triggerNodes);
+        reachable.addAll(triggerNodes);
+
+        // Build adjacency list for all edge types
+        var adjAll = new HashMap<String, Set<String>>();
+        for (var node : nodes.values()) {
+          adjAll.put(node.id(), new HashSet<>());
+        }
+        for (var edge : edges) {
+          adjAll.computeIfAbsent(edge.sourceNodeId(), _ -> new HashSet<>()).add(edge.targetNodeId());
+          // For DATA edges, also traverse backward (a data source feeding a reachable node is itself reachable)
+          if (edge.edgeType() == EdgeType.DATA) {
+            adjAll.computeIfAbsent(edge.targetNodeId(), _ -> new HashSet<>()).add(edge.sourceNodeId());
+          }
+        }
+
+        while (!bfsQueue.isEmpty()) {
+          var current = bfsQueue.poll();
+          for (var neighbor : adjAll.getOrDefault(current, Set.of())) {
+            if (reachable.add(neighbor)) {
+              bfsQueue.add(neighbor);
+            }
+          }
+        }
+
+        for (var node : nodes.values()) {
+          if (!reachable.contains(node.id())) {
+            diagnostics.add(new ValidationDiagnostic(node.id(), null,
+              "Node is not reachable from any trigger", Severity.WARNING));
+          }
+        }
+      }
+
+      // 13. Infinite loop risk: loop nodes without a ResultNode in check chain
+      for (var node : nodes.values()) {
+        if (!NodeRegistry.isRegistered(node.type())) {
+          continue;
+        }
+        var metadata = NodeRegistry.getMetadata(node.type());
+        if (!metadata.execOutputPortIds().contains(StandardPorts.EXEC_CHECK)) {
+          continue;
+        }
+        // BFS from EXEC_CHECK port following EXECUTION edges
+        var checkReachable = new HashSet<String>();
+        var checkQueue = new ArrayDeque<String>();
+        var checkKey = node.id() + ":" + StandardPorts.EXEC_CHECK;
+        for (var edge : edges) {
+          if (edge.edgeType() == EdgeType.EXECUTION
+            && edge.sourceNodeId().equals(node.id())
+            && edge.sourceHandle().equals(StandardPorts.EXEC_CHECK)) {
+            if (checkReachable.add(edge.targetNodeId())) {
+              checkQueue.add(edge.targetNodeId());
+            }
+          }
+        }
+        while (!checkQueue.isEmpty()) {
+          var current = checkQueue.poll();
+          for (var edge : edges) {
+            if (edge.edgeType() == EdgeType.EXECUTION && edge.sourceNodeId().equals(current)) {
+              if (checkReachable.add(edge.targetNodeId())) {
+                checkQueue.add(edge.targetNodeId());
+              }
+            }
+          }
+        }
+        var hasResult = checkReachable.stream().anyMatch(id -> {
+          var n = nodes.get(id);
+          return n != null && "flow.result".equals(n.type());
+        });
+        if (!hasResult) {
+          diagnostics.add(new ValidationDiagnostic(node.id(), null,
+            "Loop has no ResultNode in check chain, may run forever", Severity.WARNING));
+        }
+      }
+
+      // 14. Expensive subgraph in tick paths
+      var tickTriggerTypes = Set.of("trigger.on_pre_entity_tick", "trigger.on_post_entity_tick");
+      for (var node : nodes.values()) {
+        if (!tickTriggerTypes.contains(node.type())) {
+          continue;
+        }
+        // BFS from this tick trigger following EXECUTION edges
+        var tickReachable = new HashSet<String>();
+        var tickQueue = new ArrayDeque<String>();
+        for (var edge : edges) {
+          if (edge.edgeType() == EdgeType.EXECUTION && edge.sourceNodeId().equals(node.id())) {
+            if (tickReachable.add(edge.targetNodeId())) {
+              tickQueue.add(edge.targetNodeId());
+            }
+          }
+        }
+        while (!tickQueue.isEmpty()) {
+          var current = tickQueue.poll();
+          for (var edge : edges) {
+            if (edge.edgeType() == EdgeType.EXECUTION && edge.sourceNodeId().equals(current)) {
+              if (tickReachable.add(edge.targetNodeId())) {
+                tickQueue.add(edge.targetNodeId());
+              }
+            }
+          }
+        }
+        // Check for expensive/blocking nodes
+        for (var reachableId : tickReachable) {
+          var reachableNode = nodes.get(reachableId);
+          if (reachableNode == null || !NodeRegistry.isRegistered(reachableNode.type())) {
+            continue;
+          }
+          var reachableMeta = NodeRegistry.getMetadata(reachableNode.type());
+          if (reachableMeta.blocksThread()) {
+            diagnostics.add(new ValidationDiagnostic(reachableNode.id(), null,
+              "Blocking node '" + reachableMeta.displayName()
+                + "' in tick-synchronous path will block game thread",
+              Severity.ERROR));
+          } else if (reachableMeta.isExpensive()) {
+            diagnostics.add(new ValidationDiagnostic(reachableNode.id(), null,
+              "Expensive node '" + reachableMeta.displayName()
+                + "' in tick-synchronous path may slow game thread",
+              Severity.WARNING));
+          }
+        }
+      }
+
+      // 15. Type narrowing through ANY ports
+      diagnostics.addAll(TypePropagation.analyze(nodes, edges));
+
+      return diagnostics;
     }
 
     /// Checks whether a source port type is compatible with a target port type.
-    private static boolean isTypeCompatible(PortType source, PortType target) {
-      if (source == target) {
-        return true;
-      }
-      if (target == PortType.ANY || source == PortType.ANY) {
-        return true;
-      }
-      if (target == PortType.STRING) {
-        return true; // anything can be coerced to string
-      }
-      if (source == PortType.NUMBER && target == PortType.BOOLEAN) {
-        return true; // truthy coercion
-      }
-      return source == PortType.BOOLEAN && target == PortType.NUMBER;
+    /// Delegates to the shared TypeCompatibility class.
+    static boolean isTypeCompatible(PortType source, PortType target) {
+      return TypeCompatibility.isCompatible(source, target);
     }
 
     /// Builds the ScriptGraph after validation.
+    /// Throws on ERRORs, but includes WARNINGs in the built graph.
     ///
-    /// @throws ScriptGraphValidationException if the graph is structurally invalid
+    /// @throws ScriptGraphValidationException if the graph has ERROR-level diagnostics
     public ScriptGraph build() {
-      var errors = validate();
+      var diagnostics = validate();
+      var errors = diagnostics.stream()
+        .filter(d -> d.severity() == Severity.ERROR)
+        .toList();
       if (!errors.isEmpty()) {
-        throw new ScriptGraphValidationException(errors);
+        throw new ScriptGraphValidationException(diagnostics);
       }
-      return new ScriptGraph(scriptId, scriptName, nodes, edges);
+      var warnings = diagnostics.stream()
+        .filter(d -> d.severity() == Severity.WARNING)
+        .toList();
+      return new ScriptGraph(scriptId, scriptName, nodes, edges, warnings);
     }
   }
 }

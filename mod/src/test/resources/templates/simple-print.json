@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    {"id": "trigger", "type": "trigger.on_script_init"},
+    {"id": "print", "type": "action.print", "defaultInputs": {"message": "hello world"}}
+  ],
+  "edges": [
+    {"source": "trigger", "sourceHandle": "out", "target": "print", "targetHandle": "in", "edgeType": "EXECUTION"}
+  ]
+}

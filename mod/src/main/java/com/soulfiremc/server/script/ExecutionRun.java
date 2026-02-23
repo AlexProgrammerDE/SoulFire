@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /// don't corrupt each other's node output sinks.
 @Slf4j
 public final class ExecutionRun {
-  private static final long DEFAULT_MAX_EXECUTION_COUNT = 100_000;
-  private static final Duration DEFAULT_DATA_EDGE_TIMEOUT = Duration.ofSeconds(10);
+  static final long DEFAULT_MAX_EXECUTION_COUNT = 100_000;
+  static final Duration DEFAULT_DATA_EDGE_TIMEOUT = Duration.ofSeconds(10);
 
   private final ConcurrentHashMap<String, Sinks.Many<Map<String, NodeValue>>> nodeOutputSinks =
     new ConcurrentHashMap<>();
@@ -53,19 +53,21 @@ public final class ExecutionRun {
   private final boolean tickSynchronous;
   private final Duration dataEdgeTimeout;
   private final long maxExecutionCount;
+  private final ScriptEventListener listener;
 
   public ExecutionRun() {
     this(false);
   }
 
   public ExecutionRun(boolean tickSynchronous) {
-    this(tickSynchronous, DEFAULT_DATA_EDGE_TIMEOUT, DEFAULT_MAX_EXECUTION_COUNT);
+    this(tickSynchronous, DEFAULT_DATA_EDGE_TIMEOUT, DEFAULT_MAX_EXECUTION_COUNT, null);
   }
 
-  public ExecutionRun(boolean tickSynchronous, Duration dataEdgeTimeout, long maxExecutionCount) {
+  public ExecutionRun(boolean tickSynchronous, Duration dataEdgeTimeout, long maxExecutionCount, ScriptEventListener listener) {
     this.tickSynchronous = tickSynchronous;
     this.dataEdgeTimeout = dataEdgeTimeout;
     this.maxExecutionCount = maxExecutionCount;
+    this.listener = listener;
     // Initialize with one context for the top-level execution
     pushCheckContext();
   }
@@ -86,8 +88,14 @@ public final class ExecutionRun {
       .asFlux()
       .next()
       .timeout(dataEdgeTimeout)
-      .doOnError(_ -> log.error("Timeout waiting for node {} outputs - "
-        + "DATA edge may point to a node not on the execution path", nodeDesc))
+      .doOnError(_ -> {
+        log.error("Timeout waiting for node {} outputs - "
+          + "DATA edge may point to a node not on the execution path", nodeDesc);
+        if (listener != null) {
+          listener.onLog("warn", "Data edge timeout (" + dataEdgeTimeout.getSeconds()
+            + "s) for node " + nodeDesc);
+        }
+      })
       .onErrorReturn(Map.of());
   }
 
@@ -191,5 +199,15 @@ public final class ExecutionRun {
   /// @return true if execution is allowed, false if the limit has been exceeded
   public boolean incrementAndCheckLimit() {
     return executionCount.incrementAndGet() <= maxExecutionCount;
+  }
+
+  /// Returns the current execution count for stats reporting.
+  public long getExecutionCount() {
+    return executionCount.get();
+  }
+
+  /// Returns the maximum execution count limit.
+  public long getMaxExecutionCount() {
+    return maxExecutionCount;
   }
 }
