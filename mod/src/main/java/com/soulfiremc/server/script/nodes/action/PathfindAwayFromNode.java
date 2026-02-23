@@ -42,7 +42,9 @@ public final class PathfindAwayFromNode extends AbstractScriptNode {
     )
     .addOutputs(
       PortDefinition.execOut(),
-      PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether pathfinding succeeded")
+      PortDefinition.output(StandardPorts.EXEC_ERROR, "Error", PortType.EXEC, "Executes on failure"),
+      PortDefinition.output("success", "Success", PortType.BOOLEAN, "Whether it succeeded"),
+      PortDefinition.output("errorMessage", "Error Message", PortType.STRING, "Error details")
     )
     .description("Moves the bot away from a position using pathfinding")
     .icon("move-diagonal")
@@ -60,7 +62,15 @@ public final class PathfindAwayFromNode extends AbstractScriptNode {
     var constraint = new PathConstraintImpl(bot);
 
     return Mono.fromFuture(PathExecutor.executePathfinding(bot, goal, constraint))
-      .map(_ -> result("success", true))
-      .onErrorReturn(result("success", false));
+      .map(_ -> results(
+        StandardPorts.EXEC_OUT, true,
+        "success", true,
+        "errorMessage", ""
+      ))
+      .onErrorResume(e -> completedMono(results(
+        StandardPorts.EXEC_ERROR, true,
+        "success", false,
+        "errorMessage", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
+      )));
   }
 }

@@ -30,6 +30,7 @@ import java.util.Map;
 ///
 /// The script executor should use the output to determine which branch to execute.
 public final class SwitchNode extends AbstractScriptNode {
+  private static final int MAX_CASES = 8;
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.switch")
     .displayName("Switch")
@@ -66,7 +67,8 @@ public final class SwitchNode extends AbstractScriptNode {
     var casesStr = getStringInput(inputs, "cases", "");
 
     var cases = casesStr.split(",");
-    for (int i = 0; i < cases.length; i++) {
+    var caseCount = Math.min(cases.length, MAX_CASES);
+    for (int i = 0; i < caseCount; i++) {
       if (cases[i].trim().equals(value)) {
         var outputs = new HashMap<String, NodeValue>();
         outputs.put("branch", NodeValue.of("case" + i));

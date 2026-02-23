@@ -87,6 +87,14 @@ public interface NodeRuntime {
     throw new UnsupportedOperationException("Only available during reactive engine execution");
   }
 
+  /// Returns whether setCheckResult was called since the last reset.
+  /// Used by RepeatUntilNode to detect missing ResultNode in check chains.
+  ///
+  /// @return true if a ResultNode set the check result
+  default boolean wasCheckResultSet() {
+    throw new UnsupportedOperationException("Only available during reactive engine execution");
+  }
+
   /// Gets and resets the check result flag.
   /// Called by loop nodes (e.g., RepeatUntilNode) after executing a check chain.
   ///

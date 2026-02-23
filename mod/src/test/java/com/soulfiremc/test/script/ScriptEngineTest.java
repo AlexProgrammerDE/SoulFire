@@ -43,12 +43,10 @@ final class ScriptEngineTest {
       .addNode("const_b", "constant.number", Map.of("value", 8))
       .addNode("add", "math.add", null)
       .addNode("print", "action.print", null)
-      .addExecutionEdge("trigger", "out", "const_a", "in")
-      .addExecutionEdge("const_a", "out", "const_b", "in")
-      .addExecutionEdge("const_b", "out", "add", "in")
-      .addExecutionEdge("add", "out", "print", "in")
+      .addExecutionEdge("trigger", "out", "print", "in")
       .addDataEdge("const_a", "value", "add", "a")
       .addDataEdge("const_b", "value", "add", "b")
+      .addDataEdge("add", "result", "print", "message")
       .build();
 
     var dataEdges = graph.getIncomingDataEdges("add");
@@ -62,9 +60,11 @@ final class ScriptEngineTest {
       .addNode("const_a", "constant.number", Map.of("value", 42))
       .addNode("const_b", "constant.number", Map.of("value", 8))
       .addNode("add", "math.add", null)
-      .addExecutionEdge("trigger", "out", "add", "in")
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
       .addDataEdge("const_a", "value", "add", "a")
       .addDataEdge("const_b", "value", "add", "b")
+      .addDataEdge("add", "result", "print", "message")
       .build();
 
     var listener = runGraph(graph, "trigger");
@@ -88,8 +88,10 @@ final class ScriptEngineTest {
       .addNode("trigger", "trigger.on_script_init", null)
       .addNode("const", "constant.string", Map.of("value", "hello"))
       .addNode("len", "string.length", null)
-      .addExecutionEdge("trigger", "out", "len", "in")
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
       .addDataEdge("const", "value", "len", "text")
+      .addDataEdge("len", "length", "print", "message")
       .build();
 
     var listener = runGraph(graph, "trigger");
@@ -113,10 +115,12 @@ final class ScriptEngineTest {
       .addNode("split", "string.split", Map.of("delimiter", ","))
       .addNode("first", "list.first", null)
       .addNode("len", "string.length", null)
-      .addExecutionEdge("trigger", "out", "len", "in")
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
       .addDataEdge("const", "value", "split", "text")
       .addDataEdge("split", "result", "first", "list")
       .addDataEdge("first", "item", "len", "text")
+      .addDataEdge("len", "length", "print", "message")
       .build();
 
     var listener = runGraph(graph, "trigger");
@@ -165,8 +169,10 @@ final class ScriptEngineTest {
     var graph = ScriptGraph.builder("test-trigger-data-edge", "Trigger Data Edge Test")
       .addNode("trigger", "trigger.on_chat", null)
       .addNode("len", "string.length", null)
-      .addExecutionEdge("trigger", "out", "len", "in")
+      .addNode("print", "action.print", null)
+      .addExecutionEdge("trigger", "out", "print", "in")
       .addDataEdge("trigger", "messagePlainText", "len", "text")
+      .addDataEdge("len", "length", "print", "message")
       .build();
 
     var eventInputs = new HashMap<String, NodeValue>();
@@ -181,6 +187,8 @@ final class ScriptEngineTest {
       "Trigger node should complete");
     assertTrue(listener.completedNodes.contains("len"),
       "StringLength node should complete");
+    assertTrue(listener.completedNodes.contains("print"),
+      "Print node should complete");
 
     var lenOutputs = listener.nodeOutputs.get("len");
     assertNotNull(lenOutputs, "StringLength node should have outputs");

@@ -43,6 +43,7 @@ public final class ExecutionRun {
   private final Set<String> triggeredDataNodes = ConcurrentHashMap.newKeySet();
   private final AtomicLong executionCount = new AtomicLong(0);
   private final AtomicBoolean checkResult = new AtomicBoolean(false);
+  private final AtomicBoolean wasCheckResultSet = new AtomicBoolean(false);
 
   /// Whether this execution is running synchronously on the tick thread.
   private final boolean tickSynchronous;
@@ -124,7 +125,15 @@ public final class ExecutionRun {
   ///
   /// @param value the boolean result
   public void setCheckResult(boolean value) {
+    this.wasCheckResultSet.set(true);
     this.checkResult.set(value);
+  }
+
+  /// Returns whether setCheckResult was called since the last reset.
+  ///
+  /// @return true if a ResultNode set the check result
+  public boolean wasCheckResultSet() {
+    return wasCheckResultSet.get();
   }
 
   /// Gets and resets the check result flag atomically.
@@ -132,6 +141,7 @@ public final class ExecutionRun {
   ///
   /// @return the check result before reset
   public boolean getAndResetCheckResult() {
+    wasCheckResultSet.set(false);
     return this.checkResult.getAndSet(false);
   }
 

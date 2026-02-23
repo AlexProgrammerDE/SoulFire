@@ -47,7 +47,8 @@ public final class ScriptTriggerService {
   /// Buffer size for backpressure (events beyond this are dropped).
   private static final int TRIGGER_BUFFER_SIZE = 64;
 
-  private final Map<UUID, List<Object>> scriptListeners = new ConcurrentHashMap<>();
+  private record ScriptRegistration(List<Object> listeners, Set<String> sinkKeys) {}
+  private final Map<UUID, ScriptRegistration> scriptRegistrations = new ConcurrentHashMap<>();
   private final Map<String, Sinks.Many<Map<String, NodeValue>>> triggerSinks = new ConcurrentHashMap<>();
   private final Map<String, Disposable> triggerSubscriptions = new ConcurrentHashMap<>();
 
@@ -61,9 +62,11 @@ public final class ScriptTriggerService {
     Class<E> eventClass,
     Function<E, Map<String, NodeValue>> inputMapper,
     List<Object> listeners,
+    Set<String> sinkKeys,
     String triggerName
   ) {
     var sinkKey = scriptId + ":" + nodeId;
+    sinkKeys.add(sinkKey);
 
     var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
     triggerSinks.put(sinkKey, sink);
@@ -104,6 +107,7 @@ public final class ScriptTriggerService {
     Class<E> eventClass,
     Function<E, Map<String, NodeValue>> inputMapper,
     List<Object> listeners,
+    Set<String> sinkKeys,
     String triggerName
   ) {
     Consumer<E> handler = event -> {
@@ -137,7 +141,13 @@ public final class ScriptTriggerService {
     ReactiveScriptContext context,
     ReactiveScriptEngine engine
   ) {
+    if (scriptRegistrations.containsKey(scriptId)) {
+      log.warn("Script {} already has registered triggers, unregistering first", scriptId);
+      unregisterTriggers(scriptId);
+    }
+
     var listeners = new ArrayList<>();
+    var sinkKeys = new HashSet<String>();
 
     for (var node : graph.nodes().values()) {
       switch (node.type()) {
@@ -149,7 +159,7 @@ public final class ScriptTriggerService {
               inputs.put("bot", NodeValue.ofBot(event.connection()));
               inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
               return inputs;
-            }, listeners, "OnPreEntityTick");
+            }, listeners, sinkKeys, "OnPreEntityTick");
         }
 
         case "trigger.on_post_entity_tick" -> {
@@ -160,7 +170,7 @@ public final class ScriptTriggerService {
               inputs.put("bot", NodeValue.ofBot(event.connection()));
               inputs.put("tickCount", NodeValue.ofNumber(tickCount.getAndIncrement()));
               return inputs;
-            }, listeners, "OnPostEntityTick");
+            }, listeners, sinkKeys, "OnPostEntityTick");
         }
 
         case "trigger.on_chat" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
@@ -175,7 +185,7 @@ public final class ScriptTriggerService {
             inputs.put("messagePlainText", NodeValue.ofString(plainText));
             inputs.put("timestamp", NodeValue.ofNumber(event.timestamp()));
             return inputs;
-          }, listeners, "OnChat");
+          }, listeners, sinkKeys, "OnChat");
 
         case "trigger.on_death" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
           BotShouldRespawnEvent.class, event -> {
@@ -183,14 +193,14 @@ public final class ScriptTriggerService {
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             inputs.put("shouldRespawn", NodeValue.ofBoolean(event.shouldRespawn()));
             return inputs;
-          }, listeners, "OnDeath");
+          }, listeners, sinkKeys, "OnDeath");
 
         case "trigger.on_bot_init" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
           BotConnectionInitEvent.class, event -> {
             var inputs = new HashMap<String, NodeValue>();
             inputs.put("bot", NodeValue.ofBot(event.connection()));
             return inputs;
-          }, listeners, "OnBotInit");
+          }, listeners, sinkKeys, "OnBotInit");
 
         case "trigger.on_join" -> {
           var triggeredBots = ConcurrentHashMap.<String>newKeySet();
@@ -214,7 +224,7 @@ public final class ScriptTriggerService {
                 return inputs;
               }
               return null;
-            }, listeners, "OnJoin");
+            }, listeners, sinkKeys, "OnJoin");
         }
 
         case "trigger.on_damage" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
@@ -225,7 +235,7 @@ public final class ScriptTriggerService {
             inputs.put("previousHealth", NodeValue.ofNumber(event.previousHealth()));
             inputs.put("newHealth", NodeValue.ofNumber(event.newHealth()));
             return inputs;
-          }, listeners, "OnDamage");
+          }, listeners, sinkKeys, "OnDamage");
 
         case "trigger.on_interval" -> {
           var resolvedInputs = new HashMap<>(NodeRegistry.computeDefaultInputs(NodeRegistry.getMetadata(node.type())));
@@ -241,6 +251,7 @@ public final class ScriptTriggerService {
           var finalIntervalMs = intervalMs;
           var cancelled = new AtomicBoolean(false);
           var sinkKey = scriptId + ":" + node.id();
+          sinkKeys.add(sinkKey);
 
           var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
           triggerSinks.put(sinkKey, sink);
@@ -281,12 +292,13 @@ public final class ScriptTriggerService {
         case "trigger.on_script_init" -> {
           // Fire immediately when script starts
           // Execute asynchronously to not block registration
-          engine.executeFromTrigger(graph, node.id(), context, Map.of())
+          var initSubscription = engine.executeFromTrigger(graph, node.id(), context, Map.of())
             .onErrorResume(e -> {
               log.error("Error in OnScriptInit trigger execution", e);
               return Mono.empty();
             })
             .subscribe();
+          listeners.add(new DisposableHolder(initSubscription));
           log.debug("Registered and fired OnScriptInit trigger for script {} node {}", scriptId, node.id());
         }
 
@@ -297,7 +309,7 @@ public final class ScriptTriggerService {
             inputs.put("reason", NodeValue.ofString(
               SoulFireAdventure.LEGACY_SECTION_MESSAGE_SERIALIZER.serialize(event.message())));
             return inputs;
-          }, listeners, "OnDisconnect");
+          }, listeners, sinkKeys, "OnDisconnect");
 
         case "trigger.on_script_end" -> {
           // Store for later execution when script stops
@@ -315,7 +327,7 @@ public final class ScriptTriggerService {
     }
 
     if (!listeners.isEmpty()) {
-      scriptListeners.put(scriptId, listeners);
+      scriptRegistrations.put(scriptId, new ScriptRegistration(listeners, sinkKeys));
       log.info("Registered {} trigger(s) for script {}", listeners.size(), scriptId);
     }
   }
@@ -324,26 +336,26 @@ public final class ScriptTriggerService {
   ///
   /// @param scriptId the script ID
   public void unregisterTriggers(UUID scriptId) {
-    var listeners = scriptListeners.remove(scriptId);
-    if (listeners == null) {
+    var registration = scriptRegistrations.remove(scriptId);
+    if (registration == null) {
       return;
     }
 
-    // 1. Cancel interval tasks and unregister event listeners
+    var listeners = registration.listeners();
+
+    // 1. Cancel interval tasks, unregister event listeners, dispose subscriptions
     for (var listener : listeners) {
       if (listener instanceof CancellableTask task) {
         task.cancel();
       } else if (listener instanceof EventListenerHolder<?> holder) {
         holder.unregister();
+      } else if (listener instanceof DisposableHolder holder) {
+        holder.dispose();
       }
     }
 
-    // 2. Clean up sinks and subscriptions for this script
-    var keysToRemove = triggerSinks.keySet().stream()
-      .filter(key -> key.startsWith(scriptId + ":"))
-      .toList();
-
-    for (var key : keysToRemove) {
+    // 2. Clean up sinks and subscriptions using stored keys (no scan needed)
+    for (var key : registration.sinkKeys()) {
       var subscription = triggerSubscriptions.remove(key);
       if (subscription != null) {
         subscription.dispose();
@@ -369,7 +381,7 @@ public final class ScriptTriggerService {
   /// @param scriptId the script ID
   /// @return true if the script has registered triggers
   public boolean hasActiveTriggers(UUID scriptId) {
-    return scriptListeners.containsKey(scriptId);
+    return scriptRegistrations.containsKey(scriptId);
   }
 
   /// Holder for event listeners that enables proper unregistration.
@@ -383,6 +395,15 @@ public final class ScriptTriggerService {
   private record CancellableTask(AtomicBoolean cancelled) {
     void cancel() {
       cancelled.set(true);
+    }
+  }
+
+  /// Holder for disposable subscriptions (e.g., on_script_init).
+  private record DisposableHolder(Disposable disposable) {
+    void dispose() {
+      if (!disposable.isDisposed()) {
+        disposable.dispose();
+      }
     }
   }
 

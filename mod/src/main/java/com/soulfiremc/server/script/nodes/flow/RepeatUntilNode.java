@@ -74,7 +74,15 @@ public final class RepeatUntilNode extends AbstractScriptNode {
         return runtime.executeDownstream(StandardPorts.EXEC_LOOP, iterOutputs)
           .then(Mono.fromRunnable(runtime::resetDataNodeTriggers))
           .then(runtime.executeDownstream(StandardPorts.EXEC_CHECK, iterOutputs))
-          .then(Mono.fromSupplier(runtime::getAndResetCheckResult));
+          .then(Mono.fromSupplier(() -> {
+            var wasSet = runtime.wasCheckResultSet();
+            var conditionMet = runtime.getAndResetCheckResult();
+            if (!wasSet) {
+              // No ResultNode in check chain, break loop to avoid infinite iteration
+              return true;
+            }
+            return conditionMet;
+          }));
       })
       .repeat()
       .takeUntil(conditionMet -> conditionMet)

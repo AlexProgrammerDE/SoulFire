@@ -150,6 +150,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       log.info("Started script {} with {} triggers, {} data edges", scriptId,
         graph.findTriggerNodes().size(), graph.dataEdges().size());
+    } catch (ScriptGraphValidationException e) {
+      log.error("Script '{}' ({}) has invalid graph: {}", record.getName(), scriptId, e.errors());
     } catch (Exception e) {
       log.error("Failed to start script {}", scriptId, e);
     }
@@ -612,6 +614,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (ScriptGraphValidationException e) {
+      log.error("Script {} has invalid graph: {}", scriptId, e.errors());
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error resuming script", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -1261,6 +1266,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
               internalEdge.target(), internalEdge.targetHandle(),
               extEdge.edgeType()
             ));
+          } else {
+            log.warn("Group {} flattening: could not find internal edge for handle '{}', dropping connection", groupId, portId);
           }
         }
       }
@@ -1284,6 +1291,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
               extEdge.target(), extEdge.targetHandle(),
               extEdge.edgeType()
             ));
+          } else {
+            log.warn("Group {} flattening: could not find internal edge for handle '{}', dropping connection", groupId, portId);
           }
         }
       }
@@ -1381,7 +1390,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         return primitive.getAsBoolean();
       }
       if (primitive.isNumber()) {
-        return primitive.getAsDouble();
+        var num = primitive.getAsNumber();
+        if (num.doubleValue() == Math.floor(num.doubleValue()) && !Double.isInfinite(num.doubleValue())) {
+          var longVal = num.longValue();
+          if ((double) longVal == num.doubleValue()) {
+            return longVal;
+          }
+        }
+        return num.doubleValue();
       }
       return primitive.getAsString();
     }

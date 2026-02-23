@@ -25,13 +25,13 @@ import lombok.ToString;
 @Getter
 @ToString
 public final class ControlState {
-  private boolean up;
-  private boolean down;
-  private boolean left;
-  private boolean right;
-  private boolean jump;
-  private boolean shift;
-  private boolean sprint;
+  private volatile boolean up;
+  private volatile boolean down;
+  private volatile boolean left;
+  private volatile boolean right;
+  private volatile boolean jump;
+  private volatile boolean shift;
+  private volatile boolean sprint;
 
   public void resetWasd() {
     up = false;

@@ -40,6 +40,7 @@ import com.soulfiremc.server.script.nodes.trigger.*;
 import com.soulfiremc.server.script.nodes.util.*;
 import com.soulfiremc.server.script.nodes.variable.*;
 
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -260,11 +261,23 @@ public final class NodeRegistry {
 
   /// Registers a node type with its metadata and factory.
   /// Metadata is stored separately — no node instance is created during registration.
+  /// Validates that the node class has no mutable instance fields (nodes are cached as singletons).
   ///
   /// @param metadata the node metadata (provides type identifier, ports, etc.)
   /// @param factory  the factory to create node instances on demand
+  /// @throws IllegalStateException if the node has mutable instance fields
   public static void register(NodeMetadata metadata, Supplier<ScriptNode> factory) {
     var type = metadata.type();
+
+    // Validate statelessness: nodes are cached singletons, so they must not have mutable fields
+    var instance = factory.get();
+    for (var field : instance.getClass().getDeclaredFields()) {
+      if (!Modifier.isStatic(field.getModifiers()) && !Modifier.isFinal(field.getModifiers())) {
+        throw new IllegalStateException("Node " + type + " has mutable instance field '" + field.getName()
+          + "'. Script nodes must be stateless (cached as singletons).");
+      }
+    }
+
     METADATA_MAP.put(type, metadata);
     FACTORIES.put(type, factory);
   }

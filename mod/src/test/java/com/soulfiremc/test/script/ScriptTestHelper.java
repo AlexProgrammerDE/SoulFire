@@ -142,6 +142,7 @@ final class ScriptTestHelper {
   static class MockNodeRuntime implements NodeRuntime {
     private final ScriptStateStore stateStore = new ScriptStateStore();
     private final AtomicBoolean checkResult = new AtomicBoolean(false);
+    private final AtomicBoolean wasCheckResultSet = new AtomicBoolean(false);
     private final AtomicInteger loopCount = new AtomicInteger(0);
     private final AtomicBoolean doneFired = new AtomicBoolean(false);
     private BiConsumer<String, Map<String, NodeValue>> downstreamHandler = (_, _) -> {};
@@ -185,11 +186,18 @@ final class ScriptTestHelper {
 
     @Override
     public void setCheckResult(boolean value) {
+      wasCheckResultSet.set(true);
       checkResult.set(value);
     }
 
     @Override
+    public boolean wasCheckResultSet() {
+      return wasCheckResultSet.get();
+    }
+
+    @Override
     public boolean getAndResetCheckResult() {
+      wasCheckResultSet.set(false);
       var v = checkResult.get();
       checkResult.set(false);
       return v;

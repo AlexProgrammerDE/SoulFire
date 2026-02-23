@@ -172,7 +172,7 @@ public final class ReactiveScriptEngine {
       // cause them to be misidentified as data-only nodes).
       run.markDataNodeTriggered(triggerNodeId);
 
-      return nodeImpl.executeReactive(nodeRuntime, inputs)
+      return Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs))
         .doOnNext(outputs -> {
           if (log.isDebugEnabled()) {
             log.debug("Trigger {} outputs: {}", nodeDesc, outputs.entrySet().stream()
@@ -465,7 +465,7 @@ public final class ReactiveScriptEngine {
     var nodeDesc = describeNode(nodeId, graph);
     var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
 
-    return nodeImpl.executeReactive(nodeRuntime, inputs)
+    return Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs))
       .doOnNext(outputs -> {
         run.publishNodeOutputs(nodeId, outputs);
         context.eventListener().onNodeCompleted(nodeId, outputs);
@@ -651,6 +651,11 @@ public final class ReactiveScriptEngine {
       @Override
       public void setCheckResult(boolean value) {
         run.setCheckResult(value);
+      }
+
+      @Override
+      public boolean wasCheckResultSet() {
+        return run.wasCheckResultSet();
       }
 
       @Override

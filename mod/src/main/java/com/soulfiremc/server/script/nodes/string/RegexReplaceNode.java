@@ -38,7 +38,8 @@ public final class RegexReplaceNode extends AbstractScriptNode {
     )
     .addOutputs(
       PortDefinition.output("result", "Result", PortType.STRING, "String with replacements made"),
-      PortDefinition.output("count", "Count", PortType.NUMBER, "Number of replacements made")
+      PortDefinition.output("count", "Count", PortType.NUMBER, "Number of replacements made"),
+      PortDefinition.output("error", "Error", PortType.STRING, "Error message if pattern is invalid")
     )
     .description("Replaces matches of a regex pattern with a replacement string")
     .icon("replace")
@@ -57,7 +58,8 @@ public final class RegexReplaceNode extends AbstractScriptNode {
     if (patternStr.isEmpty()) {
       return completedMono(results(
         "result", input,
-        "count", 0
+        "count", 0,
+        "error", ""
       ));
     }
 
@@ -95,12 +97,14 @@ public final class RegexReplaceNode extends AbstractScriptNode {
 
       return completedMono(results(
         "result", result,
-        "count", count
+        "count", count,
+        "error", ""
       ));
-    } catch (Exception _) {
+    } catch (Exception e) {
       return completedMono(results(
         "result", input,
-        "count", 0
+        "count", 0,
+        "error", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       ));
     }
   }

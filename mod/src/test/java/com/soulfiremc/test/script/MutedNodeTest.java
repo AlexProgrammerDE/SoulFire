@@ -38,9 +38,9 @@ final class MutedNodeTest {
     // Trigger -> mutedPrint -> afterPrint
     // The muted print should be bypassed, but afterPrint should still execute.
     var graph = ScriptGraph.builder("test-muted-node", "Muted Node Test")
-      .addNode(new ScriptGraph.GraphNode("trigger", "trigger.on_script_init", null, null, false))
-      .addNode(new ScriptGraph.GraphNode("muted_print", "action.print", Map.of("message", "should not log"), null, true))
-      .addNode(new ScriptGraph.GraphNode("after_print", "action.print", Map.of("message", "after muted"), null, false))
+      .addNode(new ScriptGraph.GraphNode("trigger", "trigger.on_script_init", null, false))
+      .addNode(new ScriptGraph.GraphNode("muted_print", "action.print", Map.of("message", "should not log"), true))
+      .addNode(new ScriptGraph.GraphNode("after_print", "action.print", Map.of("message", "after muted"), false))
       .addExecutionEdge("trigger", "out", "muted_print", "in")
       .addExecutionEdge("muted_print", "out", "after_print", "in")
       .build();
@@ -70,9 +70,9 @@ final class MutedNodeTest {
     // The muted print should pass through the execution context so downstream print can read it.
     // Using action.print as the muted node since it has EXEC ports (in/out).
     var graph = ScriptGraph.builder("test-muted-passthrough", "Muted Passthrough Test")
-      .addNode(new ScriptGraph.GraphNode("trigger", "trigger.on_chat", null, null, false))
-      .addNode(new ScriptGraph.GraphNode("muted_print", "action.print", Map.of("message", "muted msg"), null, true))
-      .addNode(new ScriptGraph.GraphNode("print", "action.print", null, null, false))
+      .addNode(new ScriptGraph.GraphNode("trigger", "trigger.on_chat", null, false))
+      .addNode(new ScriptGraph.GraphNode("muted_print", "action.print", Map.of("message", "muted msg"), true))
+      .addNode(new ScriptGraph.GraphNode("print", "action.print", null, false))
       .addExecutionEdge("trigger", "out", "muted_print", "in")
       .addExecutionEdge("muted_print", "out", "print", "in")
       .addDataEdge("trigger", "messagePlainText", "print", "message")
@@ -104,10 +104,10 @@ final class MutedNodeTest {
   void multipleMutedNodesInChain() {
     // Trigger -> muted1 -> muted2 -> print
     var graph = ScriptGraph.builder("test-multi-muted", "Multi Muted Test")
-      .addNode(new ScriptGraph.GraphNode("trigger", "trigger.on_script_init", null, null, false))
-      .addNode(new ScriptGraph.GraphNode("muted1", "action.print", Map.of("message", "skip1"), null, true))
-      .addNode(new ScriptGraph.GraphNode("muted2", "action.print", Map.of("message", "skip2"), null, true))
-      .addNode(new ScriptGraph.GraphNode("final_print", "action.print", Map.of("message", "reached"), null, false))
+      .addNode(new ScriptGraph.GraphNode("trigger", "trigger.on_script_init", null, false))
+      .addNode(new ScriptGraph.GraphNode("muted1", "action.print", Map.of("message", "skip1"), true))
+      .addNode(new ScriptGraph.GraphNode("muted2", "action.print", Map.of("message", "skip2"), true))
+      .addNode(new ScriptGraph.GraphNode("final_print", "action.print", Map.of("message", "reached"), false))
       .addExecutionEdge("trigger", "out", "muted1", "in")
       .addExecutionEdge("muted1", "out", "muted2", "in")
       .addExecutionEdge("muted2", "out", "final_print", "in")

@@ -184,6 +184,41 @@ final class ScriptGraphTest {
   }
 
   @Test
+  void scriptGraphBuildRejectsUnknownNodeType() {
+    var builder = ScriptGraph.builder("test-id", "Test Script")
+      .addNode("node1", "trigger.on_script_init", null)
+      .addNode("node2", "action.nonexistent_node_type", null)
+      .addExecutionEdge("node1", "out", "node2", "in");
+
+    var ex = assertThrows(ScriptGraphValidationException.class, builder::build);
+    assertTrue(ex.errors().stream().anyMatch(e -> e.contains("Unknown node type") && e.contains("nonexistent_node_type")));
+  }
+
+  @Test
+  void scriptGraphBuildRejectsInvalidEdgeHandles() {
+    var builder = ScriptGraph.builder("test-id", "Test Script")
+      .addNode("node1", "trigger.on_script_init", null)
+      .addNode("node2", "action.print", null)
+      .addExecutionEdge("node1", "invalid_output", "node2", "invalid_input");
+
+    var ex = assertThrows(ScriptGraphValidationException.class, builder::build);
+    assertTrue(ex.errors().stream().anyMatch(e -> e.contains("unknown output") && e.contains("invalid_output")),
+      "Should reject unknown output handle, got: " + ex.errors());
+    assertTrue(ex.errors().stream().anyMatch(e -> e.contains("unknown input") && e.contains("invalid_input")),
+      "Should reject unknown input handle, got: " + ex.errors());
+  }
+
+  @Test
+  void scriptGraphBuildAcceptsLayoutNodes() {
+    // Layout nodes should be accepted even though they're not registered in NodeRegistry
+    var graph = ScriptGraph.builder("test-id", "Test Script")
+      .addNode("node1", "layout.reroute", null)
+      .build();
+
+    assertNotNull(graph.getNode("node1"), "Layout node should exist in graph");
+  }
+
+  @Test
   void hasIncomingExecutionEdgesReturnsFalseForDataOnlyNode() {
     var graph = ScriptGraph.builder("test", "Test")
       .addNode("trigger", "trigger.on_script_init", null)

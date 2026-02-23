@@ -71,7 +71,7 @@ final class ErrorHandlingTest {
     // Use a node that requires a bot but don't provide one (will throw IllegalStateException).
     var graph = ScriptGraph.builder("test-error-stops-branch", "Error Stops Branch Test")
       .addNode("trigger", "trigger.on_script_init", null)
-      .addNode("failing", "action.move", null) // requires bot
+      .addNode("failing", "action.move_forward", null) // requires bot
       .addNode("after", "action.print", Map.of("message", "should not run"))
       .addExecutionEdge("trigger", "out", "failing", "in")
       .addExecutionEdge("failing", "out", "after", "in")
@@ -95,7 +95,7 @@ final class ErrorHandlingTest {
     // Verify the error message from a failing node reaches the event listener.
     var graph = ScriptGraph.builder("test-error-message", "Error Message Test")
       .addNode("trigger", "trigger.on_script_init", null)
-      .addNode("failing", "action.move", null) // requires bot, will throw
+      .addNode("failing", "action.move_forward", null) // requires bot, will throw
       .addExecutionEdge("trigger", "out", "failing", "in")
       .build();
 
@@ -146,7 +146,7 @@ final class ErrorHandlingTest {
     var graph = ScriptGraph.builder("test-error-mid-chain", "Error Mid Chain Test")
       .addNode("trigger", "trigger.on_script_init", null)
       .addNode("print1", "action.print", Map.of("message", "before"))
-      .addNode("failing", "action.move", null) // requires bot
+      .addNode("failing", "action.move_forward", null) // requires bot
       .addNode("print2", "action.print", Map.of("message", "after"))
       .addExecutionEdge("trigger", "out", "print1", "in")
       .addExecutionEdge("print1", "out", "failing", "in")

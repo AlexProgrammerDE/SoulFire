@@ -36,8 +36,8 @@ final class RepeatUntilTest {
   void repeatUntilLoopsUntilConditionMet() {
     var runtime = new MockNodeRuntime();
     runtime.onDownstream((handle, _) -> {
-      if (StandardPorts.EXEC_CHECK.equals(handle) && runtime.loopCount() >= 3) {
-        runtime.setCheckResult(true);
+      if (StandardPorts.EXEC_CHECK.equals(handle)) {
+        runtime.setCheckResult(runtime.loopCount() >= 3);
       }
     });
 
@@ -70,7 +70,12 @@ final class RepeatUntilTest {
   @Test
   void repeatUntilRespectsMaxIterations() {
     var runtime = new MockNodeRuntime();
-    // No setCheckResult — defaults to false, never meets condition
+    // Always set checkResult to false to simulate condition never met
+    runtime.onDownstream((handle, _) -> {
+      if (StandardPorts.EXEC_CHECK.equals(handle)) {
+        runtime.setCheckResult(false);
+      }
+    });
 
     var result = executeNode("flow.repeat_until", runtime, Map.of(
       "maxIterations", NodeValue.ofNumber(5)
@@ -82,17 +87,17 @@ final class RepeatUntilTest {
   }
 
   @Test
-  void repeatUntilWithNoCheckConnectionLoopsToMax() {
+  void repeatUntilWithNoCheckConnectionTerminatesAfterOne() {
     var runtime = new MockNodeRuntime();
-    // Nothing connected to exec_check, checkResult stays false
+    // Nothing connected to exec_check, wasCheckResultSet stays false -> breaks after 1 iteration
 
     var result = executeNode("flow.repeat_until", runtime, Map.of(
       "maxIterations", NodeValue.ofNumber(3)
     ));
 
-    assertEquals(3, runtime.loopCount(), "Should loop exactly maxIterations times");
-    assertFalse(result.get("conditionMet").asBoolean(true),
-      "conditionMet should be false when no check connection");
+    assertEquals(1, runtime.loopCount(), "Should terminate after 1 iteration when no ResultNode sets check result");
+    assertTrue(result.get("conditionMet").asBoolean(false),
+      "conditionMet should be true (empty check chain guard)");
   }
 
   @Test
@@ -273,10 +278,10 @@ final class RepeatUntilTest {
 
   @Test
   void repeatUntilEngineWithNoCheckConnection() {
-    // No ResultNode on exec_check → checkResult stays false → loops to max.
+    // No ResultNode on exec_check → wasCheckResultSet stays false → terminates after 1 iteration.
     var graph = ScriptGraph.builder("test-repeat-no-check", "RepeatUntil No Check")
       .addNode("trigger", "trigger.on_script_init", null)
-      .addNode("repeat", "flow.repeat_until", Map.of("maxIterations", 3))
+      .addNode("repeat", "flow.repeat_until", Map.of("maxIterations", 100))
       .addNode("loop_print", "action.print", Map.of("message", "looping"))
       .addNode("done_print", "action.print", Map.of("message", "done"))
       .addExecutionEdge("trigger", "out", "repeat", "in")
@@ -290,13 +295,37 @@ final class RepeatUntilTest {
 
     var repeatOutputs = listener.nodeOutputs.get("repeat");
     assertNotNull(repeatOutputs, "RepeatUntil should have outputs");
-    assertFalse(repeatOutputs.get("conditionMet").asBoolean(true),
-      "conditionMet should be false when no check connection");
-    assertEquals(4, repeatOutputs.get("index").asInt(-1),
-      "Final index should be 4 (3 body executions + 1 maxIterations guard)");
+    assertTrue(repeatOutputs.get("conditionMet").asBoolean(false),
+      "conditionMet should be true (empty check chain guard)");
 
-    assertEquals(3, countNodeExecutions(listener, "loop_print"),
-      "Loop body should execute 3 times");
+    assertEquals(1, countNodeExecutions(listener, "loop_print"),
+      "Loop body should execute exactly once when no ResultNode sets check result");
+  }
+
+  @Test
+  void repeatUntilEmptyCheckChainTerminatesAfterOneIteration() {
+    // exec_check has no downstream nodes at all (no ResultNode).
+    // The loop should detect wasCheckResultSet==false and break after one iteration.
+    var graph = ScriptGraph.builder("test-repeat-empty-check", "RepeatUntil Empty Check")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("repeat", "flow.repeat_until", Map.of("maxIterations", 100))
+      .addNode("loop_print", "action.print", Map.of("message", "looping"))
+      .addNode("done_print", "action.print", Map.of("message", "done"))
+      .addExecutionEdge("trigger", "out", "repeat", "in")
+      .addExecutionEdge("repeat", "exec_loop", "loop_print", "in")
+      // exec_check is NOT connected to anything
+      .addExecutionEdge("repeat", "exec_done", "done_print", "in")
+      .build();
+
+    var listener = runGraph(graph, "trigger");
+
+    assertNoErrors(listener);
+
+    var repeatOutputs = listener.nodeOutputs.get("repeat");
+    assertNotNull(repeatOutputs, "RepeatUntil should have outputs");
+
+    assertEquals(1, countNodeExecutions(listener, "loop_print"),
+      "Loop body should execute exactly once when check chain has no ResultNode");
   }
 
   @Test

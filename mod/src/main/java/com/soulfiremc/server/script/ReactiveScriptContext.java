@@ -25,6 +25,8 @@ import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 /// Reactive execution context for scripts.
 /// Per-invocation state (output sinks) lives in ExecutionRun, not here.
 @Getter
@@ -35,7 +37,7 @@ public final class ReactiveScriptContext {
   private final ScriptEventListener eventListener;
 
   /// For cancellation via Disposable.
-  private volatile Disposable execution;
+  private final AtomicReference<Disposable> execution = new AtomicReference<>();
   private volatile boolean cancelled;
 
   /// Creates a new reactive script context.
@@ -84,9 +86,11 @@ public final class ReactiveScriptContext {
   /// Cancels the script execution.
   public void cancel() {
     this.cancelled = true;
-    if (execution != null) {
-      execution.dispose();
+    var exec = execution.getAndSet(null);
+    if (exec != null) {
+      exec.dispose();
     }
+    stateStore.clear();
     eventListener.onScriptCancelled();
   }
 
@@ -94,6 +98,20 @@ public final class ReactiveScriptContext {
   ///
   /// @param execution the disposable to set
   public void setExecution(Disposable execution) {
-    this.execution = execution;
+    if (cancelled) {
+      execution.dispose();
+      return;
+    }
+    var old = this.execution.getAndSet(execution);
+    if (old != null) {
+      old.dispose();
+    }
+    // Double-check after setting, in case cancel() raced
+    if (cancelled) {
+      var current = this.execution.getAndSet(null);
+      if (current != null) {
+        current.dispose();
+      }
+    }
   }
 }

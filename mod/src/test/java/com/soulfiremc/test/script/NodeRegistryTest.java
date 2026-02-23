@@ -17,8 +17,12 @@
  */
 package com.soulfiremc.test.script;
 
+import com.soulfiremc.server.script.*;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +61,56 @@ final class NodeRegistryTest {
   @Test
   void nodeRegistryGetRegisteredCount() {
     assertTrue(NodeRegistry.getRegisteredCount() > 50, "Should have many registered node types");
+  }
+
+  @Test
+  void registerRejectsMutableFieldNode() {
+    var metadata = NodeMetadata.builder()
+      .type("test.mutable_node")
+      .displayName("Mutable Node")
+      .category(CategoryRegistry.ACTIONS)
+      .icon("box")
+      .build();
+
+    assertThrows(IllegalStateException.class, () ->
+        NodeRegistry.register(metadata, MutableTestNode::new),
+      "Should reject node with mutable instance fields");
+  }
+
+  @Test
+  void registerAcceptsStatelessNode() {
+    var metadata = NodeMetadata.builder()
+      .type("test.stateless_node")
+      .displayName("Stateless Node")
+      .category(CategoryRegistry.ACTIONS)
+      .icon("box")
+      .build();
+
+    assertDoesNotThrow(() -> NodeRegistry.register(metadata, StatelessTestNode::new));
+  }
+
+  /// Test node with a mutable instance field (should be rejected).
+  static class MutableTestNode implements ScriptNode {
+    @SuppressWarnings("unused")
+    private int counter = 0;
+
+    @Override
+    public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+      return Mono.just(Map.of());
+    }
+  }
+
+  /// Test node with only static and final fields (should be accepted).
+  static class StatelessTestNode implements ScriptNode {
+    @SuppressWarnings("unused")
+    private static final String TYPE = "test.stateless";
+    @SuppressWarnings("unused")
+    private final String name = "stateless";
+
+    @Override
+    public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+      return Mono.just(Map.of());
+    }
   }
 
   @Test

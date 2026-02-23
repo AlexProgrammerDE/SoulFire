@@ -26,6 +26,7 @@ import java.util.Map;
 /// Flow control node that executes multiple branches in sequence.
 /// Self-driving: uses runtime.executeDownstream() to fire exec_0, exec_1, etc. in order.
 public final class SequenceNode extends AbstractScriptNode {
+  private static final int MAX_BRANCHES = 8;
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("flow.sequence")
     .displayName("Sequence")
@@ -54,7 +55,7 @@ public final class SequenceNode extends AbstractScriptNode {
 
   @Override
   public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
-    var branchCount = getIntInput(inputs, "branchCount", 2);
+    var branchCount = Math.min(getIntInput(inputs, "branchCount", 2), MAX_BRANCHES);
 
     return Flux.range(0, branchCount)
       .concatMap(i -> runtime.executeDownstream(StandardPorts.exec(String.valueOf(i)), Map.of(

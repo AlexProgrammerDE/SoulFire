@@ -17,10 +17,12 @@
  */
 package com.soulfiremc.server.script;
 
+import com.soulfiremc.server.script.nodes.NodeRegistry;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /// Represents the graph structure of a visual script.
 /// Contains nodes and edges that define the execution flow and data connections.
@@ -210,18 +212,16 @@ public final class ScriptGraph {
   /// @param id              unique node identifier
   /// @param type            node type identifier (e.g., "action.pathfind")
   /// @param defaultInputs   default values for input ports
-  /// @param multiInputPorts set of port names that accept multiple connections (NOTE: the reactive engine does not yet implement multi-input collection)
   /// @param muted           whether the node is muted (bypassed during execution)
   public record GraphNode(
     String id,
     String type,
     @Nullable Map<String, Object> defaultInputs,
-    @Nullable Set<String> multiInputPorts,
     boolean muted
   ) {
     /// Creates a graph node with defaults for new fields.
     public GraphNode(String id, String type, @Nullable Map<String, Object> defaultInputs) {
-      this(id, type, defaultInputs, null, false);
+      this(id, type, defaultInputs, false);
     }
   }
 
@@ -343,6 +343,33 @@ public final class ScriptGraph {
         }
         if (count != nodes.size()) {
           errors.add("Script graph contains cycles - cannot determine execution order");
+        }
+      }
+
+      // 5. Validate node types against NodeRegistry
+      for (var node : nodes.values()) {
+        if (!node.type().startsWith("layout.") && !NodeRegistry.isRegistered(node.type())) {
+          errors.add("Unknown node type '" + node.type() + "' for node " + node.id());
+        }
+      }
+
+      // 6. Validate edge handles against port metadata
+      for (var edge : edges) {
+        var sourceNode = nodes.get(edge.sourceNodeId());
+        if (sourceNode != null && NodeRegistry.isRegistered(sourceNode.type())) {
+          var metadata = NodeRegistry.getMetadata(sourceNode.type());
+          var validOutputIds = metadata.outputs().stream().map(PortDefinition::id).collect(Collectors.toSet());
+          if (!validOutputIds.contains(edge.sourceHandle())) {
+            errors.add("Edge from " + edge.sourceNodeId() + " references unknown output '" + edge.sourceHandle() + "'");
+          }
+        }
+        var targetNode = nodes.get(edge.targetNodeId());
+        if (targetNode != null && NodeRegistry.isRegistered(targetNode.type())) {
+          var metadata = NodeRegistry.getMetadata(targetNode.type());
+          var validInputIds = metadata.inputs().stream().map(PortDefinition::id).collect(Collectors.toSet());
+          if (!validInputIds.contains(edge.targetHandle())) {
+            errors.add("Edge to " + edge.targetNodeId() + " references unknown input '" + edge.targetHandle() + "'");
+          }
         }
       }
 

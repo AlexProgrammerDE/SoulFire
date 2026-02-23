@@ -36,4 +36,30 @@ public final class ScriptStateStore {
   public <T> T getOrCreate(String key, Supplier<T> factory) {
     return (T) store.computeIfAbsent(key, _ -> factory.get());
   }
+
+  /// Gets an existing value or creates a new one, with runtime type checking.
+  ///
+  /// @param key     the state key
+  /// @param type    the expected type
+  /// @param factory supplier to create the initial value
+  /// @param <T>     the value type
+  /// @return the existing or newly created value
+  /// @throws IllegalStateException if existing value has a different type
+  public <T> T getOrCreate(String key, Class<T> type, Supplier<T> factory) {
+    var existing = store.get(key);
+    if (existing != null) {
+      if (!type.isInstance(existing)) {
+        throw new IllegalStateException("State key '" + key + "' has type "
+          + existing.getClass().getSimpleName() + " but " + type.getSimpleName() + " was requested");
+      }
+      return type.cast(existing);
+    }
+    return type.cast(store.computeIfAbsent(key, _ -> factory.get()));
+  }
+
+  /// Clears all state, releasing references for GC.
+  /// Called when a script is cancelled.
+  public void clear() {
+    store.clear();
+  }
 }

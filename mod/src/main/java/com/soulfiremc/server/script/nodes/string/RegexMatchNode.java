@@ -40,7 +40,8 @@ public final class RegexMatchNode extends AbstractScriptNode {
       PortDefinition.output("matches", "Matches", PortType.BOOLEAN, "Whether the pattern matched"),
       PortDefinition.output("fullMatch", "Full Match", PortType.STRING, "The entire matched string"),
       PortDefinition.listOutput("groups", "Groups", PortType.STRING, "List of captured groups"),
-      PortDefinition.listOutput("allMatches", "All Matches", PortType.STRING, "All matches found")
+      PortDefinition.listOutput("allMatches", "All Matches", PortType.STRING, "All matches found"),
+      PortDefinition.output("error", "Error", PortType.STRING, "Error message if pattern is invalid")
     )
     .description("Tests if a string matches a regex pattern and extracts capture groups")
     .icon("regex")
@@ -59,7 +60,8 @@ public final class RegexMatchNode extends AbstractScriptNode {
         "matches", false,
         "fullMatch", "",
         "groups", List.of(),
-        "allMatches", List.of()
+        "allMatches", List.of(),
+        "error", ""
       ));
     }
 
@@ -99,7 +101,8 @@ public final class RegexMatchNode extends AbstractScriptNode {
           "matches", true,
           "fullMatch", fullMatch,
           "groups", groups,
-          "allMatches", allMatches
+          "allMatches", allMatches,
+          "error", ""
         ));
       }
 
@@ -107,14 +110,16 @@ public final class RegexMatchNode extends AbstractScriptNode {
         "matches", false,
         "fullMatch", "",
         "groups", List.of(),
-        "allMatches", List.of()
+        "allMatches", List.of(),
+        "error", ""
       ));
-    } catch (Exception _) {
+    } catch (Exception e) {
       return completedMono(results(
         "matches", false,
         "fullMatch", "",
         "groups", List.of(),
-        "allMatches", List.of()
+        "allMatches", List.of(),
+        "error", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()
       ));
     }
   }
