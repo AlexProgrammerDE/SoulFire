@@ -107,6 +107,7 @@ final class ScriptTestHelper {
     final Map<String, Map<String, NodeValue>> nodeOutputs = new HashMap<>();
     final Map<String, String> errorNodes = new HashMap<>();
     boolean scriptCompleted;
+    boolean cancelled;
 
     @Override
     public void onNodeStarted(String nodeId) {
@@ -130,7 +131,9 @@ final class ScriptTestHelper {
     }
 
     @Override
-    public void onScriptCancelled() {}
+    public void onScriptCancelled() {
+      cancelled = true;
+    }
   }
 
   /// Mock NodeRuntime for self-driving node tests (RepeatUntil, etc.).
