@@ -73,8 +73,10 @@ public final class AuthSystem {
       if (currentRootUser == null) {
         // Use USERNAME in the WHERE clause (not ID) to handle old Hibernate databases
         // where UUIDs may be stored in a binary format that doesn't match text comparison
+        var randomSuffix = UUID.randomUUID().toString().substring(0, 6);
         ctx.update(Tables.USERS)
-          .set(Tables.USERS.USERNAME, "old-root-%s".formatted(UUID.randomUUID().toString().substring(0, 6)))
+          .set(Tables.USERS.USERNAME, "old-root-%s".formatted(randomSuffix))
+          .set(Tables.USERS.EMAIL, "old-root-%s@soulfiremc.com".formatted(randomSuffix))
           .set(Tables.USERS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.USERS.USERNAME.eq("root"))
           .execute();
