@@ -46,6 +46,7 @@ public final class LoopNode extends AbstractScriptNode {
     .icon("rotate-cw")
     .color("#607D8B")
     .addKeywords("loop", "repeat", "for", "iterate", "count")
+    .supportsMuting(false)
     .build();
 
   @Override

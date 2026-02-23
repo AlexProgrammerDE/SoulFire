@@ -188,10 +188,7 @@ public final class ReactiveScriptEngine {
         })
         .onErrorResume(_ -> Mono.empty())
         .flatMap(outputs -> {
-          var execPortIds = metadata.outputs().stream()
-            .filter(p -> p.type() == PortType.EXEC)
-            .map(PortDefinition::id)
-            .collect(Collectors.toSet());
+          var execPortIds = metadata.execOutputPortIds();
           var contextOutputs = new HashMap<>(outputs);
           execPortIds.forEach(contextOutputs::remove);
           var execContext = ExecutionContext.from(contextOutputs);
@@ -218,13 +215,23 @@ public final class ReactiveScriptEngine {
     ExecutionRun run,
     ExecutionContext execContext
   ) {
-    var execPorts = metadata.outputs().stream()
-      .filter(p -> p.type() == PortType.EXEC)
-      .map(PortDefinition::id)
-      .toList();
-
-    if (execPorts.isEmpty()) {
+    var active = resolveActiveExecPorts(metadata, outputs);
+    if (active.isEmpty()) {
       return Mono.empty();
+    }
+
+    return Flux.fromIterable(active)
+      .flatMap(handle -> executeDownstream(graph, nodeId, handle, context, run, execContext), MAX_PARALLEL_BRANCHES)
+      .then();
+  }
+
+  /// Determines which execution output ports are active based on the node's outputs.
+  /// Convention: if any exec output port IDs appear as keys in the outputs map,
+  /// follow those. Otherwise fall back to "out" if it's the only exec port.
+  private static List<String> resolveActiveExecPorts(NodeMetadata metadata, Map<String, NodeValue> outputs) {
+    var execPorts = metadata.execOutputPortIds();
+    if (execPorts.isEmpty()) {
+      return List.of();
     }
 
     var active = execPorts.stream()
@@ -232,18 +239,13 @@ public final class ReactiveScriptEngine {
       .toList();
 
     if (active.isEmpty()) {
-      if (execPorts.size() == 1 && StandardPorts.EXEC_OUT.equals(execPorts.getFirst())) {
-        // Single "out" port — always follow it
-        active = List.of(StandardPorts.EXEC_OUT);
-      } else {
-        // Multiple exec ports but none matched — self-driving node already handled it
-        return Mono.empty();
+      if (execPorts.size() == 1 && execPorts.contains(StandardPorts.EXEC_OUT)) {
+        return List.of(StandardPorts.EXEC_OUT);
       }
+      return List.of();
     }
 
-    return Flux.fromIterable(active)
-      .flatMap(handle -> executeDownstream(graph, nodeId, handle, context, run, execContext), MAX_PARALLEL_BRANCHES)
-      .then();
+    return active;
   }
 
   /// Executes all nodes connected to an execution output handle.
@@ -281,28 +283,11 @@ public final class ReactiveScriptEngine {
   }
 
   /// Determines the next ExecTasks to process based on a node's execution result.
-  /// Implements the same exec port routing logic as followExecOutputs, but returns
-  /// tasks for expand() instead of recursively calling executeDownstream.
+  /// Uses resolveActiveExecPorts for routing, returns tasks for expand().
   private Flux<ExecTask> getNextExecTasks(ScriptGraph graph, NodeExecResult result) {
-    var execPorts = result.metadata().outputs().stream()
-      .filter(p -> p.type() == PortType.EXEC)
-      .map(PortDefinition::id)
-      .toList();
-
-    if (execPorts.isEmpty()) {
-      return Flux.empty();
-    }
-
-    var active = execPorts.stream()
-      .filter(result.outputs()::containsKey)
-      .toList();
-
+    var active = resolveActiveExecPorts(result.metadata(), result.outputs());
     if (active.isEmpty()) {
-      if (execPorts.size() == 1 && StandardPorts.EXEC_OUT.equals(execPorts.getFirst())) {
-        active = List.of(StandardPorts.EXEC_OUT);
-      } else {
-        return Flux.empty();
-      }
+      return Flux.empty();
     }
 
     return Flux.fromIterable(active)
@@ -357,9 +342,14 @@ public final class ReactiveScriptEngine {
 
     // Muted node bypass — propagate execution context as outputs so DATA edges pass through
     if (graphNode.muted()) {
-      run.publishNodeOutputs(nodeId, execContext.values());
-      context.eventListener().onNodeCompleted(nodeId, Map.of());
-      return Mono.just(new NodeExecResult(nodeId, metadata, Map.of(), execContext));
+      if (!metadata.supportsMuting()) {
+        log.warn("Node {} is muted but does not support muting - executing normally", describeNode(nodeId, graph));
+        // Fall through to normal execution instead of silently dropping branches
+      } else {
+        run.publishNodeOutputs(nodeId, execContext.values());
+        context.eventListener().onNodeCompleted(nodeId, Map.of());
+        return Mono.just(new NodeExecResult(nodeId, metadata, Map.of(), execContext));
+      }
     }
 
     // Collect all DATA edges targeting this node
@@ -486,9 +476,7 @@ public final class ReactiveScriptEngine {
         context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message);
       })
       .onErrorResume(e -> {
-        var hasErrorPort = metadata.outputs().stream()
-          .anyMatch(p -> p.type() == PortType.EXEC && StandardPorts.EXEC_ERROR.equals(p.id()));
-        if (hasErrorPort) {
+        if (metadata.hasExecErrorPort()) {
           var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
           return Mono.just(Map.of(
             StandardPorts.EXEC_ERROR, NodeValue.ofBoolean(true),
@@ -500,12 +488,8 @@ public final class ReactiveScriptEngine {
         return Mono.empty();
       })
       .map(outputs -> {
-        var execPortIds = metadata.outputs().stream()
-          .filter(p -> p.type() == PortType.EXEC)
-          .map(PortDefinition::id)
-          .collect(Collectors.toSet());
         var contextOutputs = new HashMap<>(outputs);
-        execPortIds.forEach(contextOutputs::remove);
+        metadata.execOutputPortIds().forEach(contextOutputs::remove);
         var newExecContext = execContext.mergeWith(contextOutputs);
         return new NodeExecResult(nodeId, metadata, outputs, newExecContext);
       });
@@ -604,6 +588,7 @@ public final class ReactiveScriptEngine {
               var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
               log.error("Error executing data node {}: {}", nodeDesc, message, e);
               context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message);
+              run.publishNodeFailure(nodeId);
             })
             .onErrorResume(_ -> Mono.empty());
         })
@@ -700,14 +685,7 @@ public final class ReactiveScriptEngine {
       return Mono.empty();
     }
 
-    // Validate no cycles
-    try {
-      graph.topologicalSort();
-    } catch (IllegalStateException e) {
-      log.error("Script {} contains cycles: {}", graph.scriptName(), e.getMessage());
-      eventListener.onScriptCompleted(false);
-      return Mono.empty();
-    }
+    // Cycle detection is now done at build time in ScriptGraph.Builder.build()
 
     // Execute all triggers in parallel
     return Flux.fromIterable(triggers)

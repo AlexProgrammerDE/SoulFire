@@ -49,6 +49,7 @@ public final class RateLimitNode extends AbstractScriptNode {
     .icon("gauge")
     .color("#8B5CF6")
     .addKeywords("rate", "limit", "throttle", "bucket", "spam", "cooldown")
+    .supportsMuting(false)
     .build();
 
   @Override

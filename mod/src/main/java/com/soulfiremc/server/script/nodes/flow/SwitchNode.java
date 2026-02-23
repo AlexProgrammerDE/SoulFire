@@ -57,6 +57,7 @@ public final class SwitchNode extends AbstractScriptNode {
     .icon("git-branch")
     .color("#607D8B")
     .addKeywords("switch", "case", "branch", "select")
+    .supportsMuting(false)
     .build();
 
   @Override

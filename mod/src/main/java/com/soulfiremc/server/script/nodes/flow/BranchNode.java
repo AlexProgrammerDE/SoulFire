@@ -47,6 +47,7 @@ public final class BranchNode extends AbstractScriptNode {
     .icon("git-branch")
     .color("#607D8B")
     .addKeywords("branch", "if", "condition", "switch", "split")
+    .supportsMuting(false)
     .build();
 
   @Override

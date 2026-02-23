@@ -47,6 +47,7 @@ public final class ForEachNode extends AbstractScriptNode {
     .icon("repeat")
     .color("#607D8B")
     .addKeywords("foreach", "loop", "iterate", "list", "array")
+    .supportsMuting(false)
     .build();
 
   @Override

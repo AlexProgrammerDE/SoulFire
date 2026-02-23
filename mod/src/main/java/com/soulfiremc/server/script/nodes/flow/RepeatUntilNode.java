@@ -52,6 +52,7 @@ public final class RepeatUntilNode extends AbstractScriptNode {
     .icon("repeat")
     .color("#607D8B")
     .addKeywords("loop", "repeat", "until", "while", "condition", "do-while")
+    .supportsMuting(false)
     .build();
 
   @Override

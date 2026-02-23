@@ -26,6 +26,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /// Per-invocation execution state.
@@ -41,7 +42,7 @@ public final class ExecutionRun {
     new ConcurrentHashMap<>();
   private final Set<String> triggeredDataNodes = ConcurrentHashMap.newKeySet();
   private final AtomicLong executionCount = new AtomicLong(0);
-  private volatile boolean checkResult;
+  private final AtomicBoolean checkResult = new AtomicBoolean(false);
 
   /// Whether this execution is running synchronously on the tick thread.
   private final boolean tickSynchronous;
@@ -69,10 +70,18 @@ public final class ExecutionRun {
       .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
       .asFlux()
       .next()
-      .timeout(Duration.ofSeconds(30))
-      .doOnError(_ -> log.warn("Timeout waiting for node {} outputs - "
+      .timeout(Duration.ofSeconds(10))
+      .doOnError(_ -> log.error("Timeout waiting for node {} outputs - "
         + "DATA edge may point to a node not on the execution path", nodeDesc))
       .onErrorReturn(Map.of());
+  }
+
+  /// Publishes that a node has failed, allowing consumers waiting via awaitNodeOutputs
+  /// to receive an empty result immediately instead of timing out.
+  ///
+  /// @param nodeId the failed node identifier
+  public void publishNodeFailure(String nodeId) {
+    publishNodeOutputs(nodeId, Map.of());
   }
 
   /// Publishes node outputs, allowing consumers to receive the latest value.
@@ -115,17 +124,15 @@ public final class ExecutionRun {
   ///
   /// @param value the boolean result
   public void setCheckResult(boolean value) {
-    this.checkResult = value;
+    this.checkResult.set(value);
   }
 
-  /// Gets and resets the check result flag.
+  /// Gets and resets the check result flag atomically.
   /// Returns the current value and resets it to false.
   ///
   /// @return the check result before reset
   public boolean getAndResetCheckResult() {
-    var result = this.checkResult;
-    this.checkResult = false;
-    return result;
+    return this.checkResult.getAndSet(false);
   }
 
   /// Resets all data-only node trigger flags, allowing them to re-execute.

@@ -21,6 +21,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /// Complete metadata for a node type.
 /// Contains all information needed to render the node in a client
@@ -119,5 +121,21 @@ public interface NodeMetadata {
   @Value.Default
   default boolean supportsPreview() {
     return false;
+  }
+
+  /// Cached set of EXEC output port IDs for this node type.
+  /// Used by the engine to avoid recomputing per node execution.
+  @Value.Lazy
+  default Set<String> execOutputPortIds() {
+    return outputs().stream()
+      .filter(p -> p.type() == PortType.EXEC)
+      .map(PortDefinition::id)
+      .collect(Collectors.toUnmodifiableSet());
+  }
+
+  /// Whether this node type has an exec_error output port.
+  @Value.Lazy
+  default boolean hasExecErrorPort() {
+    return execOutputPortIds().contains(StandardPorts.EXEC_ERROR);
   }
 }

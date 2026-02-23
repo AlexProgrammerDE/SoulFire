@@ -49,6 +49,7 @@ public final class SequenceNode extends AbstractScriptNode {
     .icon("list-ordered")
     .color("#607D8B")
     .addKeywords("sequence", "order", "steps", "then")
+    .supportsMuting(false)
     .build();
 
   @Override

@@ -47,6 +47,7 @@ public final class ForEachBotNode extends AbstractScriptNode {
     .icon("users")
     .color("#607D8B")
     .addKeywords("foreach", "bot", "iterate", "loop")
+    .supportsMuting(false)
     .build();
 
   @Override

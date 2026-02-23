@@ -40,6 +40,7 @@ import com.soulfiremc.server.script.nodes.trigger.*;
 import com.soulfiremc.server.script.nodes.util.*;
 import com.soulfiremc.server.script.nodes.variable.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public final class NodeRegistry {
   private static final Map<String, Supplier<ScriptNode>> FACTORIES = new ConcurrentHashMap<>();
   private static final Map<String, NodeMetadata> METADATA_MAP = new ConcurrentHashMap<>();
   private static final Map<String, ScriptNode> CACHED_INSTANCES = new ConcurrentHashMap<>();
+  private static final Map<String, Map<String, NodeValue>> DEFAULT_INPUTS_CACHE = new ConcurrentHashMap<>();
 
   static {
     // Trigger Nodes
@@ -297,26 +299,29 @@ public final class NodeRegistry {
   }
 
   /// Computes default input values from node metadata port definitions.
+  /// Results are cached per node type since metadata is immutable.
   ///
   /// @param metadata the node metadata
-  /// @return a map of input names to their default values
+  /// @return an unmodifiable map of input names to their default values
   public static Map<String, NodeValue> computeDefaultInputs(NodeMetadata metadata) {
-    var defaults = new HashMap<String, NodeValue>();
-    for (var input : metadata.inputs()) {
-      if (input.type() == PortType.EXEC) {
-        continue;
-      }
-      var defaultValueStr = input.defaultValue();
-      if (defaultValueStr != null && !defaultValueStr.isEmpty()) {
-        try {
-          var jsonElement = JsonParser.parseString(defaultValueStr);
-          defaults.put(input.id(), NodeValue.fromJson(jsonElement));
-        } catch (Exception _) {
-          defaults.put(input.id(), NodeValue.ofString(defaultValueStr));
+    return DEFAULT_INPUTS_CACHE.computeIfAbsent(metadata.type(), _ -> {
+      var defaults = new HashMap<String, NodeValue>();
+      for (var input : metadata.inputs()) {
+        if (input.type() == PortType.EXEC) {
+          continue;
+        }
+        var defaultValueStr = input.defaultValue();
+        if (defaultValueStr != null && !defaultValueStr.isEmpty()) {
+          try {
+            var jsonElement = JsonParser.parseString(defaultValueStr);
+            defaults.put(input.id(), NodeValue.fromJson(jsonElement));
+          } catch (Exception _) {
+            defaults.put(input.id(), NodeValue.ofString(defaultValueStr));
+          }
         }
       }
-    }
-    return defaults;
+      return Collections.unmodifiableMap(defaults);
+    });
   }
 
   /// Checks if a node type is registered.

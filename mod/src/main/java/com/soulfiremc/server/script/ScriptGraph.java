@@ -279,8 +279,84 @@ public final class ScriptGraph {
       return addEdge(new GraphEdge(sourceNodeId, sourceHandle, targetNodeId, targetHandle, EdgeType.DATA));
     }
 
-    /// Builds the ScriptGraph.
+    /// Validates the graph structure and returns a list of error messages.
+    /// Returns an empty list if the graph is valid.
+    private List<String> validate() {
+      var errors = new ArrayList<String>();
+
+      // 1. Validate all edges reference existing nodes
+      for (var edge : edges) {
+        if (!nodes.containsKey(edge.sourceNodeId())) {
+          errors.add("Edge references non-existent source node: " + edge.sourceNodeId());
+        }
+        if (!nodes.containsKey(edge.targetNodeId())) {
+          errors.add("Edge references non-existent target node: " + edge.targetNodeId());
+        }
+      }
+
+      // 2. Validate no self-loops
+      for (var edge : edges) {
+        if (edge.sourceNodeId().equals(edge.targetNodeId())) {
+          errors.add("Self-loop detected on node: " + edge.sourceNodeId());
+        }
+      }
+
+      // 3. Detect duplicate edges
+      var edgeKeys = new HashSet<String>();
+      for (var edge : edges) {
+        var key = edge.sourceNodeId() + ":" + edge.sourceHandle() + "->"
+          + edge.targetNodeId() + ":" + edge.targetHandle() + ":" + edge.edgeType();
+        if (!edgeKeys.add(key)) {
+          errors.add("Duplicate edge: " + key);
+        }
+      }
+
+      // 4. Detect cycles using Kahn's algorithm
+      if (errors.isEmpty()) {
+        var inDegree = new HashMap<String, Integer>();
+        var adjList = new HashMap<String, List<String>>();
+        for (var nodeId : nodes.keySet()) {
+          inDegree.put(nodeId, 0);
+          adjList.put(nodeId, new ArrayList<>());
+        }
+        for (var edge : edges) {
+          adjList.get(edge.sourceNodeId()).add(edge.targetNodeId());
+          inDegree.merge(edge.targetNodeId(), 1, Integer::sum);
+        }
+        var queue = new ArrayDeque<String>();
+        for (var entry : inDegree.entrySet()) {
+          if (entry.getValue() == 0) {
+            queue.add(entry.getKey());
+          }
+        }
+        var count = 0;
+        while (!queue.isEmpty()) {
+          var node = queue.poll();
+          count++;
+          for (var neighbor : adjList.get(node)) {
+            var newDegree = inDegree.get(neighbor) - 1;
+            inDegree.put(neighbor, newDegree);
+            if (newDegree == 0) {
+              queue.add(neighbor);
+            }
+          }
+        }
+        if (count != nodes.size()) {
+          errors.add("Script graph contains cycles - cannot determine execution order");
+        }
+      }
+
+      return errors;
+    }
+
+    /// Builds the ScriptGraph after validation.
+    ///
+    /// @throws ScriptGraphValidationException if the graph is structurally invalid
     public ScriptGraph build() {
+      var errors = validate();
+      if (!errors.isEmpty()) {
+        throw new ScriptGraphValidationException(errors);
+      }
       return new ScriptGraph(scriptId, scriptName, nodes, edges);
     }
   }

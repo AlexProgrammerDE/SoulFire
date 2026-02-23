@@ -48,6 +48,7 @@ public final class DebounceNode extends AbstractScriptNode {
     .icon("timer")
     .color("#607D8B")
     .addKeywords("debounce", "rate limit", "cooldown", "throttle")
+    .supportsMuting(false)
     .build();
 
   @Override

@@ -18,6 +18,7 @@
 package com.soulfiremc.test.script;
 
 import com.soulfiremc.server.script.ScriptGraph;
+import com.soulfiremc.server.script.ScriptGraphValidationException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -125,18 +126,49 @@ final class ScriptGraphTest {
   }
 
   @Test
-  void scriptGraphTopologicalSortDetectsCycle() {
-    var graph = ScriptGraph.builder("test-id", "Test Script")
+  void scriptGraphBuildDetectsCycle() {
+    var builder = ScriptGraph.builder("test-id", "Test Script")
       .addNode("node1", "action.print", null)
       .addNode("node2", "action.print", null)
       .addNode("node3", "action.print", null)
       .addExecutionEdge("node1", "out", "node2", "in")
       .addExecutionEdge("node2", "out", "node3", "in")
-      .addExecutionEdge("node3", "out", "node1", "in")
-      .build();
+      .addExecutionEdge("node3", "out", "node1", "in");
 
-    assertThrows(IllegalStateException.class, graph::topologicalSort,
-      "Cyclic graph should throw IllegalStateException");
+    assertThrows(ScriptGraphValidationException.class, builder::build,
+      "Cyclic graph should throw ScriptGraphValidationException on build");
+  }
+
+  @Test
+  void scriptGraphBuildRejectsDanglingEdge() {
+    var builder = ScriptGraph.builder("test-id", "Test Script")
+      .addNode("node1", "action.print", null)
+      .addExecutionEdge("node1", "out", "nonexistent", "in");
+
+    var ex = assertThrows(ScriptGraphValidationException.class, builder::build);
+    assertTrue(ex.errors().stream().anyMatch(e -> e.contains("non-existent target node")));
+  }
+
+  @Test
+  void scriptGraphBuildRejectsSelfLoop() {
+    var builder = ScriptGraph.builder("test-id", "Test Script")
+      .addNode("node1", "action.print", null)
+      .addExecutionEdge("node1", "out", "node1", "in");
+
+    var ex = assertThrows(ScriptGraphValidationException.class, builder::build);
+    assertTrue(ex.errors().stream().anyMatch(e -> e.contains("Self-loop")));
+  }
+
+  @Test
+  void scriptGraphBuildRejectsDuplicateEdge() {
+    var builder = ScriptGraph.builder("test-id", "Test Script")
+      .addNode("node1", "action.print", null)
+      .addNode("node2", "action.print", null)
+      .addExecutionEdge("node1", "out", "node2", "in")
+      .addExecutionEdge("node1", "out", "node2", "in");
+
+    var ex = assertThrows(ScriptGraphValidationException.class, builder::build);
+    assertTrue(ex.errors().stream().anyMatch(e -> e.contains("Duplicate edge")));
   }
 
   @Test

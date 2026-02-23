@@ -50,6 +50,7 @@ public final class GateNode extends AbstractScriptNode {
     .icon("toggle-right")
     .color("#607D8B")
     .addKeywords("gate", "filter", "pass", "block", "conditional")
+    .supportsMuting(false)
     .build();
 
   @Override
