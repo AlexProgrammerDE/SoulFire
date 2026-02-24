@@ -19,11 +19,12 @@ package com.soulfiremc.server.util.netty;
 
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.proxy.SFProxy;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
+import org.cloudburstmc.netty.channel.raknet.RakClientChannel;
 
 import java.net.InetSocketAddress;
 
@@ -33,7 +34,8 @@ public final class NettyHelper {
   private NettyHelper() {
   }
 
-  public static void addProxy(SFProxy proxy, ChannelPipeline pipeline, boolean isBedrock) {
+  public static void addProxy(SFProxy proxy, Channel channel, boolean isBedrock) {
+    var pipeline = channel.pipeline();
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
@@ -51,8 +53,12 @@ public final class NettyHelper {
       }
       case SOCKS5 -> {
         if (isBedrock) {
-          pipeline.addFirst(PROXY_NAME, new Socks5UdpRelayHandler(
-            (InetSocketAddress) proxy.address(), proxy.username(), proxy.password()));
+          if (channel instanceof RakClientChannel rakChannel) {
+            rakChannel.rakPipeline().addFirst(PROXY_NAME, new Socks5UdpRelayHandler(
+              (InetSocketAddress) proxy.address(), proxy.username(), proxy.password()));
+          } else {
+            throw new IllegalStateException("Expected RakClientChannel for Bedrock connection, but got: " + channel.getClass());
+          }
         } else if (proxy.username() != null && proxy.password() != null) {
           pipeline.addFirst(PROXY_NAME, new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
         } else {
