@@ -38,7 +38,12 @@ public final class BotControlAPI {
         try {
           localTask.tick();
         } catch (Throwable t) {
-          log.error("Error while executing controlling task, unregistering", t);
+          var desc = localTask.description();
+          if (desc != null) {
+            log.error("Error while executing controlling task ({}), unregistering", desc, t);
+          } else {
+            log.error("Error while executing controlling task, unregistering", t);
+          }
           localTask.stop();
           unregisterControllingTask(localTask);
           return;

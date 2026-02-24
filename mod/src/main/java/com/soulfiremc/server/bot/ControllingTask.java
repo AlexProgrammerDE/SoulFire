@@ -19,13 +19,18 @@ package com.soulfiremc.server.bot;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.function.LongSupplier;
 
 public interface ControllingTask {
   static ControllingTask singleTick(Runnable runnable) {
-    return new SingleTickTask(runnable);
+    return new SingleTickTask(null, runnable);
+  }
+
+  static ControllingTask singleTick(String description, Runnable runnable) {
+    return new SingleTickTask(description, runnable);
   }
 
   static ControllingTask staged(List<Stage> stages) {
@@ -42,6 +47,12 @@ public interface ControllingTask {
 
   boolean isDone();
 
+  /// Returns a human-readable description of this task for error logging.
+  /// By default returns null, meaning no extra context is available.
+  default @Nullable String description() {
+    return null;
+  }
+
   interface Stage {
   }
 
@@ -50,6 +61,7 @@ public interface ControllingTask {
 
   @RequiredArgsConstructor
   class SingleTickTask implements ControllingTask {
+    private final @Nullable String taskDescription;
     private final Runnable runnable;
     private boolean done;
 
@@ -71,6 +83,11 @@ public interface ControllingTask {
     @Override
     public boolean isDone() {
       return done;
+    }
+
+    @Override
+    public @Nullable String description() {
+      return taskDescription;
     }
   }
 

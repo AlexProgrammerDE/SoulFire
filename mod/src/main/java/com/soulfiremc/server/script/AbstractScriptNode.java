@@ -185,7 +185,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
     if (runtime.isTickSynchronous()) {
       action.run();
     } else {
-      bot.botControl().registerControllingTask(ControllingTask.singleTick(action));
+      bot.botControl().registerControllingTask(ControllingTask.singleTick(getClass().getSimpleName(), action));
     }
   }
 
