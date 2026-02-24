@@ -31,7 +31,9 @@ public class MixinAccountsSave {
   @Inject(method = "getBedrockAccount", at = @At("HEAD"), remap = false, cancellable = true)
   private void getBedrockAccount(CallbackInfoReturnable<BedrockAuthManager> cir) {
     var connection = BotConnection.CURRENT.get();
-    cir.setReturnValue(
-      ((BedrockData) connection.settingsSource().stem().accountData()).getBedrockAuthManager(connection.proxy()));
+    var accountData = connection.settingsSource().stem().accountData();
+    if (accountData instanceof BedrockData bedrockData) {
+      cir.setReturnValue(bedrockData.getBedrockAuthManager(connection.proxy()));
+    }
   }
 }
