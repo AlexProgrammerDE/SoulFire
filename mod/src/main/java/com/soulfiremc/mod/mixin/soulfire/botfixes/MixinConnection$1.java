@@ -18,7 +18,6 @@
 package com.soulfiremc.mod.mixin.soulfire.botfixes;
 
 import com.soulfiremc.mod.util.SFConstants;
-import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.server.util.netty.SFTrafficHandler;
@@ -45,12 +44,13 @@ public class MixinConnection$1 {
     var isBedrock = BedrockProtocolVersion.bedrockLatest.equals(botConnection.currentProtocolVersion());
     NettyHelper.addProxy(proxyData, channel.pipeline(), isBedrock);
 
-    channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
+    channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(botConnection.settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
 
   @Inject(method = "initChannel", at = @At("RETURN"))
   private void setReadTimeout(Channel channel, CallbackInfo ci) {
-    channel.pipeline().replace("timeout", "timeout", new ReadTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.READ_TIMEOUT)));
+    var botConnection = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get();
+    channel.pipeline().replace("timeout", "timeout", new ReadTimeoutHandler(botConnection.settingsSource().get(BotSettings.READ_TIMEOUT)));
     channel.pipeline().addFirst("sf_traffic", new SFTrafficHandler());
   }
 }
