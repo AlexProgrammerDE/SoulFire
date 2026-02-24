@@ -82,7 +82,7 @@ public class Socks5UdpRelayHandler extends ChannelDuplexHandler {
     var eventLoopGroup = EventLoopGroupHolder.remote(true);
     new Bootstrap()
       .group(eventLoopGroup.eventLoopGroup())
-      .channelFactory(eventLoopGroup.channelCls())
+      .channel(eventLoopGroup.channelCls())
       .handler(new ChannelInitializer<>() {
         @Override
         protected void initChannel(Channel ch) {
