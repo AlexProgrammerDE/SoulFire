@@ -24,13 +24,12 @@ import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
-import com.soulfiremc.server.settings.property.BooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableBooleanProperty;
-import com.soulfiremc.server.settings.property.ImmutableStringProperty;
-import com.soulfiremc.server.settings.property.StringProperty;
+import com.soulfiremc.server.settings.property.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.lenni0451.lambdaevents.EventHandler;
+
+import java.util.concurrent.TimeUnit;
 
 @InternalPluginClass
 public final class AutoRegister extends InternalPlugin {
@@ -56,13 +55,18 @@ public final class AutoRegister extends InternalPlugin {
     var plainMessage = event.parseToPlainText();
     var password = settingsSource.get(AutoRegisterSettings.PASSWORD_FORMAT);
 
+    var scheduler = connection.scheduler();
     // TODO: Add more password options
     if (plainMessage.contains("/register") || plainMessage.contains("/reg")) {
-      var registerCommand = settingsSource.get(AutoRegisterSettings.REGISTER_COMMAND);
-      connection.sendChatMessage(registerCommand.replace("%password%", password));
+      scheduler.schedule(() -> {
+        var registerCommand = settingsSource.get(AutoRegisterSettings.REGISTER_COMMAND);
+        connection.sendChatMessage(registerCommand.replace("%password%", password));
+      }, settingsSource.getRandom(AutoRegisterSettings.DELAY).getAsInt(), TimeUnit.MILLISECONDS);
     } else if (plainMessage.contains("/login") || plainMessage.contains("/l")) {
-      var loginCommand = settingsSource.get(AutoRegisterSettings.LOGIN_COMMAND);
-      connection.sendChatMessage(loginCommand.replace("%password%", password));
+      scheduler.schedule(() -> {
+        var loginCommand = settingsSource.get(AutoRegisterSettings.LOGIN_COMMAND);
+        connection.sendChatMessage(loginCommand.replace("%password%", password));
+      }, settingsSource.getRandom(AutoRegisterSettings.DELAY).getAsInt(), TimeUnit.MILLISECONDS);
     }
 
   }
@@ -111,6 +115,25 @@ public final class AutoRegister extends InternalPlugin {
         .uiName("Password Format")
         .description("The password for registering")
         .defaultValue("SoulFire")
+        .build();
+
+    public static final MinMaxProperty<SettingsSource.Bot> DELAY =
+      ImmutableMinMaxProperty.<SettingsSource.Bot>builder()
+        .sourceType(SettingsSource.Bot.INSTANCE)
+        .namespace(NAMESPACE)
+        .key("delay")
+        .minValue(0)
+        .maxValue(Integer.MAX_VALUE)
+        .minEntry(ImmutableMinMaxPropertyEntry.builder()
+          .uiName("Min delay (Milliseconds)")
+          .description("Minimum delay before sending")
+          .defaultValue(0)
+          .build())
+        .maxEntry(ImmutableMinMaxPropertyEntry.builder()
+          .uiName("Max delay (Milliseconds)")
+          .description("Maximum delay before sending")
+          .defaultValue(1000)
+          .build())
         .build();
   }
 }
