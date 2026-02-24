@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.Deque;
@@ -55,21 +57,31 @@ public final class ExecutionRun {
   private final long maxExecutionCount;
   private final ScriptEventListener listener;
 
+  /// Per-invocation Reactor scheduler, potentially wrapped with bot context.
+  private final Scheduler reactorScheduler;
+
   public ExecutionRun() {
     this(false);
   }
 
   public ExecutionRun(boolean tickSynchronous) {
-    this(tickSynchronous, DEFAULT_DATA_EDGE_TIMEOUT, DEFAULT_MAX_EXECUTION_COUNT, null);
+    this(tickSynchronous, DEFAULT_DATA_EDGE_TIMEOUT, DEFAULT_MAX_EXECUTION_COUNT, null, Schedulers.parallel());
   }
 
-  public ExecutionRun(boolean tickSynchronous, Duration dataEdgeTimeout, long maxExecutionCount, ScriptEventListener listener) {
+  public ExecutionRun(boolean tickSynchronous, Duration dataEdgeTimeout, long maxExecutionCount,
+                      ScriptEventListener listener, Scheduler reactorScheduler) {
     this.tickSynchronous = tickSynchronous;
     this.dataEdgeTimeout = dataEdgeTimeout;
     this.maxExecutionCount = maxExecutionCount;
     this.listener = listener;
+    this.reactorScheduler = reactorScheduler;
     // Initialize with one context for the top-level execution
     pushCheckContext();
+  }
+
+  /// Returns the per-invocation Reactor scheduler.
+  public Scheduler reactorScheduler() {
+    return reactorScheduler;
   }
 
   /// Returns whether this execution is running synchronously on the tick thread.

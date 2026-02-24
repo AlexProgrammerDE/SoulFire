@@ -127,6 +127,19 @@ public final class ReactiveScriptEngine {
     Map<String, NodeValue> eventInputs,
     boolean tickSynchronous
   ) {
+    // Build per-invocation reactor scheduler with bot context if available.
+    // This ensures bot thread-locals are set on all async threads,
+    // including after Mono.delay continuations.
+    var baseScheduler = context.getReactorScheduler();
+    var botValue = eventInputs.get(StandardPorts.BOT_IN);
+    var botConnection = botValue != null ? botValue.asBot() : null;
+    Scheduler invocationScheduler;
+    if (botConnection != null && baseScheduler instanceof SoulFireReactorScheduler sfScheduler) {
+      invocationScheduler = sfScheduler.withAdditionalWrapper(botConnection.runnableWrapper());
+    } else {
+      invocationScheduler = baseScheduler;
+    }
+
     var runHolder = new java.util.concurrent.atomic.AtomicReference<ExecutionRun>();
     var mono = Mono.<Void>defer(() -> {
       if (context.isCancelled()) {
@@ -134,8 +147,9 @@ public final class ReactiveScriptEngine {
       }
 
       var quotas = context.quotas();
+
       var run = new ExecutionRun(tickSynchronous, quotas.dataEdgeTimeout(),
-        quotas.maxExecutionCount(), context.eventListener());
+        quotas.maxExecutionCount(), context.eventListener(), invocationScheduler);
       runHolder.set(run);
 
       var graphNode = graph.getNode(triggerNodeId);
@@ -212,7 +226,7 @@ public final class ReactiveScriptEngine {
       });
 
     // For synchronous tick execution, don't switch schedulers - run on the calling thread
-    return tickSynchronous ? monoWithStats : monoWithStats.subscribeOn(context.getReactorScheduler());
+    return tickSynchronous ? monoWithStats : monoWithStats.subscribeOn(invocationScheduler);
   }
 
   /// Determines which exec output ports to follow based on node outputs,
@@ -701,7 +715,7 @@ public final class ReactiveScriptEngine {
 
       @Override
       public Scheduler reactorScheduler() {
-        return context.getReactorScheduler();
+        return run.reactorScheduler();
       }
 
       @Override

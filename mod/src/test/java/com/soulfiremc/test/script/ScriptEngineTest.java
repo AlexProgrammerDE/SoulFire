@@ -674,6 +674,47 @@ final class ScriptEngineTest {
       "print2 (has graph default) must keep its graph default, not exec context");
   }
 
+  @Test
+  @Timeout(5)
+  void offPathConstantOverridesGraphDefaultInChain() {
+    // Reproduces bug report: trigger → wait → print → send_chat (graph default message=""),
+    // where a shared constant feeds both print and send_chat via DATA edges.
+    // The graph default ("") must be overridden by the off-path DATA edge value ("shards").
+    // Uses print nodes as stand-ins since send_chat requires a live bot.
+    var graph = ScriptGraph.builder("test-offpath-chain-override", "Off-Path Chain Override")
+      .addNode("trigger", "trigger.on_script_init", null)
+      .addNode("wait", "action.wait", Map.of("baseMs", 10, "jitterMs", 0))
+      .addNode("const", "constant.string", Map.of("value", "shards"))
+      .addNode("print1", "action.print", null)
+      .addNode("print2", "action.print", Map.of("message", ""))
+      .addExecutionEdge("trigger", "out", "wait", "in")
+      .addExecutionEdge("wait", "out", "print1", "in")
+      .addExecutionEdge("print1", "out", "print2", "in")
+      .addDataEdge("const", "value", "print1", "message")
+      .addDataEdge("const", "value", "print2", "message")
+      .build();
+
+    var listener = new LogRecordingEventListener();
+    var context = new ReactiveScriptContext(listener);
+    var engine = new ReactiveScriptEngine();
+    engine.executeFromTriggerSync(graph, "trigger", context, Map.of()).block();
+
+    assertNoErrors(listener);
+    assertTrue(listener.completedNodes.contains("const"),
+      "Data-only constant should be eagerly executed");
+    assertTrue(listener.completedNodes.contains("print1"),
+      "First print should complete");
+    assertTrue(listener.completedNodes.contains("print2"),
+      "Second print (with graph default) should complete");
+
+    assertEquals(2, listener.logMessages.size(),
+      "Both prints should log, got: " + listener.logMessages);
+    assertEquals("shards", listener.logMessages.get(0),
+      "print1 should receive 'shards' from constant via off-path DATA edge");
+    assertEquals("shards", listener.logMessages.get(1),
+      "print2 should receive 'shards' from constant, overriding graph default ''");
+  }
+
   /// Extended RecordingEventListener that also captures log messages from Print nodes.
   private static class LogRecordingEventListener extends RecordingEventListener {
     final List<String> logMessages = new ArrayList<>();

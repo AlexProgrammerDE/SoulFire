@@ -18,6 +18,7 @@
 package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.SoulFireScheduler;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
 
@@ -26,19 +27,40 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /// Adapter that wraps SoulFireScheduler to implement Reactor's Scheduler interface.
 /// This allows reactive pipelines to execute on SoulFire's virtual thread executor.
+/// Supports an optional additional RunnableWrapper for per-invocation context
+/// (e.g., bot thread-locals for trigger executions).
 public final class SoulFireReactorScheduler implements Scheduler {
   private final SoulFireScheduler delegate;
+  private final SoulFireScheduler.@Nullable RunnableWrapper additionalWrapper;
 
   public SoulFireReactorScheduler(SoulFireScheduler delegate) {
+    this(delegate, null);
+  }
+
+  public SoulFireReactorScheduler(SoulFireScheduler delegate, SoulFireScheduler.@Nullable RunnableWrapper additionalWrapper) {
     this.delegate = delegate;
+    this.additionalWrapper = additionalWrapper;
+  }
+
+  /// Creates a new scheduler with an additional RunnableWrapper composed on top.
+  /// The wrapper is applied to each task before delegation, ensuring thread-locals
+  /// (e.g., BotConnection.CURRENT, MINECRAFT_INSTANCE) are set for all async operations.
+  public SoulFireReactorScheduler withAdditionalWrapper(SoulFireScheduler.RunnableWrapper wrapper) {
+    var composed = additionalWrapper != null ? additionalWrapper.with(wrapper) : wrapper;
+    return new SoulFireReactorScheduler(delegate, composed);
+  }
+
+  private Runnable wrapTask(Runnable task) {
+    return additionalWrapper != null ? additionalWrapper.wrap(task) : task;
   }
 
   @Override
   public Disposable schedule(Runnable task) {
+    var wrapped = wrapTask(task);
     var cancelled = new AtomicBoolean(false);
     delegate.schedule(() -> {
       if (!cancelled.get()) {
-        task.run();
+        wrapped.run();
       }
     });
     return () -> cancelled.set(true);
@@ -46,10 +68,11 @@ public final class SoulFireReactorScheduler implements Scheduler {
 
   @Override
   public Disposable schedule(Runnable task, long delay, TimeUnit unit) {
+    var wrapped = wrapTask(task);
     var cancelled = new AtomicBoolean(false);
     delegate.schedule(() -> {
       if (!cancelled.get()) {
-        task.run();
+        wrapped.run();
       }
     }, delay, unit);
     return () -> cancelled.set(true);
@@ -57,10 +80,11 @@ public final class SoulFireReactorScheduler implements Scheduler {
 
   @Override
   public Disposable schedulePeriodically(Runnable task, long initialDelay, long period, TimeUnit unit) {
+    var wrapped = wrapTask(task);
     var cancelled = new AtomicBoolean(false);
     delegate.scheduleAtFixedRate(() -> {
       if (!cancelled.get()) {
-        task.run();
+        wrapped.run();
       }
     }, initialDelay, period, unit);
     return () -> cancelled.set(true);
