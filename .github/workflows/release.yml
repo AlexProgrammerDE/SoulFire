@@ -39,7 +39,7 @@ jobs:
           distribution: 'temurin'
           check-latest: true
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # 5.0.1
+        uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # 5.0.2
       - name: Build with Gradle
         run: ./gradlew build test --stacktrace --scan
 
