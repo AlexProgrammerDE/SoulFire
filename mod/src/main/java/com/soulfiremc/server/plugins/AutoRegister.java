@@ -57,10 +57,10 @@ public final class AutoRegister extends InternalPlugin {
     var password = settingsSource.get(AutoRegisterSettings.PASSWORD_FORMAT);
 
     // TODO: Add more password options
-    if (plainMessage.contains("/register")) {
+    if (plainMessage.contains("/register") || plainMessage.contains("/reg")) {
       var registerCommand = settingsSource.get(AutoRegisterSettings.REGISTER_COMMAND);
       connection.sendChatMessage(registerCommand.replace("%password%", password));
-    } else if (plainMessage.contains("/login")) {
+    } else if (plainMessage.contains("/login") || plainMessage.contains("/l")) {
       var loginCommand = settingsSource.get(AutoRegisterSettings.LOGIN_COMMAND);
       connection.sendChatMessage(loginCommand.replace("%password%", password));
     }
