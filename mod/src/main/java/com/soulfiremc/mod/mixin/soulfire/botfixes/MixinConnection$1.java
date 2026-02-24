@@ -43,7 +43,7 @@ public class MixinConnection$1 {
     }
 
     var isBedrock = BedrockProtocolVersion.bedrockLatest.equals(botConnection.currentProtocolVersion());
-    NettyHelper.addProxy(proxyData, channel.pipeline(), isBedrock);
+    NettyHelper.addProxy(proxyData, channel, isBedrock);
 
     channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(BotConnection.CURRENT.get().settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
