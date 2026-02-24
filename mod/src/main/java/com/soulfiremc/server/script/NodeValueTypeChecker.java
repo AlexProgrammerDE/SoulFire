@@ -18,7 +18,6 @@
 package com.soulfiremc.server.script;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 
 /// Checks whether a NodeValue matches a declared PortType at runtime.
 public final class NodeValueTypeChecker {
@@ -32,13 +31,11 @@ public final class NodeValueTypeChecker {
     if (value == null || value.isNull()) {
       return false;
     }
-    if (value instanceof NodeValue.Bot) {
-      return type == PortType.BOT;
-    }
-    if (value instanceof NodeValue.Json(JsonElement element)) {
-      return matchesJson(element, type);
-    }
-    return false;
+    return switch (value) {
+      case NodeValue.Bot _ -> type == PortType.BOT;
+      case NodeValue.ValueList _ -> type == PortType.LIST;
+      case NodeValue.Json(JsonElement element) -> matchesJson(element, type);
+    };
   }
 
   private static boolean matchesJson(JsonElement element, PortType type) {
@@ -60,19 +57,22 @@ public final class NodeValueTypeChecker {
     if (value == null || value.isNull()) {
       return "null";
     }
-    if (value instanceof NodeValue.Bot) {
-      return "Bot";
+    return switch (value) {
+      case NodeValue.Bot _ -> "Bot";
+      case NodeValue.ValueList _ -> "List";
+      case NodeValue.Json(JsonElement element) -> describeJsonType(element);
+    };
+  }
+
+  private static String describeJsonType(JsonElement element) {
+    if (element.isJsonPrimitive()) {
+      var prim = element.getAsJsonPrimitive();
+      if (prim.isNumber()) return "Number";
+      if (prim.isBoolean()) return "Boolean";
+      if (prim.isString()) return "String";
     }
-    if (value instanceof NodeValue.Json(JsonElement element)) {
-      if (element.isJsonPrimitive()) {
-        var prim = element.getAsJsonPrimitive();
-        if (prim.isNumber()) return "Number";
-        if (prim.isBoolean()) return "Boolean";
-        if (prim.isString()) return "String";
-      }
-      if (element.isJsonArray()) return "List";
-      if (element.isJsonObject()) return "Object";
-    }
+    if (element.isJsonArray()) return "List";
+    if (element.isJsonObject()) return "Object";
     return "Unknown";
   }
 
