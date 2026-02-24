@@ -20,6 +20,7 @@ package com.soulfiremc.server.bot;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /// This class is used to control the bot. The goal is to reduce friction for doing simple things.
@@ -58,15 +59,18 @@ public final class BotControlAPI {
   }
 
   public boolean stopControllingTask() {
-    return this.controllingTask.updateAndGet(
+    var isDone = new AtomicBoolean(false);
+    this.controllingTask.updateAndGet(
       current -> {
         if (current != null) {
           current.stop();
+          isDone.set(true);
           return null;
         }
 
         return null;
-      }) != null;
+      });
+    return isDone.get();
   }
 
   public boolean activelyControlled() {
