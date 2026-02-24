@@ -901,6 +901,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.BLOCK, PortType.PORT_TYPE_BLOCK, "#06b6d4", "Block", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
     new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.ITEM, PortType.PORT_TYPE_ITEM, "#ec4899", "Item", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
     new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.LIST, PortType.PORT_TYPE_LIST, "#8b5cf6", "List", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT),
+    new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.MAP, PortType.PORT_TYPE_MAP, "#14b8a6", "Map", HandleShape.HANDLE_SHAPE_DIAMOND, EdgeStyle.EDGE_STYLE_DEFAULT),
     new PortTypeDisplayInfo(com.soulfiremc.server.script.PortType.ANY, PortType.PORT_TYPE_ANY, "#6b7280", "Any", HandleShape.HANDLE_SHAPE_CIRCLE, EdgeStyle.EDGE_STYLE_DEFAULT)
   );
 
@@ -982,7 +983,29 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     if (port.elementType() != null) {
       builder.setElementType(portTypeToProto(port.elementType()));
     }
+    if (port.typeDescriptor() != null) {
+      builder.setTypeDescriptor(typeDescriptorToProto(port.typeDescriptor()));
+    }
 
+    return builder.build();
+  }
+
+  private com.soulfiremc.grpc.generated.TypeDescriptor typeDescriptorToProto(com.soulfiremc.server.script.TypeDescriptor td) {
+    var builder = com.soulfiremc.grpc.generated.TypeDescriptor.newBuilder();
+    switch (td) {
+      case com.soulfiremc.server.script.TypeDescriptor.Simple(com.soulfiremc.server.script.PortType type) ->
+        builder.setSimple(portTypeToProto(type));
+      case com.soulfiremc.server.script.TypeDescriptor.Parameterized(com.soulfiremc.server.script.PortType base, java.util.List<com.soulfiremc.server.script.TypeDescriptor> params) -> {
+        var paramBuilder = ParameterizedType.newBuilder()
+          .setBase(portTypeToProto(base));
+        for (var param : params) {
+          paramBuilder.addParams(typeDescriptorToProto(param));
+        }
+        builder.setParameterized(paramBuilder.build());
+      }
+      case com.soulfiremc.server.script.TypeDescriptor.TypeVariable(String name) ->
+        builder.setTypeVariable(name);
+    }
     return builder.build();
   }
 
@@ -999,6 +1022,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       case BLOCK -> PortType.PORT_TYPE_BLOCK;
       case ENTITY -> PortType.PORT_TYPE_ENTITY;
       case ITEM -> PortType.PORT_TYPE_ITEM;
+      case MAP -> PortType.PORT_TYPE_MAP;
     };
   }
 

@@ -33,12 +33,12 @@ public final class ForEachNode extends AbstractScriptNode {
     .category(CategoryRegistry.FLOW)
     .addInputs(
       PortDefinition.execIn(),
-      PortDefinition.listInput("items", "Items", PortType.ANY, "List of items to iterate")
+      PortDefinition.genericListInput("items", "Items", TypeDescriptor.typeVar("T"), "List of items to iterate")
     )
     .addOutputs(
       PortDefinition.output(StandardPorts.EXEC_LOOP, "Loop", PortType.EXEC, "Executes for each item"),
       PortDefinition.output(StandardPorts.EXEC_DONE, "Done", PortType.EXEC, "Executes when iteration completes"),
-      PortDefinition.output("item", "Item", PortType.ANY, "Current item"),
+      PortDefinition.genericOutput("item", "Item", TypeDescriptor.typeVar("T"), "Current item"),
       PortDefinition.output("index", "Index", PortType.NUMBER, "Current index"),
       PortDefinition.output("isComplete", "Complete", PortType.BOOLEAN, "Whether iteration is done"),
       PortDefinition.output("size", "Size", PortType.NUMBER, "Total items count")

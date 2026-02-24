@@ -105,6 +105,7 @@ public interface PortDefinition {
       .description(description)
       .required(true)
       .elementType(elementType)
+      .typeDescriptor(TypeDescriptor.listOf(elementType))
       .build();
   }
 
@@ -117,6 +118,54 @@ public interface PortDefinition {
       .type(PortType.LIST)
       .description(description)
       .elementType(elementType)
+      .typeDescriptor(TypeDescriptor.listOf(elementType))
+      .build();
+  }
+
+  /// Creates a required input port with a generic type descriptor.
+  /// The base PortType is derived from the descriptor's baseType().
+  static PortDefinition genericInput(String id, String displayName, TypeDescriptor typeDescriptor, String description) {
+    return ImmutablePortDefinition.builder()
+      .id(id)
+      .displayName(displayName)
+      .type(typeDescriptor.baseType())
+      .description(description)
+      .required(true)
+      .typeDescriptor(typeDescriptor)
+      .build();
+  }
+
+  /// Creates an output port with a generic type descriptor.
+  static PortDefinition genericOutput(String id, String displayName, TypeDescriptor typeDescriptor, String description) {
+    return ImmutablePortDefinition.builder()
+      .id(id)
+      .displayName(displayName)
+      .type(typeDescriptor.baseType())
+      .description(description)
+      .typeDescriptor(typeDescriptor)
+      .build();
+  }
+
+  /// Creates a list input port with a generic element type (e.g., List<T>).
+  static PortDefinition genericListInput(String id, String displayName, TypeDescriptor elementTypeDescriptor, String description) {
+    return ImmutablePortDefinition.builder()
+      .id(id)
+      .displayName(displayName)
+      .type(PortType.LIST)
+      .description(description)
+      .required(true)
+      .typeDescriptor(TypeDescriptor.list(elementTypeDescriptor))
+      .build();
+  }
+
+  /// Creates a list output port with a generic element type (e.g., List<T>).
+  static PortDefinition genericListOutput(String id, String displayName, TypeDescriptor elementTypeDescriptor, String description) {
+    return ImmutablePortDefinition.builder()
+      .id(id)
+      .displayName(displayName)
+      .type(PortType.LIST)
+      .description(description)
+      .typeDescriptor(TypeDescriptor.list(elementTypeDescriptor))
       .build();
   }
 
@@ -138,6 +187,28 @@ public interface PortDefinition {
 
   @Nullable
   PortType elementType();
+
+  /// Optional generic type descriptor for parameterized types.
+  /// When present, provides richer type information than the flat type() field.
+  /// For example, List<Bot> is expressed as Parameterized(LIST, [Simple(BOT)]).
+  /// Type variables like T are resolved based on connections at edit time.
+  @Nullable
+  TypeDescriptor typeDescriptor();
+
+  /// Returns the effective TypeDescriptor for this port.
+  /// If typeDescriptor() is set, returns it. Otherwise, derives from type() and elementType().
+  @Value.Lazy
+  default TypeDescriptor effectiveTypeDescriptor() {
+    var td = typeDescriptor();
+    if (td != null) {
+      return td;
+    }
+    // Derive from legacy fields
+    if (type() == PortType.LIST && elementType() != null) {
+      return TypeDescriptor.listOf(elementType());
+    }
+    return TypeDescriptor.simple(type());
+  }
 
   /// Whether this input accepts multiple connections (Blender-style multi-input).
   /// When true, all connected values are collected into a list.

@@ -31,11 +31,11 @@ public final class GetAtNode extends AbstractScriptNode {
     .displayName("Get At Index")
     .category(CategoryRegistry.LIST)
     .addInputs(
-      PortDefinition.listInput("list", "List", PortType.ANY, "The input list"),
+      PortDefinition.genericListInput("list", "List", TypeDescriptor.typeVar("T"), "The input list"),
       PortDefinition.inputWithDefault("index", "Index", PortType.NUMBER, "0", "The index to retrieve (0-based)")
     )
     .addOutputs(
-      PortDefinition.output("item", "Item", PortType.ANY, "The item at the specified index"),
+      PortDefinition.genericOutput("item", "Item", TypeDescriptor.typeVar("T"), "The item at the specified index"),
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the index was valid")
     )
     .description("Gets an item at a specific index in a list")

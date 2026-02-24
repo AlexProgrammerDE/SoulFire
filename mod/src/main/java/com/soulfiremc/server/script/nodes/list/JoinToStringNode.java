@@ -32,7 +32,7 @@ public final class JoinToStringNode extends AbstractScriptNode {
     .displayName("Join to String")
     .category(CategoryRegistry.LIST)
     .addInputs(
-      PortDefinition.listInput("list", "List", PortType.ANY, "The list to join"),
+      PortDefinition.genericListInput("list", "List", TypeDescriptor.typeVar("T"), "The list to join"),
       PortDefinition.inputWithDefault("separator", "Separator", PortType.STRING, "\", \"", "The separator between items")
     )
     .addOutputs(

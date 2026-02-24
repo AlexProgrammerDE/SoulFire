@@ -46,6 +46,7 @@ public final class NodeValueTypeChecker {
       case NUMBER -> element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
       case BOOLEAN -> element.isJsonPrimitive() && element.getAsJsonPrimitive().isBoolean();
       case LIST -> element.isJsonArray();
+      case MAP -> element.isJsonObject();
       case VECTOR3 -> element.isJsonObject() || element.isJsonArray();
       case BLOCK, ENTITY, ITEM -> element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
       default -> true;

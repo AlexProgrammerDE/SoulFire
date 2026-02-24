@@ -41,5 +41,7 @@ public enum PortType {
   /// Entity reference.
   ENTITY,
   /// Item stack reference.
-  ITEM
+  ITEM,
+  /// Key-value map of entries.
+  MAP
 }

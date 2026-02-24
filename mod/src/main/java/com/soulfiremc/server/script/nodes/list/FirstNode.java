@@ -31,10 +31,10 @@ public final class FirstNode extends AbstractScriptNode {
     .displayName("First")
     .category(CategoryRegistry.LIST)
     .addInputs(
-      PortDefinition.listInput("list", "List", PortType.ANY, "The input list")
+      PortDefinition.genericListInput("list", "List", TypeDescriptor.typeVar("T"), "The input list")
     )
     .addOutputs(
-      PortDefinition.output("item", "Item", PortType.ANY, "The first item in the list"),
+      PortDefinition.genericOutput("item", "Item", TypeDescriptor.typeVar("T"), "The first item in the list"),
       PortDefinition.output("found", "Found", PortType.BOOLEAN, "Whether the list was non-empty")
     )
     .description("Gets the first item in a list")

@@ -31,7 +31,7 @@ public final class ListLengthNode extends AbstractScriptNode {
     .displayName("List Length")
     .category(CategoryRegistry.LIST)
     .addInputs(
-      PortDefinition.listInput("list", "List", PortType.ANY, "The input list")
+      PortDefinition.genericListInput("list", "List", TypeDescriptor.typeVar("T"), "The input list")
     )
     .addOutputs(
       PortDefinition.output("length", "Length", PortType.NUMBER, "Number of items in the list")

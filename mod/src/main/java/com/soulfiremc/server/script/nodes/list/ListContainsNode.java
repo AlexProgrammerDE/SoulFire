@@ -31,8 +31,8 @@ public final class ListContainsNode extends AbstractScriptNode {
     .displayName("List Contains")
     .category(CategoryRegistry.LIST)
     .addInputs(
-      PortDefinition.listInput("list", "List", PortType.ANY, "The list to search in"),
-      PortDefinition.input("item", "Item", PortType.ANY, "The item to search for")
+      PortDefinition.genericListInput("list", "List", TypeDescriptor.typeVar("T"), "The list to search in"),
+      PortDefinition.genericInput("item", "Item", TypeDescriptor.typeVar("T"), "The item to search for")
     )
     .addOutputs(
       PortDefinition.output("result", "Result", PortType.BOOLEAN, "Whether the list contains the item")

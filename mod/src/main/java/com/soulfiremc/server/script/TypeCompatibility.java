@@ -71,6 +71,14 @@ public final class TypeCompatibility {
     return compatibleSet != null && compatibleSet.contains(source);
   }
 
+  /// Checks whether a source TypeDescriptor is compatible with a target TypeDescriptor.
+  /// Handles generics, type variables, and parameterized types.
+  /// This is a non-mutating check (does not bind type variables).
+  public static boolean isDescriptorCompatible(TypeDescriptor source, TypeDescriptor target) {
+    // Use unification with a temporary bindings map
+    return TypeDescriptor.unify(source, target, TypeDescriptor.newBindings());
+  }
+
   /// Returns the compatible_from set for a given target type.
   /// Used to populate the PortTypeMetadata proto.
   public static Set<PortType> getCompatibleFrom(PortType targetType) {
