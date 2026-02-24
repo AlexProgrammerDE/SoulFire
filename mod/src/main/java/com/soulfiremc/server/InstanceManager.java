@@ -66,7 +66,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @Getter
 public final class InstanceManager {
-  public static final ThreadLocal<InstanceManager> CURRENT = new InheritableThreadLocal<>();
+  public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
   private final MetadataHolder<JsonElement> persistentMetadata = new MetadataHolder<>();

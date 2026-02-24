@@ -82,7 +82,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 public final class SoulFireServer {
-  public static final ThreadLocal<SoulFireServer> CURRENT = new InheritableThreadLocal<>();
+  public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
 
   private final SoulFireScheduler.RunnableWrapper runnableWrapper = new ServerRunnableWrapper(this);
   private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);

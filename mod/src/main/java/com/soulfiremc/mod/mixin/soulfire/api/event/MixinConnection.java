@@ -19,6 +19,7 @@ package com.soulfiremc.mod.mixin.soulfire.api.event;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.DummyPacket;
 import com.soulfiremc.server.api.event.bot.BotPacketPreReceiveEvent;
@@ -74,7 +75,7 @@ public class MixinConnection {
 
   @WrapMethod(method = "doSendPacket")
   public void wrapDoSendPacket(Packet<?> packet, @Nullable ChannelFutureListener sendListener, boolean flush, Operation<Void> original) {
-    var connection = BotConnection.CURRENT.get();
+    var connection = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get();
     var event = new BotPacketPreSendEvent(connection, packet);
     SoulFireAPI.postEvent(event);
 

@@ -79,7 +79,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Getter
 public final class BotConnection {
-  public static final ThreadLocal<BotConnection> CURRENT = new InheritableThreadLocal<>();
+  public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
