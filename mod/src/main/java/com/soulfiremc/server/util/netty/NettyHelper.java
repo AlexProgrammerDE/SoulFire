@@ -17,10 +17,8 @@
  */
 package com.soulfiremc.server.util.netty;
 
-import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.proxy.SFProxy;
 import io.netty.channel.Channel;
-import io.netty.channel.EventLoopGroup;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
@@ -67,16 +65,5 @@ public final class NettyHelper {
       }
       default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
     }
-  }
-
-  public static EventLoopGroup createEventLoopGroup(String name, SoulFireScheduler.RunnableWrapper runnableWrapper) {
-    var group =
-      TransportHelper.TRANSPORT_TYPE.eventLoopGroupFactory().apply(
-        r ->
-          Thread.ofPlatform().name(name).daemon().priority(Thread.MAX_PRIORITY).unstarted(runnableWrapper.wrap(r)));
-
-    Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().unstarted(group::shutdownGracefully));
-
-    return group;
   }
 }

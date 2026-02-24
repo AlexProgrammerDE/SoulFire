@@ -45,9 +45,9 @@ import io.netty.handler.codec.socksx.v5.Socks5PasswordAuthResponse;
 import io.netty.handler.codec.socksx.v5.Socks5PasswordAuthResponseDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5PasswordAuthStatus;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.server.network.EventLoopGroupHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -79,9 +79,10 @@ public class Socks5UdpRelayHandler extends ChannelDuplexHandler {
                       SocketAddress localAddress, ChannelPromise promise) {
     originalDestination = (InetSocketAddress) remoteAddress;
 
+    var eventLoopGroup = EventLoopGroupHolder.remote(true);
     new Bootstrap()
-      .group(ctx.channel().eventLoop())
-      .channelFactory(TransportHelper.TRANSPORT_TYPE.socketChannelFactory())
+      .group(eventLoopGroup.eventLoopGroup())
+      .channelFactory(eventLoopGroup.channelCls())
       .handler(new ChannelInitializer<>() {
         @Override
         protected void initChannel(Channel ch) {
