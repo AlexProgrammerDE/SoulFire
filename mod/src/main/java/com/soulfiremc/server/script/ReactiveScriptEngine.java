@@ -52,9 +52,6 @@ public final class ReactiveScriptEngine {
   /// Maximum number of parallel branches to execute simultaneously.
   static final int MAX_PARALLEL_BRANCHES = 8;
 
-  /// Maximum time a single node execution can take before being timed out.
-  private static final Duration NODE_EXECUTION_TIMEOUT = Duration.ofSeconds(30);
-
   /// Result of executing a single node: its outputs and the updated execution context.
   /// Used by expand() to iteratively determine the next nodes to execute.
   private record NodeExecResult(
@@ -136,8 +133,9 @@ public final class ReactiveScriptEngine {
         return Mono.empty();
       }
 
-      var run = new ExecutionRun(tickSynchronous, ExecutionRun.DEFAULT_DATA_EDGE_TIMEOUT,
-        ExecutionRun.DEFAULT_MAX_EXECUTION_COUNT, context.eventListener());
+      var quotas = context.quotas();
+      var run = new ExecutionRun(tickSynchronous, quotas.dataEdgeTimeout(),
+        quotas.maxExecutionCount(), context.eventListener());
       runHolder.set(run);
 
       var graphNode = graph.getNode(triggerNodeId);
@@ -521,8 +519,10 @@ public final class ReactiveScriptEngine {
     var startNanos = System.nanoTime();
     var nodeMono = Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs));
     // Add per-node timeout for async execution (skip for tick-synchronous to avoid interrupting tick thread)
-    if (!run.isTickSynchronous()) {
-      nodeMono = nodeMono.timeout(NODE_EXECUTION_TIMEOUT);
+    // Duration.ZERO means timeouts are disabled
+    var nodeTimeout = context.quotas().nodeExecutionTimeout();
+    if (!run.isTickSynchronous() && !nodeTimeout.isZero()) {
+      nodeMono = nodeMono.timeout(nodeTimeout);
     }
     return nodeMono
       .doOnNext(outputs -> {
@@ -764,7 +764,7 @@ public final class ReactiveScriptEngine {
     InstanceManager instance,
     ScriptEventListener eventListener
   ) {
-    var context = new ReactiveScriptContext(instance, eventListener);
+    var context = new ReactiveScriptContext(instance, eventListener, ScriptQuotasConfig.DEFAULTS);
 
     var triggers = graph.findTriggerNodes();
     if (triggers.isEmpty()) {

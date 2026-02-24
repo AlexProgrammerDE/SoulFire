@@ -270,6 +270,8 @@ message ScriptQuotas {
   optional int32 max_concurrent_triggers = 3;
   // Maximum number of entries in the script's state store.
   optional int64 max_state_store_entries = 4;
+  // When true, disables per-node and data edge timeouts entirely.
+  bool disable_timeouts = 5;
 }
 
 // Summary information about a script for listing purposes.
@@ -464,6 +466,8 @@ message CreateScriptRequest {
   // Whether the script should be created in paused state.
   // If false (default), the script starts running immediately after creation.
   bool paused = 7;
+  // Optional resource quotas for this script.
+  ScriptQuotas quotas = 8;
 }
 
 // Response after successfully creating a script.
@@ -522,6 +526,10 @@ message UpdateScriptRequest {
   // If not set, the paused setting remains unchanged.
   // If set to false and script was paused, the script will be restarted.
   optional bool paused = 10;
+  // Updated resource quotas for this script.
+  ScriptQuotas quotas = 11;
+  // Whether the quotas field should be updated (allows clearing quotas).
+  bool update_quotas = 12;
 }
 
 // Response after successfully updating a script.

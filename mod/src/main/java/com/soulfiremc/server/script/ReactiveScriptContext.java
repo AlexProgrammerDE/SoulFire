@@ -35,6 +35,7 @@ public final class ReactiveScriptContext {
   private final InstanceManager instance;
   private final Scheduler reactorScheduler;
   private final ScriptEventListener eventListener;
+  private final ScriptQuotasConfig quotas;
 
   /// For cancellation via Disposable.
   private final AtomicReference<Disposable> execution = new AtomicReference<>();
@@ -44,10 +45,12 @@ public final class ReactiveScriptContext {
   ///
   /// @param instance      the SoulFire instance
   /// @param eventListener listener for script execution events
-  public ReactiveScriptContext(InstanceManager instance, ScriptEventListener eventListener) {
+  /// @param quotas        execution quotas for this script
+  public ReactiveScriptContext(InstanceManager instance, ScriptEventListener eventListener, ScriptQuotasConfig quotas) {
     this.instance = instance;
     this.reactorScheduler = new SoulFireReactorScheduler(instance.scheduler());
     this.eventListener = eventListener;
+    this.quotas = quotas;
   }
 
   /// Creates a lightweight context for testing without an InstanceManager.
@@ -59,6 +62,7 @@ public final class ReactiveScriptContext {
     this.instance = null;
     this.reactorScheduler = Schedulers.parallel();
     this.eventListener = eventListener;
+    this.quotas = ScriptQuotasConfig.DEFAULTS;
   }
 
   public SoulFireScheduler scheduler() {

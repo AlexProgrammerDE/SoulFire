@@ -81,20 +81,13 @@ public final class ScriptTriggerService {
     var sink = Sinks.many().multicast().<Map<String, NodeValue>>onBackpressureBuffer(TRIGGER_BUFFER_SIZE);
     triggerSinks.put(sinkKey, sink);
 
-    var executing = new AtomicBoolean(false);
+    var maxConcurrent = context.quotas().maxConcurrentTriggers();
     var subscription = sink.asFlux()
-      .flatMap(inputs -> {
-        if (!executing.compareAndSet(false, true)) {
-          context.eventListener().onLog("warn", "Skipping overlapping " + triggerName + " trigger invocation");
-          return Mono.empty();
-        }
-        return engine.executeFromTrigger(graph, nodeId, context, inputs)
-          .doFinally(_ -> executing.set(false))
+      .flatMap(inputs -> engine.executeFromTrigger(graph, nodeId, context, inputs)
           .onErrorResume(e -> {
             log.error("Error in {} trigger execution", triggerName, e);
             return Mono.empty();
-          });
-      }, 1)
+          }), maxConcurrent)
       .subscribe();
     triggerSubscriptions.put(sinkKey, subscription);
 
@@ -287,7 +280,7 @@ public final class ScriptTriggerService {
               .onErrorResume(e -> {
                 log.error("Error in OnInterval trigger execution", e);
                 return Mono.empty();
-              }), 1)
+              }), context.quotas().maxConcurrentTriggers())
             .subscribe();
           triggerSubscriptions.put(sinkKey, subscription);
 

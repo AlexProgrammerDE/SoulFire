@@ -83,20 +83,24 @@ public final class ExecutionRun {
   /// @param nodeDesc human-readable node descriptor for log messages
   /// @return a Mono that completes with the node's outputs
   public Mono<Map<String, NodeValue>> awaitNodeOutputs(String nodeId, String nodeDesc) {
-    return nodeOutputSinks
+    var mono = nodeOutputSinks
       .computeIfAbsent(nodeId, _ -> Sinks.many().replay().latest())
       .asFlux()
-      .next()
-      .timeout(dataEdgeTimeout)
-      .doOnError(_ -> {
-        log.error("Timeout waiting for node {} outputs - "
-          + "DATA edge may point to a node not on the execution path", nodeDesc);
-        if (listener != null) {
-          listener.onLog("warn", "Data edge timeout (" + dataEdgeTimeout.getSeconds()
-            + "s) for node " + nodeDesc);
-        }
-      })
-      .onErrorReturn(Map.of());
+      .next();
+    // Duration.ZERO means timeouts are disabled
+    if (!dataEdgeTimeout.isZero()) {
+      mono = mono.timeout(dataEdgeTimeout)
+        .doOnError(_ -> {
+          log.error("Timeout waiting for node {} outputs - "
+            + "DATA edge may point to a node not on the execution path", nodeDesc);
+          if (listener != null) {
+            listener.onLog("warn", "Data edge timeout (" + dataEdgeTimeout.getSeconds()
+              + "s) for node " + nodeDesc);
+          }
+        })
+        .onErrorReturn(Map.of());
+    }
+    return mono;
   }
 
   /// Publishes that a node has failed, allowing consumers waiting via awaitNodeOutputs

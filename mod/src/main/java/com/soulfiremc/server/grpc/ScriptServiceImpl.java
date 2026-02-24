@@ -127,8 +127,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Create internal event listener (no stream, just logging)
       var eventListener = createInternalEventListener(scriptId);
 
+      // Parse quotas from the database record
+      var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
+
       // Create reactive context for trigger execution
-      var context = new ReactiveScriptContext(instanceManager, eventListener);
+      var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
 
       // Atomically check-and-set to avoid race condition
       var activationState = new ScriptActivationState(
@@ -320,6 +323,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .set(Tables.SCRIPTS.INSTANCE_ID, instanceId.toString())
           .set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()))
           .set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()))
+          .set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null)
           .set(Tables.SCRIPTS.PAUSED, request.getPaused())
           .set(Tables.SCRIPTS.CREATED_AT, now)
           .set(Tables.SCRIPTS.UPDATED_AT, now)
@@ -429,6 +433,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
         if (request.getUpdateEdges()) {
           update = update.set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()));
+        }
+        if (request.getUpdateQuotas()) {
+          update = update.set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null);
         }
         if (request.hasPaused()) {
           update = update.set(Tables.SCRIPTS.PAUSED, request.getPaused());
@@ -623,8 +630,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Create event listener that streams events to the client
       var eventListener = createStreamingEventListener(scriptId, observerRef);
 
+      // Parse quotas from the database record
+      var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
+
       // Create reactive context for trigger execution
-      var context = new ReactiveScriptContext(instanceManager, eventListener);
+      var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
 
       // Register triggers for event-driven execution using reactive engine
       var engine = new ReactiveScriptEngine();
@@ -1026,6 +1036,28 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     return GsonInstance.GSON.toJson(edgeDataList);
   }
 
+  private String quotasToJson(ScriptQuotas quotas) {
+    try {
+      return JsonFormat.printer().omittingInsignificantWhitespace().print(quotas);
+    } catch (InvalidProtocolBufferException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private ScriptQuotas jsonToQuotas(String json) {
+    if (json == null || json.isBlank()) {
+      return ScriptQuotas.getDefaultInstance();
+    }
+    try {
+      var builder = ScriptQuotas.newBuilder();
+      JsonFormat.parser().merge(json, builder);
+      return builder.build();
+    } catch (InvalidProtocolBufferException e) {
+      log.warn("Failed to parse quotas JSON: {}", json, e);
+      return ScriptQuotas.getDefaultInstance();
+    }
+  }
+
   private List<ScriptNode> jsonToNodes(String json) {
     List<ScriptNodeData> nodeDataList = GsonInstance.GSON.fromJson(json, NODE_LIST_TYPE);
     if (nodeDataList == null) {
@@ -1078,15 +1110,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   }
 
   private ScriptData recordToScriptData(ScriptsRecord record) {
-    return ScriptData.newBuilder()
+    var builder = ScriptData.newBuilder()
       .setId(record.getId())
       .setName(record.getName())
       .setDescription(record.getDescription() != null ? record.getDescription() : "")
       .setInstanceId(record.getInstanceId())
       .addAllNodes(jsonToNodes(record.getNodesJson()))
       .addAllEdges(jsonToEdges(record.getEdgesJson()))
-      .setPaused(record.getPaused())
-      .build();
+      .setPaused(record.getPaused());
+
+    var quotas = jsonToQuotas(record.getQuotasJson());
+    if (!quotas.equals(ScriptQuotas.getDefaultInstance())) {
+      builder.setQuotas(quotas);
+    }
+
+    return builder.build();
   }
 
   private ScriptInfo recordToScriptInfo(ScriptsRecord record) {
