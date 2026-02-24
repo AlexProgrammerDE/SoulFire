@@ -19,6 +19,7 @@ package com.soulfiremc.test.mixin;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Closeables;
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 import lombok.SneakyThrows;
 import net.lenni0451.reflect.Agents;
 import org.objectweb.asm.ClassReader;
@@ -126,6 +127,7 @@ public class AgentMixinService extends MixinServiceAbstract implements IClassPro
     return basicClass;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public URL[] getClassPath() {
     return new URL[0];

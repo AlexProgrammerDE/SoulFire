@@ -68,12 +68,22 @@ public final class NodeValueTypeChecker {
   private static String describeJsonType(JsonElement element) {
     if (element.isJsonPrimitive()) {
       var prim = element.getAsJsonPrimitive();
-      if (prim.isNumber()) return "Number";
-      if (prim.isBoolean()) return "Boolean";
-      if (prim.isString()) return "String";
+      if (prim.isNumber()) {
+        return "Number";
+      }
+      if (prim.isBoolean()) {
+        return "Boolean";
+      }
+      if (prim.isString()) {
+        return "String";
+      }
     }
-    if (element.isJsonArray()) return "List";
-    if (element.isJsonObject()) return "Object";
+    if (element.isJsonArray()) {
+      return "List";
+    }
+    if (element.isJsonObject()) {
+      return "Object";
+    }
     return "Unknown";
   }
 

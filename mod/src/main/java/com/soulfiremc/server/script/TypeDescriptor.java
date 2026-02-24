@@ -143,12 +143,8 @@ public sealed interface TypeDescriptor {
       && resolvedB instanceof Parameterized(PortType baseB, List<TypeDescriptor> _) && baseB == PortType.MAP) {
       return true;
     }
-    if (resolvedB instanceof Simple(PortType typeB) && typeB == PortType.MAP
-      && resolvedA instanceof Parameterized(PortType baseA, List<TypeDescriptor> _) && baseA == PortType.MAP) {
-      return true;
-    }
-
-    return false;
+    return resolvedB instanceof Simple(PortType typeB) && typeB == PortType.MAP
+      && resolvedA instanceof Parameterized(PortType baseA, List<TypeDescriptor> _) && baseA == PortType.MAP;
   }
 
   /// Creates a fresh bindings map for unification.

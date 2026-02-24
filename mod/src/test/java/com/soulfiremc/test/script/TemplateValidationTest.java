@@ -48,7 +48,7 @@ final class TemplateValidationTest {
 
   @ParameterizedTest(name = "template: {0}")
   @MethodSource("templateFiles")
-  void templateBuildsWithoutErrors(String filename) throws IOException {
+  void templateBuildsWithoutErrors(String filename) throws Exception {
     var template = loadTemplate(filename);
 
     var builder = ScriptGraph.builder("template-" + filename, filename);

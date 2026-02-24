@@ -600,7 +600,7 @@ public final class ScriptGraph {
         for (var edge : edges) {
           if (edge.edgeType() == EdgeType.EXECUTION
             && edge.sourceNodeId().equals(node.id())
-            && edge.sourceHandle().equals(StandardPorts.EXEC_CHECK)) {
+            && StandardPorts.EXEC_CHECK.equals(edge.sourceHandle())) {
             if (checkReachable.add(edge.targetNodeId())) {
               checkQueue.add(edge.targetNodeId());
             }

@@ -990,12 +990,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     return builder.build();
   }
 
-  private com.soulfiremc.grpc.generated.TypeDescriptor typeDescriptorToProto(com.soulfiremc.server.script.TypeDescriptor td) {
-    var builder = com.soulfiremc.grpc.generated.TypeDescriptor.newBuilder();
+  private TypeDescriptor typeDescriptorToProto(com.soulfiremc.server.script.TypeDescriptor td) {
+    var builder = TypeDescriptor.newBuilder();
     switch (td) {
       case com.soulfiremc.server.script.TypeDescriptor.Simple(com.soulfiremc.server.script.PortType type) ->
         builder.setSimple(portTypeToProto(type));
-      case com.soulfiremc.server.script.TypeDescriptor.Parameterized(com.soulfiremc.server.script.PortType base, java.util.List<com.soulfiremc.server.script.TypeDescriptor> params) -> {
+      case com.soulfiremc.server.script.TypeDescriptor.Parameterized(com.soulfiremc.server.script.PortType base, List<com.soulfiremc.server.script.TypeDescriptor> params) -> {
         var paramBuilder = ParameterizedType.newBuilder()
           .setBase(portTypeToProto(base));
         for (var param : params) {
@@ -1893,7 +1893,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   }
 
   /// Converts a proto Value to a NodeValue.
-  private static NodeValue protoValueToNodeValue(com.google.protobuf.Value value) {
+  private static NodeValue protoValueToNodeValue(Value value) {
     return switch (value.getKindCase()) {
       case NUMBER_VALUE -> NodeValue.ofNumber(value.getNumberValue());
       case STRING_VALUE -> NodeValue.ofString(value.getStringValue());

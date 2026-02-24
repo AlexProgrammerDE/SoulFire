@@ -668,7 +668,7 @@ final class ScriptEngineTest {
 
     assertNoErrors(listener);
     assertEquals(2, listener.logMessages.size(), "Should have 2 log messages");
-    assertEquals("§aFrom trigger", listener.logMessages.get(0),
+    assertEquals("§aFrom trigger", listener.logMessages.getFirst(),
       "print1 (no graph default) should receive message from exec context");
     assertEquals("custom", listener.logMessages.get(1),
       "print2 (has graph default) must keep its graph default, not exec context");
@@ -709,7 +709,7 @@ final class ScriptEngineTest {
 
     assertEquals(2, listener.logMessages.size(),
       "Both prints should log, got: " + listener.logMessages);
-    assertEquals("shards", listener.logMessages.get(0),
+    assertEquals("shards", listener.logMessages.getFirst(),
       "print1 should receive 'shards' from constant via off-path DATA edge");
     assertEquals("shards", listener.logMessages.get(1),
       "print2 should receive 'shards' from constant, overriding graph default ''");

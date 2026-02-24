@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /// Reactive execution engine for visual scripts.
@@ -140,7 +141,7 @@ public final class ReactiveScriptEngine {
       invocationScheduler = baseScheduler;
     }
 
-    var runHolder = new java.util.concurrent.atomic.AtomicReference<ExecutionRun>();
+    var runHolder = new AtomicReference<ExecutionRun>();
     var mono = Mono.<Void>defer(() -> {
       if (context.isCancelled()) {
         return Mono.empty();

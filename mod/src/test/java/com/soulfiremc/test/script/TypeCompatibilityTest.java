@@ -37,7 +37,9 @@ final class TypeCompatibilityTest {
   @Test
   void anyAcceptsEverything() {
     for (var type : PortType.values()) {
-      if (type == PortType.EXEC) continue;
+      if (type == PortType.EXEC) {
+        continue;
+      }
       assertTrue(TypeCompatibility.isCompatible(type, PortType.ANY),
         type + " should be accepted by ANY target");
       assertTrue(TypeCompatibility.isCompatible(PortType.ANY, type),
@@ -48,7 +50,9 @@ final class TypeCompatibilityTest {
   @Test
   void stringAcceptsEverything() {
     for (var type : PortType.values()) {
-      if (type == PortType.EXEC) continue;
+      if (type == PortType.EXEC) {
+        continue;
+      }
       assertTrue(TypeCompatibility.isCompatible(type, PortType.STRING),
         type + " should be accepted by STRING target");
     }
@@ -71,12 +75,18 @@ final class TypeCompatibilityTest {
   @Test
   void compatibleFromMatchesIsCompatible() {
     for (var target : PortType.values()) {
-      if (target == PortType.EXEC) continue;
+      if (target == PortType.EXEC) {
+        continue;
+      }
       var compatibleSet = TypeCompatibility.getCompatibleFrom(target);
       for (var source : PortType.values()) {
-        if (source == PortType.EXEC || source == target) continue;
+        if (source == PortType.EXEC || source == target) {
+          continue;
+        }
         // ANY always matches via isCompatible but may not be in compatibleFrom
-        if (source == PortType.ANY || target == PortType.ANY || target == PortType.STRING) continue;
+        if (source == PortType.ANY || target == PortType.ANY || target == PortType.STRING) {
+          continue;
+        }
         var inSet = compatibleSet.contains(source);
         var isCompat = TypeCompatibility.isCompatible(source, target);
         assertEquals(inSet, isCompat,

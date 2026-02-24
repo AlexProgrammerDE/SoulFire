@@ -43,10 +43,14 @@ public final class TypePropagation {
 
     // Initialize known types from node metadata outputs (concrete types only)
     for (var node : nodes.values()) {
-      if (!NodeRegistry.isRegistered(node.type())) continue;
+      if (!NodeRegistry.isRegistered(node.type())) {
+        continue;
+      }
       var metadata = NodeRegistry.getMetadata(node.type());
       for (var output : metadata.outputs()) {
-        if (output.type() == PortType.EXEC) continue;
+        if (output.type() == PortType.EXEC) {
+          continue;
+        }
         var td = output.effectiveTypeDescriptor();
         if (!td.hasTypeVariables()) {
           inferredDescriptors.put(node.id() + ":" + output.id(), td);
@@ -73,16 +77,22 @@ public final class TypePropagation {
         var targetKey = edge.targetNodeId() + ":" + edge.targetHandle();
 
         var sourceDescriptor = inferredDescriptors.get(sourceKey);
-        if (sourceDescriptor == null) continue;
+        if (sourceDescriptor == null) {
+          continue;
+        }
 
         // Look up target port
         var targetNode = nodes.get(edge.targetNodeId());
-        if (targetNode == null || !NodeRegistry.isRegistered(targetNode.type())) continue;
+        if (targetNode == null || !NodeRegistry.isRegistered(targetNode.type())) {
+          continue;
+        }
         var targetMeta = NodeRegistry.getMetadata(targetNode.type());
 
         var targetPort = targetMeta.inputs().stream()
           .filter(p -> p.id().equals(edge.targetHandle())).findFirst();
-        if (targetPort.isEmpty()) continue;
+        if (targetPort.isEmpty()) {
+          continue;
+        }
 
         var targetDescriptor = targetPort.get().effectiveTypeDescriptor();
 
@@ -106,7 +116,9 @@ public final class TypePropagation {
 
               // Propagate resolved types to outputs that share type variables
               for (var output : targetMeta.outputs()) {
-                if (output.type() == PortType.EXEC) continue;
+                if (output.type() == PortType.EXEC) {
+                  continue;
+                }
                 var outputDescriptor = output.effectiveTypeDescriptor();
                 if (outputDescriptor.hasTypeVariables()) {
                   var resolvedOutput = outputDescriptor.resolve(bindings);
@@ -141,7 +153,9 @@ public final class TypePropagation {
 
               // Propagate to ANY outputs of the same node (legacy passthrough)
               for (var output : targetMeta.outputs()) {
-                if (output.type() == PortType.EXEC) continue;
+                if (output.type() == PortType.EXEC) {
+                  continue;
+                }
                 var outputDescriptor = output.effectiveTypeDescriptor();
                 if (outputDescriptor instanceof TypeDescriptor.Simple(PortType outType) && outType == PortType.ANY) {
                   var outKey = edge.targetNodeId() + ":" + output.id();
