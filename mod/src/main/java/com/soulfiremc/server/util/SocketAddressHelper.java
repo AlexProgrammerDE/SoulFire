@@ -57,6 +57,9 @@ public final class SocketAddressHelper {
       case "inet" -> {
         var host = uri.getHost();
         var port = uri.getPort();
+        if (host == null || port == -1) {
+          throw new IllegalArgumentException("Invalid inet address, expected format 'inet://host:port' but got: " + uriString);
+        }
         yield new InetSocketAddress(host, port);
       }
       case "unix" -> {
