@@ -243,6 +243,28 @@ public final class SoulFireScheduler implements Executor {
       wrap(runnable).run();
     }
 
+    default <T> Callable<T> wrap(Callable<T> callable) {
+      return () -> {
+        var result = new Object() {
+          T value;
+        };
+        final var runnable = (Runnable) () -> {
+          try {
+            result.value = callable.call();
+          } catch (Exception e) {
+            throw new CatchableException(e);
+          }
+        };
+
+        try {
+          wrap(runnable).run();
+        } catch (CatchableException e) {
+          throw e.exception;
+        }
+        return result.value;
+      };
+    }
+
     default void runWrappedWithIOException(RunnableIOException runnable) throws IOException {
       try {
         wrap(() -> {
@@ -254,6 +276,15 @@ public final class SoulFireScheduler implements Executor {
         }).run();
       } catch (UncheckedIOException e) {
         throw e.getCause();
+      }
+    }
+
+    class CatchableException extends RuntimeException {
+      private final Exception exception;
+
+      public CatchableException(Exception cause) {
+        super(cause);
+        this.exception = cause;
       }
     }
   }

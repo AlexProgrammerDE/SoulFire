@@ -49,6 +49,7 @@ public class MixinMinecraft implements IMinecraft {
     var currentInstance = SFConstants.MINECRAFT_INSTANCE.get();
     if (currentInstance == null) {
       // new RuntimeException().printStackTrace();
+      cir.setReturnValue(null);
     } else {
       cir.setReturnValue(currentInstance);
     }
@@ -61,7 +62,7 @@ public class MixinMinecraft implements IMinecraft {
   }
 
   @Inject(method = "<init>", at = @At("RETURN"))
-  private void getInstance(GameConfig gameConfig, CallbackInfo ci) {
+  private void setGaeConfig(GameConfig gameConfig, CallbackInfo ci) {
     soulfire$setGameConfig(gameConfig);
   }
 
