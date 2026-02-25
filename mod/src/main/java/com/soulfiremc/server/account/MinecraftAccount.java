@@ -23,6 +23,7 @@ import com.soulfiremc.server.account.service.AccountData;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
+import com.soulfiremc.server.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.util.SFHelpers;
 import lombok.With;
@@ -60,6 +61,7 @@ public record MinecraftAccount(
       account.getLastKnownName(),
       switch (account.getAccountDataCase()) {
         case ONLINE_CHAIN_JAVA_DATA -> OnlineChainJavaData.fromProto(account.getOnlineChainJavaData());
+        case ONLINE_SIMPLE_JAVA_DATA -> OnlineSimpleJavaData.fromProto(account.getOnlineSimpleJavaData());
         case OFFLINE_JAVA_DATA -> OfflineJavaData.fromProto(account.getOfflineJavaData());
         case BEDROCK_DATA -> BedrockData.fromProto(account.getBedrockData());
         case ACCOUNTDATA_NOT_SET -> throw new IllegalArgumentException("AccountData not set");
@@ -85,6 +87,7 @@ public record MinecraftAccount(
       case BedrockData bedrockData -> () -> builder.setBedrockData(bedrockData.toProto());
       case OfflineJavaData offlineJavaData -> () -> builder.setOfflineJavaData(offlineJavaData.toProto());
       case OnlineChainJavaData onlineChainJavaData -> () -> builder.setOnlineChainJavaData(onlineChainJavaData.toProto());
+      case OnlineSimpleJavaData onlineSimpleJavaData -> () -> builder.setOnlineSimpleJavaData(onlineSimpleJavaData.toProto());
     });
 
     // Add persistent metadata

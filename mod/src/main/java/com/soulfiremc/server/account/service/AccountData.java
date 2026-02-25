@@ -17,5 +17,5 @@
  */
 package com.soulfiremc.server.account.service;
 
-public sealed interface AccountData permits BedrockData, OfflineJavaData, OnlineChainJavaData {
+public sealed interface AccountData permits BedrockData, OfflineJavaData, OnlineChainJavaData, OnlineSimpleJavaData {
 }

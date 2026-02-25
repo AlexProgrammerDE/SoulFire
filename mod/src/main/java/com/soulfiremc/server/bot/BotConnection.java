@@ -28,6 +28,7 @@ import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
+import com.soulfiremc.server.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
@@ -169,6 +170,7 @@ public final class BotConnection {
         case BedrockData ignored -> "bedrock";
         case OfflineJavaData ignored -> "offline";
         case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getJavaAuthManager(proxy).getMinecraftToken().getUpToDateUnchecked().getToken();
+        case OnlineSimpleJavaData onlineSimpleJavaData -> onlineSimpleJavaData.accessToken();
       },
       Optional.empty(),
       Optional.empty()

@@ -21,6 +21,7 @@ import com.mojang.util.UndashedUuid;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
+import com.soulfiremc.server.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.netty.handler.codec.http.HttpStatusClass;
@@ -40,11 +41,12 @@ public final class SFSessionService {
   public void joinServer(String serverId) {
     var account = botConnection.settingsSource().stem();
     var joinEndpoint = switch (account.authType()) {
-      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN, MICROSOFT_JAVA_COOKIES -> MOJANG_JOIN_URI;
+      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN, MICROSOFT_JAVA_COOKIES, MICROSOFT_JAVA_ACCESS_TOKEN -> MOJANG_JOIN_URI;
       case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Server does not support auth type: " + account.authType());
     };
     var authenticationToken = switch (account.accountData()) {
       case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getJavaAuthManager(botConnection.proxy()).getMinecraftToken().getUpToDateUnchecked().getToken();
+      case OnlineSimpleJavaData onlineSimpleJavaData -> onlineSimpleJavaData.accessToken();
       case OfflineJavaData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
       case BedrockData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
     };

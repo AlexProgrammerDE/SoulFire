@@ -70,6 +70,11 @@ enum AccountTypeCredentials {
   // Exchanges cookies for a refresh token, then authenticates normally.
   // Payload format: cookie string (Netscape jar, Cookie Editor JSON, or raw header).
   MICROSOFT_JAVA_COOKIES = 6;
+  // Microsoft Java Edition authentication using a raw Minecraft access token.
+  // The token is validated by fetching the profile from Mojang's API.
+  // Cannot be refreshed; used until expiry.
+  // Payload format: raw JWT access token string.
+  MICROSOFT_JAVA_ACCESS_TOKEN = 7;
 }
 
 // Authentication service types that use the OAuth 2.0 Device Code flow.
@@ -117,6 +122,9 @@ message MinecraftAccountProto {
     // Authenticated via Microsoft Java browser cookies.
     // Account data stored in OnlineChainJavaData.
     MICROSOFT_JAVA_COOKIES = 8;
+    // Authenticated via raw Minecraft Java access token.
+    // Account data stored in OnlineSimpleJavaData.
+    MICROSOFT_JAVA_ACCESS_TOKEN = 9;
   }
 
   // Authentication chain data for online Java Edition accounts.
@@ -135,6 +143,16 @@ message MinecraftAccountProto {
   message OfflineJavaData {
     // Empty message - offline accounts have no persistent auth data.
     // UUID is calculated as: UUID.nameUUIDFromBytes("OfflinePlayer:<username>")
+  }
+
+  // Account data for Java Edition accounts authenticated with a raw access token.
+  // Contains only the token and its expiry, without a full authentication chain.
+  // Cannot be refreshed; used until the token expires.
+  message OnlineSimpleJavaData {
+    // The raw Minecraft access token (JWT).
+    string access_token = 1;
+    // Token expiry time in milliseconds since epoch.
+    int64 expire_time_ms = 2;
   }
 
   // Authentication chain data for Bedrock Edition accounts.
@@ -169,6 +187,8 @@ message MinecraftAccountProto {
     OfflineJavaData offline_java_data = 6;
     // Authentication chain for Bedrock accounts (Microsoft-authenticated).
     BedrockData bedrock_data = 7;
+    // Data for Java accounts authenticated with a raw access token.
+    OnlineSimpleJavaData online_simple_java_data = 10;
   }
   // Per-bot configuration settings stored with the account.
   // Organized as namespace -> key -> value mappings.
