@@ -37,9 +37,9 @@ public final class MSJavaCookiesAuthService
   public CompletableFuture<MinecraftAccount> login(MSJavaCookiesAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        var refreshToken = MSLiveCookieHelper.exchangeForRefreshToken(data.cookieInput, proxyData);
+        var cookieHeader = MSLiveCookieHelper.parseCookieHeader(data.cookieInput);
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
-          .login(refreshToken);
+          .login(CookieMsaAuthService::new, cookieHeader);
         return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_COOKIES, authManager, null);
       } catch (Exception e) {
         throw new CompletionException(e);

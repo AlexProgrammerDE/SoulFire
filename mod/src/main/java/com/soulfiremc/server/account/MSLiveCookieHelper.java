@@ -18,52 +18,20 @@
 package com.soulfiremc.server.account;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.soulfiremc.server.proxy.SFProxy;
-import com.soulfiremc.server.util.ReactorHttpHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpStatusClass;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufFlux;
 
-import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.time.Duration;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-
-/// Utility for exchanging Microsoft Live cookies for a Minecraft-compatible refresh token.
+/// Utility for parsing various cookie input formats into a Cookie header string
+/// suitable for Microsoft Live authentication.
 ///
 /// Supports three cookie input formats:
 /// - Netscape cookie jar (tab-separated, e.g. from curl or browser export)
 /// - Cookie Editor JSON (array of objects with domain/name/value)
 /// - Raw cookie header string (semicolon-separated name=value pairs)
 public final class MSLiveCookieHelper {
-  private static final String CLIENT_ID = "00000000402b5328";
-  private static final String REDIRECT_URI = "https://login.live.com/oauth20_desktop.srf";
-  private static final String SCOPE = "service::user.auth.xboxlive.com::MBI_SSL";
-  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
   private MSLiveCookieHelper() {}
 
-  /// Parses a cookie input string and exchanges it with Microsoft Live for a refresh token.
-  public static String exchangeForRefreshToken(String cookieInput, @Nullable SFProxy proxyData) {
-    var cookieHeader = parseCookieHeader(cookieInput);
-    var verifier = generatePkceVerifier();
-    var challenge = computePkceChallenge(verifier);
-    var code = obtainAuthorizationCode(cookieHeader, challenge, proxyData);
-    return exchangeCodeForRefreshToken(code, verifier, proxyData);
-  }
-
-  // Visible for testing
-  static String parseCookieHeader(String cookieInput) {
+  /// Parses a cookie input string (in any supported format) into a Cookie header value.
+  public static String parseCookieHeader(String cookieInput) {
     var input = stripEnclosingQuotes(cookieInput.strip());
     if (input.isEmpty()) {
       throw new IllegalArgumentException("Empty cookie input");
@@ -94,131 +62,6 @@ public final class MSLiveCookieHelper {
     }
 
     throw new IllegalArgumentException("Unrecognized cookie format");
-  }
-
-  private static String obtainAuthorizationCode(String cookieHeader, String challenge, @Nullable SFProxy proxyData) {
-    var authorizeUri = URI.create(
-      "https://login.live.com/oauth20_authorize.srf"
-        + "?client_id=" + urlEncode(CLIENT_ID)
-        + "&response_type=code"
-        + "&response_mode=query"
-        + "&redirect_uri=" + urlEncode(REDIRECT_URI)
-        + "&scope=" + urlEncode(SCOPE)
-        + "&prompt=none"
-        + "&code_challenge=" + urlEncode(challenge)
-        + "&code_challenge_method=S256"
-    );
-
-    var location = ReactorHttpHelper.createReactorClient(proxyData, false)
-      .responseTimeout(Duration.ofSeconds(20))
-      .followRedirect(false)
-      .headers(h -> h.set(HttpHeaderNames.COOKIE, cookieHeader))
-      .get()
-      .uri(authorizeUri)
-      .responseSingle((res, content) -> {
-        if (res.status().codeClass() != HttpStatusClass.REDIRECTION) {
-          return content.asString(StandardCharsets.UTF_8)
-            .defaultIfEmpty("")
-            .flatMap(_ -> Mono.error(
-              new IllegalStateException("Unexpected authorize response: " + res.status().code())
-            ));
-        }
-        return Mono.justOrEmpty(res.responseHeaders().get(HttpHeaderNames.LOCATION));
-      })
-      .block();
-
-    if (location == null || location.isEmpty()) {
-      throw new IllegalStateException("Missing authorize redirect location");
-    }
-
-    var redirect = URI.create(location);
-    var expectedRedirect = URI.create(REDIRECT_URI);
-    if (redirect.getHost() == null
-      || !expectedRedirect.getHost().equalsIgnoreCase(redirect.getHost())
-      || !expectedRedirect.getPath().equals(redirect.getPath())) {
-      throw new IllegalStateException("Unexpected redirect to " + redirect.getHost() + redirect.getPath());
-    }
-
-    var params = parseQueryParams(redirect.getRawQuery());
-    var error = params.get("error");
-    if (error != null && !error.isEmpty()) {
-      var description = params.getOrDefault("error_description", "");
-      var suffix = description.isEmpty() ? "" : ": " + description;
-      throw new IllegalStateException("Authorize error " + error + suffix);
-    }
-
-    var code = params.get("code");
-    if (code == null || code.isEmpty()) {
-      throw new IllegalStateException("Missing authorization code in redirect");
-    }
-
-    return code;
-  }
-
-  private static String exchangeCodeForRefreshToken(String code, String verifier, @Nullable SFProxy proxyData) {
-    var tokenBody =
-      "client_id=" + urlEncode(CLIENT_ID)
-        + "&redirect_uri=" + urlEncode(REDIRECT_URI)
-        + "&scope=" + urlEncode(SCOPE)
-        + "&grant_type=authorization_code"
-        + "&code=" + urlEncode(code)
-        + "&code_verifier=" + urlEncode(verifier);
-
-    var tokenJson = ReactorHttpHelper.createReactorClient(proxyData, false)
-      .responseTimeout(Duration.ofSeconds(20))
-      .headers(h -> h.set(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded"))
-      .post()
-      .uri(URI.create("https://login.live.com/oauth20_token.srf"))
-      .send(ByteBufFlux.fromString(Mono.just(tokenBody)))
-      .responseSingle((res, content) -> {
-        if (res.status().codeClass() != HttpStatusClass.SUCCESS) {
-          return content.asString(StandardCharsets.UTF_8)
-            .defaultIfEmpty("")
-            .flatMap(body -> Mono.error(
-              new IllegalStateException("Token exchange failed " + res.status().code() + extractOAuthError(body))
-            ));
-        }
-        return content.asString(StandardCharsets.UTF_8);
-      })
-      .block();
-
-    if (tokenJson == null || tokenJson.isEmpty()) {
-      throw new IllegalStateException("Empty token response");
-    }
-
-    JsonObject obj;
-    try {
-      obj = GsonInstance.GSON.fromJson(tokenJson, JsonObject.class);
-    } catch (Exception e) {
-      throw new IllegalStateException("Invalid token response JSON", e);
-    }
-
-    if (obj == null || !obj.has("refresh_token")) {
-      throw new IllegalStateException("Missing refresh_token in token response");
-    }
-
-    var refreshToken = obj.get("refresh_token").getAsString();
-    if (refreshToken == null || refreshToken.isEmpty()) {
-      throw new IllegalStateException("Empty refresh_token in token response");
-    }
-
-    return refreshToken;
-  }
-
-  private static String generatePkceVerifier() {
-    var bytes = new byte[32];
-    SECURE_RANDOM.nextBytes(bytes);
-    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
-  }
-
-  private static String computePkceChallenge(String verifier) {
-    try {
-      var digest = MessageDigest.getInstance("SHA-256");
-      var hash = digest.digest(verifier.getBytes(StandardCharsets.US_ASCII));
-      return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
-    } catch (Exception e) {
-      throw new IllegalStateException("SHA-256 not available", e);
-    }
   }
 
   private static boolean looksLikeCookieJar(String input) {
@@ -373,52 +216,5 @@ public final class MSLiveCookieHelper {
       d = d.substring(0, slash);
     }
     return d.strip();
-  }
-
-  private static String extractOAuthError(@Nullable String body) {
-    if (body == null || body.isBlank()) {
-      return "";
-    }
-
-    try {
-      var obj = GsonInstance.GSON.fromJson(body.strip(), JsonObject.class);
-      if (obj != null && obj.has("error")) {
-        var err = obj.get("error").getAsString();
-        var desc = obj.has("error_description") ? obj.get("error_description").getAsString() : null;
-        if (desc != null && !desc.isEmpty()) {
-          return " (%s: %s)".formatted(err, desc.length() > 200 ? desc.substring(0, 200) : desc);
-        }
-        return " (%s)".formatted(err);
-      }
-    } catch (Exception ignored) {
-    }
-
-    return "";
-  }
-
-  private static Map<String, String> parseQueryParams(@Nullable String rawQuery) {
-    var out = new HashMap<String, String>();
-    if (rawQuery == null || rawQuery.isEmpty()) {
-      return out;
-    }
-
-    for (var pair : rawQuery.split("&")) {
-      if (pair.isEmpty()) {
-        continue;
-      }
-      var idx = pair.indexOf('=');
-      var key = idx >= 0 ? pair.substring(0, idx) : pair;
-      var value = idx >= 0 ? pair.substring(idx + 1) : "";
-      out.put(urlDecode(key), urlDecode(value));
-    }
-    return out;
-  }
-
-  private static String urlEncode(String v) {
-    return URLEncoder.encode(v, StandardCharsets.UTF_8);
-  }
-
-  private static String urlDecode(String v) {
-    return URLDecoder.decode(v, StandardCharsets.UTF_8);
   }
 }

@@ -40,7 +40,7 @@ public final class SFSessionService {
   public void joinServer(String serverId) {
     var account = botConnection.settingsSource().stem();
     var joinEndpoint = switch (account.authType()) {
-      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
+      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN, MICROSOFT_JAVA_COOKIES -> MOJANG_JOIN_URI;
       case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Server does not support auth type: " + account.authType());
     };
     var authenticationToken = switch (account.accountData()) {
