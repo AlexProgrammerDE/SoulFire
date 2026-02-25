@@ -22,6 +22,7 @@ import io.netty.util.AttributeKey;
 import net.minecraft.client.Minecraft;
 
 public final class SFConstants {
+  public static boolean NOT_REGISTRY_INIT_PHASE = true;
   public static final ThreadLocal<Minecraft> MINECRAFT_INSTANCE = new ThreadLocal<>();
   public static final AttributeKey<BotConnection> NETTY_BOT_CONNECTION = AttributeKey.valueOf("soulfire_bot_connection");
   public static Minecraft BASE_MC_INSTANCE;

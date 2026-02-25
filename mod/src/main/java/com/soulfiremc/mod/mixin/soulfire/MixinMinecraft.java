@@ -48,8 +48,12 @@ public class MixinMinecraft implements IMinecraft {
   private static void getInstance(CallbackInfoReturnable<Minecraft> cir) {
     var currentInstance = SFConstants.MINECRAFT_INSTANCE.get();
     if (currentInstance == null) {
-      // new RuntimeException().printStackTrace();
-      cir.setReturnValue(null);
+      if (SFConstants.NOT_REGISTRY_INIT_PHASE) {
+        new RuntimeException().printStackTrace();
+        throw new IllegalStateException("Minecraft instance is null");
+      } else {
+        cir.setReturnValue(null);
+      }
     } else {
       cir.setReturnValue(currentInstance);
     }

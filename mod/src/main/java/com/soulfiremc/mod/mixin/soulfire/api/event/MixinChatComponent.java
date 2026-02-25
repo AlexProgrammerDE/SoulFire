@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinChatComponent {
   @Inject(method = "logChatMessage", at = @At("HEAD"), cancellable = true)
   public void logChatMessage(GuiMessage message, CallbackInfo ci) {
-    SoulFireAPI.postEvent(new ChatMessageReceiveEvent(BotConnection.CURRENT.get(), System.currentTimeMillis(), SFHelpers.nativeToAdventure(message.content())));
+    SoulFireAPI.postEvent(new ChatMessageReceiveEvent(BotConnection.current(), System.currentTimeMillis(), SFHelpers.nativeToAdventure(message.content())));
     ci.cancel();
   }
 }

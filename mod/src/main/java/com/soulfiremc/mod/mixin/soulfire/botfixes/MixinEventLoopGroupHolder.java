@@ -45,7 +45,7 @@ public class MixinEventLoopGroupHolder {
 
   @Inject(method = "remote", at = @At("HEAD"), cancellable = true)
   private static void allowIoUring(boolean allowNativeTransport, CallbackInfoReturnable<EventLoopGroupHolder> cir) {
-    var connection = BotConnection.CURRENT.get();
+    var connection = BotConnection.current();
     if (allowNativeTransport
       && connection != null
       && connection.settingsSource().get(BotSettings.USE_IO_URING)

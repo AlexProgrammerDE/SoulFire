@@ -36,7 +36,7 @@ public class MixinPacketListener$ListenerAndPacket {
 
   @WrapOperation(method = "handle()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketListener;onPacketError(Lnet/minecraft/network/protocol/Packet;Ljava/lang/Exception;)V"))
   public void onPacketError(PacketListener instance, Packet<?> packet, Exception exception, Operation<Void> original) {
-    if (BotConnection.CURRENT.get().settingsSource().get(BotSettings.IGNORE_PACKET_HANDLING_ERRORS)) {
+    if (BotConnection.current().settingsSource().get(BotSettings.IGNORE_PACKET_HANDLING_ERRORS)) {
       log.warn("Ignoring packet handling error", exception);
       return;
     }

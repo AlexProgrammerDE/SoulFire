@@ -31,11 +31,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinClientLevel {
   @Inject(method = "tickEntities", at = @At("HEAD"))
   private void onEntityTickPre(CallbackInfo ci) {
-    SoulFireAPI.postEvent(new BotPreEntityTickEvent(BotConnection.CURRENT.get()));
+    SoulFireAPI.postEvent(new BotPreEntityTickEvent(BotConnection.current()));
   }
 
   @Inject(method = "tickEntities", at = @At("RETURN"))
   private void onEntityTickPost(CallbackInfo ci) {
-    SoulFireAPI.postEvent(new BotPostEntityTickEvent(BotConnection.CURRENT.get()));
+    SoulFireAPI.postEvent(new BotPostEntityTickEvent(BotConnection.current()));
   }
 }

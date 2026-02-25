@@ -35,12 +35,12 @@ public class MixinClientCommandInternals {
 
   @Redirect(method = "*", at = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/impl/command/client/ClientCommandInternals;activeDispatcher:Lcom/mojang/brigadier/CommandDispatcher;", opcode = Opcodes.GETSTATIC), remap = false)
   private static CommandDispatcher<FabricClientCommandSource> getActiveDispatcher() {
-    return BotConnection.CURRENT.get().metadata().get(ACTIVE_COMMAND_DISPATCHER_KEY);
+    return BotConnection.current().metadata().get(ACTIVE_COMMAND_DISPATCHER_KEY);
   }
 
   @Redirect(method = "*", at = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/impl/command/client/ClientCommandInternals;activeDispatcher:Lcom/mojang/brigadier/CommandDispatcher;", opcode = Opcodes.PUTSTATIC), remap = false)
   private static void setActiveDispatcher(CommandDispatcher<FabricClientCommandSource> addon) {
-    var metadataHolder = BotConnection.CURRENT.get().metadata();
+    var metadataHolder = BotConnection.current().metadata();
     if (addon == null) {
       metadataHolder.remove(ACTIVE_COMMAND_DISPATCHER_KEY);
     } else {

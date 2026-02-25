@@ -66,10 +66,7 @@ import net.minecraft.server.network.EventLoopGroupHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.net.Proxy;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -79,7 +76,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @Getter
 public final class BotConnection {
-  public static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
+  private static final ThreadLocal<BotConnection> CURRENT = new ThreadLocal<>();
   private final List<Runnable> shutdownHooks = new CopyOnWriteArrayList<>();
   private final Queue<Runnable> preTickHooks = new ConcurrentLinkedQueue<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
@@ -103,6 +100,22 @@ public final class BotConnection {
   @Setter
   private ProtocolVersion currentProtocolVersion;
   private boolean isDisconnected;
+
+  public static BotConnection current() {
+    var current = CURRENT.get();
+    if (!SFConstants.NOT_REGISTRY_INIT_PHASE) {
+      return current;
+    }
+
+    if (current == null) {
+      new RuntimeException().printStackTrace();
+    }
+    return Objects.requireNonNull(current, "No bot connection in current thread");
+  }
+
+  public static Optional<BotConnection> currentOptional() {
+    return Optional.ofNullable(CURRENT.get());
+  }
 
   public BotConnection(
     BotConnectionFactory factory,

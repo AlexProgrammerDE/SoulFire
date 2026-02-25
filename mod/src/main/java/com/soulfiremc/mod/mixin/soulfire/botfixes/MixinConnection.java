@@ -41,9 +41,9 @@ import java.util.concurrent.TimeUnit;
 public class MixinConnection {
   @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Lio/netty/bootstrap/Bootstrap;group(Lio/netty/channel/EventLoopGroup;)Lio/netty/bootstrap/AbstractBootstrap;"))
   private static AbstractBootstrap<?, ?> useCustomGroup(Bootstrap instance, EventLoopGroup eventLoopGroup, Operation<AbstractBootstrap<Bootstrap, Channel>> original) {
-    return original.call(instance, new WrappingEventLoopGroup(eventLoopGroup, BotConnection.CURRENT.get().runnableWrapper()))
-      .attr(SFConstants.NETTY_BOT_CONNECTION, BotConnection.CURRENT.get())
-      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) TimeUnit.SECONDS.toMillis(BotConnection.CURRENT.get().settingsSource().get(BotSettings.CONNECT_TIMEOUT)));
+    return original.call(instance, new WrappingEventLoopGroup(eventLoopGroup, BotConnection.current().runnableWrapper()))
+      .attr(SFConstants.NETTY_BOT_CONNECTION, BotConnection.current())
+      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, (int) TimeUnit.SECONDS.toMillis(BotConnection.current().settingsSource().get(BotSettings.CONNECT_TIMEOUT)));
   }
 
   @WrapMethod(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V")

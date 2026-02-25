@@ -47,7 +47,7 @@ public class MixinConnection {
   @SuppressWarnings("unchecked")
   @ModifyVariable(method = "genericsFtw", at = @At("HEAD"), argsOnly = true)
   private static Packet<?> handlePacket(Packet<?> parentPacket) {
-    var connection = BotConnection.CURRENT.get();
+    var connection = BotConnection.current();
     if (parentPacket instanceof ClientboundBundlePacket bundlePacket) {
       var subPackets = new ArrayList<Packet<? super ClientGamePacketListener>>();
 

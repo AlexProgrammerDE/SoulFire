@@ -34,7 +34,7 @@ public class MixinConnectScreen {
 
   @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V"))
   private void startConnectionThread(Thread instance, Operation<Void> original) {
-    var bot = BotConnection.CURRENT.get();
+    var bot = BotConnection.current();
     if (bot == null) {
       throw new IllegalStateException("No bot connection found in ConnectScreen.connect, but it should be there!");
     }

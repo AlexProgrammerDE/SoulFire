@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinClientHandshakePacketListenerImpl {
   @WrapOperation(method = "handleLoginFinished", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/ClientBrandRetriever;getClientModName()Ljava/lang/String;"))
   private String clientBrandEvent(Operation<String> original) {
-    var event = new BotClientBrandEvent(BotConnection.CURRENT.get(), original.call());
+    var event = new BotClientBrandEvent(BotConnection.current(), original.call());
     SoulFireAPI.postEvent(event);
     return event.clientBrand();
   }

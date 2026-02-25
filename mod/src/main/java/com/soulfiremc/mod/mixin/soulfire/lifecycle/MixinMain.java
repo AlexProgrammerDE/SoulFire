@@ -42,6 +42,7 @@ public final class MixinMain {
     Agents.getInstrumentation().addTransformer(new LwjglAgent());
     GenericTerminalConsole.setupStreams();
     SharedConstants.CHECK_DATA_FIXER_SCHEMA = false;
+    SFConstants.NOT_REGISTRY_INIT_PHASE = false;
   }
 
   @SneakyThrows
@@ -49,6 +50,7 @@ public final class MixinMain {
   private static void init(Minecraft instance) {
     // We want this to not inject anywhere else
     SFConstants.MINECRAFT_INSTANCE.remove();
+    SFConstants.NOT_REGISTRY_INIT_PHASE = true;
 
     SFConstants.BASE_MC_INSTANCE = instance;
 

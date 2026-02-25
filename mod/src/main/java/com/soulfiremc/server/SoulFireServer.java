@@ -19,6 +19,7 @@ package com.soulfiremc.server;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.builddata.BuildData;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.api.SessionLifecycle;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.lifecycle.ServerSettingsRegistryInitEvent;
@@ -67,6 +68,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -82,7 +84,23 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Getter
 public final class SoulFireServer {
-  public static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
+  private static final ThreadLocal<SoulFireServer> CURRENT = new ThreadLocal<>();
+
+  public static SoulFireServer current() {
+    var current = CURRENT.get();
+    if (!SFConstants.NOT_REGISTRY_INIT_PHASE) {
+      return current;
+    }
+
+    if (current == null) {
+      new RuntimeException().printStackTrace();
+    }
+    return Objects.requireNonNull(current, "No soulfire server in current thread");
+  }
+
+  public static Optional<SoulFireServer> currentOptional() {
+    return Optional.ofNullable(CURRENT.get());
+  }
 
   private final SoulFireScheduler.RunnableWrapper runnableWrapper = new ServerRunnableWrapper(this);
   private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);
@@ -120,7 +138,7 @@ public final class SoulFireServer {
     Authenticator.setDefault(new Authenticator() {
       @Override
       protected @Nullable PasswordAuthentication getPasswordAuthentication() {
-        var connection = BotConnection.CURRENT.get();
+        var connection = BotConnection.current();
         if (connection == null
           || connection.proxy() == null) {
           return null;

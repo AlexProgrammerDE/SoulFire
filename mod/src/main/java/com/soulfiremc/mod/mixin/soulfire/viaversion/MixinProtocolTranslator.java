@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class MixinProtocolTranslator {
   @Inject(method = "getTargetVersion()Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;", at = @At("HEAD"), cancellable = true)
   private static void getTargetVersion(CallbackInfoReturnable<ProtocolVersion> cir) {
-    var botConnection = BotConnection.CURRENT.get();
+    var botConnection = BotConnection.current();
     if (botConnection != null) {
       cir.setReturnValue(botConnection.currentProtocolVersion());
     }
@@ -38,7 +38,7 @@ public class MixinProtocolTranslator {
 
   @Inject(method = "setTargetVersion(Lcom/viaversion/viaversion/api/protocol/version/ProtocolVersion;Z)V", at = @At("HEAD"), cancellable = true)
   private static void setTargetVersion(ProtocolVersion newVersion, boolean revertOnDisconnect, CallbackInfo ci) {
-    var botConnection = BotConnection.CURRENT.get();
+    var botConnection = BotConnection.current();
     if (botConnection != null) {
       botConnection.currentProtocolVersion(newVersion);
       ci.cancel();

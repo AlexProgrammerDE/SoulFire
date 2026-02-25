@@ -26,6 +26,6 @@ import org.spongepowered.asm.mixin.Mixin;
 public class MixinConnectScreen$1 {
   @WrapMethod(method = "run")
   private void wrapRun(Operation<Void> original) {
-    BotConnection.CURRENT.get().runnableWrapper().runWrapped(original::call);
+    BotConnection.current().runnableWrapper().runWrapped(original::call);
   }
 }

@@ -38,12 +38,12 @@ public class MixinClientNetworkingImpl {
 
   @Redirect(method = "*", at = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/impl/networking/client/ClientNetworkingImpl;currentPlayAddon:Lnet/fabricmc/fabric/impl/networking/client/ClientPlayNetworkAddon;", opcode = Opcodes.GETSTATIC), remap = false)
   private static ClientPlayNetworkAddon getCurrentPlayAddon() {
-    return BotConnection.CURRENT.get().metadata().get(PLAY_ADDON_KEY);
+    return BotConnection.current().metadata().get(PLAY_ADDON_KEY);
   }
 
   @Redirect(method = "*", at = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/impl/networking/client/ClientNetworkingImpl;currentPlayAddon:Lnet/fabricmc/fabric/impl/networking/client/ClientPlayNetworkAddon;", opcode = Opcodes.PUTSTATIC), remap = false)
   private static void setCurrentPlayAddon(ClientPlayNetworkAddon addon) {
-    var metadataHolder = BotConnection.CURRENT.get().metadata();
+    var metadataHolder = BotConnection.current().metadata();
     if (addon == null) {
       metadataHolder.remove(PLAY_ADDON_KEY);
     } else {
@@ -53,12 +53,12 @@ public class MixinClientNetworkingImpl {
 
   @Redirect(method = "*", at = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/impl/networking/client/ClientNetworkingImpl;currentConfigurationAddon:Lnet/fabricmc/fabric/impl/networking/client/ClientConfigurationNetworkAddon;", opcode = Opcodes.GETSTATIC), remap = false)
   private static ClientConfigurationNetworkAddon getCurrentConfigurationAddon() {
-    return BotConnection.CURRENT.get().metadata().get(CONFIGURATION_ADDON_KEY);
+    return BotConnection.current().metadata().get(CONFIGURATION_ADDON_KEY);
   }
 
   @Redirect(method = "*", at = @At(value = "FIELD", target = "Lnet/fabricmc/fabric/impl/networking/client/ClientNetworkingImpl;currentConfigurationAddon:Lnet/fabricmc/fabric/impl/networking/client/ClientConfigurationNetworkAddon;", opcode = Opcodes.PUTSTATIC), remap = false)
   private static void setCurrentConfigurationAddon(ClientConfigurationNetworkAddon addon) {
-    var metadataHolder = BotConnection.CURRENT.get().metadata();
+    var metadataHolder = BotConnection.current().metadata();
     if (addon == null) {
       metadataHolder.remove(CONFIGURATION_ADDON_KEY);
     } else {

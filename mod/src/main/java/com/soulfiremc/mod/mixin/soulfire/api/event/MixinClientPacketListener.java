@@ -36,14 +36,14 @@ public class MixinClientPacketListener {
   @WrapOperation(method = "handlePlayerCombatKill",
     at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;shouldShowDeathScreen()Z"))
   private boolean shouldRespawnEvent(LocalPlayer instance, Operation<Boolean> original) {
-    var event = new BotShouldRespawnEvent(BotConnection.CURRENT.get(), !original.call(instance));
+    var event = new BotShouldRespawnEvent(BotConnection.current(), !original.call(instance));
     SoulFireAPI.postEvent(event);
     return !event.shouldRespawn();
   }
 
   @Inject(method = "handleSetHealth", at = @At("HEAD"))
   private void onSetHealth(ClientboundSetHealthPacket packet, CallbackInfo ci) {
-    var bot = BotConnection.CURRENT.get();
+    var bot = BotConnection.current();
     var player = bot.minecraft().player;
     if (player == null) {
       return;
@@ -56,7 +56,7 @@ public class MixinClientPacketListener {
     if (newHealth < previousHealth) {
       var damageAmount = previousHealth - newHealth;
       var event = new BotDamageEvent(
-        BotConnection.CURRENT.get(),
+        BotConnection.current(),
         previousHealth,
         newHealth,
         damageAmount

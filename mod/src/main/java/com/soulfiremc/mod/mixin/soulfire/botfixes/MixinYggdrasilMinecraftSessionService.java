@@ -30,7 +30,7 @@ import java.util.UUID;
 public class MixinYggdrasilMinecraftSessionService {
   @Inject(method = "joinServer", at = @At("HEAD"), cancellable = true)
   private void joinServer(UUID profileId, String authenticationToken, String serverId, CallbackInfo ci) {
-    var bot = BotConnection.CURRENT.get();
+    var bot = BotConnection.current();
     bot.sessionService().joinServer(serverId);
     ci.cancel();
   }

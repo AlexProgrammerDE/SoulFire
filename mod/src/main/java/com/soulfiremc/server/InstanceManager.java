@@ -18,6 +18,7 @@
 package com.soulfiremc.server;
 
 import com.google.gson.JsonElement;
+import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.api.SessionLifecycle;
@@ -66,7 +67,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @Getter
 public final class InstanceManager {
-  public static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
+  private static final ThreadLocal<InstanceManager> CURRENT = new ThreadLocal<>();
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
   private final MetadataHolder<JsonElement> persistentMetadata = new MetadataHolder<>();
@@ -81,6 +82,22 @@ public final class InstanceManager {
   private final InstanceMetricsCollector metricsCollector;
   private final AtomicBoolean allBotsConnected = new AtomicBoolean(false);
   private SessionLifecycle sessionLifecycle = SessionLifecycle.STOPPED;
+
+  public static InstanceManager current() {
+    var current = CURRENT.get();
+    if (!SFConstants.NOT_REGISTRY_INIT_PHASE) {
+      return current;
+    }
+
+    if (current == null) {
+      new RuntimeException().printStackTrace();
+    }
+    return Objects.requireNonNull(current, "No instance manager in current thread");
+  }
+
+  public static Optional<InstanceManager> currentOptional() {
+    return Optional.ofNullable(CURRENT.get());
+  }
 
   public InstanceManager(SoulFireServer soulFireServer, DSLContext dsl, UUID id, SessionLifecycle lastState) {
     this.id = id;
