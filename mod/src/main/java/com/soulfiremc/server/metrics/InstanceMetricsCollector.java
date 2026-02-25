@@ -233,38 +233,42 @@ public final class InstanceMetricsCollector {
 
     // Aggregate bot state
     var botConnections = instanceManager.botConnections();
-    var onlineCount = 0;
-    var totalHealth = 0.0;
-    var totalFood = 0.0;
-    var totalChunks = 0;
-    var totalEntities = 0;
-    var botsWithPlayerData = 0;
+    var ref = new Object() {
+      int botsWithPlayerData = 0;
+      int onlineCount = 0;
+      double totalHealth = 0.0;
+      double totalFood = 0.0;
+      int totalChunks = 0;
+      int totalEntities = 0;
+    };
 
     for (var bot : botConnections.values()) {
       if (bot.isDisconnected()) {
         continue;
       }
 
-      onlineCount++;
+      ref.onlineCount++;
 
-      var minecraft = bot.minecraft();
-      var player = minecraft.player;
-      var level = minecraft.level;
-      if (player != null) {
-        botsWithPlayerData++;
-        totalHealth += player.getHealth();
-        totalFood += player.getFoodData().getFoodLevel();
+      bot.runnableWrapper().runWrapped(() -> {
+        var minecraft = bot.minecraft();
+        var player = minecraft.player;
+        var level = minecraft.level;
+        if (player != null) {
+          ref.botsWithPlayerData++;
+          ref.totalHealth += player.getHealth();
+          ref.totalFood += player.getFoodData().getFoodLevel();
 
-        if (level != null) {
-          totalEntities += level.getEntityCount();
-          var chunkSource = level.getChunkSource();
-          totalChunks += chunkSource.getLoadedChunksCount();
+          if (level != null) {
+            ref.totalEntities += level.getEntityCount();
+            var chunkSource = level.getChunkSource();
+            ref.totalChunks += chunkSource.getLoadedChunksCount();
+          }
         }
-      }
+      });
     }
 
-    var avgHealth = botsWithPlayerData > 0 ? totalHealth / botsWithPlayerData : 0.0;
-    var avgFood = botsWithPlayerData > 0 ? totalFood / botsWithPlayerData : 0.0;
+    var avgHealth = ref.botsWithPlayerData > 0 ? ref.totalHealth / ref.botsWithPlayerData : 0.0;
+    var avgFood = ref.botsWithPlayerData > 0 ? ref.totalFood / ref.botsWithPlayerData : 0.0;
     var totalBots = instanceManager.settingsSource().accounts().size();
 
     var snapshot = MetricsSnapshot.newBuilder()
@@ -272,7 +276,7 @@ public final class InstanceMetricsCollector {
         .setSeconds(now.getEpochSecond())
         .setNanos(now.getNano())
         .build())
-      .setBotsOnline(onlineCount)
+      .setBotsOnline(ref.onlineCount)
       .setBotsTotal(totalBots)
       .setPacketsSentTotal(currentPacketsSent)
       .setPacketsReceivedTotal(currentPacketsReceived)
@@ -286,8 +290,8 @@ public final class InstanceMetricsCollector {
       .setMaxTickDurationMs(maxTickMs)
       .setAvgHealth(avgHealth)
       .setAvgFoodLevel(avgFood)
-      .setTotalLoadedChunks(totalChunks)
-      .setTotalTrackedEntities(totalEntities)
+      .setTotalLoadedChunks(ref.totalChunks)
+      .setTotalTrackedEntities(ref.totalEntities)
       .setConnections(connectCount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) connectCount)
       .setDisconnections(disconnectCount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) disconnectCount)
       .build();

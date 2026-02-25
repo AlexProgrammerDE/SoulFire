@@ -34,15 +34,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(targets = "net.minecraft.network.Connection$1", priority = 500)
 public class MixinConnection$1 {
   @Inject(method = "initChannel", at = @At("HEAD"))
-  private void injectProxyAndWriteTimeout(Channel channel, CallbackInfo ci) {
+  private void earlyInject(Channel channel, CallbackInfo ci) {
     var botConnection = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get();
-    var proxyData = botConnection.proxy();
-    if (proxyData == null) {
-      return;
-    }
+    NettyHelper.addRunnableWrapper("first_", botConnection.runnableWrapper(), channel);
 
-    var isBedrock = BedrockProtocolVersion.bedrockLatest.equals(botConnection.currentProtocolVersion());
-    NettyHelper.addProxy(proxyData, channel, isBedrock);
+    var proxyData = botConnection.proxy();
+    if (proxyData != null) {
+      var isBedrock = BedrockProtocolVersion.bedrockLatest.equals(botConnection.currentProtocolVersion());
+      NettyHelper.addProxy(proxyData, channel, isBedrock);
+    }
 
     channel.pipeline().addLast("write_timeout", new WriteTimeoutHandler(botConnection.settingsSource().get(BotSettings.WRITE_TIMEOUT)));
   }
@@ -52,5 +52,6 @@ public class MixinConnection$1 {
     var botConnection = channel.attr(SFConstants.NETTY_BOT_CONNECTION).get();
     channel.pipeline().replace("timeout", "timeout", new ReadTimeoutHandler(botConnection.settingsSource().get(BotSettings.READ_TIMEOUT)));
     channel.pipeline().addFirst("sf_traffic", new SFTrafficHandler());
+    NettyHelper.addRunnableWrapper("last_", botConnection.runnableWrapper(), channel);
   }
 }

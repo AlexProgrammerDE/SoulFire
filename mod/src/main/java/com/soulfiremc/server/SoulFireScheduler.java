@@ -279,6 +279,20 @@ public final class SoulFireScheduler implements Executor {
       }
     }
 
+    default void runWrappedWithException(RunnableException runnable) throws Exception {
+      try {
+        wrap(() -> {
+          try {
+            runnable.run();
+          } catch (Exception e) {
+            throw new CatchableException(e);
+          }
+        }).run();
+      } catch (CatchableException e) {
+        throw e.exception;
+      }
+    }
+
     class CatchableException extends RuntimeException {
       private final Exception exception;
 
@@ -292,6 +306,11 @@ public final class SoulFireScheduler implements Executor {
   @FunctionalInterface
   public interface RunnableIOException {
     void run() throws IOException;
+  }
+
+  @FunctionalInterface
+  public interface RunnableException {
+    void run() throws Exception;
   }
 
   public interface FinalizableRunnable extends Runnable {

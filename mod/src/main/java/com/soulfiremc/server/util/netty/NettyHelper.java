@@ -17,8 +17,12 @@
  */
 package com.soulfiremc.server.util.netty;
 
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.proxy.SFProxy;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
@@ -37,33 +41,48 @@ public final class NettyHelper {
     switch (proxy.type()) {
       case HTTP -> {
         if (proxy.username() != null && proxy.password() != null) {
-          pipeline.addFirst(PROXY_NAME, new HttpProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+          pipeline.addLast(PROXY_NAME, new HttpProxyHandler(proxy.address(), proxy.username(), proxy.password()));
         } else {
-          pipeline.addFirst(PROXY_NAME, new HttpProxyHandler(proxy.address()));
+          pipeline.addLast(PROXY_NAME, new HttpProxyHandler(proxy.address()));
         }
       }
       case SOCKS4 -> {
         if (proxy.username() != null) {
-          pipeline.addFirst(PROXY_NAME, new Socks4ProxyHandler(proxy.address(), proxy.username()));
+          pipeline.addLast(PROXY_NAME, new Socks4ProxyHandler(proxy.address(), proxy.username()));
         } else {
-          pipeline.addFirst(PROXY_NAME, new Socks4ProxyHandler(proxy.address()));
+          pipeline.addLast(PROXY_NAME, new Socks4ProxyHandler(proxy.address()));
         }
       }
       case SOCKS5 -> {
         if (isBedrock) {
           if (channel instanceof RakClientChannel rakChannel) {
-            rakChannel.rakPipeline().addFirst(PROXY_NAME, new Socks5UdpRelayHandler(
+            rakChannel.rakPipeline().addLast(PROXY_NAME, new Socks5UdpRelayHandler(
               (InetSocketAddress) proxy.address(), proxy.username(), proxy.password()));
           } else {
             throw new IllegalStateException("Expected RakClientChannel for Bedrock connection, but got: " + channel.getClass());
           }
         } else if (proxy.username() != null && proxy.password() != null) {
-          pipeline.addFirst(PROXY_NAME, new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
+          pipeline.addLast(PROXY_NAME, new Socks5ProxyHandler(proxy.address(), proxy.username(), proxy.password()));
         } else {
-          pipeline.addFirst(PROXY_NAME, new Socks5ProxyHandler(proxy.address()));
+          pipeline.addLast(PROXY_NAME, new Socks5ProxyHandler(proxy.address()));
         }
       }
       default -> throw new UnsupportedOperationException("Unsupported proxy type: " + proxy.type());
     }
+  }
+
+  public static void addRunnableWrapper(String prefix, SoulFireScheduler.RunnableWrapper runnableWrapper, Channel channel) {
+    var pipeline = channel.pipeline();
+    pipeline.addLast(prefix + "sf_runnable_wrapper", new ChannelDuplexHandler() {
+      @Override
+      public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelRead(ctx, msg));
+      }
+
+      @Override
+      public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.write(ctx, msg, promise));
+      }
+    });
   }
 }
