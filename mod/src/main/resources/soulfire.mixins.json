@@ -22,6 +22,7 @@
     "soulfire.optimization.MixinDataFixers",
     "soulfire.optimization.MixinFontCacheReload",
     "soulfire.resourcepack.MixinReloadableResourceManager",
+    "soulfire.viaversion.MixinAbstractSave",
     "soulfire.viaversion.MixinAccountsSave",
     "soulfire.viaversion.MixinProtocolTranslator",
     "soulfire.viaversion.MixinViaBedrockConfig"
