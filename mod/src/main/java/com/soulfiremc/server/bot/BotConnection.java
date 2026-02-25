@@ -155,7 +155,7 @@ public final class BotConnection {
       switch (minecraftAccount.accountData()) {
         case BedrockData ignored -> "bedrock";
         case OfflineJavaData ignored -> "offline";
-        case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getJavaAuthManager(proxy).getMinecraftToken().getUpToDateUnchecked().getToken();
+        case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getAccessToken(proxy);
       },
       Optional.empty(),
       Optional.empty()

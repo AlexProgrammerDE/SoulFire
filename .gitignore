@@ -48,3 +48,27 @@ out/
 
 temp/
 tmp/
+
+# Downloaded libraries
+/libraries/
+
+# SQLite database
+*.sqlite
+*.sqlite-journal
+
+# Secrets
+secret-key.bin
+
+# Minecraft runtime data
+/minecraft/.fabric/
+/minecraft/config/viafabricplus/
+/minecraft/data/
+/minecraft/downloads/
+/minecraft/mods/
+
+# Spark profiling tmp
+/config/spark/
+
+# MC Downloads
+/mc-downloads/
+/logs

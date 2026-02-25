@@ -32,6 +32,7 @@ public enum AuthType {
   MICROSOFT_JAVA_DEVICE_CODE("Microsoft Java Device Code", OnlineChainJavaData.class),
   MICROSOFT_BEDROCK_DEVICE_CODE("Microsoft Bedrock Device Code", BedrockData.class),
   MICROSOFT_JAVA_REFRESH_TOKEN("Microsoft Java Refresh Token", OnlineChainJavaData.class),
+  MICROSOFT_JAVA_ACCESS_TOKEN("Microsoft Java Access Token", OnlineChainJavaData.class),
   OFFLINE("Offline", OfflineJavaData.class);
 
   private final String displayName;

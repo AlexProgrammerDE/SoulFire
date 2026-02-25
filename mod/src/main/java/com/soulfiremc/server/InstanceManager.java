@@ -249,13 +249,22 @@ public final class InstanceManager {
           log.info("Refreshing expired accounts");
         }
 
-        accounts.add(authService.refresh(
-          account,
-          settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
-            ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
-          scheduler
-        ).join());
-        refreshed++;
+        try {
+          accounts.add(authService.refresh(
+            account,
+            settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
+              ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
+            scheduler
+          ).join());
+          refreshed++;
+        } catch (CompletionException e) {
+          if (e.getCause() instanceof UnsupportedOperationException) {
+            log.warn("Account {} cannot be refreshed: {}", account.lastKnownName(), e.getCause().getMessage());
+            accounts.add(account);
+          } else {
+            throw e;
+          }
+        }
       } else {
         accounts.add(account);
       }
@@ -288,12 +297,21 @@ public final class InstanceManager {
     }
 
     log.info("Account {} is expired, refreshing before connecting", account.lastKnownName());
-    var refreshedAccount = authService.refresh(
-      account,
-      settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
-        ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
-      scheduler
-    ).join();
+    MinecraftAccount refreshedAccount;
+    try {
+      refreshedAccount = authService.refresh(
+        account,
+        settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
+          ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
+        scheduler
+      ).join();
+    } catch (CompletionException e) {
+      if (e.getCause() instanceof UnsupportedOperationException) {
+        log.warn("Account {} cannot be refreshed: {}", account.lastKnownName(), e.getCause().getMessage());
+        return account;
+      }
+      throw e;
+    }
     var accounts = new ArrayList<>(settingsSource.accounts().values());
     accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())
       && a.profileId().equals(refreshedAccount.profileId()) ? refreshedAccount : a);
@@ -427,6 +445,11 @@ public final class InstanceManager {
     var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
     while (!accountQueue.isEmpty()) {
       var minecraftAccount = refreshAccount(accountQueue.poll());
+      var postRefreshAuthService = MCAuthService.convertService(minecraftAccount.authType());
+      if (postRefreshAuthService.isExpired(minecraftAccount)) {
+        log.warn("Skipping account {} because its authentication is expired and cannot be refreshed", minecraftAccount.lastKnownName());
+        continue;
+      }
       var lastAccountObject = new AtomicReference<>(minecraftAccount);
       var proxyData = getProxy(proxies).orElse(null);
 

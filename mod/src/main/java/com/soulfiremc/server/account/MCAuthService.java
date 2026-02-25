@@ -29,13 +29,15 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 public sealed interface MCAuthService<I, T>
-  permits MSBedrockCredentialsAuthService, MSBedrockDeviceCodeAuthService, MSJavaCredentialsAuthService, MSJavaDeviceCodeAuthService, MSJavaRefreshTokenAuthService, OfflineAuthService {
+  permits MSBedrockCredentialsAuthService, MSBedrockDeviceCodeAuthService, MSJavaAccessTokenAuthService, MSJavaCookiesAuthService, MSJavaCredentialsAuthService, MSJavaDeviceCodeAuthService, MSJavaRefreshTokenAuthService, OfflineAuthService {
   static MCAuthService<String, ?> convertService(AccountTypeCredentials service) {
     return switch (service) {
       case MICROSOFT_JAVA_CREDENTIALS -> MSJavaCredentialsAuthService.INSTANCE;
       case MICROSOFT_BEDROCK_CREDENTIALS -> MSBedrockCredentialsAuthService.INSTANCE;
       case OFFLINE -> OfflineAuthService.INSTANCE;
       case MICROSOFT_JAVA_REFRESH_TOKEN -> MSJavaRefreshTokenAuthService.INSTANCE;
+      case MICROSOFT_JAVA_ACCESS_TOKEN -> MSJavaAccessTokenAuthService.INSTANCE;
+      case MICROSOFT_JAVA_COOKIES -> MSJavaCookiesAuthService.INSTANCE;
       case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
     };
   }
@@ -56,6 +58,7 @@ public sealed interface MCAuthService<I, T>
       case MICROSOFT_JAVA_DEVICE_CODE -> MSJavaDeviceCodeAuthService.INSTANCE;
       case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
       case MICROSOFT_JAVA_REFRESH_TOKEN -> MSJavaRefreshTokenAuthService.INSTANCE;
+      case MICROSOFT_JAVA_ACCESS_TOKEN -> MSJavaAccessTokenAuthService.INSTANCE;
       case UNRECOGNIZED -> throw new IllegalArgumentException("Unrecognized service");
     };
   }
@@ -68,6 +71,7 @@ public sealed interface MCAuthService<I, T>
       case MICROSOFT_BEDROCK_DEVICE_CODE -> MSBedrockDeviceCodeAuthService.INSTANCE;
       case OFFLINE -> OfflineAuthService.INSTANCE;
       case MICROSOFT_JAVA_REFRESH_TOKEN -> MSJavaRefreshTokenAuthService.INSTANCE;
+      case MICROSOFT_JAVA_ACCESS_TOKEN -> MSJavaAccessTokenAuthService.INSTANCE;
     };
   }
 

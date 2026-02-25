@@ -21,6 +21,7 @@ message CredentialsAuthRequest {
   // - MICROSOFT_BEDROCK_CREDENTIALS: Payload format is "email:password"
   // - OFFLINE: Payload is the username to use (no authentication performed)
   // - MICROSOFT_JAVA_REFRESH_TOKEN: Payload is a Microsoft refresh token
+  // - MICROSOFT_JAVA_COOKIES: Payload is a cookie import (cookie jar / Cookie header / export)
   AccountTypeCredentials service = 2;
 
   // List of authentication credentials/data strings.

@@ -28,14 +28,7 @@ dependencies {
   }
 }
 
-// Configure mod compile classpath - mod project is already evaluated due to evaluationDependsOn
-val javadocTask = tasks.named<Javadoc>("javadoc")
-val modCompileClasspath = project(":mod").extensions
-  .getByType<SourceSetContainer>()["main"].compileClasspath
-
-javadocTask.configure {
-  classpath = classpath.plus(modCompileClasspath)
-}
+val modCompileClasspath = project(":mod").configurations.named("compileClasspath")
 
 val usedJavadocTool: Provider<JavadocTool> = javaToolchains.javadocToolFor {
   languageVersion = JavaLanguageVersion.of(25)
@@ -51,6 +44,18 @@ tasks {
     opts.addBooleanOption("-enable-preview", true)
     opts.source = "25"
 
+    rootProject.subprojects.forEach { subproject ->
+      if (subproject.name != "javadoc" && subproject.name != "data-generator" && subproject.plugins.hasPlugin("java")) {
+        val delombokTask = subproject.tasks.findByName("delombok")
+        if (delombokTask != null) {
+          dependsOn(delombokTask)
+        }
+      }
+    }
+
+    notCompatibleWithConfigurationCache("Uses cross-project classpaths")
+
+    classpath = classpath.plus(modCompileClasspath.get())
     javadocTool = usedJavadocTool
   }
 

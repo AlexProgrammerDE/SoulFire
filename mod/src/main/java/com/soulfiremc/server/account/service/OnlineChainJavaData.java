@@ -36,7 +36,28 @@ public record OnlineChainJavaData(JsonObject authChain) implements AccountData {
   }
 
   public JavaAuthManager getJavaAuthManager(@Nullable SFProxy proxyData) {
+    if (isAccessTokenOnly()) {
+      throw new UnsupportedOperationException("Access-token-only accounts do not have a full auth chain");
+    }
     return JavaAuthManager.fromJson(LenniHttpHelper.client(proxyData), authChain);
+  }
+
+  /**
+   * Returns true if this is an access-token-only account (no full auth chain).
+   */
+  public boolean isAccessTokenOnly() {
+    return authChain.has("_accessTokenOnly") && authChain.get("_accessTokenOnly").getAsBoolean();
+  }
+
+  /**
+   * Returns the raw access token for access-token-only accounts,
+   * or the token from the auth chain for full accounts.
+   */
+  public String getAccessToken(@Nullable SFProxy proxyData) {
+    if (isAccessTokenOnly()) {
+      return authChain.get("_accessToken").getAsString();
+    }
+    return getJavaAuthManager(proxyData).getMinecraftToken().getUpToDateUnchecked().getToken();
   }
 
   @SneakyThrows

@@ -45,6 +45,12 @@ public final class MCAuthServiceImpl extends MCAuthServiceGrpc.MCAuthServiceImpl
     var instanceId = UUID.fromString(request.getInstanceId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.AUTHENTICATE_MC_ACCOUNT, instanceId));
 
+    if (request.getService() == AccountTypeCredentials.UNRECOGNIZED) {
+      throw Status.INVALID_ARGUMENT.withDescription(
+        "Unrecognized auth service enum. Client/server version mismatch (update both).")
+        .asRuntimeException();
+    }
+
     var optionalInstance = soulFireServer.getInstance(instanceId);
     if (optionalInstance.isEmpty()) {
       throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();

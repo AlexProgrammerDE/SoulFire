@@ -66,6 +66,15 @@ enum AccountTypeCredentials {
   // Useful for re-authenticating accounts without requiring credentials again.
   // Payload format: ["refresh_token"] for each account.
   MICROSOFT_JAVA_REFRESH_TOKEN = 5;
+  // Microsoft Java Edition authentication using a raw Minecraft access token.
+  // Useful for importing accounts from other launchers or tools.
+  // Payload format: ["access_token"] for each account.
+  // Note: Access token accounts cannot be refreshed.
+  MICROSOFT_JAVA_ACCESS_TOKEN = 6;
+  // Microsoft Java Edition authentication using browser cookies for login.live.com.
+  // The server exchanges cookies for an OAuth refresh token, then authenticates normally.
+  // Payload format: a cookie jar / Cookie header / cookie export for each account.
+  MICROSOFT_JAVA_COOKIES = 7;
 }
 
 // Authentication service types that use the OAuth 2.0 Device Code flow.
@@ -110,6 +119,10 @@ message MinecraftAccountProto {
     // Authenticated via Microsoft Java refresh token.
     // Account data stored in OnlineChainJavaData.
     MICROSOFT_JAVA_REFRESH_TOKEN = 7;
+    // Authenticated via raw Minecraft access token.
+    // Account data stored in OnlineChainJavaData.
+    // Cannot be refreshed.
+    MICROSOFT_JAVA_ACCESS_TOKEN = 8;
   }
 
   // Authentication chain data for online Java Edition accounts.

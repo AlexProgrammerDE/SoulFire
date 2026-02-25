@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.bot;
 
+import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.service.BedrockData;
 import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
@@ -39,12 +40,16 @@ public final class SFSessionService {
 
   public void joinServer(String serverId) {
     var account = botConnection.settingsSource().stem();
+    var authService = MCAuthService.convertService(account.authType());
+    if (authService.isExpired(account)) {
+      throw new IllegalStateException("Account authentication is expired; refusing to join server with an expired access token");
+    }
     var joinEndpoint = switch (account.authType()) {
-      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN -> MOJANG_JOIN_URI;
+      case MICROSOFT_JAVA_CREDENTIALS, MICROSOFT_JAVA_DEVICE_CODE, MICROSOFT_JAVA_REFRESH_TOKEN, MICROSOFT_JAVA_ACCESS_TOKEN -> MOJANG_JOIN_URI;
       case OFFLINE, MICROSOFT_BEDROCK_CREDENTIALS, MICROSOFT_BEDROCK_DEVICE_CODE -> throw new IllegalArgumentException("Server does not support auth type: " + account.authType());
     };
     var authenticationToken = switch (account.accountData()) {
-      case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getJavaAuthManager(botConnection.proxy()).getMinecraftToken().getUpToDateUnchecked().getToken();
+      case OnlineChainJavaData onlineChainJavaData -> onlineChainJavaData.getAccessToken(botConnection.proxy());
       case OfflineJavaData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
       case BedrockData ignored -> throw new IllegalArgumentException("Invalid auth type: " + account.authType());
     };

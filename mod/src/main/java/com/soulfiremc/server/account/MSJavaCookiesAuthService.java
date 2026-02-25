@@ -20,7 +20,6 @@ package com.soulfiremc.server.account;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.util.LenniHttpHelper;
 import com.soulfiremc.server.util.ReactorHttpHelper;
@@ -36,27 +35,31 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
-public final class MSJavaRefreshTokenAuthService
-  implements MCAuthService<String, MSJavaRefreshTokenAuthService.MSJavaRefreshTokenAuthData> {
-  public static final MSJavaRefreshTokenAuthService INSTANCE = new MSJavaRefreshTokenAuthService();
+public final class MSJavaCookiesAuthService
+  implements MCAuthService<String, MSJavaCookiesAuthService.MSJavaCookiesAuthData> {
+  public static final MSJavaCookiesAuthService INSTANCE = new MSJavaCookiesAuthService();
   private static final String CLIENT_ID = "00000000402b5328";
   private static final String REDIRECT_URI = "https://login.live.com/oauth20_desktop.srf";
-  private static final String SCOPE = "XboxLive.signin XboxLive.offline_access";
+  private static final String SCOPE = "service::user.auth.xboxlive.com::MBI_SSL";
+  private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-  private MSJavaRefreshTokenAuthService() {}
+  private MSJavaCookiesAuthService() {}
 
   @Override
-  public CompletableFuture<MinecraftAccount> login(MSJavaRefreshTokenAuthData data, @Nullable SFProxy proxyData, Executor executor) {
+  public CompletableFuture<MinecraftAccount> login(MSJavaCookiesAuthData data, @Nullable SFProxy proxyData, Executor executor) {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        var refreshToken = data.refreshToken;
+        var refreshToken = exchangeCookieInputForRefreshToken(data.cookieInput, proxyData);
         var authManager = JavaAuthManager.create(LenniHttpHelper.client(proxyData))
           .login(refreshToken);
         return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, null);
@@ -67,102 +70,30 @@ public final class MSJavaRefreshTokenAuthService
   }
 
   @Override
-  public MSJavaRefreshTokenAuthData createData(String data) {
+  public MSJavaCookiesAuthData createData(String data) {
     var t = data.strip();
     if (t.isEmpty()) {
-      throw new IllegalArgumentException("Invalid refresh token: empty input");
+      throw new IllegalArgumentException("Cookie import failed: empty input");
     }
-    if (looksLikeCookieInput(t)) {
-      throw new IllegalArgumentException("Invalid refresh token: looks like cookies. Use the Microsoft Cookies import type.");
-    }
-    if (t.contains("\n") || t.contains("\r") || t.contains("\t")) {
-      throw new IllegalArgumentException("Invalid refresh token: contains whitespace");
-    }
-    return new MSJavaRefreshTokenAuthData(t);
+    return new MSJavaCookiesAuthData(t);
   }
 
   @Override
   public CompletableFuture<MinecraftAccount> refresh(MinecraftAccount account, @Nullable SFProxy proxyData, Executor executor) {
-    return CompletableFuture.supplyAsync(() -> {
-      try {
-        var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(proxyData);
-        return AuthHelpers.fromJavaAuthManager(AuthType.MICROSOFT_JAVA_REFRESH_TOKEN, authManager, account);
-      } catch (Exception e) {
-        throw new CompletionException(e);
-      }
-    }, executor);
+    return MSJavaRefreshTokenAuthService.INSTANCE.refresh(account, proxyData, executor);
   }
 
   @Override
   public boolean isExpired(MinecraftAccount account) {
-    var authManager = ((OnlineChainJavaData) account.accountData()).getJavaAuthManager(null);
-    return authManager.getMinecraftToken().isExpired()
-      || authManager.getMinecraftProfile().isExpired()
-      || authManager.getMinecraftPlayerCertificates().isExpired();
-  }
-
-  private static boolean looksLikeCookieInput(String input) {
-    var t = input.strip();
-    if (t.isEmpty()) return false;
-    if (looksLikeCookieJar(t)) return true;
-    if (looksLikeCookieEditorJson(t)) return true;
-    return looksLikeCookieHeader(t);
-  }
-
-  private static boolean looksLikeCookieJar(String input) {
-    return input.contains("\t")
-      && (input.contains("__Host-MSAAUTHP") || input.contains("login.live.com"));
-  }
-
-  private static boolean looksLikeCookieHeader(String input) {
-    return input.contains("__Host-MSAAUTHP=")
-      || input.contains("MSPRequ=")
-      || input.contains("MSPOK=")
-      || input.contains("PPLState=");
-  }
-
-  private static boolean looksLikeCookieEditorJson(String input) {
-    var t = input.strip();
-    if (!(t.startsWith("[") && t.endsWith("]"))) return false;
-    return t.contains("\"domain\"") && t.contains("\"name\"") && t.contains("\"value\"");
-  }
-
-  private static String cookieJarToCookieHeader(String cookieJar) {
-    var out = new StringBuilder();
-    for (var line : cookieJar.split("\\R")) {
-      var l = line.strip();
-      if (l.isEmpty() || l.startsWith("#")) {
-        continue;
-      }
-
-      var parts = l.split("\t");
-      if (parts.length < 7) {
-        continue;
-      }
-
-      var domain = parts[0].strip();
-      domain = stripDomain(domain);
-      if (!(domain.endsWith("login.live.com") || domain.endsWith(".login.live.com"))) {
-        continue;
-      }
-
-      var name = parts[5].strip();
-      var value = parts[6].strip();
-      if (name.isEmpty() || value.isEmpty()) {
-        continue;
-      }
-
-      if (!out.isEmpty()) {
-        out.append("; ");
-      }
-      out.append(name).append('=').append(value);
-    }
-
-    return out.toString();
+    return MSJavaRefreshTokenAuthService.INSTANCE.isExpired(account);
   }
 
   private static String exchangeCookieInputForRefreshToken(String cookieInput, @Nullable SFProxy proxyData) {
     var cookieHeader = cookieInputToCookieHeader(cookieInput);
+
+    var verifier = generatePkceVerifier();
+    var challenge = pkceS256Challenge(verifier);
+
     var authorizeUri = URI.create(
       "https://login.live.com/oauth20_authorize.srf"
         + "?client_id=" + urlEncode(CLIENT_ID)
@@ -171,10 +102,13 @@ public final class MSJavaRefreshTokenAuthService
         + "&redirect_uri=" + urlEncode(REDIRECT_URI)
         + "&scope=" + urlEncode(SCOPE)
         + "&prompt=none"
+        + "&code_challenge=" + urlEncode(challenge)
+        + "&code_challenge_method=S256"
     );
 
     var location = ReactorHttpHelper.createReactorClient(proxyData, false)
       .responseTimeout(Duration.ofSeconds(20))
+      .followRedirect(false)
       .headers(h -> {
         h.set(HttpHeaderNames.USER_AGENT, "SoulFire/" + BuildData.VERSION);
         h.set(HttpHeaderNames.COOKIE, cookieHeader);
@@ -221,7 +155,8 @@ public final class MSJavaRefreshTokenAuthService
         + "&redirect_uri=" + urlEncode(REDIRECT_URI)
         + "&scope=" + urlEncode(SCOPE)
         + "&grant_type=authorization_code"
-        + "&code=" + urlEncode(code);
+        + "&code=" + urlEncode(code)
+        + "&code_verifier=" + urlEncode(verifier);
 
     var tokenJson = ReactorHttpHelper.createReactorClient(proxyData, false)
       .responseTimeout(Duration.ofSeconds(20))
@@ -268,6 +203,22 @@ public final class MSJavaRefreshTokenAuthService
     return refreshToken;
   }
 
+  private static String generatePkceVerifier() {
+    var bytes = new byte[32];
+    SECURE_RANDOM.nextBytes(bytes);
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+  }
+
+  private static String pkceS256Challenge(String verifier) {
+    try {
+      var digest = MessageDigest.getInstance("SHA-256");
+      var hash = digest.digest(verifier.getBytes(StandardCharsets.US_ASCII));
+      return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+    } catch (Exception e) {
+      throw new IllegalStateException("Cookie import failed: PKCE unavailable");
+    }
+  }
+
   private static String oauthErrorSuffix(@Nullable String body) {
     if (body == null || body.isEmpty()) return "";
     var t = body.strip();
@@ -309,8 +260,7 @@ public final class MSJavaRefreshTokenAuthService
   }
 
   private static String cookieInputToCookieHeader(String cookieInput) {
-    var t = cookieInput.strip();
-    t = stripEnclosingQuotes(t);
+    var t = stripEnclosingQuotes(cookieInput.strip());
     if (t.isEmpty()) {
       throw new IllegalArgumentException("Cookie import failed: empty input");
     }
@@ -340,6 +290,57 @@ public final class MSJavaRefreshTokenAuthService
     }
 
     throw new IllegalArgumentException("Cookie import failed: unrecognized cookie format");
+  }
+
+  private static boolean looksLikeCookieJar(String input) {
+    return input.contains("\t")
+      && (input.contains("__Host-MSAAUTHP") || input.contains("login.live.com"));
+  }
+
+  private static boolean looksLikeCookieHeader(String input) {
+    return input.contains("__Host-MSAAUTHP=")
+      || input.contains("MSPRequ=")
+      || input.contains("MSPOK=")
+      || input.contains("PPLState=");
+  }
+
+  private static boolean looksLikeCookieEditorJson(String input) {
+    var t = input.strip();
+    if (!(t.startsWith("[") && t.endsWith("]"))) return false;
+    return t.contains("\"domain\"") && t.contains("\"name\"") && t.contains("\"value\"");
+  }
+
+  private static String cookieJarToCookieHeader(String cookieJar) {
+    var out = new StringBuilder();
+    for (var line : cookieJar.split("\\R")) {
+      var l = line.strip();
+      if (l.isEmpty() || l.startsWith("#")) {
+        continue;
+      }
+
+      var parts = l.split("\t");
+      if (parts.length < 7) {
+        continue;
+      }
+
+      var domain = stripDomain(parts[0].strip());
+      if (!(domain.endsWith("login.live.com") || domain.endsWith(".login.live.com"))) {
+        continue;
+      }
+
+      var name = parts[5].strip();
+      var value = parts[6].strip();
+      if (name.isEmpty() || value.isEmpty()) {
+        continue;
+      }
+
+      if (!out.isEmpty()) {
+        out.append("; ");
+      }
+      out.append(name).append('=').append(value);
+    }
+
+    return out.toString();
   }
 
   private static String cookieEditorJsonToCookieHeader(String cookieJson) {
@@ -452,5 +453,5 @@ public final class MSJavaRefreshTokenAuthService
     return URLDecoder.decode(v, StandardCharsets.UTF_8);
   }
 
-  public record MSJavaRefreshTokenAuthData(String refreshToken) {}
+  public record MSJavaCookiesAuthData(String cookieInput) {}
 }
