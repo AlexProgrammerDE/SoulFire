@@ -32,14 +32,14 @@ jobs:
           projectVersion=$(grep '^maven_version=' gradle.properties | cut -d'=' -f2)
           echo "version=$projectVersion" >> $GITHUB_OUTPUT
       - name: Upload Client Build Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # 6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # 7.0.0
         with:
           name: SoulFireCLI
           if-no-files-found: error
           path: |
             client-launcher/build/libs/SoulFireCLI-${{ steps.get-version.outputs.version }}.jar
       - name: Upload Dedicated Build Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # 6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # 7.0.0
         with:
           name: SoulFireDedicated
           if-no-files-found: error
