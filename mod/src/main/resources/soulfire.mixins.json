@@ -15,6 +15,7 @@
     "soulfire.botfixes.MixinEventLoopGroupHolder",
     "soulfire.botfixes.MixinReloadableResourceManager",
     "soulfire.botfixes.MixinServerLoginPacketListenerImpl$1",
+    "soulfire.botfixes.MixinTracingExecutor",
     "soulfire.botfixes.MixinYggdrasilMinecraftSessionService",
     "soulfire.debug.MixinCrashReport",
     "soulfire.debug.MixinUtil",

@@ -17,24 +17,19 @@
  */
 package com.soulfiremc.mod.mixin.soulfire.botfixes;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.soulfiremc.server.bot.BotConnection;
-import net.minecraft.client.gui.screens.ConnectScreen;
-import org.slf4j.Logger;
+import net.minecraft.TracingExecutor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(ConnectScreen.class)
-public class MixinConnectScreen {
-  @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"))
-  private void logConnectInfo(Logger instance, String s, Object o1, Object o2, Operation<Void> original) {
-    // Prevent logging anything here, as it is not needed
-  }
-
-  @WrapOperation(method = "connect", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V"))
-  private void startConnectionThread(Thread instance, Operation<Void> original) {
-    // We are preventing a new Thread from spawning naturally from this, we know what we're doing.
-    BotConnection.current().scheduler().execute(instance);
+@Mixin(TracingExecutor.class)
+public class MixinTracingExecutor {
+  @WrapMethod(method = "wrapUnnamed")
+  private static Runnable wrapUnnamed(Runnable command, Operation<Runnable> original) {
+    var returnValue = original.call(command);
+    return BotConnection.currentOptional()
+      .map(connection -> connection.runnableWrapper().wrap(returnValue))
+      .orElse(returnValue);
   }
 }
