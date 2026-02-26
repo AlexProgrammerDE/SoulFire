@@ -21,10 +21,13 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDamageEvent;
+import com.soulfiremc.server.api.event.bot.BotOpenContainerEvent;
 import com.soulfiremc.server.api.event.bot.BotShouldRespawnEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,5 +66,26 @@ public class MixinClientPacketListener {
       );
       SoulFireAPI.postEvent(event);
     }
+  }
+
+  @Inject(method = "handleOpenScreen", at = @At("HEAD"))
+  private void onOpenScreen(ClientboundOpenScreenPacket packet, CallbackInfo ci) {
+    var bot = BotConnection.current();
+    if (bot.minecraft().player == null) {
+      return;
+    }
+
+    var containerId = packet.getContainerId();
+    var title = packet.getTitle().getString();
+    var containerType = BuiltInRegistries.MENU.getKey(packet.getType()).getPath();
+
+    var event = new BotOpenContainerEvent(
+      bot,
+      containerId,
+      title,
+      containerType
+    );
+
+    SoulFireAPI.postEvent(event);
   }
 }

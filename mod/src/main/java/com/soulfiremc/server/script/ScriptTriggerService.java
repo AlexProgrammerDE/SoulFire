@@ -256,6 +256,16 @@ public final class ScriptTriggerService {
             return inputs;
           }, listeners, sinkKeys, "OnDamage");
 
+        case "trigger.on_container_open" -> registerEventTrigger(scriptId, node.id(), graph, context, engine,
+          BotOpenContainerEvent.class, event -> {
+            var inputs = new HashMap<String, NodeValue>();
+            inputs.put("bot", NodeValue.ofBot(event.connection()));
+            inputs.put("containerId", NodeValue.ofNumber(event.containerId()));
+            inputs.put("containerName", NodeValue.ofString(event.containerName()));
+            inputs.put("containerType", NodeValue.ofString(event.containerType()));
+            return inputs;
+          }, listeners, sinkKeys, "OnContainerOpen");
+
         case "trigger.on_interval" -> {
           var resolvedInputs = new HashMap<>(NodeRegistry.computeDefaultInputs(NodeRegistry.getMetadata(node.type())));
           if (node.defaultInputs() != null) {

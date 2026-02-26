@@ -72,6 +72,7 @@ public final class NodeRegistry {
     register(OnScriptInitNode.METADATA, OnScriptInitNode::new);
     register(OnScriptEndNode.METADATA, OnScriptEndNode::new);
     register(OnDisconnectNode.METADATA, OnDisconnectNode::new);
+    register(OnContainerOpenNode.METADATA, OnContainerOpenNode::new);
 
     // Math Nodes
     register(AddNode.METADATA, AddNode::new);
