@@ -276,7 +276,7 @@ public final class PathExecutor implements ControllingTask {
       }
 
       var routeFinder =
-        new RouteFinder(new MinecraftGraph(level, inventory, pathConstraint), goalScorer);
+        new RouteFinder(new MinecraftGraph(level, inventory, pathConstraint), goalScorer, bot.scheduler());
 
       log.info("Starting calculations at: {}", start.formatXYZ());
       var routeSearchResultFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory));

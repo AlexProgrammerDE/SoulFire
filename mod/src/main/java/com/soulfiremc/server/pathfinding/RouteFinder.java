@@ -35,14 +35,16 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Slf4j
-public record RouteFinder(MinecraftGraph baseGraph, GoalScorer scorer) {
+public record RouteFinder(MinecraftGraph baseGraph, GoalScorer scorer, Executor executor) {
   /// Maximum possible usable block items (4 rows * 9 columns * 64 stack size)
   private static final int MAX_USABLE_BLOCK_ITEMS = 4 * 9 * 64;
+
+  public RouteFinder(MinecraftGraph baseGraph, GoalScorer scorer) {
+    this(baseGraph, scorer, ForkJoinPool.commonPool());
+  }
 
   private static List<WorldAction> reconstructPath(MinecraftRouteNode current) {
     var actions = new ArrayList<WorldAction>();
@@ -135,7 +137,7 @@ public record RouteFinder(MinecraftGraph baseGraph, GoalScorer scorer) {
   }
 
   public CompletableFuture<RouteSearchResult> findRouteFutureSingle(MinecraftGraph graph, NodeState from, CancellationToken cancellationToken) {
-    return CompletableFuture.supplyAsync(() -> findRouteSyncSingle(graph, from, cancellationToken));
+    return CompletableFuture.supplyAsync(() -> findRouteSyncSingle(graph, from, cancellationToken), executor);
   }
 
   private RouteSearchResult findRouteSyncSingle(MinecraftGraph graph, NodeState from, CancellationToken cancellationToken) {
