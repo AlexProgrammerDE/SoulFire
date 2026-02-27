@@ -28,7 +28,7 @@ spotbugs {
 }
 
 dependencies {
-  errorprone("com.google.errorprone:error_prone_core:2.47.0")
+  errorprone("com.google.errorprone:error_prone_core:2.48.0")
   spotbugs("com.github.spotbugs:spotbugs:4.9.8")
 
   rewrite("org.openrewrite.recipe:rewrite-static-analysis:2.28.0")
