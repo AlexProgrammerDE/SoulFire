@@ -75,7 +75,7 @@ flyway-mysql = { module = "org.flywaydb:flyway-mysql", version.ref = "flyway" }
 hikaricp = "com.zaxxer:HikariCP:7.0.2"
 mariadb = "org.mariadb.jdbc:mariadb-java-client:3.5.7"
 sqlite = "org.xerial:sqlite-jdbc:3.51.2.0"
-acme4j = "org.shredzone.acme4j:acme4j-client:4.0.0"
+acme4j = "org.shredzone.acme4j:acme4j-client:5.0.0"
 kotlin-bom = "org.jetbrains.kotlin:kotlin-bom:2.3.10"
 classtransform-mixinstranslator = { module = "net.lenni0451.classtransform:mixinstranslator", version.ref = "classtransform" }
 classtransform-additionalclassprovider = { module = "net.lenni0451.classtransform:additionalclassprovider", version.ref = "classtransform" }
