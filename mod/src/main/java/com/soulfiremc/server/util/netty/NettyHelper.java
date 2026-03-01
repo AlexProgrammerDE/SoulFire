@@ -29,6 +29,7 @@ import io.netty.handler.proxy.Socks5ProxyHandler;
 import org.cloudburstmc.netty.channel.raknet.RakClientChannel;
 
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 public final class NettyHelper {
   public static final String PROXY_NAME = "sf_proxy";
@@ -74,14 +75,91 @@ public final class NettyHelper {
   public static void addRunnableWrapper(String prefix, SoulFireScheduler.RunnableWrapper runnableWrapper, Channel channel) {
     var pipeline = channel.pipeline();
     pipeline.addLast(prefix + "sf_runnable_wrapper", new ChannelDuplexHandler() {
+      // Inbound
+      @Override
+      public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelRegistered(ctx));
+      }
+
+      @Override
+      public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelUnregistered(ctx));
+      }
+
+      @Override
+      public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelActive(ctx));
+      }
+
+      @Override
+      public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelInactive(ctx));
+      }
+
       @Override
       public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         runnableWrapper.runWrappedWithException(() -> super.channelRead(ctx, msg));
       }
 
       @Override
+      public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelReadComplete(ctx));
+      }
+
+      @Override
+      public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.userEventTriggered(ctx, evt));
+      }
+
+      @Override
+      public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.channelWritabilityChanged(ctx));
+      }
+
+      @Override
+      public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.exceptionCaught(ctx, cause));
+      }
+
+      // Outbound
+      @Override
+      public void bind(ChannelHandlerContext ctx, SocketAddress localAddress, ChannelPromise promise) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.bind(ctx, localAddress, promise));
+      }
+
+      @Override
+      public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.connect(ctx, remoteAddress, localAddress, promise));
+      }
+
+      @Override
+      public void disconnect(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.disconnect(ctx, promise));
+      }
+
+      @Override
+      public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.close(ctx, promise));
+      }
+
+      @Override
+      public void deregister(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.deregister(ctx, promise));
+      }
+
+      @Override
+      public void read(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.read(ctx));
+      }
+
+      @Override
       public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
         runnableWrapper.runWrappedWithException(() -> super.write(ctx, msg, promise));
+      }
+
+      @Override
+      public void flush(ChannelHandlerContext ctx) throws Exception {
+        runnableWrapper.runWrappedWithException(() -> super.flush(ctx));
       }
     });
   }
