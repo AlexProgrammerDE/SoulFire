@@ -35,6 +35,7 @@ public final class NodeValueTypeChecker {
       case NodeValue.Bot _ -> type == PortType.BOT;
       case NodeValue.ValueList _ -> type == PortType.LIST;
       case NodeValue.Json(JsonElement element) -> matchesJson(element, type);
+      case NodeValue.Vector3 _ -> type == PortType.VECTOR3;
     };
   }
 
@@ -62,6 +63,7 @@ public final class NodeValueTypeChecker {
       case NodeValue.Bot _ -> "Bot";
       case NodeValue.ValueList _ -> "List";
       case NodeValue.Json(JsonElement element) -> describeJsonType(element);
+      case NodeValue.Vector3 _ -> "Vector3";
     };
   }
 

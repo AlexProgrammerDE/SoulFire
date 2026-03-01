@@ -19,6 +19,7 @@ package com.soulfiremc.server.script;
 
 import com.google.gson.*;
 import com.soulfiremc.server.bot.BotConnection;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -45,6 +46,15 @@ public sealed interface NodeValue {
     if (value instanceof JsonElement json) {
       return new Json(json);
     }
+
+    if (value instanceof Vec3 v) {
+      var arr = new JsonArray();
+      arr.add(v.x);
+      arr.add(v.y);
+      arr.add(v.z);
+      return new Json(arr);
+    }
+
     if (value instanceof String s) {
       return new Json(new JsonPrimitive(s));
     }
@@ -213,6 +223,14 @@ public sealed interface NodeValue {
     return List.of();
   }
 
+  @Nullable
+  default Vec3 asVec3() {
+    if (this instanceof Vector3(Vec3 v)) {
+      return v;
+    }
+    return null;
+  }
+
   /// Gets this value as a BotConnection, or null if not a bot.
   @Nullable
   default BotConnection asBot() {
@@ -240,6 +258,7 @@ public sealed interface NodeValue {
       }
       case Bot(BotConnection bot1) -> "Bot(" + bot1.accountName() + ")";
       case ValueList(List<NodeValue> items) -> "List[" + items.size() + "]";
+      case Vector3(Vec3 vec) -> "Vector3(" + vec + ")";
     };
   }
 
@@ -256,6 +275,13 @@ public sealed interface NodeValue {
     @Override
     public String toString() {
       return "Bot[" + bot.accountName() + "]";
+    }
+  }
+
+  record Vector3(Vec3 value) implements NodeValue {
+    @Override
+    public String toString() {
+      return "Vector3[" + value + "]";
     }
   }
 
