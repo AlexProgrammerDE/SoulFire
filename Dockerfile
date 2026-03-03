@@ -19,6 +19,9 @@ WORKDIR /soulfire/data
 # Copy over the start script
 COPY --chmod=755 start.sh /soulfire/start.sh
 
+# Ensure runtime data directory is writable when mounted or initialized
+RUN mkdir -p /soulfire/data && chown -R soulfire:soulfire /soulfire
+
 # Switch from root to soulfire
 USER soulfire
 
