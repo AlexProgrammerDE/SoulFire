@@ -57,6 +57,14 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
     }
   }
 
+  private static String buildMCPAddress(String baseUrl) {
+    if (baseUrl.endsWith("/")) {
+      return baseUrl + "mcp";
+    } else {
+      return baseUrl + "/mcp";
+    }
+  }
+
   private Collection<GlobalPermissionState> getGlobalPermissions() {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     return Arrays.stream(GlobalPermission.values())
@@ -93,6 +101,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
             .setPublicApiAddress(publicAddress)
             .setPublicWebdavAddress(buildWebDAVAddress(publicAddress))
             .setPublicDocsAddress(buildDocsAddress(publicAddress))
+            .setPublicMcpAddress(buildMCPAddress(publicAddress))
             .setMinecraftVersion(ProtocolTranslator.NATIVE_VERSION.getName())
             .build())
           .build());

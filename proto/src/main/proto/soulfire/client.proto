@@ -40,6 +40,10 @@ message ServerInfo {
   // The public URL for the API documentation endpoint.
   // Derived from public_api_address with "/docs" appended.
   string public_docs_address = 6;
+  // The public URL for the MCP (Model Context Protocol) endpoint.
+  // Derived from public_api_address with "/mcp" appended.
+  // Clients can use this to connect AI assistants to the SoulFire server.
+  string public_mcp_address = 8;
   // The native Minecraft protocol version supported by this server (e.g., "1.21.4").
   string minecraft_version = 7;
 }
