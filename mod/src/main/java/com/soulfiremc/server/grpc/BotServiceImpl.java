@@ -1238,8 +1238,9 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         }
       }
 
-      // Perform the click
-      gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player);
+      activeBot.botControl().registerControllingTask(
+        ControllingTask.singleTick(() ->
+          gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player)));
 
       responseObserver.onNext(BotInventoryClickResponse.newBuilder()
         .setSuccess(true)
@@ -1275,8 +1276,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
       }
 
-      // Close any open container
-      player.closeContainer();
+      // Close the container on the bot tick thread.
+      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(player::closeContainer));
 
       responseObserver.onNext(BotCloseContainerResponse.newBuilder()
         .setSuccess(true)
@@ -1312,8 +1313,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
       }
 
-      // Open player inventory (sends inventory open packet to server)
-      player.sendOpenInventory();
+      // Open the inventory on the bot tick thread.
+      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(player::sendOpenInventory));
 
       responseObserver.onNext(BotOpenInventoryResponse.newBuilder()
         .setSuccess(true)
@@ -1352,8 +1353,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       }
 
       switch (request.getButton()) {
-        case LEFT_BUTTON -> MouseClickHelper.performLeftClick(player, level, gameMode);
-        case RIGHT_BUTTON -> MouseClickHelper.performRightClick(player, level, gameMode);
+        case LEFT_BUTTON -> activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+          MouseClickHelper.performLeftClick(player, level, gameMode)));
+        case RIGHT_BUTTON -> activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+          MouseClickHelper.performRightClick(player, level, gameMode)));
         default -> {
           responseObserver.onNext(BotMouseClickResponse.newBuilder()
             .setSuccess(false)
