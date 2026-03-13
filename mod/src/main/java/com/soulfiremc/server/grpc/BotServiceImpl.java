@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControllingTask;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.plugins.DialogHandler;
@@ -54,6 +55,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -136,6 +138,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     } catch (IOException e) {
       throw new IllegalStateException("Failed to convert image to base64", e);
     }
+  }
+
+  private static <T> T callInBotContext(BotConnection botConnection, Callable<T> callable) throws Exception {
+    return botConnection.runnableWrapper().wrap(callable).call();
   }
 
   /**
@@ -267,11 +273,16 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
         var activeBot = botConnections.get(profileId);
         if (activeBot != null) {
-          var minecraft = activeBot.minecraft();
-          var player = minecraft.player;
-          if (player != null) {
+          var liveState = callInBotContext(activeBot, () -> {
+            var minecraft = activeBot.minecraft();
+            var player = minecraft.player;
+            return player != null
+              ? buildLiveState(minecraft, player, false)
+              : null;
+          });
+          if (liveState != null) {
             // Don't include inventory for list view (too expensive)
-            entryBuilder.setLiveState(buildLiveState(minecraft, player, false));
+            entryBuilder.setLiveState(liveState);
           }
         }
         responseBuilder.addBots(entryBuilder.build());
@@ -306,11 +317,16 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var botInfoResponseBuilder = BotInfoResponse.newBuilder();
       var activeBot = instance.botConnections().get(botId);
       if (activeBot != null) {
-        var minecraft = activeBot.minecraft();
-        var player = minecraft.player;
-        if (player != null) {
+        var liveState = callInBotContext(activeBot, () -> {
+          var minecraft = activeBot.minecraft();
+          var player = minecraft.player;
+          return player != null
+            ? buildLiveState(minecraft, player, true)
+            : null;
+        });
+        if (liveState != null) {
           // Include full inventory data for detail view
-          botInfoResponseBuilder.setLiveState(buildLiveState(minecraft, player, true));
+          botInfoResponseBuilder.setLiveState(liveState);
         }
       }
 
@@ -340,13 +356,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      var level = minecraft.level;
-      if (player == null || level == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player or level is not available").asRuntimeException();
-      }
-
       // Use provided dimensions or defaults
       var width = request.getWidth() > 0 ? request.getWidth() : RenderConstants.DEFAULT_WIDTH;
       var height = request.getHeight() > 0 ? request.getHeight() : RenderConstants.DEFAULT_HEIGHT;
@@ -354,27 +363,34 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       // Clamp dimensions to reasonable values
       width = Math.min(Math.max(width, 1), 1920);
       height = Math.min(Math.max(height, 1), 1080);
+      final var renderWidth = width;
+      final var renderHeight = height;
 
-      // Get render distance from settings (in chunks) and convert to blocks
-      var renderDistanceChunks = minecraft.options.getEffectiveRenderDistance();
-      var maxDistance = renderDistanceChunks * 16;
+      var response = callInBotContext(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        var player = minecraft.player;
+        var level = minecraft.level;
+        if (player == null || level == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player or level is not available").asRuntimeException();
+        }
 
-      // Render the POV
-      var image = SoftwareRenderer.render(
-        level,
-        player,
-        width,
-        height,
-        RenderConstants.DEFAULT_FOV,
-        maxDistance
-      );
+        var renderDistanceChunks = minecraft.options.getEffectiveRenderDistance();
+        var maxDistance = renderDistanceChunks * 16;
+        var image = SoftwareRenderer.render(
+          level,
+          player,
+          renderWidth,
+          renderHeight,
+          RenderConstants.DEFAULT_FOV,
+          maxDistance
+        );
 
-      // Convert to base64 PNG
-      var base64Image = toBase64PNG(image);
+        return BotRenderPovResponse.newBuilder()
+          .setImageBase64(toBase64PNG(image))
+          .build();
+      });
 
-      responseObserver.onNext(BotRenderPovResponse.newBuilder()
-        .setImageBase64(base64Image)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error rendering bot POV", t);
@@ -1186,15 +1202,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      var gameMode = minecraft.gameMode;
-      if (player == null || gameMode == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
-      }
-
       // Map proto ClickType to Minecraft ClickType and mouse button
-      var container = player.containerMenu;
       var slotId = request.getSlot();
       int mouseButton;
       ClickType clickType;
@@ -1238,13 +1246,25 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         }
       }
 
-      activeBot.botControl().registerControllingTask(
-        ControllingTask.singleTick(() ->
-          gameMode.handleInventoryMouseClick(container.containerId, slotId, mouseButton, clickType, player)));
+      var response = callInBotContext(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        var player = minecraft.player;
+        var gameMode = minecraft.gameMode;
+        if (player == null || gameMode == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
+        }
 
-      responseObserver.onNext(BotInventoryClickResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+        var containerId = player.containerMenu.containerId;
+        activeBot.botControl().registerControllingTask(
+          ControllingTask.singleTick(() ->
+            gameMode.handleInventoryMouseClick(containerId, slotId, mouseButton, clickType, player)));
+
+        return BotInventoryClickResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
+
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking inventory slot", t);
@@ -1270,18 +1290,19 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      if (player == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var player = activeBot.minecraft().player;
+        if (player == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
+        }
 
-      // Close the container on the bot tick thread.
-      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(player::closeContainer));
+        activeBot.botControl().registerControllingTask(ControllingTask.singleTick(player::closeContainer));
+        return BotCloseContainerResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
 
-      responseObserver.onNext(BotCloseContainerResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error closing container", t);
@@ -1307,18 +1328,19 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      if (player == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var player = activeBot.minecraft().player;
+        if (player == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
+        }
 
-      // Open the inventory on the bot tick thread.
-      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(player::sendOpenInventory));
+        activeBot.botControl().registerControllingTask(ControllingTask.singleTick(player::sendOpenInventory));
+        return BotOpenInventoryResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
 
-      responseObserver.onNext(BotOpenInventoryResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error opening inventory", t);
@@ -1344,32 +1366,38 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      var level = minecraft.level;
-      var gameMode = minecraft.gameMode;
-      if (player == null || level == null || gameMode == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player, level, or gameMode is not available").asRuntimeException();
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        var player = minecraft.player;
+        var level = minecraft.level;
+        var gameMode = minecraft.gameMode;
+        if (player == null || level == null || gameMode == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player, level, or gameMode is not available").asRuntimeException();
+        }
 
-      switch (request.getButton()) {
-        case LEFT_BUTTON -> activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-          MouseClickHelper.performLeftClick(player, level, gameMode)));
-        case RIGHT_BUTTON -> activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
-          MouseClickHelper.performRightClick(player, level, gameMode)));
-        default -> {
-          responseObserver.onNext(BotMouseClickResponse.newBuilder()
+        return switch (request.getButton()) {
+          case LEFT_BUTTON -> {
+            activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+              MouseClickHelper.performLeftClick(player, level, gameMode)));
+            yield BotMouseClickResponse.newBuilder()
+              .setSuccess(true)
+              .build();
+          }
+          case RIGHT_BUTTON -> {
+            activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() ->
+              MouseClickHelper.performRightClick(player, level, gameMode)));
+            yield BotMouseClickResponse.newBuilder()
+              .setSuccess(true)
+              .build();
+          }
+          default -> BotMouseClickResponse.newBuilder()
             .setSuccess(false)
             .setError("Invalid mouse button")
-            .build());
-          responseObserver.onCompleted();
-          return;
-        }
-      }
+            .build();
+        };
+      });
 
-      responseObserver.onNext(BotMouseClickResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error performing mouse click", t);
@@ -1395,46 +1423,44 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      var gameMode = minecraft.gameMode;
-      if (player == null || gameMode == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
-      }
-
-      var container = player.containerMenu;
       var buttonId = request.getButtonId();
 
-      // Validate the button click based on container type
-      // Most containers accept any button ID and ignore invalid ones server-side
-      var validClick = switch (container) {
-        case StonecutterMenu ignored -> buttonId >= 0 && buttonId < 100; // Recipes vary by input
-        case EnchantmentMenu ignored -> buttonId >= 0 && buttonId < 3;
-        case LoomMenu ignored -> buttonId >= 0 && buttonId < 100; // Patterns vary
-        case MerchantMenu merchantMenu -> buttonId >= 0 && buttonId < merchantMenu.getOffers().size();
-        case BeaconMenu ignored -> true; // Beacon accepts various effect IDs including negative for confirm
-        case CrafterMenu ignored -> buttonId >= 0 && buttonId < 9; // 9 slot toggles
-        case LecternMenu ignored -> buttonId >= 1 && buttonId <= 3; // Page nav and take book
-        default -> true; // Allow button clicks on unknown containers - server will validate
-      };
+      var response = callInBotContext(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        var player = minecraft.player;
+        var gameMode = minecraft.gameMode;
+        if (player == null || gameMode == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
+        }
 
-      if (!validClick) {
-        responseObserver.onNext(BotContainerButtonClickResponse.newBuilder()
-          .setSuccess(false)
-          .setError("Invalid button ID for this container type")
-          .build());
-        responseObserver.onCompleted();
-        return;
-      }
+        var container = player.containerMenu;
+        var validClick = switch (container) {
+          case StonecutterMenu ignored -> buttonId >= 0 && buttonId < 100;
+          case EnchantmentMenu ignored -> buttonId >= 0 && buttonId < 3;
+          case LoomMenu ignored -> buttonId >= 0 && buttonId < 100;
+          case MerchantMenu merchantMenu -> buttonId >= 0 && buttonId < merchantMenu.getOffers().size();
+          case BeaconMenu ignored -> true;
+          case CrafterMenu ignored -> buttonId >= 0 && buttonId < 9;
+          case LecternMenu ignored -> buttonId >= 1 && buttonId <= 3;
+          default -> true;
+        };
 
-      // Click the button - must be executed in game tick context
-      log.info("Clicking container button {} on container {} (type: {})", buttonId, container.containerId, container.getClass().getSimpleName());
-      activeBot.botControl().registerControllingTask(
-        ControllingTask.singleTick(() -> gameMode.handleInventoryButtonClick(container.containerId, buttonId)));
+        if (!validClick) {
+          return BotContainerButtonClickResponse.newBuilder()
+            .setSuccess(false)
+            .setError("Invalid button ID for this container type")
+            .build();
+        }
 
-      responseObserver.onNext(BotContainerButtonClickResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+        log.info("Clicking container button {} on container {} (type: {})", buttonId, container.containerId, container.getClass().getSimpleName());
+        activeBot.botControl().registerControllingTask(
+          ControllingTask.singleTick(() -> gameMode.handleInventoryButtonClick(container.containerId, buttonId)));
+        return BotContainerButtonClickResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
+
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking container button", t);
@@ -1460,53 +1486,54 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      if (player == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        var player = minecraft.player;
+        if (player == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
+        }
 
-      var container = player.containerMenu;
-      var title = getContainerTitle(container, minecraft);
-      var layout = buildContainerLayout(container, title);
+        var container = player.containerMenu;
+        var title = getContainerTitle(container, minecraft);
+        var layout = buildContainerLayout(container, title);
+        var responseBuilder = BotInventoryStateResponse.newBuilder()
+          .setLayout(layout)
+          .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
 
-      var responseBuilder = BotInventoryStateResponse.newBuilder()
-        .setLayout(layout)
-        .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
+        for (var slot : container.slots) {
+          var item = slot.getItem();
+          if (!item.isEmpty()) {
+            var slotBuilder = InventorySlot.newBuilder()
+              .setSlot(slot.index)
+              .setItemId(item.getItemHolder().getRegisteredName())
+              .setCount(item.getCount());
 
-      // Add all non-empty slots
-      for (var slot : container.slots) {
-        var item = slot.getItem();
-        if (!item.isEmpty()) {
-          var slotBuilder = InventorySlot.newBuilder()
-            .setSlot(slot.index)
-            .setItemId(item.getItemHolder().getRegisteredName())
-            .setCount(item.getCount());
+            if (item.has(DataComponents.CUSTOM_NAME)) {
+              slotBuilder.setDisplayName(item.getHoverName().getString());
+            }
 
-          if (item.has(DataComponents.CUSTOM_NAME)) {
-            slotBuilder.setDisplayName(item.getHoverName().getString());
+            responseBuilder.addSlots(slotBuilder.build());
+          }
+        }
+
+        var carried = container.getCarried();
+        if (!carried.isEmpty()) {
+          var carriedBuilder = InventorySlot.newBuilder()
+            .setSlot(-1)
+            .setItemId(carried.getItemHolder().getRegisteredName())
+            .setCount(carried.getCount());
+
+          if (carried.has(DataComponents.CUSTOM_NAME)) {
+            carriedBuilder.setDisplayName(carried.getHoverName().getString());
           }
 
-          responseBuilder.addSlots(slotBuilder.build());
-        }
-      }
-
-      // Add carried item if present
-      var carried = container.getCarried();
-      if (!carried.isEmpty()) {
-        var carriedBuilder = InventorySlot.newBuilder()
-          .setSlot(-1) // -1 indicates carried item
-          .setItemId(carried.getItemHolder().getRegisteredName())
-          .setCount(carried.getCount());
-
-        if (carried.has(DataComponents.CUSTOM_NAME)) {
-          carriedBuilder.setDisplayName(carried.getHoverName().getString());
+          responseBuilder.setCarriedItem(carriedBuilder.build());
         }
 
-        responseBuilder.setCarriedItem(carriedBuilder.build());
-      }
+        return responseBuilder.build();
+      });
 
-      responseObserver.onNext(responseBuilder.build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error getting inventory state", t);
@@ -1536,42 +1563,37 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      if (player == null) {
-        throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
-      }
-
-      var container = player.containerMenu;
       var fieldId = request.getFieldId();
       var text = request.getText();
 
-      // Handle text input based on container type and field ID
-      if (container instanceof AnvilMenu anvilMenu && "item_name".equals(fieldId)) {
-        // Anvil rename - need to send packet to server
-        var connection = minecraft.getConnection();
-        if (connection == null) {
-          throw Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available").asRuntimeException();
+      var response = callInBotContext(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        var player = minecraft.player;
+        if (player == null) {
+          throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
         }
 
-        // Send the rename packet
-        activeBot.botControl().registerControllingTask(
-          ControllingTask.singleTick(() ->
-            // The anvil menu has a setItemName method that we can call
-            // This will update the output slot and send the appropriate packet
-            anvilMenu.setItemName(text)));
+        var container = player.containerMenu;
+        if (container instanceof AnvilMenu anvilMenu && "item_name".equals(fieldId)) {
+          if (minecraft.getConnection() == null) {
+            throw Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available").asRuntimeException();
+          }
 
-        responseObserver.onNext(BotSetContainerTextResponse.newBuilder()
-          .setSuccess(true)
-          .build());
-        responseObserver.onCompleted();
-      } else {
-        responseObserver.onNext(BotSetContainerTextResponse.newBuilder()
+          activeBot.botControl().registerControllingTask(
+            ControllingTask.singleTick(() -> anvilMenu.setItemName(text)));
+          return BotSetContainerTextResponse.newBuilder()
+            .setSuccess(true)
+            .build();
+        }
+
+        return BotSetContainerTextResponse.newBuilder()
           .setSuccess(false)
           .setError("Unsupported container or field ID: " + container.getClass().getSimpleName() + "/" + fieldId)
-          .build());
-        responseObserver.onCompleted();
-      }
+          .build();
+      });
+
+      responseObserver.onNext(response);
+      responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting container text", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -1595,8 +1617,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var responseBuilder = BotGetDialogResponse.newBuilder();
 
       if (activeBot != null) {
-        // Get current dialog from the DialogHandler
-        var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
+        var dialogHolder = callInBotContext(activeBot, () -> DialogHandler.getCurrentDialog(activeBot));
         if (dialogHolder != null) {
           responseBuilder.setDialog(convertDialogToProto(dialogHolder));
         }
@@ -1628,25 +1649,23 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
-      if (dialogHolder == null) {
-        responseObserver.onNext(BotSubmitDialogResponse.newBuilder()
-          .setSuccess(false)
-          .setError("No dialog is currently displayed")
-          .build());
-        responseObserver.onCompleted();
-        return;
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
+        if (dialogHolder == null) {
+          return BotSubmitDialogResponse.newBuilder()
+            .setSuccess(false)
+            .setError("No dialog is currently displayed")
+            .build();
+        }
 
-      // For now, just clear the dialog state - actual packet sending for dialog responses
-      // requires more complex NBT payload construction that varies by dialog type
-      // TODO: Implement proper dialog response packets
-      log.info("Dialog submit requested with {} input values - clearing dialog state", request.getInputValuesCount());
-      DialogHandler.setCurrentDialog(activeBot, null);
+        log.info("Dialog submit requested with {} input values - clearing dialog state", request.getInputValuesCount());
+        DialogHandler.setCurrentDialog(activeBot, null);
+        return BotSubmitDialogResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
 
-      responseObserver.onNext(BotSubmitDialogResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error submitting dialog", t);
@@ -1672,25 +1691,23 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
-      if (dialogHolder == null) {
-        responseObserver.onNext(BotClickDialogButtonResponse.newBuilder()
-          .setSuccess(false)
-          .setError("No dialog is currently displayed")
-          .build());
-        responseObserver.onCompleted();
-        return;
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
+        if (dialogHolder == null) {
+          return BotClickDialogButtonResponse.newBuilder()
+            .setSuccess(false)
+            .setError("No dialog is currently displayed")
+            .build();
+        }
 
-      // For now, just clear the dialog state - actual packet sending for button clicks
-      // requires more complex NBT payload construction
-      // TODO: Implement proper dialog button click packets
-      log.info("Dialog button click requested (button index: {}) - clearing dialog state", request.getButtonIndex());
-      DialogHandler.setCurrentDialog(activeBot, null);
+        log.info("Dialog button click requested (button index: {}) - clearing dialog state", request.getButtonIndex());
+        DialogHandler.setCurrentDialog(activeBot, null);
+        return BotClickDialogButtonResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
 
-      responseObserver.onNext(BotClickDialogButtonResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error clicking dialog button", t);
@@ -1716,12 +1733,14 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      // Just clear the dialog state locally - the server will handle cleanup
-      DialogHandler.setCurrentDialog(activeBot, null);
+      var response = callInBotContext(activeBot, () -> {
+        DialogHandler.setCurrentDialog(activeBot, null);
+        return BotCloseDialogResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
 
-      responseObserver.onNext(BotCloseDialogResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error closing dialog", t);
@@ -1758,26 +1777,24 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      if (player == null) {
-        responseObserver.onNext(BotSetHotbarSlotResponse.newBuilder()
-          .setSuccess(false)
-          .setError("Player is not available")
-          .build());
-        responseObserver.onCompleted();
-        return;
-      }
+      var response = callInBotContext(activeBot, () -> {
+        var player = activeBot.minecraft().player;
+        if (player == null) {
+          return BotSetHotbarSlotResponse.newBuilder()
+            .setSuccess(false)
+            .setError("Player is not available")
+            .build();
+        }
 
-      // Set the selected hotbar slot
-      activeBot.botControl().registerControllingTask(
-        ControllingTask.singleTick(() -> player.getInventory().setSelectedSlot(slot)));
+        activeBot.botControl().registerControllingTask(
+          ControllingTask.singleTick(() -> player.getInventory().setSelectedSlot(slot)));
+        log.info("Setting hotbar slot to {} for bot {}", slot, botId);
+        return BotSetHotbarSlotResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
 
-      log.info("Setting hotbar slot to {} for bot {}", slot, botId);
-
-      responseObserver.onNext(BotSetHotbarSlotResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting hotbar slot", t);
@@ -1892,17 +1909,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var minecraft = activeBot.minecraft();
-      var player = minecraft.player;
-      if (player == null) {
-        responseObserver.onNext(BotSetRotationResponse.newBuilder()
-          .setSuccess(false)
-          .setError("Player is not available")
-          .build());
-        responseObserver.onCompleted();
-        return;
-      }
-
       var yaw = request.getYaw();
       var pitch = request.getPitch();
 
@@ -1920,15 +1926,25 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       final float finalYaw = yaw;
       final float finalPitch = pitch;
 
-      // Set the rotation
-      activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
-        player.setYRot(finalYaw);
-        player.setXRot(finalPitch);
-      }));
+      var response = callInBotContext(activeBot, () -> {
+        var player = activeBot.minecraft().player;
+        if (player == null) {
+          return BotSetRotationResponse.newBuilder()
+            .setSuccess(false)
+            .setError("Player is not available")
+            .build();
+        }
 
-      responseObserver.onNext(BotSetRotationResponse.newBuilder()
-        .setSuccess(true)
-        .build());
+        activeBot.botControl().registerControllingTask(ControllingTask.singleTick(() -> {
+          player.setYRot(finalYaw);
+          player.setXRot(finalPitch);
+        }));
+        return BotSetRotationResponse.newBuilder()
+          .setSuccess(true)
+          .build();
+      });
+
+      responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error setting rotation", t);
