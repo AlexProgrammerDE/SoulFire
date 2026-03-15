@@ -62,7 +62,7 @@ public final class PlaceBlockNode extends AbstractScriptNode {
     var constraint = new PathConstraintImpl(bot);
 
     return Mono.fromFuture(PathExecutor.executePathfinding(bot, goal, constraint))
-      .map(_ -> results(
+      .thenReturn(results(
         StandardPorts.EXEC_OUT, true,
         "success", true,
         "errorMessage", ""
