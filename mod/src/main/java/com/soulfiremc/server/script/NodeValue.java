@@ -46,15 +46,9 @@ public sealed interface NodeValue {
     if (value instanceof JsonElement json) {
       return new Json(json);
     }
-
     if (value instanceof Vec3 v) {
-      var arr = new JsonArray();
-      arr.add(v.x);
-      arr.add(v.y);
-      arr.add(v.z);
-      return new Json(arr);
+      return new Vector3(v);
     }
-
     if (value instanceof String s) {
       return new Json(new JsonPrimitive(s));
     }
@@ -132,6 +126,11 @@ public sealed interface NodeValue {
   /// Creates a bot NodeValue.
   static NodeValue ofBot(BotConnection bot) {
     return new Bot(bot);
+  }
+
+  /// Creates a vector NodeValue.
+  static NodeValue ofVector3(Vec3 value) {
+    return new Vector3(value);
   }
 
   /// Creates a NodeValue from a JsonElement.
@@ -227,6 +226,28 @@ public sealed interface NodeValue {
   default Vec3 asVec3() {
     if (this instanceof Vector3(Vec3 v)) {
       return v;
+    }
+    if (this instanceof Json(JsonElement element)) {
+      if (element.isJsonArray()) {
+        var list = asList();
+        if (list.size() >= 3) {
+          return new Vec3(
+            list.getFirst().asDouble(0.0),
+            list.get(1).asDouble(0.0),
+            list.get(2).asDouble(0.0)
+          );
+        }
+      }
+      if (element.isJsonObject()) {
+        var object = element.getAsJsonObject();
+        if (object.has("x") && object.has("y") && object.has("z")) {
+          return new Vec3(
+            object.get("x").getAsDouble(),
+            object.get("y").getAsDouble(),
+            object.get("z").getAsDouble()
+          );
+        }
+      }
     }
     return null;
   }

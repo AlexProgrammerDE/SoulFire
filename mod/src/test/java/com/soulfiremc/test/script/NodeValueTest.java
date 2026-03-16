@@ -17,7 +17,9 @@
  */
 package com.soulfiremc.test.script;
 
+import com.google.gson.JsonParser;
 import com.soulfiremc.server.script.NodeValue;
+import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -88,6 +90,29 @@ final class NodeValueTest {
     assertEquals(123, NodeValue.of(123).asInt(0), "Integer conversion should work");
     assertTrue(NodeValue.of(true).asBoolean(false), "Boolean conversion should work");
     assertTrue(NodeValue.of(null).isNull(), "Null conversion should produce null value");
+  }
+
+  @Test
+  void nodeValueOfVec3PreservesVectorType() {
+    var vector = new Vec3(1.5, 2.5, 3.5);
+    var value = NodeValue.of(vector);
+
+    assertInstanceOf(NodeValue.Vector3.class, value, "Vec3 values should stay typed");
+    assertEquals(vector, value.asVec3(), "Vector conversion should preserve coordinates");
+  }
+
+  @Test
+  void nodeValueAsVec3SupportsJsonArrayFallback() {
+    var value = NodeValue.fromJson(JsonParser.parseString("[1.5,2.5,3.5]"));
+
+    assertEquals(new Vec3(1.5, 2.5, 3.5), value.asVec3(), "JSON arrays should still parse as vectors");
+  }
+
+  @Test
+  void nodeValueAsVec3SupportsJsonObjectFallback() {
+    var value = NodeValue.fromJson(JsonParser.parseString("{\"x\":1.5,\"y\":2.5,\"z\":3.5}"));
+
+    assertEquals(new Vec3(1.5, 2.5, 3.5), value.asVec3(), "JSON objects should parse as vectors");
   }
 
   @Test
