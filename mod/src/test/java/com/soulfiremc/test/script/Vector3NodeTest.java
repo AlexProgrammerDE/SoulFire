@@ -27,6 +27,7 @@ import java.util.Map;
 import static com.soulfiremc.test.script.ScriptTestHelper.executeNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /// Tests the VECTOR3 node execution path.
 final class Vector3NodeTest {
@@ -58,5 +59,24 @@ final class Vector3NodeTest {
     assertEquals(1.5, split.get("x").asDouble(0.0));
     assertEquals(2.5, split.get("y").asDouble(0.0));
     assertEquals(3.5, split.get("z").asDouble(0.0));
+  }
+
+  @Test
+  void vectorConstantProvidesTypedVectorOutput() {
+    var outputs = executeNode("constant.vector3", Map.of(
+      "x", NodeValue.of("1.5"),
+      "y", NodeValue.of(true),
+      "z", NodeValue.of(3)
+    ));
+
+    var vector = outputs.get("vector");
+    assertInstanceOf(NodeValue.Vector3.class, vector, "Vector constant should expose a typed vector output");
+    assertEquals(new Vec3(1.5, 1.0, 3.0), vector.asVec3(), "Vector constant should use centralized coercion");
+  }
+
+  @Test
+  void invalidLegacyVectorShapeNoLongerSilentlyParses() {
+    assertNull(NodeValue.fromJson(JsonParser.parseString("[1.5,2.5]")).asVec3(),
+      "Malformed vector arrays should not decode");
   }
 }

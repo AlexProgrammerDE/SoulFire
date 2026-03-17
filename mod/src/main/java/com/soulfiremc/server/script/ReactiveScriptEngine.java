@@ -525,9 +525,13 @@ public final class ReactiveScriptEngine {
       var portMeta = NodeRegistry.getMetadata(targetNode.type());
       var portDef = portMeta.inputs().stream()
         .filter(p -> p.id().equals(edge.targetHandle())).findFirst();
-      if (portDef.isPresent() && !NodeValueTypeChecker.matches(value, portDef.get().type())) {
-        context.eventListener().onLog("warn", "Type mismatch at runtime: port '" + edge.targetHandle()
-          + "' expected " + portDef.get().type() + ", got " + NodeValueTypeChecker.describeActualType(value));
+      if (portDef.isPresent()) {
+        var conversion = NodeValueConversion.convert(value, portDef.get().type());
+        if (!conversion.success()) {
+          context.eventListener().onLog("warn", "Type mismatch at runtime: port '" + edge.targetHandle()
+            + "' expected " + portDef.get().type() + ", got " + NodeValueTypeChecker.describeActualType(value)
+            + " (" + conversion.failureReason() + ")");
+        }
       }
     }
 

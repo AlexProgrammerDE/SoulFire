@@ -18,12 +18,12 @@
 package com.soulfiremc.server.script.nodes.constant;
 
 import com.soulfiremc.server.script.*;
+import net.minecraft.world.phys.Vec3;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
-/// Constant node that outputs a configurable 3D vector (x, y, z).
-/// Outputs: x, y, z (number)
+/// Constant node that outputs a configurable 3D vector and its components.
 public final class Vector3ConstantNode extends AbstractScriptNode {
   public static final NodeMetadata METADATA = NodeMetadata.builder()
     .type("constant.vector3")
@@ -35,11 +35,12 @@ public final class Vector3ConstantNode extends AbstractScriptNode {
       PortDefinition.inputWithDefault("z", "Z", PortType.NUMBER, "0", "Z component")
     )
     .addOutputs(
+      PortDefinition.output("vector", "Vector", PortType.VECTOR3, "Vector value"),
       PortDefinition.output("x", "X", PortType.NUMBER, "X component"),
       PortDefinition.output("y", "Y", PortType.NUMBER, "Y component"),
       PortDefinition.output("z", "Z", PortType.NUMBER, "Z component")
     )
-    .description("Outputs a constant 3D vector with x, y, z components")
+    .description("Outputs a constant 3D vector with both a typed vector and x, y, z components")
     .icon("move-3d")
     .color("#9C27B0")
     .addKeywords("vector", "vector3", "xyz", "position", "coordinate", "constant")
@@ -50,6 +51,6 @@ public final class Vector3ConstantNode extends AbstractScriptNode {
     var x = getDoubleInput(inputs, "x", 0.0);
     var y = getDoubleInput(inputs, "y", 0.0);
     var z = getDoubleInput(inputs, "z", 0.0);
-    return completedMono(results("x", x, "y", y, "z", z));
+    return completedMono(results("vector", new Vec3(x, y, z), "x", x, "y", y, "z", z));
   }
 }

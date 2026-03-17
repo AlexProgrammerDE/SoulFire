@@ -62,6 +62,14 @@ final class TypeCompatibilityTest {
   void numberBooleanCoercion() {
     assertTrue(TypeCompatibility.isCompatible(PortType.NUMBER, PortType.BOOLEAN));
     assertTrue(TypeCompatibility.isCompatible(PortType.BOOLEAN, PortType.NUMBER));
+    assertTrue(TypeCompatibility.isCompatible(PortType.STRING, PortType.NUMBER));
+    assertTrue(TypeCompatibility.isCompatible(PortType.STRING, PortType.BOOLEAN));
+  }
+
+  @Test
+  void vectorAcceptsStructuredValues() {
+    assertTrue(TypeCompatibility.isCompatible(PortType.LIST, PortType.VECTOR3));
+    assertTrue(TypeCompatibility.isCompatible(PortType.MAP, PortType.VECTOR3));
   }
 
   @Test
@@ -81,10 +89,6 @@ final class TypeCompatibilityTest {
       var compatibleSet = TypeCompatibility.getCompatibleFrom(target);
       for (var source : PortType.values()) {
         if (source == PortType.EXEC || source == target) {
-          continue;
-        }
-        // ANY always matches via isCompatible but may not be in compatibleFrom
-        if (source == PortType.ANY || target == PortType.ANY || target == PortType.STRING) {
           continue;
         }
         var inSet = compatibleSet.contains(source);

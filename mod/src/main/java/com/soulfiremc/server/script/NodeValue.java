@@ -145,54 +145,33 @@ public sealed interface NodeValue {
 
   /// Gets this value as a string, or returns the default if not a string.
   default String asString(String defaultValue) {
-    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
-      return element.getAsString();
-    }
-    return defaultValue;
+    return NodeValueConversion.toStringValue(this).optionalValue().orElse(defaultValue);
   }
 
   /// Gets this value as a double, or returns the default if not a number.
   default double asDouble(double defaultValue) {
-    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
-      var primitive = element.getAsJsonPrimitive();
-      if (primitive.isNumber()) {
-        return primitive.getAsDouble();
-      }
-    }
-    return defaultValue;
+    return NodeValueConversion.toDouble(this).optionalValue().orElse(defaultValue);
   }
 
   /// Gets this value as an int, or returns the default if not a number.
   default int asInt(int defaultValue) {
-    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
-      var primitive = element.getAsJsonPrimitive();
-      if (primitive.isNumber()) {
-        return primitive.getAsInt();
-      }
-    }
-    return defaultValue;
+    return NodeValueConversion.toDouble(this)
+      .optionalValue()
+      .map(Double::intValue)
+      .orElse(defaultValue);
   }
 
   /// Gets this value as a long, or returns the default if not a number.
   default long asLong(long defaultValue) {
-    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
-      var primitive = element.getAsJsonPrimitive();
-      if (primitive.isNumber()) {
-        return primitive.getAsLong();
-      }
-    }
-    return defaultValue;
+    return NodeValueConversion.toDouble(this)
+      .optionalValue()
+      .map(Double::longValue)
+      .orElse(defaultValue);
   }
 
   /// Gets this value as a boolean, or returns the default if not a boolean.
   default boolean asBoolean(boolean defaultValue) {
-    if (this instanceof Json(JsonElement element) && element.isJsonPrimitive()) {
-      var primitive = element.getAsJsonPrimitive();
-      if (primitive.isBoolean()) {
-        return primitive.getAsBoolean();
-      }
-    }
-    return defaultValue;
+    return NodeValueConversion.toBoolean(this).optionalValue().orElse(defaultValue);
   }
 
   /// Gets this value as a list of NodeValues.
@@ -224,41 +203,13 @@ public sealed interface NodeValue {
 
   @Nullable
   default Vec3 asVec3() {
-    if (this instanceof Vector3(Vec3 v)) {
-      return v;
-    }
-    if (this instanceof Json(JsonElement element)) {
-      if (element.isJsonArray()) {
-        var list = asList();
-        if (list.size() >= 3) {
-          return new Vec3(
-            list.getFirst().asDouble(0.0),
-            list.get(1).asDouble(0.0),
-            list.get(2).asDouble(0.0)
-          );
-        }
-      }
-      if (element.isJsonObject()) {
-        var object = element.getAsJsonObject();
-        if (object.has("x") && object.has("y") && object.has("z")) {
-          return new Vec3(
-            object.get("x").getAsDouble(),
-            object.get("y").getAsDouble(),
-            object.get("z").getAsDouble()
-          );
-        }
-      }
-    }
-    return null;
+    return NodeValueConversion.toVector3(this).optionalValue().orElse(null);
   }
 
   /// Gets this value as a BotConnection, or null if not a bot.
   @Nullable
   default BotConnection asBot() {
-    if (this instanceof Bot(BotConnection bot1)) {
-      return bot1;
-    }
-    return null;
+    return NodeValueConversion.toBot(this).optionalValue().orElse(null);
   }
 
   /// Gets the raw JsonElement if this is a Json value.

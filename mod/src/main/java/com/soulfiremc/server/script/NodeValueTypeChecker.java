@@ -25,33 +25,7 @@ public final class NodeValueTypeChecker {
   /// Returns true if the value is compatible with the declared port type.
   /// ANY always matches. STRING always matches (coercible).
   public static boolean matches(NodeValue value, PortType type) {
-    if (type == PortType.ANY || type == PortType.STRING || type == PortType.EXEC) {
-      return true;
-    }
-    if (value == null || value.isNull()) {
-      return false;
-    }
-    return switch (value) {
-      case NodeValue.Bot _ -> type == PortType.BOT;
-      case NodeValue.ValueList _ -> type == PortType.LIST;
-      case NodeValue.Json(JsonElement element) -> matchesJson(element, type);
-      case NodeValue.Vector3 _ -> type == PortType.VECTOR3;
-    };
-  }
-
-  private static boolean matchesJson(JsonElement element, PortType type) {
-    if (element == null || element.isJsonNull()) {
-      return false;
-    }
-    return switch (type) {
-      case NUMBER -> element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
-      case BOOLEAN -> element.isJsonPrimitive() && element.getAsJsonPrimitive().isBoolean();
-      case LIST -> element.isJsonArray();
-      case MAP -> element.isJsonObject();
-      case VECTOR3 -> element.isJsonObject() || element.isJsonArray();
-      case BLOCK, ENTITY, ITEM -> element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
-      default -> true;
-    };
+    return NodeValueConversion.canConvert(value, type);
   }
 
   /// Returns a human-readable description of the actual type.

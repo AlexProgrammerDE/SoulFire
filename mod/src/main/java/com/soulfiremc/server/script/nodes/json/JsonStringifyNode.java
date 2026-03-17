@@ -19,6 +19,7 @@ package com.soulfiremc.server.script.nodes.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.soulfiremc.server.script.*;
 import reactor.core.publisher.Mono;
 
@@ -53,6 +54,15 @@ public final class JsonStringifyNode extends AbstractScriptNode {
 
     if (value == null || value.isNull()) {
       return completedMono(result("json", "null"));
+    }
+
+    if (value instanceof NodeValue.Vector3(var vector)) {
+      var json = new JsonObject();
+      json.addProperty("x", vector.x());
+      json.addProperty("y", vector.y());
+      json.addProperty("z", vector.z());
+      var gson = pretty ? GSON_PRETTY : GSON;
+      return completedMono(result("json", gson.toJson(json)));
     }
 
     var jsonElement = value.asJsonElement();

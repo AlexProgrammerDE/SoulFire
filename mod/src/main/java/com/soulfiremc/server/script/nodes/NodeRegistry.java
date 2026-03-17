@@ -336,14 +336,12 @@ public final class NodeRegistry {
         if (defaultValueStr != null && !defaultValueStr.isEmpty()) {
           try {
             var jsonElement = JsonParser.parseString(defaultValueStr);
-            // Validate type compatibility
-            if (input.type() == PortType.NUMBER && !jsonElement.isJsonPrimitive()) {
-              log.warn("Node {} port '{}' has non-numeric default: {}", metadata.type(), input.id(), defaultValueStr);
+            var defaultValue = NodeValue.fromJson(jsonElement);
+            if (!NodeValueConversion.canConvert(defaultValue, input.type())) {
+              log.warn("Node {} port '{}' has incompatible default for {}: {}",
+                metadata.type(), input.id(), input.type(), defaultValueStr);
             }
-            if (input.type() == PortType.BOOLEAN && (!jsonElement.isJsonPrimitive() || !jsonElement.getAsJsonPrimitive().isBoolean())) {
-              log.warn("Node {} port '{}' has non-boolean default: {}", metadata.type(), input.id(), defaultValueStr);
-            }
-            defaults.put(input.id(), NodeValue.fromJson(jsonElement));
+            defaults.put(input.id(), defaultValue);
           } catch (Exception _) {
             log.warn("Node {} port '{}' has unparseable default: {}", metadata.type(), input.id(), defaultValueStr);
             defaults.put(input.id(), NodeValue.ofString(defaultValueStr));

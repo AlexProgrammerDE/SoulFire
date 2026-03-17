@@ -43,16 +43,19 @@ public abstract class AbstractScriptNode implements ScriptNode {
 
     // Special handling for Vec3 values, including legacy JSON-backed vectors.
     if (defaultValue instanceof Vec3) {
-      var vector = value.asVec3();
-      if (vector != null) {
-        return (T) vector;
+      var vector = NodeValueConversion.toVector3(value);
+      if (vector.success()) {
+        return (T) vector.value();
       }
       return defaultValue;
     }
 
     // For bot values
-    if (value instanceof NodeValue.Bot(BotConnection bot1) && defaultValue instanceof BotConnection) {
-      return (T) bot1;
+    if (defaultValue instanceof BotConnection) {
+      var bot = NodeValueConversion.toBot(value);
+      if (bot.success()) {
+        return (T) bot.value();
+      }
     }
 
     return defaultValue;
@@ -64,7 +67,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
     if (value == null) {
       return defaultValue;
     }
-    return value.asDouble(defaultValue);
+    return NodeValueConversion.toDouble(value).optionalValue().orElse(defaultValue);
   }
 
   /// Helper method to get an int input value.
@@ -100,7 +103,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
     if (value == null) {
       return defaultValue;
     }
-    return value.asBoolean(defaultValue);
+    return NodeValueConversion.toBoolean(value).optionalValue().orElse(defaultValue);
   }
 
   /// Helper method to get a string input value.
@@ -109,7 +112,7 @@ public abstract class AbstractScriptNode implements ScriptNode {
     if (value == null) {
       return defaultValue;
     }
-    return value.asString(defaultValue);
+    return NodeValueConversion.toStringValue(value).optionalValue().orElse(defaultValue);
   }
 
   /// Helper method to get a list input value as NodeValues.

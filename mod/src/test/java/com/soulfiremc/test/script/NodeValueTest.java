@@ -93,6 +93,14 @@ final class NodeValueTest {
   }
 
   @Test
+  void nodeValueSupportsImplicitScalarCoercions() {
+    assertEquals(12.5, NodeValue.of("12.5").asDouble(0.0), "Numeric strings should coerce to doubles");
+    assertEquals(1.0, NodeValue.of(true).asDouble(0.0), "Booleans should coerce to numbers");
+    assertTrue(NodeValue.of("true").asBoolean(false), "Boolean strings should coerce to booleans");
+    assertEquals("42", NodeValue.of(42).asString(""), "Numbers should coerce to strings");
+  }
+
+  @Test
   void nodeValueOfVec3PreservesVectorType() {
     var vector = new Vec3(1.5, 2.5, 3.5);
     var value = NodeValue.of(vector);
@@ -113,6 +121,21 @@ final class NodeValueTest {
     var value = NodeValue.fromJson(JsonParser.parseString("{\"x\":1.5,\"y\":2.5,\"z\":3.5}"));
 
     assertEquals(new Vec3(1.5, 2.5, 3.5), value.asVec3(), "JSON objects should parse as vectors");
+  }
+
+  @Test
+  void nodeValueAsVec3SupportsStringComponents() {
+    var value = NodeValue.fromJson(JsonParser.parseString("{\"x\":\"1.5\",\"y\":\"2.5\",\"z\":\"3.5\"}"));
+
+    assertEquals(new Vec3(1.5, 2.5, 3.5), value.asVec3(), "String components should still parse as vectors");
+  }
+
+  @Test
+  void nodeValueAsVec3RejectsWrongShape() {
+    assertNull(NodeValue.fromJson(JsonParser.parseString("[1.0,2.0]")).asVec3(),
+      "Vectors should require exactly 3 array entries");
+    assertNull(NodeValue.fromJson(JsonParser.parseString("{\"x\":1.0,\"y\":2.0}")).asVec3(),
+      "Vectors should require x, y, and z fields");
   }
 
   @Test

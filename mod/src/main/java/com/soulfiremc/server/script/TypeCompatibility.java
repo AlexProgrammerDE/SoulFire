@@ -35,14 +35,27 @@ public final class TypeCompatibility {
       map.put(type, EnumSet.noneOf(PortType.class));
     }
 
-    // STRING accepts everything (coercion)
-    map.get(PortType.STRING).addAll(EnumSet.of(PortType.NUMBER, PortType.BOOLEAN));
+    for (var target : PortType.values()) {
+      if (target != PortType.EXEC && target != PortType.ANY) {
+        map.get(target).add(PortType.ANY);
+      }
+    }
+
+    // STRING accepts everything except EXEC.
+    for (var source : PortType.values()) {
+      if (source != PortType.EXEC && source != PortType.STRING) {
+        map.get(PortType.STRING).add(source);
+      }
+    }
 
     // NUMBER accepts BOOLEAN and STRING
     map.get(PortType.NUMBER).addAll(EnumSet.of(PortType.STRING, PortType.BOOLEAN));
 
     // BOOLEAN accepts NUMBER and STRING
     map.get(PortType.BOOLEAN).addAll(EnumSet.of(PortType.NUMBER, PortType.STRING));
+
+    // VECTOR3 accepts structured list/object values as well as typed vectors.
+    map.get(PortType.VECTOR3).addAll(EnumSet.of(PortType.LIST, PortType.MAP));
 
     // ANY accepts everything
     for (var type : PortType.values()) {
@@ -55,17 +68,10 @@ public final class TypeCompatibility {
   }
 
   /// Checks whether a source port type is compatible with a target port type.
-  /// Same type always matches. ANY on either side matches. STRING target accepts all.
-  /// NUMBER<->BOOLEAN coercion is allowed.
+  /// Same type always matches. Additional implicit conversions come from COMPATIBLE_FROM.
   public static boolean isCompatible(PortType source, PortType target) {
     if (source == target) {
       return true;
-    }
-    if (target == PortType.ANY || source == PortType.ANY) {
-      return true;
-    }
-    if (target == PortType.STRING) {
-      return true; // anything can be coerced to string
     }
     var compatibleSet = COMPATIBLE_FROM.get(target);
     return compatibleSet != null && compatibleSet.contains(source);
