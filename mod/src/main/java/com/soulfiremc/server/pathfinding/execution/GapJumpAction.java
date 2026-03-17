@@ -29,6 +29,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 @RequiredArgsConstructor
 public final class GapJumpAction implements WorldAction {
   private final SFVec3i blockPosition;
+  private final int gapLength;
   private boolean didLook;
   private boolean lockYRot;
   private int noJumpTicks;
@@ -81,6 +82,7 @@ public final class GapJumpAction implements WorldAction {
       clientEntity.yRotLast = newYRot;
     }
 
+    connection.controlState().sprint(true);
     connection.controlState().up(true);
 
     if (shouldJump()) {
@@ -89,7 +91,7 @@ public final class GapJumpAction implements WorldAction {
   }
 
   private boolean shouldJump() {
-    if (noJumpTicks < 1) {
+    if (noJumpTicks < gapLength) {
       noJumpTicks++;
       return false;
     } else {

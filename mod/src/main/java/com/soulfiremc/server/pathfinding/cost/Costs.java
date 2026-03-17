@@ -48,6 +48,8 @@ public final class Costs {
   public static final double JUMP_LAND_GROUND = 12 / TICKS_PER_BLOCK;
   /// When you jump a gap you roughly do a full jump and walk 2 blocks in front.
   public static final double ONE_GAP_JUMP = JUMP_LAND_GROUND + STRAIGHT + STRAIGHT;
+  /// Interacting with a simple passage block like a door or gate is cheap but not free.
+  public static final double INTERACT_OPENABLE = 0.25;
   /// Falling 1 block takes ~5.63 ticks.
   public static final double FALL_1 = 5.63 / TICKS_PER_BLOCK;
   /// Falling 2 blocks takes ~7.79 ticks.
@@ -61,6 +63,10 @@ public final class Costs {
   public static final double CORNER_SLIDE = 2 - DIAGONAL;
 
   private Costs() {}
+
+  public static double gapJumpCost(int gapLength) {
+    return JUMP_LAND_GROUND + (gapLength + 1) * STRAIGHT;
+  }
 
   // Time in ticks
   public static TickResult getRequiredMiningTicks(

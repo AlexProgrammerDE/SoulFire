@@ -20,6 +20,7 @@ package com.soulfiremc.test;
 import com.soulfiremc.server.pathfinding.NodeState;
 import com.soulfiremc.server.pathfinding.RouteFinder;
 import com.soulfiremc.server.pathfinding.SFVec3i;
+import com.soulfiremc.server.pathfinding.execution.InteractBlockAction;
 import com.soulfiremc.server.pathfinding.goals.PosGoal;
 import com.soulfiremc.server.pathfinding.graph.MinecraftGraph;
 import com.soulfiremc.server.pathfinding.graph.ProjectedInventory;
@@ -30,6 +31,14 @@ import com.soulfiremc.test.utils.TestPathConstraint;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -258,8 +267,7 @@ final class PathfindingTest {
 
     var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
 
-    // TODO: Allow longer jumps
-    if (gapLength > 1) {
+    if (gapLength > 2) {
       assertInstanceOf(
         RouteFinder.NoRouteFoundResult.class, routeFinder.findRouteFuture(initialState).join());
     } else {
@@ -268,6 +276,131 @@ final class PathfindingTest {
         RouteFinder.FoundRouteResult.class, route);
       assertEquals(1, foundRouteResult.actions().size());
     }
+  }
+
+  @Test
+  void pathfindingThroughCarpet() {
+    var accessor = new TestBlockAccessorBuilder();
+    accessor.setBlockAt(0, 0, 0, Blocks.STONE);
+    accessor.setBlockAt(1, 0, 0, Blocks.STONE);
+    accessor.setBlockAt(0, 1, 0, Blocks.WHITE_CARPET);
+    accessor.setBlockAt(1, 1, 0, Blocks.WHITE_CARPET);
+
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(
+      accessor.build(),
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(1, 1, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
+
+    var route = routeFinder.findRouteFuture(initialState).join();
+    var foundRouteResult = assertInstanceOf(RouteFinder.FoundRouteResult.class, route);
+    assertEquals(1, foundRouteResult.actions().size());
+  }
+
+  @Test
+  void pathfindingThroughSnowLayers() {
+    var accessor = new TestBlockAccessorBuilder();
+    accessor.setBlockAt(0, 0, 0, Blocks.STONE);
+    accessor.setBlockAt(1, 0, 0, Blocks.STONE);
+    accessor.setBlockStateAt(0, 1, 0, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 4));
+    accessor.setBlockStateAt(1, 1, 0, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 4));
+
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(
+      accessor.build(),
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(1, 1, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
+
+    var route = routeFinder.findRouteFuture(initialState).join();
+    var foundRouteResult = assertInstanceOf(RouteFinder.FoundRouteResult.class, route);
+    assertEquals(1, foundRouteResult.actions().size());
+  }
+
+  @Test
+  void pathfindingOnBottomSlabs() {
+    var accessor = new TestBlockAccessorBuilder();
+    accessor.setBlockStateAt(0, 0, 0, Blocks.STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
+    accessor.setBlockStateAt(1, 0, 0, Blocks.STONE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.BOTTOM));
+
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(
+      accessor.build(),
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(1, 0, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 0, 0), inventory);
+
+    var route = routeFinder.findRouteFuture(initialState).join();
+    var foundRouteResult = assertInstanceOf(RouteFinder.FoundRouteResult.class, route);
+    assertEquals(1, foundRouteResult.actions().size());
+  }
+
+  @Test
+  void pathfindingOnBottomStairs() {
+    var accessor = new TestBlockAccessorBuilder();
+    accessor.setBlockStateAt(0, 0, 0, Blocks.OAK_STAIRS.defaultBlockState().setValue(StairBlock.HALF, Half.BOTTOM));
+    accessor.setBlockStateAt(1, 0, 0, Blocks.OAK_STAIRS.defaultBlockState().setValue(StairBlock.HALF, Half.BOTTOM));
+
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(
+      accessor.build(),
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(1, 0, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 0, 0), inventory);
+
+    var route = routeFinder.findRouteFuture(initialState).join();
+    var foundRouteResult = assertInstanceOf(RouteFinder.FoundRouteResult.class, route);
+    assertEquals(1, foundRouteResult.actions().size());
+  }
+
+  @Test
+  void pathfindingThroughClosedDoor() {
+    var accessor = new TestBlockAccessorBuilder();
+    accessor.setBlockAt(0, 0, 0, Blocks.STONE);
+    accessor.setBlockAt(1, 0, 0, Blocks.STONE);
+    accessor.setBlockStateAt(1, 1, 0, Blocks.OAK_DOOR.defaultBlockState());
+    accessor.setBlockStateAt(1, 2, 0, Blocks.OAK_DOOR.defaultBlockState().setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER));
+
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(
+      accessor.build(),
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(1, 1, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
+
+    var route = routeFinder.findRouteFuture(initialState).join();
+    var foundRouteResult = assertInstanceOf(RouteFinder.FoundRouteResult.class, route);
+    assertEquals(3, foundRouteResult.actions().size());
+    assertInstanceOf(InteractBlockAction.class, foundRouteResult.actions().getFirst());
+    assertInstanceOf(InteractBlockAction.class, foundRouteResult.actions().getLast());
+  }
+
+  @Test
+  void pathfindingThroughClosedFenceGate() {
+    var accessor = new TestBlockAccessorBuilder();
+    accessor.setBlockAt(0, 0, 0, Blocks.STONE);
+    accessor.setBlockAt(1, 0, 0, Blocks.STONE);
+    accessor.setBlockStateAt(1, 1, 0, Blocks.OAK_FENCE_GATE.defaultBlockState().setValue(FenceGateBlock.OPEN, false));
+
+    var inventory = new ProjectedInventory(List.of(), TestMiningCostCalculator.INSTANCE, TestPathConstraint.INSTANCE);
+    var routeFinder = new RouteFinder(new MinecraftGraph(
+      accessor.build(),
+      inventory,
+      TestPathConstraint.INSTANCE), new PosGoal(1, 1, 0));
+
+    var initialState = NodeState.forInfo(new SFVec3i(0, 1, 0), inventory);
+
+    var route = routeFinder.findRouteFuture(initialState).join();
+    var foundRouteResult = assertInstanceOf(RouteFinder.FoundRouteResult.class, route);
+    assertEquals(3, foundRouteResult.actions().size());
+    assertInstanceOf(InteractBlockAction.class, foundRouteResult.actions().getFirst());
+    assertInstanceOf(InteractBlockAction.class, foundRouteResult.actions().getLast());
   }
 
   @Test

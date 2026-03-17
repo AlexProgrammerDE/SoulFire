@@ -21,11 +21,21 @@ import com.soulfiremc.server.util.structs.IDBooleanMap;
 import com.soulfiremc.server.util.structs.IDMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -36,6 +46,14 @@ public final class SFBlockHelpers {
     Block.BLOCK_STATE_REGISTRY, blockState -> blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
   public static final IDBooleanMap<BlockState> COLLISION_SHAPE_TOP_FACE_FULL = new IDBooleanMap<>(
     Block.BLOCK_STATE_REGISTRY, blockState -> Block.isFaceFull(RAW_COLLISION_SHAPES.get(blockState), Direction.UP));
+  public static final IDBooleanMap<BlockState> WALKABLE_FLOOR_BLOCK = new IDBooleanMap<>(
+    Block.BLOCK_STATE_REGISTRY, SFBlockHelpers::computeWalkableFloorBlock);
+  public static final IDBooleanMap<BlockState> FEET_SUPPORT_IN_BLOCK = new IDBooleanMap<>(
+    Block.BLOCK_STATE_REGISTRY, SFBlockHelpers::computeFeetSupportInBlock);
+  public static final IDBooleanMap<BlockState> BODY_PASSABLE_BLOCK = new IDBooleanMap<>(
+    Block.BLOCK_STATE_REGISTRY, SFBlockHelpers::computeBodyPassableBlock);
+  public static final IDBooleanMap<BlockState> OPENABLE_PASSAGE_BLOCK = new IDBooleanMap<>(
+    Block.BLOCK_STATE_REGISTRY, SFBlockHelpers::computeOpenablePassageBlock);
 
   private SFBlockHelpers() {}
 
@@ -92,6 +110,43 @@ public final class SFBlockHelpers {
     return isTopFullBlock(state) && !isHurtWhenStoodOn(state);
   }
 
+  public static boolean isWalkableFloorBlock(BlockState state) {
+    return WALKABLE_FLOOR_BLOCK.get(state);
+  }
+
+  public static boolean canSupportFeetInBlock(BlockState state) {
+    return FEET_SUPPORT_IN_BLOCK.get(state);
+  }
+
+  public static boolean isBodyPassableBlock(BlockState state) {
+    return BODY_PASSABLE_BLOCK.get(state);
+  }
+
+  public static boolean isOpenablePassageBlock(BlockState state) {
+    return OPENABLE_PASSAGE_BLOCK.get(state);
+  }
+
+  public static boolean isPassageBlockOpen(BlockState state) {
+    var block = state.getBlock();
+    if (block instanceof DoorBlock door) {
+      return door.isOpen(state);
+    }
+
+    if (block instanceof FenceGateBlock) {
+      return state.getValue(FenceGateBlock.OPEN);
+    }
+
+    return false;
+  }
+
+  public static BlockPos getOpenablePassagePos(BlockPos pos, BlockState state) {
+    if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER) {
+      return pos.below();
+    }
+
+    return pos;
+  }
+
   public static boolean isTopFullBlock(BlockState blockState) {
     return COLLISION_SHAPE_TOP_FACE_FULL.get(blockState);
   }
@@ -107,5 +162,76 @@ public final class SFBlockHelpers {
   public static boolean isEmptyBlock(Block type) {
     // Void air stands for not loaded blocks, so we do not know what is there
     return type instanceof AirBlock && type != Blocks.VOID_AIR;
+  }
+
+  private static boolean computeWalkableFloorBlock(BlockState state) {
+    if (isSafeBlockToStandOn(state)) {
+      return true;
+    }
+
+    if (isHurtWhenStoodOn(state)) {
+      return false;
+    }
+
+    if (state.is(BlockTags.STAIRS)) {
+      return true;
+    }
+
+    if (state.getBlock() instanceof SlabBlock) {
+      return state.getValue(SlabBlock.TYPE) != SlabType.BOTTOM;
+    }
+
+    return false;
+  }
+
+  private static boolean computeFeetSupportInBlock(BlockState state) {
+    if (isHurtWhenStoodOn(state) || affectsTouchMovementSpeed(state.getBlock())) {
+      return false;
+    }
+
+    var block = state.getBlock();
+    if (block instanceof CarpetBlock) {
+      return true;
+    }
+
+    if (block instanceof SnowLayerBlock) {
+      return state.getValue(SnowLayerBlock.LAYERS) < SnowLayerBlock.HEIGHT_IMPASSABLE;
+    }
+
+    if (block instanceof SlabBlock) {
+      return state.getValue(SlabBlock.TYPE) == SlabType.BOTTOM;
+    }
+
+    if (block instanceof StairBlock) {
+      return state.getValue(StairBlock.HALF) == Half.BOTTOM;
+    }
+
+    return false;
+  }
+
+  private static boolean computeBodyPassableBlock(BlockState state) {
+    if (isBlockFree(state)) {
+      return true;
+    }
+
+    var block = state.getBlock();
+    if (block instanceof DoorBlock || block instanceof FenceGateBlock) {
+      return isPassageBlockOpen(state);
+    }
+
+    return false;
+  }
+
+  private static boolean computeOpenablePassageBlock(BlockState state) {
+    var block = state.getBlock();
+    if (block instanceof DoorBlock) {
+      return DoorBlock.isWoodenDoor(state) && !isPassageBlockOpen(state);
+    }
+
+    if (block instanceof FenceGateBlock) {
+      return !isPassageBlockOpen(state);
+    }
+
+    return false;
   }
 }

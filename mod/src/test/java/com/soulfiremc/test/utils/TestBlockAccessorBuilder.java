@@ -51,7 +51,10 @@ public final class TestBlockAccessorBuilder {
   }
 
   public void setBlockAt(int x, int y, int z, Block block) {
-    var targetState = block.defaultBlockState();
+    setBlockStateAt(x, y, z, block.defaultBlockState());
+  }
+
+  public void setBlockStateAt(int x, int y, int z, BlockState targetState) {
     if (targetState == defaultBlock) {
       blocks.remove(SFVec3i.from(x, y, z));
     } else {

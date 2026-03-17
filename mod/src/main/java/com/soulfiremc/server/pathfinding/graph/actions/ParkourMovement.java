@@ -34,13 +34,21 @@ import java.util.function.Consumer;
 
 public final class ParkourMovement extends GraphAction implements Cloneable {
   private static final SFVec3i FEET_POSITION_RELATIVE_BLOCK = SFVec3i.ZERO;
+  private static final int MAX_GAP_LENGTH = 2;
   private final ParkourDirection direction;
+  private final int gapLength;
   private final SFVec3i targetFeetBlock;
 
-  private ParkourMovement(ParkourDirection direction, SubscriptionConsumer blockSubscribers) {
+  private ParkourMovement(ParkourDirection direction, int gapLength, SubscriptionConsumer blockSubscribers) {
     super(direction.actionDirection);
     this.direction = direction;
-    this.targetFeetBlock = direction.offset(direction.offset(FEET_POSITION_RELATIVE_BLOCK));
+    this.gapLength = gapLength;
+
+    var targetFeetBlock = FEET_POSITION_RELATIVE_BLOCK;
+    for (var i = 0; i < gapLength + 1; i++) {
+      targetFeetBlock = direction.offset(targetFeetBlock);
+    }
+    this.targetFeetBlock = targetFeetBlock;
 
     this.registerRequiredFreeBlocks(blockSubscribers);
     this.registerRequiredUnsafeBlock(blockSubscribers);
@@ -49,7 +57,9 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
 
   public static void registerParkourMovements(Consumer<GraphAction> callback, SubscriptionConsumer blockSubscribers) {
     for (var direction : ParkourDirection.VALUES) {
-      callback.accept(new ParkourMovement(direction, blockSubscribers));
+      for (var gapLength = 1; gapLength <= MAX_GAP_LENGTH; gapLength++) {
+        callback.accept(new ParkourMovement(direction, gapLength, blockSubscribers));
+      }
     }
   }
 
@@ -57,24 +67,21 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     // Make block above the head block free for jump
     blockSubscribers.subscribe(FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
 
-    var oneFurther = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
-
-    // Room for jumping
-    blockSubscribers.subscribe(oneFurther, MovementFreeSubscription.INSTANCE);
-    blockSubscribers.subscribe(oneFurther.add(0, 1, 0), MovementFreeSubscription.INSTANCE);
-    blockSubscribers.subscribe(oneFurther.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
-
-    var twoFurther = direction.offset(oneFurther);
-
-    // Room for jumping
-    blockSubscribers.subscribe(twoFurther, MovementFreeSubscription.INSTANCE);
-    blockSubscribers.subscribe(twoFurther.add(0, 1, 0), MovementFreeSubscription.INSTANCE);
-    blockSubscribers.subscribe(twoFurther.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
+    var current = FEET_POSITION_RELATIVE_BLOCK;
+    for (var i = 0; i < gapLength + 1; i++) {
+      current = direction.offset(current);
+      blockSubscribers.subscribe(current, MovementFreeSubscription.INSTANCE);
+      blockSubscribers.subscribe(current.add(0, 1, 0), MovementFreeSubscription.INSTANCE);
+      blockSubscribers.subscribe(current.add(0, 2, 0), MovementFreeSubscription.INSTANCE);
+    }
   }
 
   private void registerRequiredUnsafeBlock(SubscriptionConsumer blockSubscribers) {
-    // The gap to jump over, needs to be unsafe for this movement to be possible
-    blockSubscribers.subscribe(direction.offset(FEET_POSITION_RELATIVE_BLOCK).sub(0, 1, 0), ParkourUnsafeToStandOnSubscription.INSTANCE);
+    var current = FEET_POSITION_RELATIVE_BLOCK;
+    for (var i = 0; i < gapLength; i++) {
+      current = direction.offset(current);
+      blockSubscribers.subscribe(current.sub(0, 1, 0), ParkourUnsafeToStandOnSubscription.INSTANCE);
+    }
   }
 
   private void registerRequiredSolidBlock(SubscriptionConsumer blockSubscribers) {
@@ -91,8 +98,8 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
       0,
       false,
       actionDirection,
-      Costs.ONE_GAP_JUMP,
-      List.of(new GapJumpAction(absoluteTargetFeetBlock))
+      Costs.gapJumpCost(gapLength),
+      List.of(new GapJumpAction(absoluteTargetFeetBlock, gapLength))
     ));
   }
 
@@ -153,7 +160,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
       // We only want to jump over dangerous blocks/gaps
       // So either a non-full-block like water or lava or magma
       // since it hurts to stand on.
-      if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
+      if (SFBlockHelpers.isWalkableFloorBlock(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
@@ -168,7 +175,7 @@ public final class ParkourMovement extends GraphAction implements Cloneable {
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, ParkourMovement parkourMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Block is safe to walk on, no need to check for more
-      if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
+      if (SFBlockHelpers.isWalkableFloorBlock(blockState)) {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 

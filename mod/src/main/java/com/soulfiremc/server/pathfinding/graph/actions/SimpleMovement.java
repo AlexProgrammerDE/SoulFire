@@ -22,6 +22,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.cost.Costs;
 import com.soulfiremc.server.pathfinding.execution.BlockBreakAction;
 import com.soulfiremc.server.pathfinding.execution.BlockPlaceAction;
+import com.soulfiremc.server.pathfinding.execution.InteractBlockAction;
 import com.soulfiremc.server.pathfinding.execution.MovementAction;
 import com.soulfiremc.server.pathfinding.execution.WorldAction;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
@@ -47,6 +48,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private final SFVec3i targetFeetBlock;
   private final boolean diagonal;
   private final boolean allowBlockActions;
+  private final boolean allowInteractablePassage;
   // Mutable
   private MovementMiningCost[] blockBreakCosts;
   // Mutable
@@ -60,7 +62,13 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   // Mutable
   private double cost;
   // Mutable
-  private boolean requiresAgainstBlock;
+  private boolean floorHasSupport;
+  // Mutable
+  private boolean floorCanBePlaced;
+  // Mutable
+  private boolean supportInTargetBlock;
+  // Mutable
+  private InteractablePassage interactablePassage;
 
   private SimpleMovement(MovementDirection direction, MovementModifier modifier, SubscriptionConsumer blockSubscribers) {
     super(modifier == MovementModifier.NORMAL ? direction.actionDirection() : ActionDirection.SPECIAL);
@@ -87,6 +95,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         case JUMP_UP_BLOCK, NORMAL, FALL_1 -> true;
         case FALL_2, FALL_3 -> false;
       };
+    this.allowInteractablePassage = !diagonal && modifier == MovementModifier.NORMAL;
 
     var arraySize = registerRequiredFreeBlocks(blockSubscribers);
     if (allowBlockActions) {
@@ -120,7 +129,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       var aboveHead = FEET_POSITION_RELATIVE_BLOCK.add(0, 2, 0);
 
       // Make block above the head block free for jump
-      blockSubscribers.subscribe(aboveHead, new MovementFreeSubscription(aboveHeadBlockIndex, BlockFace.BOTTOM));
+      blockSubscribers.subscribe(aboveHead,
+        new MovementFreeSubscription(aboveHeadBlockIndex, BlockFace.BOTTOM, BodyPart.HEAD, false, null));
 
       if (allowBlockActions) {
         blockSubscribers.subscribe(aboveHead.add(0, 1, 0),
@@ -136,10 +146,13 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     var targetEdge = direction.offset(FEET_POSITION_RELATIVE_BLOCK);
     for (var bodyOffset : BodyPart.VALUES) {
       BlockFace blockBreakSideHint;
+      BlockFace interactionSideHint;
       if (diagonal) {
         blockBreakSideHint = null; // We don't mine blocks in diagonals
+        interactionSideHint = null;
       } else {
         blockBreakSideHint = direction.toSkyDirection().blockFace();
+        interactionSideHint = direction.toSkyDirection().opposite().blockFace();
       }
 
       var blockIndex = blockIndexCounter++;
@@ -149,7 +162,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
       // Apply jump shift to target diagonal and offset for body part
       blockSubscribers.subscribe(block,
-        new MovementFreeSubscription(blockIndex, blockBreakSideHint));
+        new MovementFreeSubscription(blockIndex, blockBreakSideHint, bodyOffset, block.equals(targetFeetBlock), interactionSideHint));
 
       if (allowBlockActions) {
         if (bodyOffset == BodyPart.HEAD) {
@@ -171,7 +184,7 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
         var fallFree = MovementModifier.FALL_1.offset(targetEdge);
 
         blockSubscribers.subscribe(fallFree,
-          new MovementFreeSubscription(fallOneBlockIndex, BlockFace.TOP));
+          new MovementFreeSubscription(fallOneBlockIndex, BlockFace.TOP, BodyPart.FEET, false, null));
 
         // Require free blocks to fall into the target position
         if (allowBlockActions) {
@@ -183,17 +196,17 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       }
       case FALL_2 -> {
         blockSubscribers.subscribe(MovementModifier.FALL_1.offset(targetEdge),
-          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP, BodyPart.FEET, false, null));
         blockSubscribers.subscribe(MovementModifier.FALL_2.offset(targetEdge),
-          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP, BodyPart.FEET, false, null));
       }
       case FALL_3 -> {
         blockSubscribers.subscribe(MovementModifier.FALL_1.offset(targetEdge),
-          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP, BodyPart.FEET, false, null));
         blockSubscribers.subscribe(MovementModifier.FALL_2.offset(targetEdge),
-          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP, BodyPart.FEET, false, null));
         blockSubscribers.subscribe(MovementModifier.FALL_3.offset(targetEdge),
-          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP));
+          new MovementFreeSubscription(blockIndexCounter++, BlockFace.TOP, BodyPart.FEET, false, null));
       }
     }
 
@@ -258,6 +271,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
   @Override
   public List<GraphInstructions> getInstructions(MinecraftGraph graph, SFVec3i node) {
+    var requiresAgainstBlock = !floorHasSupport && !supportInTargetBlock && floorCanBePlaced;
+    if (!floorHasSupport && !supportInTargetBlock && !requiresAgainstBlock) {
+      return Collections.emptyList();
+    }
+
     if (requiresAgainstBlock && blockPlaceAgainstData == null) {
       return Collections.emptyList();
     }
@@ -266,9 +284,10 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     var blocksToBreak = blockBreakCosts == null ? 0 : blockBreakCosts.length;
     var blockToPlace = requiresAgainstBlock ? 1 : 0;
+    var blockToInteract = interactablePassage == null ? 0 : 2;
 
     var usableBlockItemsDiff = 0;
-    var actions = new ArrayList<WorldAction>(1 + blocksToBreak + blockToPlace);
+    var actions = new ArrayList<WorldAction>(1 + blocksToBreak + blockToPlace + blockToInteract);
     if (blockBreakCosts != null) {
       for (var breakCost : blockBreakCosts) {
         if (breakCost == null) {
@@ -286,6 +305,11 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
 
     var absoluteTargetFeetBlock = node.add(targetFeetBlock);
 
+    if (interactablePassage != null) {
+      cost += Costs.INTERACT_OPENABLE * 2;
+      actions.add(new InteractBlockAction(interactablePassage.block(), interactablePassage.interactFace(), true));
+    }
+
     // Even creative mode needs a block in the inv to place
     var requiresOneBlock = requiresAgainstBlock && usableBlockItemsDiff <= 0;
     if (requiresAgainstBlock) {
@@ -301,6 +325,9 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     }
 
     actions.add(new MovementAction(absoluteTargetFeetBlock, diagonal));
+    if (interactablePassage != null) {
+      actions.add(new InteractBlockAction(interactablePassage.block(), interactablePassage.interactFace(), false));
+    }
 
     return Collections.singletonList(new GraphInstructions(
       absoluteTargetFeetBlock,
@@ -335,16 +362,52 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
   private interface SimpleMovementSubscription extends MinecraftGraph.MovementSubscription<SimpleMovement> {
   }
 
-  private record MovementFreeSubscription(int blockArrayIndex, @Nullable BlockFace blockBreakSideHint) implements SimpleMovementSubscription {
+  private record MovementFreeSubscription(
+    int blockArrayIndex,
+    @Nullable BlockFace blockBreakSideHint,
+    BodyPart bodyPart,
+    boolean targetFeetBlock,
+    @Nullable BlockFace interactionSideHint
+  ) implements SimpleMovementSubscription {
     @Override
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
-      if (SFBlockHelpers.isBlockFree(blockState)) {
+      if (SFBlockHelpers.isBodyPassableBlock(blockState)) {
         if (simpleMovement.allowBlockActions) {
           simpleMovement.noNeedToBreak[blockArrayIndex] = true;
         }
 
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
+      if (bodyPart == BodyPart.FEET && targetFeetBlock && SFBlockHelpers.canSupportFeetInBlock(blockState)) {
+        if (simpleMovement.allowBlockActions) {
+          simpleMovement.noNeedToBreak[blockArrayIndex] = true;
+        }
+
+        simpleMovement.supportInTargetBlock = true;
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+      }
+
+      if (interactionSideHint != null && simpleMovement.allowInteractablePassage && SFBlockHelpers.isOpenablePassageBlock(blockState)) {
+        var interactableBlock = SFVec3i.fromInt(SFBlockHelpers.getOpenablePassagePos(absoluteKey.toBlockPos(), blockState));
+        var interactablePassage = simpleMovement.interactablePassage;
+        if (interactablePassage == null) {
+          simpleMovement.interactablePassage = new InteractablePassage(interactableBlock, interactionSideHint);
+          if (simpleMovement.allowBlockActions) {
+            simpleMovement.noNeedToBreak[blockArrayIndex] = true;
+          }
+
+          return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        } else if (interactablePassage.block().equals(interactableBlock)) {
+          if (simpleMovement.allowBlockActions) {
+            simpleMovement.noNeedToBreak[blockArrayIndex] = true;
+          }
+
+          return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
+        }
+
+        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
       }
 
       // Search for a way to break this block
@@ -413,23 +476,18 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
     public MinecraftGraph.SubscriptionSingleResult processBlock(MinecraftGraph graph, SFVec3i key, SimpleMovement simpleMovement,
                                                                 BlockState blockState, SFVec3i absoluteKey) {
       // Block is safe to walk on, no need to check for more
-      if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
-        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
-      }
-
-      // Stairs blocks are pretty much identical to full blocks
-      if (graph.inventory().isStairsBlockToStandOn(blockState)) {
+      if (SFBlockHelpers.isWalkableFloorBlock(blockState)) {
+        simpleMovement.floorHasSupport = true;
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
       if (!graph.pathConstraint().canPlaceBlock(absoluteKey)
         || !simpleMovement.allowBlockActions
         || !blockState.canBeReplaced()) {
-        return MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE;
+        return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
-      // We can place a block here, but we need to find a block to place against
-      simpleMovement.requiresAgainstBlock = true;
+      simpleMovement.floorCanBePlaced = true;
       return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
   }
@@ -478,5 +536,8 @@ public final class SimpleMovement extends GraphAction implements Cloneable {
       simpleMovement.blockPlaceAgainstData = new BlockPlaceAgainstData(absoluteKey, againstFace);
       return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
     }
+  }
+
+  private record InteractablePassage(SFVec3i block, BlockFace interactFace) {
   }
 }

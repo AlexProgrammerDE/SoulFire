@@ -169,7 +169,7 @@ public final class DownMovement extends GraphAction implements Cloneable {
         return MinecraftGraph.SubscriptionSingleResult.CONTINUE;
       }
 
-      if (SFBlockHelpers.isSafeBlockToStandOn(blockState)) {
+      if (SFBlockHelpers.isWalkableFloorBlock(blockState)) {
         // We found a block to fall on
         downMovement.closestBlockToFallOn = yLevel;
       }

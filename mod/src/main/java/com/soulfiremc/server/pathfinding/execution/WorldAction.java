@@ -24,6 +24,7 @@ public sealed interface WorldAction
   permits BlockBreakAction,
   BlockPlaceAction,
   GapJumpAction,
+  InteractBlockAction,
   JumpAndPlaceBelowAction,
   MovementAction,
   RecalculatePathAction {
