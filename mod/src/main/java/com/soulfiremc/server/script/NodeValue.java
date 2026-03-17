@@ -19,6 +19,7 @@ package com.soulfiremc.server.script;
 
 import com.google.gson.*;
 import com.soulfiremc.server.bot.BotConnection;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -44,6 +45,9 @@ public sealed interface NodeValue {
     }
     if (value instanceof JsonElement json) {
       return new Json(json);
+    }
+    if (value instanceof Vec3 v) {
+      return new Vector3(v);
     }
     if (value instanceof String s) {
       return new Json(new JsonPrimitive(s));
@@ -122,6 +126,11 @@ public sealed interface NodeValue {
   /// Creates a bot NodeValue.
   static NodeValue ofBot(BotConnection bot) {
     return new Bot(bot);
+  }
+
+  /// Creates a vector NodeValue.
+  static NodeValue ofVector3(Vec3 value) {
+    return new Vector3(value);
   }
 
   /// Creates a NodeValue from a JsonElement.
@@ -213,6 +222,36 @@ public sealed interface NodeValue {
     return List.of();
   }
 
+  @Nullable
+  default Vec3 asVec3() {
+    if (this instanceof Vector3(Vec3 v)) {
+      return v;
+    }
+    if (this instanceof Json(JsonElement element)) {
+      if (element.isJsonArray()) {
+        var list = asList();
+        if (list.size() >= 3) {
+          return new Vec3(
+            list.getFirst().asDouble(0.0),
+            list.get(1).asDouble(0.0),
+            list.get(2).asDouble(0.0)
+          );
+        }
+      }
+      if (element.isJsonObject()) {
+        var object = element.getAsJsonObject();
+        if (object.has("x") && object.has("y") && object.has("z")) {
+          return new Vec3(
+            object.get("x").getAsDouble(),
+            object.get("y").getAsDouble(),
+            object.get("z").getAsDouble()
+          );
+        }
+      }
+    }
+    return null;
+  }
+
   /// Gets this value as a BotConnection, or null if not a bot.
   @Nullable
   default BotConnection asBot() {
@@ -240,6 +279,7 @@ public sealed interface NodeValue {
       }
       case Bot(BotConnection bot1) -> "Bot(" + bot1.accountName() + ")";
       case ValueList(List<NodeValue> items) -> "List[" + items.size() + "]";
+      case Vector3(Vec3 vec) -> "Vector3(" + vec + ")";
     };
   }
 
@@ -256,6 +296,13 @@ public sealed interface NodeValue {
     @Override
     public String toString() {
       return "Bot[" + bot.accountName() + "]";
+    }
+  }
+
+  record Vector3(Vec3 value) implements NodeValue {
+    @Override
+    public String toString() {
+      return "Vector3[" + value + "]";
     }
   }
 
