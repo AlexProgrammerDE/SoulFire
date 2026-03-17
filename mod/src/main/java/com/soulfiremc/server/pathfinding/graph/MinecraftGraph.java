@@ -145,16 +145,18 @@ public record MinecraftGraph(BlockGetter blockAccessor,
         }
       }
 
-      if (subscriber.subscription.processBlockUnsafe(this, key, action, blockState, absolutePositionBlock) == MinecraftGraph.SubscriptionSingleResult.CONTINUE) {
-        if (!action.decrementAndIsDone()) {
-          continue;
-        }
+      var result = subscriber.subscription.processBlockUnsafe(this, key, action, blockState, absolutePositionBlock);
+      switch (result) {
+        case CONTINUE -> {
+          if (!action.decrementAndIsDone()) {
+            continue;
+          }
 
-        for (var instruction : action.getInstructions(this, node)) {
-          callback.accept(pathConstraint.modifyAsNeeded(instruction));
+          for (var instruction : action.getInstructions(this, node)) {
+            callback.accept(pathConstraint.modifyAsNeeded(instruction));
+          }
         }
-      } else if (subscriber.subscription.processBlockUnsafe(this, key, action, blockState, absolutePositionBlock) == MinecraftGraph.SubscriptionSingleResult.IMPOSSIBLE) {
-        actions[subscriber.actionIndex] = null;
+        case IMPOSSIBLE -> actions[subscriber.actionIndex] = null;
       }
     }
   }
