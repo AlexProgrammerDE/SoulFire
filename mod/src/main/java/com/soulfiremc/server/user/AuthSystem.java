@@ -22,6 +22,7 @@ import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.database.UserRole;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.database.generated.tables.records.UsersRecord;
+import com.soulfiremc.server.grpc.EventServiceImpl;
 import com.soulfiremc.server.grpc.LogServiceImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
 import com.soulfiremc.server.settings.server.ServerSettings;
@@ -50,6 +51,7 @@ import java.util.UUID;
 public final class AuthSystem {
   public static final UUID ROOT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
   public static final String ROOT_DEFAULT_EMAIL = "root@soulfiremc.com";
+  private final EventServiceImpl.StateHolder eventService;
   private final LogServiceImpl.StateHolder logService;
   private final ServerSettingsSource settingsSource;
   private final SecretKey jwtSecretKey;
@@ -57,6 +59,7 @@ public final class AuthSystem {
   private final DSLContext dsl;
 
   public AuthSystem(SoulFireServer soulFireServer, DSLContext dsl) {
+    this.eventService = soulFireServer.eventStateHolder();
     this.logService = soulFireServer.logStateHolder();
     this.jwtSecretKey = soulFireServer.jwtSecretKey();
     this.parser = Jwts.parser().verifyWith(soulFireServer.jwtSecretKey()).build();
@@ -176,7 +179,7 @@ public final class AuthSystem {
           .execute();
       }
 
-      return Optional.of(new SoulFireUserImpl(logService, userRecord, dsl, settingsSource, issuedAt));
+      return Optional.of(new SoulFireUserImpl(eventService, logService, userRecord, dsl, settingsSource, issuedAt));
     });
   }
 
@@ -212,6 +215,7 @@ public final class AuthSystem {
   }
 
   private record SoulFireUserImpl(
+    EventServiceImpl.StateHolder eventService,
     LogServiceImpl.StateHolder logService,
     UsersRecord userData,
     DSLContext dsl,
@@ -283,6 +287,11 @@ public final class AuthSystem {
 
     @Override
     public void sendMessage(Level level, Component message) {
+      eventService.publishMessage(
+        UUID.fromString(userData.getId()),
+        this,
+        level,
+        SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(message));
       logService.sendPersonalMessage(UUID.fromString(userData.getId()), SoulFireAdventure.TRUE_COLOR_ANSI_SERIALIZER.serialize(message));
     }
 

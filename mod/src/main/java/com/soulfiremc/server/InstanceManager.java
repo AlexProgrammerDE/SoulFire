@@ -18,6 +18,8 @@
 package com.soulfiremc.server;
 
 import com.google.gson.JsonElement;
+import com.soulfiremc.grpc.generated.EventSeverity;
+import com.soulfiremc.grpc.generated.EventType;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.account.MCAuthService;
 import com.soulfiremc.server.account.MinecraftAccount;
@@ -369,6 +371,13 @@ public final class InstanceManager {
         case PAUSED -> {
           if (initiator != null) {
             addAuditLog(initiator, AuditLogType.RESUME_SESSION, null);
+            soulFireServer.eventStateHolder().publishSessionEvent(
+              this,
+              EventType.EVENT_TYPE_SESSION_RESUMED,
+              EventSeverity.EVENT_SEVERITY_SUCCESS,
+              "Session resumed",
+              null,
+              initiator);
           }
 
           this.sessionLifecycle(allBotsConnected.get() ? SessionLifecycle.RUNNING : SessionLifecycle.STARTING);
@@ -377,6 +386,13 @@ public final class InstanceManager {
         case STOPPED -> {
           if (initiator != null) {
             addAuditLog(initiator, AuditLogType.START_SESSION, null);
+            soulFireServer.eventStateHolder().publishSessionEvent(
+              this,
+              EventType.EVENT_TYPE_SESSION_STARTED,
+              EventSeverity.EVENT_SEVERITY_SUCCESS,
+              "Session started",
+              null,
+              initiator);
           }
 
           yield scheduler.runAsync(this::start);
@@ -386,6 +402,13 @@ public final class InstanceManager {
         case STARTING, RUNNING -> {
           if (initiator != null) {
             addAuditLog(initiator, AuditLogType.PAUSE_SESSION, null);
+            soulFireServer.eventStateHolder().publishSessionEvent(
+              this,
+              EventType.EVENT_TYPE_SESSION_PAUSED,
+              EventSeverity.EVENT_SEVERITY_WARN,
+              "Session paused",
+              null,
+              initiator);
           }
 
           this.sessionLifecycle(SessionLifecycle.PAUSED);
@@ -396,6 +419,20 @@ public final class InstanceManager {
           if (initiator != null) {
             addAuditLog(initiator, AuditLogType.START_SESSION, null);
             addAuditLog(initiator, AuditLogType.PAUSE_SESSION, null);
+            soulFireServer.eventStateHolder().publishSessionEvent(
+              this,
+              EventType.EVENT_TYPE_SESSION_STARTED,
+              EventSeverity.EVENT_SEVERITY_SUCCESS,
+              "Session started",
+              null,
+              initiator);
+            soulFireServer.eventStateHolder().publishSessionEvent(
+              this,
+              EventType.EVENT_TYPE_SESSION_PAUSED,
+              EventSeverity.EVENT_SEVERITY_WARN,
+              "Session paused",
+              null,
+              initiator);
           }
 
           yield scheduler.runAsync(this::start)
@@ -406,6 +443,13 @@ public final class InstanceManager {
         case STARTING, RUNNING, PAUSED -> {
           if (initiator != null) {
             addAuditLog(initiator, AuditLogType.STOP_SESSION, null);
+            soulFireServer.eventStateHolder().publishSessionEvent(
+              this,
+              EventType.EVENT_TYPE_SESSION_STOPPED,
+              EventSeverity.EVENT_SEVERITY_WARN,
+              "Session stopped",
+              null,
+              initiator);
           }
           yield stopSessionPermanently();
         }
