@@ -34,7 +34,6 @@ import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.database.AuditLogType;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.metrics.InstanceMetricsCollector;
-import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.*;
 import com.soulfiremc.server.settings.lib.*;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -59,7 +58,6 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /// Represents a single instance.
@@ -180,30 +178,13 @@ public final class InstanceManager {
     }
   }
 
-  private static Optional<SFProxy> getProxy(List<ProxyData> proxies) {
-    if (proxies.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var selectedProxy =
-      proxies.stream()
-        .filter(ProxyData::isAvailable)
-        .min(Comparator.comparingInt(ProxyData::usedBots))
-        .orElseThrow(
-          () -> new IllegalStateException("No proxies available!"));
-
-    selectedProxy.useCount().incrementAndGet();
-
-    return Optional.of(selectedProxy.proxy());
-  }
-
   private void tick() {
     if (sessionLifecycle().isTicking()) {
       SoulFireAPI.postEvent(new SessionTickEvent(this));
     }
 
-    evictBots();
     persistDirtyMetadata();
+    evictBots();
   }
 
   private void persistDirtyMetadata() {
@@ -318,6 +299,34 @@ public final class InstanceManager {
     }
   }
 
+  private void persistAccountMetadataUpdates(Map<UUID, Map<String, Map<String, JsonElement>>> metadataUpdates) {
+    if (metadataUpdates.isEmpty()) {
+      return;
+    }
+
+    dsl.transaction(cfg -> {
+      var ctx = DSL.using(cfg);
+      var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
+      if (record == null) {
+        return;
+      }
+
+      var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+      var newAccounts = currentSettings.accounts().stream()
+        .map(account -> {
+          var updatedMetadata = metadataUpdates.get(account.profileId());
+          return updatedMetadata != null ? account.withPersistentMetadata(updatedMetadata) : account;
+        })
+        .toList();
+
+      ctx.update(Tables.INSTANCES)
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(currentSettings.withAccounts(newAccounts).serializeToTree()))
+        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+        .where(Tables.INSTANCES.ID.eq(id.toString()))
+        .execute();
+    });
+  }
+
   private MinecraftAccount refreshAccount(MinecraftAccount account) {
     var authService = MCAuthService.convertService(account.authType());
     if (!authService.isExpired(account)) {
@@ -418,17 +427,18 @@ public final class InstanceManager {
     var botAmount = settingsSource.get(BotSettings.AMOUNT); // How many bots to connect
     var botsPerProxy =
       settingsSource.get(ProxySettings.BOTS_PER_PROXY); // How many bots per proxy are allowed
+    var stickyProxiesEnabled = settingsSource.get(ProxySettings.STICKY_PROXIES);
 
     var proxies = new ArrayList<>(settingsSource.proxies()
       .stream()
-      .map(p -> new ProxyData(p, botsPerProxy, new AtomicInteger(0)))
+      .map(p -> new StickyProxyAllocator.ProxyAllocation(p, botsPerProxy))
       .toList());
     {
       var availableProxies = proxies.size();
       if (availableProxies == 0) {
         log.info("No proxies provided, session will be performed without proxies");
       } else {
-        var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(ProxyData::availableBots));
+        var maxBots = MathHelper.sumCapOverflow(proxies.stream().mapToInt(StickyProxyAllocator.ProxyAllocation::availableBots));
         if (botAmount > maxBots) {
           log.warn("You have requested {} bots, but only {} are possible with the current amount of proxies.", botAmount, maxBots);
           log.warn("Continuing with {} bots due to proxies.", maxBots);
@@ -441,7 +451,7 @@ public final class InstanceManager {
       }
     }
 
-    var accountQueue = new ArrayBlockingQueue<MinecraftAccount>(botAmount);
+    List<MinecraftAccount> selectedAccounts;
     {
       var accounts = new ArrayList<>(settingsSource.accounts().values());
       var availableAccounts = accounts.size();
@@ -458,15 +468,34 @@ public final class InstanceManager {
         Collections.shuffle(accounts);
       }
 
-      accountQueue.addAll(accounts.subList(0, botAmount));
+      selectedAccounts = accounts.subList(0, botAmount);
     }
 
-    var factories = new ArrayBlockingQueue<BotConnectionFactory>(botAmount);
-    while (!accountQueue.isEmpty()) {
-      var minecraftAccount = refreshAccount(accountQueue.poll());
-      var lastAccountObject = new AtomicReference<>(minecraftAccount);
-      var proxyData = getProxy(proxies).orElse(null);
+    var refreshedAccounts = selectedAccounts.stream().map(this::refreshAccount).toList();
+    var assignedProxies = StickyProxyAllocator.assign(refreshedAccounts, proxies, stickyProxiesEnabled);
+    var stickyMetadataUpdates = new LinkedHashMap<UUID, Map<String, Map<String, JsonElement>>>();
+    var preparedAssignments = new ArrayList<StickyProxyAllocator.AssignedProxy>(assignedProxies.size());
+    for (var assignedProxy : assignedProxies) {
+      var minecraftAccount = assignedProxy.account();
+      if (stickyProxiesEnabled && assignedProxy.proxy() != null) {
+        var updatedMetadata = StickyProxyAllocator.withSelectedProxy(minecraftAccount.persistentMetadata(), assignedProxy.proxy());
+        if (!updatedMetadata.equals(minecraftAccount.persistentMetadata())) {
+          stickyMetadataUpdates.put(minecraftAccount.profileId(), updatedMetadata);
+        }
+        minecraftAccount = minecraftAccount.withPersistentMetadata(updatedMetadata);
+      }
+      preparedAssignments.add(new StickyProxyAllocator.AssignedProxy(minecraftAccount, assignedProxy.proxy()));
+    }
 
+    if (!stickyMetadataUpdates.isEmpty()) {
+      persistAccountMetadataUpdates(stickyMetadataUpdates);
+      invalidateSettingsCache();
+    }
+
+    var factories = new ArrayBlockingQueue<BotConnectionFactory>(preparedAssignments.size());
+    for (var preparedAssignment : preparedAssignments) {
+      var minecraftAccount = preparedAssignment.account();
+      var lastAccountObject = new AtomicReference<>(minecraftAccount);
       var botSettings = new BotSettingsDelegate(new CachedLazyObject<>(() -> {
         var fetchedSettingsSource = this.settingsSource();
         var fetchedAccount = fetchedSettingsSource.accounts().get(minecraftAccount.profileId());
@@ -486,11 +515,11 @@ public final class InstanceManager {
           botSettings,
           protocolVersion,
           serverAddress,
-          proxyData
+          preparedAssignment.proxy()
         ));
     }
 
-    var usedProxies = proxies.stream().filter(ProxyData::hasBots).count();
+    var usedProxies = proxies.stream().filter(StickyProxyAllocator.ProxyAllocation::hasBots).count();
     if (usedProxies == 0) {
       log.info("Starting session with {} bots", factories.size());
     } else {
@@ -667,28 +696,6 @@ public final class InstanceManager {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  private record ProxyData(SFProxy proxy, int maxBots, AtomicInteger useCount) {
-    public boolean unlimited() {
-      return maxBots == -1;
-    }
-
-    public int availableBots() {
-      return unlimited() ? Integer.MAX_VALUE : maxBots - useCount.get();
-    }
-
-    public boolean isAvailable() {
-      return availableBots() > 0;
-    }
-
-    public int usedBots() {
-      return useCount.get();
-    }
-
-    public boolean hasBots() {
-      return usedBots() > 0;
-    }
   }
 
   private record InstanceRunnableWrapper(InstanceManager instanceManager) implements SoulFireScheduler.RunnableWrapper {

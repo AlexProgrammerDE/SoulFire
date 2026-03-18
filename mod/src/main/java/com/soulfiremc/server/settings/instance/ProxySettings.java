@@ -46,6 +46,15 @@ public final class ProxySettings implements SettingsObject {
       .description("Should the proxy order be random when connecting bots?")
       .defaultValue(false)
       .build();
+  public static final BooleanProperty<SettingsSource.Instance> STICKY_PROXIES =
+    ImmutableBooleanProperty.<SettingsSource.Instance>builder()
+      .sourceType(SettingsSource.Instance.INSTANCE)
+      .namespace(NAMESPACE)
+      .key("sticky-proxies")
+      .uiName("Sticky proxies")
+      .description("Reuse the last successfully assigned proxy for each bot on the next session start when possible")
+      .defaultValue(false)
+      .build();
   public static final StringProperty<SettingsSource.Instance> PROXY_CHECK_ADDRESS =
     ImmutableStringProperty.<SettingsSource.Instance>builder()
       .sourceType(SettingsSource.Instance.INSTANCE)
