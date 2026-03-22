@@ -19,20 +19,13 @@ package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
-import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.command.CommandSourceStack;
-import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.TriState;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.event.Level;
 
-import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,7 +40,6 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
     var stack = validateScope(request.getScope());
 
     try {
-      publishCommandEvent(request.getScope(), stack.source(), request.getCommand());
       var code = soulFire.serverCommandManager().execute(request.getCommand(), stack);
 
       responseObserver.onNext(CommandResponse.newBuilder().setCode(code).build());
@@ -93,16 +85,13 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
     return switch (scope.getScopeCase()) {
       case GLOBAL -> {
         user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.GLOBAL_COMMAND_EXECUTION));
-        yield CommandSourceStack.ofUnrestricted(soulFire, new EventAwareUser(soulFire, user, null, null));
+        yield CommandSourceStack.ofUnrestricted(soulFire, user);
       }
       case INSTANCE -> {
         var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
         user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.INSTANCE_COMMAND_EXECUTION, instanceId));
 
-        yield CommandSourceStack.ofInstance(
-          soulFire,
-          new EventAwareUser(soulFire, user, instanceId, null),
-          Set.of(instanceId));
+        yield CommandSourceStack.ofInstance(soulFire, user, Set.of(instanceId));
       }
       case BOT -> {
         var instanceId = UUID.fromString(scope.getBot().getInstanceId());
@@ -110,111 +99,9 @@ public final class CommandServiceImpl extends CommandServiceGrpc.CommandServiceI
 
         var botId = UUID.fromString(scope.getBot().getBotId());
 
-        yield CommandSourceStack.ofInstanceAndBot(
-          soulFire,
-          new EventAwareUser(soulFire, user, instanceId, botId),
-          Set.of(instanceId),
-          Set.of(botId));
+        yield CommandSourceStack.ofInstanceAndBot(soulFire, user, Set.of(instanceId), Set.of(botId));
       }
       case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
     };
-  }
-
-  private void publishCommandEvent(CommandScope scope, SoulFireUser actor, String command) {
-    switch (scope.getScopeCase()) {
-      case INSTANCE -> {
-        var instanceId = UUID.fromString(scope.getInstance().getInstanceId());
-        var instance = soulFire.getInstance(instanceId).orElse(null);
-        soulFire.eventStateHolder().publishCommandEvent(
-          instanceId,
-          instance != null ? instance.friendlyNameCache().get() : null,
-          null,
-          null,
-          actor,
-          command);
-      }
-      case BOT -> {
-        var instanceId = UUID.fromString(scope.getBot().getInstanceId());
-        var botId = UUID.fromString(scope.getBot().getBotId());
-        var instance = soulFire.getInstance(instanceId).orElse(null);
-        var botName = instance != null
-          ? instance.getConnectedBots().stream()
-          .filter(bot -> bot.accountProfileId().equals(botId))
-          .map(BotConnection::accountName)
-          .findFirst()
-          .orElse(null)
-          : null;
-        soulFire.eventStateHolder().publishCommandEvent(
-          instanceId,
-          instance != null ? instance.friendlyNameCache().get() : null,
-          botId,
-          botName,
-          actor,
-          command);
-      }
-      case GLOBAL ->
-        soulFire.eventStateHolder().publishCommandEvent(null, null, null, null, actor, command);
-      case SCOPE_NOT_SET -> throw new IllegalArgumentException("Scope not set");
-    }
-  }
-
-  private record EventAwareUser(
-    SoulFireServer soulFire,
-    SoulFireUser delegate,
-    @Nullable UUID fallbackInstanceId,
-    @Nullable UUID fallbackBotId
-  ) implements SoulFireUser {
-    @Override
-    public void sendMessage(Level level, Component message) {
-      var instanceName = fallbackInstanceId == null
-        ? null
-        : soulFire.getInstance(fallbackInstanceId)
-        .map(instance -> instance.friendlyNameCache().get())
-        .orElse(null);
-      var botName = fallbackInstanceId == null || fallbackBotId == null
-        ? null
-        : soulFire.getInstance(fallbackInstanceId)
-        .stream()
-        .flatMap(instance -> instance.getConnectedBots().stream())
-        .filter(bot -> bot.accountProfileId().equals(fallbackBotId))
-        .map(BotConnection::accountName)
-        .findFirst()
-        .orElse(null);
-
-      try (var ignored = soulFire.eventStateHolder()
-        .pushMessageContext(fallbackInstanceId, instanceName, fallbackBotId, botName)) {
-        delegate.sendMessage(level, message);
-      }
-    }
-
-    @Override
-    public TriState getPermission(PermissionContext permission) {
-      return delegate.getPermission(permission);
-    }
-
-    @Override
-    public UUID getUniqueId() {
-      return delegate.getUniqueId();
-    }
-
-    @Override
-    public String getUsername() {
-      return delegate.getUsername();
-    }
-
-    @Override
-    public String getEmail() {
-      return delegate.getEmail();
-    }
-
-    @Override
-    public com.soulfiremc.server.database.UserRole getRole() {
-      return delegate.getRole();
-    }
-
-    @Override
-    public Instant getIssuedAt() {
-      return delegate.getIssuedAt();
-    }
   }
 }

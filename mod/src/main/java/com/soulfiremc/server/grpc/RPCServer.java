@@ -102,7 +102,6 @@ public final class RPCServer {
         .addService(new ClientServiceImpl(soulFireServer))
         .addService(new CommandServiceImpl(soulFireServer))
         .addService(new DownloadServiceImpl())
-        .addService(new EventServiceImpl(soulFireServer))
         .addService(new InstanceServiceImpl(soulFireServer))
         .addService(new LoginServiceImpl(soulFireServer))
         .addService(new LogServiceImpl(soulFireServer))

@@ -31,7 +31,6 @@ import com.soulfiremc.server.database.DatabaseManager;
 import com.soulfiremc.server.database.InstanceConstants;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.grpc.LogServiceImpl;
-import com.soulfiremc.server.grpc.EventServiceImpl;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.metrics.ServerMetricsCollector;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
@@ -119,8 +118,6 @@ public final class SoulFireServer {
   private final SFSparkPlugin sparkPlugin;
   @Getter
   private final LogServiceImpl.StateHolder logStateHolder = new LogServiceImpl.StateHolder();
-  @Getter
-  private final EventServiceImpl.StateHolder eventStateHolder = new EventServiceImpl.StateHolder();
 
   public SoulFireServer(
     String host,

@@ -26,7 +26,6 @@ import com.linecorp.armeria.server.ServiceRequestContext;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.grpc.generated.PortType;
 import com.soulfiremc.grpc.generated.ScriptNode;
-import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.database.generated.Tables;
@@ -97,7 +96,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   private record ScriptActivationState(
     UUID scriptId,
     UUID instanceId,
-    String scriptName,
     boolean active,
     String activeNodeId,
     long activationCount,
@@ -127,7 +125,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       }
 
       // Create internal event listener (no stream, just logging)
-      var eventListener = createInternalEventListener(instanceManager, scriptId, record.getName());
+      var eventListener = createInternalEventListener(scriptId);
 
       // Parse quotas from the database record
       var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
@@ -139,7 +137,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var activationState = new ScriptActivationState(
         scriptId,
         instanceId,
-        record.getName(),
         true,
         null,
         1,
@@ -155,15 +152,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Register triggers for event-driven execution
       var engine = new ReactiveScriptEngine();
       triggerService.registerTriggers(scriptId, graph, context, engine);
-
-      soulFireServer.eventStateHolder().publishScriptEvent(
-        instanceManager,
-        scriptId,
-        record.getName(),
-        EventSeverity.EVENT_SEVERITY_SUCCESS,
-        EventType.EVENT_TYPE_SCRIPT_ACTIVATED,
-        "Script activated",
-        record.getName());
 
       log.info("Started script {} with {} triggers, {} data edges", scriptId,
         graph.findTriggerNodes().size(), graph.dataEdges().size());
@@ -258,7 +246,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   }
 
   /// Creates an internal event listener that just logs events (no streaming to client).
-  private ScriptEventListener createInternalEventListener(InstanceManager instanceManager, UUID scriptId, String scriptName) {
+  private ScriptEventListener createInternalEventListener(UUID scriptId) {
     return new ScriptEventListener() {
       @Override
       public void onNodeStarted(String nodeId) {
@@ -273,59 +261,23 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       @Override
       public void onNodeError(String nodeId, String error) {
         log.warn("[Script {}] Node error {}: {}", scriptId, nodeId, error);
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptName,
-          EventSeverity.EVENT_SEVERITY_ERROR,
-          EventType.EVENT_TYPE_SCRIPT_ERROR,
-          "Script node failed",
-          error);
       }
 
       @Override
       public void onScriptCompleted(boolean success) {
         activeScripts.remove(scriptId);
         log.debug("[Script {}] Execution chain completed: {}", scriptId, success ? "success" : "failure");
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptName,
-          success ? EventSeverity.EVENT_SEVERITY_SUCCESS : EventSeverity.EVENT_SEVERITY_ERROR,
-          EventType.EVENT_TYPE_SCRIPT_COMPLETED,
-          success ? "Script completed" : "Script completed with errors",
-          scriptName);
       }
 
       @Override
       public void onScriptCancelled() {
         activeScripts.remove(scriptId);
         log.debug("[Script {}] Execution cancelled", scriptId);
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptName,
-          EventSeverity.EVENT_SEVERITY_WARN,
-          EventType.EVENT_TYPE_SCRIPT_CANCELLED,
-          "Script cancelled",
-          scriptName);
       }
 
       @Override
       public void onLog(String level, String message) {
         log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
-        if ("warn".equalsIgnoreCase(level) || "error".equalsIgnoreCase(level)) {
-          soulFireServer.eventStateHolder().publishScriptEvent(
-            instanceManager,
-            scriptId,
-            scriptName,
-            "error".equalsIgnoreCase(level)
-              ? EventSeverity.EVENT_SEVERITY_ERROR
-              : EventSeverity.EVENT_SEVERITY_WARN,
-            EventType.EVENT_TYPE_SCRIPT_ERROR,
-            "Script log message",
-            message);
-        }
       }
     };
   }
@@ -648,7 +600,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         activeScripts.put(scriptId, new ScriptActivationState(
           existingState.scriptId(),
           existingState.instanceId(),
-          existingState.scriptName(),
           existingState.active(),
           existingState.activeNodeId(),
           existingState.activationCount() + 1,
@@ -677,7 +628,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var observerRef = new AtomicReference<>(serverObserver);
 
       // Create event listener that streams events to the client
-      var eventListener = createStreamingEventListener(instanceManager, scriptId, scriptRecord.getName(), observerRef);
+      var eventListener = createStreamingEventListener(scriptId, observerRef);
 
       // Parse quotas from the database record
       var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
@@ -693,7 +644,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       var activationState = new ScriptActivationState(
         scriptId,
         instanceId,
-        scriptRecord.getName(),
         true,
         null,
         1,
@@ -701,15 +651,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         observerRef
       );
       activeScripts.put(scriptId, activationState);
-
-      soulFireServer.eventStateHolder().publishScriptEvent(
-        instanceManager,
-        scriptId,
-        scriptRecord.getName(),
-        EventSeverity.EVENT_SEVERITY_SUCCESS,
-        EventType.EVENT_TYPE_SCRIPT_ACTIVATED,
-        "Script activated",
-        scriptRecord.getName());
 
       // Send script started event once the stream is ready
       // (Armeria requires headers to be sent before messages, which happens after this method returns)
@@ -737,7 +678,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.CHANGE_INSTANCE_STATE, instanceId));
 
     try {
-      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+      // Set paused=true in the database to persist the paused state
+      soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
         var record = ctx.selectFrom(Tables.SCRIPTS)
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
@@ -751,24 +693,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
           .execute();
-        record.setPaused(true);
-        return record;
       });
 
       // Stop the script if it's running
       stopScriptInternal(scriptId);
-
-      var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
-      if (instanceManager != null) {
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptRecord.getName(),
-          EventSeverity.EVENT_SEVERITY_WARN,
-          EventType.EVENT_TYPE_SCRIPT_PAUSED,
-          "Script paused",
-          scriptRecord.getName());
-      }
 
       log.info("Script {} paused", scriptId);
       responseObserver.onNext(DeactivateScriptResponse.newBuilder().build());
@@ -1560,12 +1488,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
   }
 
-  private ScriptEventListener createStreamingEventListener(
-    InstanceManager instanceManager,
-    UUID scriptId,
-    String scriptName,
-    AtomicReference<ServerCallStreamObserver<ScriptEvent>> observerRef
-  ) {
+  private ScriptEventListener createStreamingEventListener(UUID scriptId, AtomicReference<ServerCallStreamObserver<ScriptEvent>> observerRef) {
     return new ScriptEventListener() {
       @Override
       public void onNodeStarted(String nodeId) {
@@ -1596,14 +1519,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onNodeError(String nodeId, String error) {
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptName,
-          EventSeverity.EVENT_SEVERITY_ERROR,
-          EventType.EVENT_TYPE_SCRIPT_ERROR,
-          "Script node failed",
-          error);
         sendToObserver(observerRef, ScriptEvent.newBuilder()
           .setNodeError(NodeError.newBuilder()
             .setNodeId(nodeId)
@@ -1615,14 +1530,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onScriptCompleted(boolean success) {
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptName,
-          success ? EventSeverity.EVENT_SEVERITY_SUCCESS : EventSeverity.EVENT_SEVERITY_ERROR,
-          EventType.EVENT_TYPE_SCRIPT_COMPLETED,
-          success ? "Script completed" : "Script completed with errors",
-          scriptName);
         var observer = observerRef.get();
         if (observer != null && !observer.isCancelled()) {
           try {
@@ -1643,14 +1550,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       @Override
       public void onScriptCancelled() {
         activeScripts.remove(scriptId);
-        soulFireServer.eventStateHolder().publishScriptEvent(
-          instanceManager,
-          scriptId,
-          scriptName,
-          EventSeverity.EVENT_SEVERITY_WARN,
-          EventType.EVENT_TYPE_SCRIPT_CANCELLED,
-          "Script cancelled",
-          scriptName);
         var observer = observerRef.get();
         if (observer != null && !observer.isCancelled()) {
           try {
@@ -1671,18 +1570,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       @Override
       public void onLog(String level, String message) {
         log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
-        if ("warn".equalsIgnoreCase(level) || "error".equalsIgnoreCase(level)) {
-          soulFireServer.eventStateHolder().publishScriptEvent(
-            instanceManager,
-            scriptId,
-            scriptName,
-            "error".equalsIgnoreCase(level)
-              ? EventSeverity.EVENT_SEVERITY_ERROR
-              : EventSeverity.EVENT_SEVERITY_WARN,
-            EventType.EVENT_TYPE_SCRIPT_ERROR,
-            "Script log message",
-            message);
-        }
         sendToObserver(observerRef, ScriptEvent.newBuilder()
           .setScriptLog(ScriptLog.newBuilder()
             .setLevel(level)
