@@ -30,10 +30,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Scanner;
+import java.util.Set;
 
 /// This class prepares the earliest work possible, such as loading mixins and setting up logging.
 @Slf4j
 public abstract class SoulFireAbstractBootstrap {
+  private static final Set<String> RESERVED_FLAGS = Set.of("sf.flags.v2");
   public static final Instant START_TIME = Instant.now();
 
   protected SoulFireAbstractBootstrap() {}
@@ -122,7 +124,7 @@ public abstract class SoulFireAbstractBootstrap {
 
         var parsedKey = parts[0].strip();
         var parsedValue = parts[1].strip();
-        if (!parsedKey.startsWith("sf.")) {
+        if (!parsedKey.startsWith("sf.") || RESERVED_FLAGS.stream().anyMatch(parsedKey::equalsIgnoreCase)) {
           log.warn("Invalid key in options file at line {}: {}", lineNumber, parsedKey);
           continue;
         }
