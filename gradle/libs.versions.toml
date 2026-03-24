@@ -7,7 +7,7 @@ reactor-core = "3.8.4"
 armeria = "1.37.0"
 classtransform = "1.14.1"
 kyori = "4.26.1"
-jooq = "3.20.11"
+jooq = "3.21.0"
 flyway = "12.1.1"
 
 [plugins]
