@@ -65,8 +65,8 @@ if (!skipBuild) {
   await runCommand("bun", ["run", "typecheck:smoke"], {
     cwd: packageDirectory,
   });
-  await runCommand("../../gradlew", [":dedicated-launcher:uberJar"], {
-    cwd: packageDirectory,
+  await runCommand("./gradlew", [":dedicated-launcher:uberJar"], {
+    cwd: repositoryRoot,
   });
 }
 
