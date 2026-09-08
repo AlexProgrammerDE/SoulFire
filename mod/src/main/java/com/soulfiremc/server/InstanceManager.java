@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server;
 
+import com.google.common.util.concurrent.Striped;
 import com.google.gson.JsonElement;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.account.MCAuthService;
@@ -69,6 +70,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 /// Represents a single instance.
 /// An instance persists settings and provides a compartment for independently controlled bots.
@@ -76,6 +78,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public final class InstanceManager {
   private static final ScopedValue<InstanceManager> CURRENT = ScopedValue.newInstance();
+  private final Striped<Lock> accountRefreshLocks = Striped.lock(64);
   private final Map<UUID, BotConnection> botConnections = new ConcurrentHashMap<>();
   private final BotControlLeaseManager botControlLeaseManager = new BotControlLeaseManager();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
@@ -318,49 +321,14 @@ public final class InstanceManager {
   }
 
   private void refreshExpiredAccounts() {
-    if (settingsSource.accounts().isEmpty()) {
-      // Nothing to refresh
-      return;
-    }
-
-    var accounts = new ArrayList<MinecraftAccount>();
-    var refreshed = 0;
     for (var account : settingsSource.accounts().values()) {
-      var authService = MCAuthService.convertService(account.authType());
-      if (authService.isExpired(account)) {
-        if (refreshed == 0) {
-          log.info("Refreshing expired accounts");
-        }
-
-        accounts.add(authService.refresh(
-          account,
-          settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
-            ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
-          scheduler
-        ).join());
-        refreshed++;
-      } else {
-        accounts.add(account);
+      try {
+        refreshAccount(account);
+      } catch (Exception e) {
+        // One expired or rate-limited account must not prevent other accounts
+        // from refreshing, or discard credentials refreshed earlier in the batch.
+        log.warn("Failed to refresh account {}", account.profileId(), e);
       }
-    }
-
-    if (refreshed > 0) {
-      log.info("Refreshed {} accounts", refreshed);
-      dsl.transaction(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
-        if (record == null) {
-          return;
-        }
-
-        var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
-        var newSettings = currentSettings.withAccounts(accounts);
-        ctx.update(Tables.INSTANCES)
-          .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
-          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
-          .where(Tables.INSTANCES.ID.eq(id.toString()))
-          .execute();
-      });
     }
   }
 
@@ -393,38 +361,72 @@ public final class InstanceManager {
   }
 
   MinecraftAccount refreshAccount(MinecraftAccount account) {
-    var authService = MCAuthService.convertService(account.authType());
-    if (!authService.isExpired(account)) {
-      return account;
-    }
-
-    log.info("Account {} is expired, refreshing before connecting", account.lastKnownName());
-    var refreshedAccount = authService.refresh(
-      account,
-      settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
-        ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
-      scheduler
-    ).join();
-    var accounts = new ArrayList<>(settingsSource.accounts().values());
-    accounts.replaceAll(a -> a.authType().equals(refreshedAccount.authType())
-      && a.profileId().equals(refreshedAccount.profileId()) ? refreshedAccount : a);
-    dsl.transaction(cfg -> {
-      var ctx = DSL.using(cfg);
-      var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
-      if (record == null) {
-        return;
+    var lock = accountRefreshLocks.get(account.profileId());
+    lock.lock();
+    try {
+      // A concurrent connection or the periodic refresh may have refreshed this
+      // account already. Read persisted credentials after acquiring its lock.
+      var currentAccount = fetchSettingsSource().accounts().get(account.profileId());
+      if (currentAccount == null) {
+        throw new IllegalStateException("Account was removed before authentication");
+      }
+      var authService = MCAuthService.convertService(currentAccount.authType());
+      if (!authService.isExpired(currentAccount)) {
+        return currentAccount;
       }
 
-      var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
-      var newSettings = currentSettings.withAccounts(accounts);
-      ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
-        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
-        .where(Tables.INSTANCES.ID.eq(id.toString()))
-        .execute();
-    });
+      log.info("Refreshing expired account {}", currentAccount.lastKnownName());
+      var refreshedAccount = authService.refresh(
+        currentAccount,
+        settingsSource.get(AccountSettings.USE_PROXIES_FOR_ACCOUNT_AUTH)
+          ? SFHelpers.getRandomEntry(settingsSource.proxies()) : null,
+        scheduler
+      ).join();
+      var persistedAccount = dsl.transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
+        if (record == null) {
+          throw new IllegalStateException("Instance was removed during authentication");
+        }
 
-    return refreshedAccount;
+        var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
+        var accounts = mergeRefreshedAccount(currentSettings.accounts(), currentAccount, refreshedAccount);
+        var result = accounts.stream()
+          .filter(a -> a.profileId().equals(account.profileId()))
+          .findFirst()
+          .orElseThrow(() -> new IllegalStateException("Account was removed during authentication"));
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(currentSettings.withAccounts(accounts).serializeToTree()))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(id.toString()))
+          .execute();
+        return result;
+      });
+      invalidateSettingsCache();
+      return persistedAccount;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  /// Applies refreshed credentials without restoring removed accounts or overwriting
+  /// account edits made while the authentication request was in flight.
+  static List<MinecraftAccount> mergeRefreshedAccount(
+    List<MinecraftAccount> accounts,
+    MinecraftAccount original,
+    MinecraftAccount refreshed
+  ) {
+    if (!original.profileId().equals(refreshed.profileId()) || original.authType() != refreshed.authType()) {
+      throw new IllegalArgumentException("Refreshed account identity does not match");
+    }
+    return accounts.stream().map(account -> {
+      if (!account.profileId().equals(original.profileId())
+        || account.authType() != original.authType()
+        || !account.accountData().equals(original.accountData())) {
+        return account;
+      }
+      return account.withAccountData(refreshed.accountData()).withLastKnownName(refreshed.lastKnownName());
+    }).toList();
   }
 
   public CompletableFuture<?> deleteInstance() {
