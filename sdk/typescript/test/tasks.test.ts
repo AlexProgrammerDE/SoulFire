@@ -101,11 +101,7 @@ describe("SoulFireTasks", () => {
             createClient(BotLiveService, transport),
             createClient(BotTaskService, transport),
           );
-          const task = yield* bot.tasks.start(
-            GoToTaskSchema,
-            {},
-            GoToTaskResultSchema,
-          );
+          const task = yield* bot.tasks.start(GoToTaskSchema, {}, GoToTaskResultSchema);
           const result = yield* task.result();
           expect(started).toMatchObject({
             instanceId: "instance-id",
@@ -279,9 +275,7 @@ describe("SoulFireTasks", () => {
               path: { allowMining: false, allowPlacing: false },
             },
           );
-          expect(
-            anyUnpack(started!.input!, RangedAttackTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started!.input!, RangedAttackTaskSchema)).toMatchObject({
             target: {
               networkId: 42,
               connectionEpoch: "connection-epoch",
@@ -338,9 +332,7 @@ describe("SoulFireTasks", () => {
               weapon: { tags: ["minecraft:swords"] },
             },
           );
-          expect(
-            anyUnpack(started!.input!, AttackNearestTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started!.input!, AttackNearestTaskSchema)).toMatchObject({
             selector: { entityTypes: ["minecraft:zombie"] },
             radius: 48,
             maximumTargets: 3,
@@ -796,9 +788,7 @@ describe("SoulFireTasks", () => {
               closeContainer: true,
             },
           );
-          expect(
-            anyUnpack(started!.input!, ContainerTransferTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started!.input!, ContainerTransferTaskSchema)).toMatchObject({
             container: {
               x: 30,
               y: 65,
@@ -873,9 +863,7 @@ describe("SoulFireTasks", () => {
               closeContainer: true,
             },
           );
-          expect(
-            anyUnpack(started!.input!, MaintainLoadoutTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started!.input!, MaintainLoadoutTaskSchema)).toMatchObject({
             container: {
               x: 14,
               y: 64,
@@ -930,16 +918,13 @@ describe("SoulFireTasks", () => {
             createClient(BotLiveService, transport),
             createClient(BotTaskService, transport),
           );
-          yield* bot.tasks.autoEat(
-            ["minecraft:bread", "minecraft:cooked_beef"],
-            {
-              foodLevel: 12,
-              checkIntervalTicks: 10,
-              maximumMeals: 3,
-              completeWhenNoFood: true,
-              restoreSelectedSlot: false,
-            },
-          );
+          yield* bot.tasks.autoEat(["minecraft:bread", "minecraft:cooked_beef"], {
+            foodLevel: 12,
+            checkIntervalTicks: 10,
+            maximumMeals: 3,
+            completeWhenNoFood: true,
+            restoreSelectedSlot: false,
+          });
           const input = anyUnpack(started!.input!, AutoEatTaskSchema);
           expect(input).toMatchObject({
             foodItemIds: ["minecraft:bread", "minecraft:cooked_beef"],
@@ -1029,17 +1014,13 @@ describe("SoulFireTasks", () => {
             maximumEquips: 4,
             completeWhenNoUpgrade: true,
           });
-          expect(
-            anyUnpack(started[0]!.input!, AutoTotemTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started[0]!.input!, AutoTotemTaskSchema)).toMatchObject({
             checkIntervalTicks: 8,
             maximumEquips: 2,
             completeWhenNoTotem: true,
             replaceOccupiedOffhand: true,
           });
-          expect(
-            anyUnpack(started[1]!.input!, AutoArmorTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started[1]!.input!, AutoArmorTaskSchema)).toMatchObject({
             checkIntervalTicks: 12,
             maximumEquips: 4,
             completeWhenNoUpgrade: true,
@@ -1088,9 +1069,7 @@ describe("SoulFireTasks", () => {
               maximumY: 96,
             },
           });
-          expect(
-            anyUnpack(started!.input!, CollectBlocksTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started!.input!, CollectBlocksTaskSchema)).toMatchObject({
             blockIds: ["minecraft:oak_log"],
             tags: ["minecraft:logs"],
             count: 6,
@@ -1424,9 +1403,7 @@ describe("SoulFireTasks", () => {
             expectedResult: { itemIds: ["minecraft:ender_pearl"] },
             closeWhenDone: true,
           });
-          expect(
-            anyUnpack(started!.input!, VillagerTradeTaskSchema),
-          ).toMatchObject({
+          expect(anyUnpack(started!.input!, VillagerTradeTaskSchema)).toMatchObject({
             offerIndex: 4,
             count: 3,
             expectedResult: { itemIds: ["minecraft:ender_pearl"] },
@@ -1463,13 +1440,9 @@ describe("SoulFireTasks", () => {
             createClient(BotLiveService, transport),
             createClient(BotTaskService, transport),
           );
-          const updates = Array.from(
-            yield* Stream.runCollect(bot.tasks.run(GoToTaskSchema, {})),
-          );
+          const updates = Array.from(yield* Stream.runCollect(bot.tasks.run(GoToTaskSchema, {})));
           expect(updates).toHaveLength(1);
-          expect(started?.disconnectPolicy).toBe(
-            BotTaskDisconnectPolicy.CANCEL_WITH_CALL,
-          );
+          expect(started?.disconnectPolicy).toBe(BotTaskDisconnectPolicy.CANCEL_WITH_CALL);
         }),
       ),
     ));

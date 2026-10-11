@@ -2,11 +2,11 @@
 
 SoulFire tasks run on the server. The SDK offers three ways to use them:
 
-| API | Result | Cancellation ownership |
-| --- | --- | --- |
-| `bot.collect(...)` | Completed collection result | Cancels unfinished work on interruption |
-| `bot.tasks.collectBlocks(...)` | Handle after server acceptance | Explicit cancellation through `task.cancel()` |
-| `bot.tasks.runCollectBlocks(...)` | Stream of task events | Cancels unfinished work when the stream closes by default |
+| API                               | Result                         | Cancellation ownership                                    |
+| --------------------------------- | ------------------------------ | --------------------------------------------------------- |
+| `bot.collect(...)`                | Completed collection result    | Cancels unfinished work on interruption                   |
+| `bot.tasks.collectBlocks(...)`    | Handle after server acceptance | Explicit cancellation through `task.cancel()`             |
+| `bot.tasks.runCollectBlocks(...)` | Stream of task events          | Cancels unfinished work when the stream closes by default |
 
 The same start-versus-stream distinction applies to navigation and other task
 families. A start method does not wait for completion. `run*` methods start work

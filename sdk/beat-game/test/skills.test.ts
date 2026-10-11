@@ -23,10 +23,7 @@ const now = "2026-08-28T12:00:00.000Z";
 
 describe("durable beat-game skills", () => {
   it.each([
-    [
-      { type: "recover-death", action: "recover-death" },
-      BeatGameDurableSkillKind.DEATH_RECOVERY,
-    ],
+    [{ type: "recover-death", action: "recover-death" }, BeatGameDurableSkillKind.DEATH_RECOVERY],
     [
       {
         type: "build-and-enter-nether",
@@ -34,10 +31,7 @@ describe("durable beat-game skills", () => {
       },
       BeatGameDurableSkillKind.PORTAL_CONSTRUCTION,
     ],
-    [
-      { type: "throw-eye", action: "throw-eye" },
-      BeatGameDurableSkillKind.STRONGHOLD_TRIANGULATION,
-    ],
+    [{ type: "throw-eye", action: "throw-eye" }, BeatGameDurableSkillKind.STRONGHOLD_TRIANGULATION],
     [
       { type: "activate-end-portal", action: "activate-end-portal" },
       BeatGameDurableSkillKind.END_PORTAL_ENTRY,
@@ -59,28 +53,14 @@ describe("durable beat-game skills", () => {
       type: "build-and-enter-nether",
       action: "build-and-enter-nether",
     } as const;
-    const started = startOrResumeDurableSkill(
-      initial,
-      decision,
-      now,
-      () => "portal-skill",
-    );
+    const started = startOrResumeDurableSkill(initial, decision, now, () => "portal-skill");
     const workspace = portalWorkspace();
-    const reserved = advanceDurableSkill(
-      started,
-      "construct-frame",
-      now,
-      {
-        portalWorkspace: workspace,
-        targets: [workspace.origin],
-        protectedBlocks: workspace.protectedBlocks,
-      },
-    );
-    const suspended = suspendDurableSkill(
-      reserved,
-      "nearby hostile",
-      "2026-08-28T12:00:01.000Z",
-    );
+    const reserved = advanceDurableSkill(started, "construct-frame", now, {
+      portalWorkspace: workspace,
+      targets: [workspace.origin],
+      protectedBlocks: workspace.protectedBlocks,
+    });
+    const suspended = suspendDurableSkill(reserved, "nearby hostile", "2026-08-28T12:00:01.000Z");
     const store = new InMemoryBeatGameCheckpointStore();
     const saved = await Effect.runPromise(store.save(suspended, undefined));
     const restored = await Effect.runPromise(store.load(saved.runId));
@@ -100,9 +80,7 @@ describe("durable beat-game skills", () => {
       () => "must-not-replace",
     );
     expect(resumed.activeSkill?.skillId).toBe("portal-skill");
-    expect(resumed.activeSkill?.status).toBe(
-      BeatGameDurableSkillStatus.ACTIVE,
-    );
+    expect(resumed.activeSkill?.status).toBe(BeatGameDurableSkillStatus.ACTIVE);
   });
 
   it("archives completion evidence and clears only the active handle", () => {
@@ -168,12 +146,14 @@ describe("durable beat-game skills", () => {
         action: `exercise-${kind}`,
         status: BeatGameDurableSkillStatus.ACTIVE,
         substep: "observe",
-        targets: [initial.memory.eyeSamples[0]?.origin ?? {
-          x: 0,
-          y: 64,
-          z: 0,
-          dimension: "minecraft:overworld",
-        }],
+        targets: [
+          initial.memory.eyeSamples[0]?.origin ?? {
+            x: 0,
+            y: 64,
+            z: 0,
+            dimension: "minecraft:overworld",
+          },
+        ],
         protectedBlocks: [],
         protectedItemIds: [],
         completedWorldChanges: [],
@@ -183,13 +163,17 @@ describe("durable beat-game skills", () => {
         updatedAt: now,
       };
       const store = new InMemoryBeatGameCheckpointStore();
-      const saved = await Effect.runPromise(store.save({
-        ...initial,
-        activeSkill,
-      }, undefined));
+      const saved = await Effect.runPromise(
+        store.save(
+          {
+            ...initial,
+            activeSkill,
+          },
+          undefined,
+        ),
+      );
 
-      expect((await Effect.runPromise(store.load(saved.runId)))?.activeSkill)
-        .toEqual(activeSkill);
+      expect((await Effect.runPromise(store.load(saved.runId)))?.activeSkill).toEqual(activeSkill);
     },
   );
 });

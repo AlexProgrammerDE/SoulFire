@@ -1,18 +1,7 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
-import {
-  createServer,
-  type IncomingMessage,
-  type Server,
-  type ServerResponse,
-} from "node:http";
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import {
-  Cause,
-  Effect,
-  Exit,
-  Option,
-  type Scope,
-} from "effect";
+import { Cause, Effect, Exit, Option, type Scope } from "effect";
 
 const DEFAULT_MAXIMUM_BODY_BYTES = 1024 * 1024;
 
@@ -23,9 +12,7 @@ export interface SmokeDebugOperation {
   readonly path: `/${string}`;
   readonly description: string;
   readonly unsafe?: boolean;
-  readonly execute: (
-    input: unknown,
-  ) => Effect.Effect<unknown, unknown>;
+  readonly execute: (input: unknown) => Effect.Effect<unknown, unknown>;
 }
 
 export interface SmokeDebugServerOptions {
@@ -77,16 +64,13 @@ export class SmokeDebugTimeline {
     if (!Number.isSafeInteger(requestedLimit) || requestedLimit < 1) {
       throw new RangeError("limit must be a positive safe integer");
     }
-    const kinds = options.kinds === undefined
-      ? undefined
-      : new Set(options.kinds);
-    const filtered = kinds === undefined
-      ? this.#entries
-      : this.#entries.filter((entry) =>
-        isRecord(entry)
-        && typeof entry.kind === "string"
-        && kinds.has(entry.kind)
-      );
+    const kinds = options.kinds === undefined ? undefined : new Set(options.kinds);
+    const filtered =
+      kinds === undefined
+        ? this.#entries
+        : this.#entries.filter(
+            (entry) => isRecord(entry) && typeof entry.kind === "string" && kinds.has(entry.kind),
+          );
     return filtered.slice(-Math.min(requestedLimit, this.#maximumEntries));
   }
 }
@@ -94,10 +78,7 @@ export class SmokeDebugTimeline {
 export class SmokeDebugRequestError extends Error {
   public readonly status: number;
 
-  public constructor(
-    message: string,
-    status: number = 400,
-  ) {
+  public constructor(message: string, status: number = 400) {
     super(message);
     this.name = "SmokeDebugRequestError";
     this.status = status;
@@ -110,26 +91,16 @@ export function startSmokeDebugServer(
   return Effect.gen(function* () {
     validateOptions(options);
     const token = options.token ?? randomBytes(32).toString("base64url");
-    const maximumBodyBytes = options.maximumBodyBytes
-      ?? DEFAULT_MAXIMUM_BODY_BYTES;
+    const maximumBodyBytes = options.maximumBodyBytes ?? DEFAULT_MAXIMUM_BODY_BYTES;
     const operationIndex = indexOperations(options.operations);
     const server = createServer((request, response) => {
-      void handleRequest(
-        request,
-        response,
-        token,
-        operationIndex,
-        maximumBodyBytes,
-      );
+      void handleRequest(request, response, token, operationIndex, maximumBodyBytes);
     });
-    const address = yield* Effect.acquireRelease(
-      listen(server, options.port),
-      () => close(server),
-    );
+    const address = yield* Effect.acquireRelease(listen(server, options.port), () => close(server));
     const operations = [...options.operations]
-      .sort((left, right) =>
-        left.path.localeCompare(right.path)
-        || left.method.localeCompare(right.method)
+      .sort(
+        (left, right) =>
+          left.path.localeCompare(right.path) || left.method.localeCompare(right.method),
       )
       .map((operation) => ({
         method: operation.method,
@@ -148,19 +119,12 @@ export function startSmokeDebugServer(
 }
 
 function validateOptions(options: SmokeDebugServerOptions): void {
-  if (
-    !Number.isSafeInteger(options.port)
-    || options.port < 0
-    || options.port > 65_535
-  ) {
+  if (!Number.isSafeInteger(options.port) || options.port < 0 || options.port > 65_535) {
     throw new RangeError("port must be an integer between 0 and 65535");
   }
   if (
-    options.maximumBodyBytes !== undefined
-    && (
-      !Number.isSafeInteger(options.maximumBodyBytes)
-      || options.maximumBodyBytes < 1
-    )
+    options.maximumBodyBytes !== undefined &&
+    (!Number.isSafeInteger(options.maximumBodyBytes) || options.maximumBodyBytes < 1)
   ) {
     throw new RangeError("maximumBodyBytes must be a positive safe integer");
   }
@@ -179,9 +143,7 @@ function indexOperations(
     }
     const key = operationKey(operation.method, operation.path);
     if (index.has(key)) {
-      throw new RangeError(
-        `Duplicate debug operation: ${operation.method} ${operation.path}`,
-      );
+      throw new RangeError(`Duplicate debug operation: ${operation.method} ${operation.path}`);
     }
     index.set(key, operation);
   }
@@ -238,9 +200,9 @@ async function handleRequest(
         ok: true,
         result: {
           operations: [...operations.values()]
-            .sort((left, right) =>
-              left.path.localeCompare(right.path)
-              || left.method.localeCompare(right.method)
+            .sort(
+              (left, right) =>
+                left.path.localeCompare(right.path) || left.method.localeCompare(right.method),
             )
             .map((operation) => ({
               method: operation.method,
@@ -262,49 +224,39 @@ async function handleRequest(
       });
       return;
     }
-    const method = request.method === "GET" || request.method === "POST"
-      ? request.method
-      : undefined;
-    const operation = method === undefined
-      ? undefined
-      : operations.get(operationKey(method, url.pathname));
+    const method =
+      request.method === "GET" || request.method === "POST" ? request.method : undefined;
+    const operation =
+      method === undefined ? undefined : operations.get(operationKey(method, url.pathname));
     if (operation === undefined) {
-      response.setHeader(
-        "allow",
-        pathOperations.map(({ method: allowed }) => allowed).join(", "),
-      );
+      response.setHeader("allow", pathOperations.map(({ method: allowed }) => allowed).join(", "));
       writeJson(response, 405, {
         ok: false,
         error: { message: `Method ${request.method ?? "UNKNOWN"} is not allowed` },
       });
       return;
     }
-    const input = operation.method === "POST"
-      ? await readJson(request, maximumBodyBytes)
-      : Object.fromEntries(url.searchParams);
+    const input =
+      operation.method === "POST"
+        ? await readJson(request, maximumBodyBytes)
+        : Object.fromEntries(url.searchParams);
     const exit = await Effect.runPromiseExit(operation.execute(input));
     if (Exit.isSuccess(exit)) {
       writeJson(response, 200, { ok: true, result: exit.value });
       return;
     }
     const failure = Option.getOrUndefined(Cause.findErrorOption(exit.cause));
-    const status = failure instanceof SmokeDebugRequestError
-      ? failure.status
-      : 500;
+    const status = failure instanceof SmokeDebugRequestError ? failure.status : 500;
     writeJson(response, status, {
       ok: false,
       error: {
-        message: failure instanceof Error
-          ? failure.message
-          : Cause.pretty(exit.cause),
+        message: failure instanceof Error ? failure.message : Cause.pretty(exit.cause),
         ...(failure instanceof Error ? { name: failure.name } : {}),
       },
     });
   } catch (cause) {
     const error = cause instanceof Error ? cause : new Error(String(cause));
-    const status = error instanceof SmokeDebugRequestError
-      ? error.status
-      : 500;
+    const status = error instanceof SmokeDebugRequestError ? error.status : 500;
     writeJson(response, status, {
       ok: false,
       error: { name: error.name, message: error.message },
@@ -319,24 +271,17 @@ function authorized(request: IncomingMessage, token: string): boolean {
   }
   const supplied = Buffer.from(authorization.slice("Bearer ".length));
   const expected = Buffer.from(token);
-  return supplied.byteLength === expected.byteLength
-    && timingSafeEqual(supplied, expected);
+  return supplied.byteLength === expected.byteLength && timingSafeEqual(supplied, expected);
 }
 
-async function readJson(
-  request: IncomingMessage,
-  maximumBodyBytes: number,
-): Promise<unknown> {
+async function readJson(request: IncomingMessage, maximumBodyBytes: number): Promise<unknown> {
   const chunks: Buffer[] = [];
   let bytes = 0;
   for await (const chunk of request) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     bytes += buffer.byteLength;
     if (bytes > maximumBodyBytes) {
-      throw new SmokeDebugRequestError(
-        `Request body exceeds ${maximumBodyBytes} bytes`,
-        413,
-      );
+      throw new SmokeDebugRequestError(`Request body exceeds ${maximumBodyBytes} bytes`, 413);
     }
     chunks.push(buffer);
   }
@@ -350,16 +295,12 @@ async function readJson(
   }
 }
 
-function writeJson(
-  response: ServerResponse,
-  status: number,
-  value: unknown,
-): void {
+function writeJson(response: ServerResponse, status: number, value: unknown): void {
   if (response.writableEnded) {
     return;
   }
   const body = `${JSON.stringify(value, (_, nested) =>
-    typeof nested === "bigint" ? nested.toString() : nested
+    typeof nested === "bigint" ? nested.toString() : nested,
   )}\n`;
   response.writeHead(status, {
     "cache-control": "no-store",

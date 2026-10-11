@@ -16,8 +16,7 @@ export interface BeatGamePolicyContext {
   readonly strategy: BeatGameStrategy;
 }
 
-export interface BeatGameRequirementPolicyContext
-  extends BeatGamePolicyContext {
+export interface BeatGameRequirementPolicyContext extends BeatGamePolicyContext {
   readonly requirement: BeatGameItemRequirement;
 }
 
@@ -31,40 +30,16 @@ type PolicyEffect<A> = Effect.Effect<A, unknown>;
  * The planner always reads a fresh observation before advancing a phase.
  */
 export interface BeatGameStrategyHooks {
-  readonly recoverDeath?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly eat?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly retreat?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly prepareEquipment?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly satisfyRequirement?: (
-    context: BeatGameRequirementPolicyContext,
-  ) => PolicyEffect<void>;
-  readonly buildAndEnterNether?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly returnThroughPortal?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly throwEye?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<BeatGameEyeSample>;
-  readonly searchStronghold?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<boolean>;
-  readonly activateEndPortal?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
-  readonly fightEnderDragon?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<boolean>;
-  readonly exitEnd?: (
-    context: BeatGamePolicyContext,
-  ) => PolicyEffect<void>;
+  readonly recoverDeath?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly eat?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly retreat?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly prepareEquipment?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly satisfyRequirement?: (context: BeatGameRequirementPolicyContext) => PolicyEffect<void>;
+  readonly buildAndEnterNether?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly returnThroughPortal?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly throwEye?: (context: BeatGamePolicyContext) => PolicyEffect<BeatGameEyeSample>;
+  readonly searchStronghold?: (context: BeatGamePolicyContext) => PolicyEffect<boolean>;
+  readonly activateEndPortal?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
+  readonly fightEnderDragon?: (context: BeatGamePolicyContext) => PolicyEffect<boolean>;
+  readonly exitEnd?: (context: BeatGamePolicyContext) => PolicyEffect<void>;
 }

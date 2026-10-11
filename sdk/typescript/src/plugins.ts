@@ -15,18 +15,9 @@ import {
   type Registry,
 } from "@bufbuild/protobuf";
 import { FileDescriptorSetSchema } from "@bufbuild/protobuf/wkt";
-import {
-  createClient,
-  type CallOptions,
-  type Client,
-  type Transport,
-} from "@connectrpc/connect";
+import { createClient, type CallOptions, type Client, type Transport } from "@connectrpc/connect";
 import { Effect, Stream } from "effect";
-import {
-  operationError,
-  SoulFirePluginError,
-  type SoulFireOperationError,
-} from "./errors.js";
+import { operationError, SoulFirePluginError, type SoulFireOperationError } from "./errors.js";
 import { rpc, rpcStream, withSignal } from "./transport.js";
 
 import {
@@ -141,8 +132,7 @@ export class ReflectivePlugin {
         ),
       );
       return yield* Effect.try({
-        try: () =>
-          reflectiveMessage(method.output, response.message, this.registry),
+        try: () => reflectiveMessage(method.output, response.message, this.registry),
         catch: (cause) => operationError("plugin.call", cause),
       });
     });
@@ -267,9 +257,7 @@ export class ReflectivePlugin {
   }
 
   #message(typeUrl: string): DescMessage {
-    const typeName = typeUrl.includes("/")
-      ? typeUrl.slice(typeUrl.lastIndexOf("/") + 1)
-      : typeUrl;
+    const typeName = typeUrl.includes("/") ? typeUrl.slice(typeUrl.lastIndexOf("/") + 1) : typeUrl;
     const message = this.registry.getMessage(typeName);
     if (message === undefined) {
       throw new SoulFirePluginDescriptorError(
@@ -288,19 +276,14 @@ export class ReflectivePlugin {
         `Plugin ${this.descriptor.pluginId} does not describe service ${serviceName}`,
       );
     }
-    if (
-      !this.descriptor.services.some(
-        (candidate) => candidate.fullName === serviceName,
-      )
-    ) {
+    if (!this.descriptor.services.some((candidate) => candidate.fullName === serviceName)) {
       throw new SoulFirePluginCompatibilityError(
         this.descriptor.pluginId,
         `Plugin ${this.descriptor.pluginId} does not expose ${serviceName}`,
       );
     }
     const method = service.methods.find(
-      (candidate) =>
-        candidate.name === methodName || candidate.localName === methodName,
+      (candidate) => candidate.name === methodName || candidate.localName === methodName,
     );
     if (method === undefined) {
       throw new SoulFirePluginDescriptorError(
@@ -362,31 +345,20 @@ export class PluginCatalog {
     return Effect.try({
       try: () => {
         const descriptor = this.requireDescriptor(module.pluginId);
-        if (
-          module.isCompatible !== undefined &&
-          !module.isCompatible(descriptor)
-        )
+        if (module.isCompatible !== undefined && !module.isCompatible(descriptor))
           throw new SoulFirePluginCompatibilityError(
             module.pluginId,
             "Installed plugin is incompatible with its SDK module",
           );
         return module.create(this, descriptor);
       },
-      catch: (cause) =>
-        new SoulFirePluginError({ pluginId: module.pluginId, cause }),
+      catch: (cause) => new SoulFirePluginError({ pluginId: module.pluginId, cause }),
     });
   }
 
-  public service<T extends DescService>(
-    pluginId: string,
-    service: T,
-  ): Client<T> {
+  public service<T extends DescService>(pluginId: string, service: T): Client<T> {
     const descriptor = this.requireDescriptor(pluginId);
-    if (
-      !descriptor.services.some(
-        (registered) => registered.fullName === service.typeName,
-      )
-    ) {
+    if (!descriptor.services.some((registered) => registered.fullName === service.typeName)) {
       throw new SoulFirePluginCompatibilityError(
         pluginId,
         `Plugin ${pluginId} does not expose ${service.typeName}`,
@@ -425,9 +397,7 @@ export class PluginCatalog {
           withSignal(options, signal),
         ),
       );
-      const actualHash = yield* rpc("plugins.sha256", () =>
-        sha256(response.descriptorSet),
-      );
+      const actualHash = yield* rpc("plugins.sha256", () => sha256(response.descriptorSet));
       if (actualHash !== response.descriptorSha256.toLowerCase()) {
         return yield* Effect.fail(
           operationError(
@@ -458,15 +428,10 @@ export class PluginCatalog {
       }
       const bytes = yield* this.descriptorSet(pluginId, options);
       const registry = yield* Effect.try({
-        try: () =>
-          createFileRegistry(fromBinary(FileDescriptorSetSchema, bytes)),
+        try: () => createFileRegistry(fromBinary(FileDescriptorSetSchema, bytes)),
         catch: (cause) => operationError("plugins.reflective", cause),
       });
-      const plugin = new ReflectivePlugin(
-        descriptor,
-        registry,
-        this.#transport,
-      );
+      const plugin = new ReflectivePlugin(descriptor, registry, this.#transport);
       this.#reflective.set(pluginId, {
         hash: descriptor.descriptorSha256,
         plugin,
@@ -475,14 +440,9 @@ export class PluginCatalog {
     });
   }
 
-  public watch(
-    options?: CallOptions,
-  ): Stream.Stream<PluginApiEvent, SoulFireOperationError> {
+  public watch(options?: CallOptions): Stream.Stream<PluginApiEvent, SoulFireOperationError> {
     return rpcStream("plugins.watch", (signal) =>
-      this.#client.watchPluginApis(
-        { afterRevision: this.#revision },
-        withSignal(options, signal),
-      ),
+      this.#client.watchPluginApis({ afterRevision: this.#revision }, withSignal(options, signal)),
     ).pipe(
       Stream.tap((event) =>
         Effect.sync(() => {
@@ -510,7 +470,7 @@ export class PluginCatalog {
     options: WatchPluginEventOptions = {},
   ): Stream.Stream<PluginEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         const { pluginIds = [], typeUrls = [], call, ...request } = options;
         return rpcStream("PluginCatalog.events", (signal) =>
           this.#client.watchPluginEvents(
@@ -576,20 +536,13 @@ export class PluginCatalog {
   }
 }
 
-function indexPlugins(
-  plugins: readonly PluginApiDescriptor[],
-): Map<string, PluginApiDescriptor> {
+function indexPlugins(plugins: readonly PluginApiDescriptor[]): Map<string, PluginApiDescriptor> {
   return new Map(plugins.map((plugin) => [plugin.pluginId, plugin]));
 }
 
 async function sha256(value: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    Uint8Array.from(value).buffer,
-  );
-  return [...new Uint8Array(digest)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
+  const digest = await crypto.subtle.digest("SHA-256", Uint8Array.from(value).buffer);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function reflectiveMessage(
@@ -615,10 +568,7 @@ function mapTypedEvents<T extends DescMessage>(
       Effect.try({
         try: (): TypedPluginEvent<T> => {
           if (event.payload === undefined) return { event };
-          if (
-            event.typeUrl !== expectedTypeUrl ||
-            event.payload.typeUrl !== expectedTypeUrl
-          )
+          if (event.typeUrl !== expectedTypeUrl || event.payload.typeUrl !== expectedTypeUrl)
             throw new SoulFirePluginDescriptorError(
               pluginId,
               `Expected ${expectedTypeUrl}, received ${event.typeUrl ?? event.payload.typeUrl}`,
@@ -641,9 +591,7 @@ function mapReflectiveEvents(
       Effect.try({
         try: (): ReflectivePluginEvent => {
           if (event.payload === undefined) return { event };
-          const typeName = typeNameFromUrl(
-            event.typeUrl ?? event.payload.typeUrl,
-          );
+          const typeName = typeNameFromUrl(event.typeUrl ?? event.payload.typeUrl);
           const schema = registry.getMessage(typeName);
           if (schema === undefined)
             throw new SoulFirePluginDescriptorError(
@@ -652,11 +600,7 @@ function mapReflectiveEvents(
             );
           return {
             event,
-            message: reflectiveMessage(
-              schema,
-              fromBinary(schema, event.payload.value),
-              registry,
-            ),
+            message: reflectiveMessage(schema, fromBinary(schema, event.payload.value), registry),
           };
         },
         catch: (cause) => operationError("plugins.reflectiveEvents", cause),

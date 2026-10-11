@@ -19,12 +19,8 @@ function connect(
   );
 }
 
-function layer(
-  options: SoulFireOptions,
-): Layer.Layer<SoulFireService, SoulFireConnectionError> {
-  return UniversalSoulFire.layerWithHttpClient(options).pipe(
-    Layer.provide(FetchHttpClient.layer),
-  );
+function layer(options: SoulFireOptions): Layer.Layer<SoulFireService, SoulFireConnectionError> {
+  return UniversalSoulFire.layerWithHttpClient(options).pipe(Layer.provide(FetchHttpClient.layer));
 }
 
 /**

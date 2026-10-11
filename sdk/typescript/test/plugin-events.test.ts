@@ -83,9 +83,7 @@ function pluginDescriptor() {
   });
 }
 
-function eventTransport(
-  onRequest?: (request: WatchPluginEventsRequest) => void,
-) {
+function eventTransport(onRequest?: (request: WatchPluginEventsRequest) => void) {
   return createRouterTransport(({ service }) => {
     service(PluginApiService, {
       async *watchPluginEvents(request) {

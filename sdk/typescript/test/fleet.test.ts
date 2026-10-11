@@ -57,10 +57,7 @@ describe("SoulFireFleet", () => {
             orderBy: "health" as const,
           };
           const selected = yield* fleet.select(selector);
-          const assignments = yield* fleet.distribute(
-            ["one", "two", "three"],
-            selector,
-          );
+          const assignments = yield* fleet.distribute(["one", "two", "three"], selector);
           yield* fleet.start(selector);
           yield* soulfire.close();
           expect(selected.map(({ id }) => id)).toEqual(["healthy", "nearby"]);
@@ -107,14 +104,9 @@ describe("SoulFireFleet", () => {
           yield* soulfire.close();
           expect(maximumActive).toBe(1);
           expect(group.size).toBe(2);
-          expect(events.map(({ bot }) => bot.id)).toEqual([
-            "healthy",
-            "nearby",
-          ]);
+          expect(events.map(({ bot }) => bot.id)).toEqual(["healthy", "nearby"]);
           expect(report.rejected).toHaveLength(0);
-          expect(report.fulfilled.map(({ value }) => value.respawns)).toEqual([
-            1, 1,
-          ]);
+          expect(report.fulfilled.map(({ value }) => value.respawns)).toEqual([1, 1]);
         }),
       ),
     ));
@@ -140,9 +132,7 @@ describe("SoulFireFleet", () => {
               (_bot, index) =>
                 index === 0
                   ? { maximumRespawns: 1 }
-                  : Deferred.succeed(waiting, undefined).pipe(
-                      Effect.andThen(Effect.never),
-                    ),
+                  : Deferred.succeed(waiting, undefined).pipe(Effect.andThen(Effect.never)),
               AutoRespawnTaskResultSchema,
               { concurrency: 1 },
             )
@@ -200,30 +190,27 @@ function fleetTransport(options: {
             case: "info",
             value: {
               config: {
-                accounts: ["healthy", "nearby", "far", "offline"].map(
-                  (profileId) => ({
-                    profileId,
-                    lastKnownName: profileId,
-                    type: MinecraftAccountProto_AccountTypeProto.OFFLINE,
-                    persistentMetadata: [
-                      {
-                        namespace: "fleet",
-                        entries: [
-                          {
-                            key: "role",
-                            value: {
-                              kind: {
-                                case: "stringValue",
-                                value:
-                                  profileId === "far" ? "scout" : "builder",
-                              },
+                accounts: ["healthy", "nearby", "far", "offline"].map((profileId) => ({
+                  profileId,
+                  lastKnownName: profileId,
+                  type: MinecraftAccountProto_AccountTypeProto.OFFLINE,
+                  persistentMetadata: [
+                    {
+                      namespace: "fleet",
+                      entries: [
+                        {
+                          key: "role",
+                          value: {
+                            kind: {
+                              case: "stringValue",
+                              value: profileId === "far" ? "scout" : "builder",
                             },
                           },
-                        ],
-                      },
-                    ],
-                  }),
-                ),
+                        },
+                      ],
+                    },
+                  ],
+                })),
               },
             },
           },

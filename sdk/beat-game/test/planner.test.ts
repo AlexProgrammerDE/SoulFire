@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  BeatGamePhase,
-  decideBeatGameAction,
-  defaultBeatGameStrategy,
-} from "../src/index.js";
+import { BeatGamePhase, decideBeatGameAction, defaultBeatGameStrategy } from "../src/index.js";
 import { blockObservation, checkpoint, observation } from "./fixtures.js";
 
 describe("beat-game planner", () => {
@@ -316,22 +312,27 @@ describe("beat-game planner", () => {
         ...base,
         memory: {
           ...base.memory,
-          portals: [{
-            key: "portal:minecraft:overworld:0:64:0",
-            value: blockObservation({
-              x: 0,
-              y: 64,
-              z: 0,
-              dimension: "minecraft:overworld",
-            }, {
-              blockId: "minecraft:nether_portal",
-              diggable: false,
-              solid: false,
+          portals: [
+            {
+              key: "portal:minecraft:overworld:0:64:0",
+              value: blockObservation(
+                {
+                  x: 0,
+                  y: 64,
+                  z: 0,
+                  dimension: "minecraft:overworld",
+                },
+                {
+                  blockId: "minecraft:nether_portal",
+                  diggable: false,
+                  solid: false,
+                  observedAt,
+                },
+              ),
               observedAt,
-            }),
-            observedAt,
-            confidence: 0.25,
-          }],
+              confidence: 0.25,
+            },
+          ],
         },
       },
       observation: observation({
@@ -416,24 +417,28 @@ describe("beat-game planner", () => {
   it("recovers in place when current hunger or emergency food can heal", () => {
     const base = checkpoint(BeatGamePhase.PREPARE_OVERWORLD);
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({
-        food: 18,
-        health: 12,
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({
+          food: 18,
+          health: 12,
+        }),
+        strategy: defaultBeatGameStrategy,
       }),
-      strategy: defaultBeatGameStrategy,
-    })).toMatchObject({ type: "retreat" });
+    ).toMatchObject({ type: "retreat" });
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({
-        counts: { "minecraft:rotten_flesh": 1 },
-        food: 17,
-        health: 12,
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({
+          counts: { "minecraft:rotten_flesh": 1 },
+          food: 17,
+          health: 12,
+        }),
+        strategy: defaultBeatGameStrategy,
       }),
-      strategy: defaultBeatGameStrategy,
-    })).toMatchObject({ type: "retreat" });
+    ).toMatchObject({ type: "retreat" });
   });
 
   it("advances only after a fresh observation satisfies preparation", () => {
@@ -483,23 +488,29 @@ describe("beat-game planner", () => {
     };
     const base = checkpoint(BeatGamePhase.PREPARE_OVERWORLD);
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({ counts, food: 10 }),
-      strategy: defaultBeatGameStrategy,
-    })).toMatchObject({ type: "eat" });
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({ counts, food: 10 }),
+        strategy: defaultBeatGameStrategy,
+      }),
+    ).toMatchObject({ type: "eat" });
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({ counts, health: 4 }),
-      strategy: defaultBeatGameStrategy,
-    })).toMatchObject({ type: "retreat" });
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({ counts, health: 4 }),
+        strategy: defaultBeatGameStrategy,
+      }),
+    ).toMatchObject({ type: "retreat" });
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({ counts }),
-      strategy: defaultBeatGameStrategy,
-    })).toMatchObject({ type: "prepare-equipment" });
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({ counts }),
+        strategy: defaultBeatGameStrategy,
+      }),
+    ).toMatchObject({ type: "prepare-equipment" });
   });
 
   it("uses dimension evidence before advancing through a portal phase", () => {
@@ -517,20 +528,24 @@ describe("beat-game planner", () => {
       "minecraft:flint_and_steel": 1,
     };
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({ counts }),
-      strategy: defaultBeatGameStrategy,
-    }).type).toBe("build-and-enter-nether");
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({ counts }),
+        strategy: defaultBeatGameStrategy,
+      }).type,
+    ).toBe("build-and-enter-nether");
 
-    expect(decideBeatGameAction({
-      checkpoint: base,
-      observation: observation({
-        counts,
-        dimension: "minecraft:the_nether",
+    expect(
+      decideBeatGameAction({
+        checkpoint: base,
+        observation: observation({
+          counts,
+          dimension: "minecraft:the_nether",
+        }),
+        strategy: defaultBeatGameStrategy,
       }),
-      strategy: defaultBeatGameStrategy,
-    })).toMatchObject({
+    ).toMatchObject({
       type: "advance-phase",
       to: BeatGamePhase.COLLECT_NETHER_RESOURCES,
     });
@@ -539,28 +554,33 @@ describe("beat-game planner", () => {
   it("tries a remembered portal before collecting construction supplies", () => {
     const base = checkpoint(BeatGamePhase.ENTER_NETHER);
     const observedAt = "2026-01-01T00:00:00.000Z";
-    const portal = blockObservation({
-      x: 0,
-      y: 64,
-      z: 0,
-      dimension: "minecraft:overworld",
-    }, {
-      blockId: "minecraft:nether_portal",
-      diggable: false,
-      solid: false,
-      observedAt,
-    });
+    const portal = blockObservation(
+      {
+        x: 0,
+        y: 64,
+        z: 0,
+        dimension: "minecraft:overworld",
+      },
+      {
+        blockId: "minecraft:nether_portal",
+        diggable: false,
+        solid: false,
+        observedAt,
+      },
+    );
     const decision = decideBeatGameAction({
       checkpoint: {
         ...base,
         memory: {
           ...base.memory,
-          portals: [{
-            key: "portal:minecraft:overworld:0:64:0",
-            value: portal,
-            observedAt,
-            confidence: 0.25,
-          }],
+          portals: [
+            {
+              key: "portal:minecraft:overworld:0:64:0",
+              value: portal,
+              observedAt,
+              confidence: 0.25,
+            },
+          ],
         },
       },
       observation: observation({
@@ -599,28 +619,33 @@ describe("beat-game planner", () => {
   it("returns to a remembered Nether portal after restoring survival gear", () => {
     const base = checkpoint(BeatGamePhase.COLLECT_NETHER_RESOURCES);
     const observedAt = "2026-01-01T00:00:00.000Z";
-    const portal = blockObservation({
-      x: 0,
-      y: 64,
-      z: 0,
-      dimension: "minecraft:overworld",
-    }, {
-      blockId: "minecraft:nether_portal",
-      diggable: false,
-      solid: false,
-      observedAt,
-    });
+    const portal = blockObservation(
+      {
+        x: 0,
+        y: 64,
+        z: 0,
+        dimension: "minecraft:overworld",
+      },
+      {
+        blockId: "minecraft:nether_portal",
+        diggable: false,
+        solid: false,
+        observedAt,
+      },
+    );
     const decision = decideBeatGameAction({
       checkpoint: {
         ...base,
         memory: {
           ...base.memory,
-          portals: [{
-            key: "portal:minecraft:overworld:0:64:0",
-            value: portal,
-            observedAt,
-            confidence: 0.25,
-          }],
+          portals: [
+            {
+              key: "portal:minecraft:overworld:0:64:0",
+              value: portal,
+              observedAt,
+              confidence: 0.25,
+            },
+          ],
         },
       },
       observation: observation({

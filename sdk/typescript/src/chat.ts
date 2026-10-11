@@ -1,11 +1,7 @@
 import type { MessageInitShape } from "@bufbuild/protobuf";
 import type { CallOptions, Client } from "@connectrpc/connect";
 import { Effect, Filter, Option, Stream } from "effect";
-import {
-  operationError,
-  rpcError,
-  type SoulFireOperationError,
-} from "./errors.js";
+import { operationError, rpcError, type SoulFireOperationError } from "./errors.js";
 import { rpc, withSignal } from "./transport.js";
 
 import { requireCompletedAction } from "./actions.js";
@@ -16,10 +12,7 @@ import {
   type BotEvent,
   type ChatSource,
 } from "./generated/soulfire/bot_live_pb.js";
-import {
-  ChatService,
-  type TabCompleteResponse,
-} from "./generated/soulfire/chat_pb.js";
+import { ChatService, type TabCompleteResponse } from "./generated/soulfire/chat_pb.js";
 
 export interface ChatMutationOptions {
   call?: CallOptions;
@@ -58,9 +51,7 @@ export class SoulFireChat {
     private readonly instanceId: string,
     private readonly botId: string,
     private readonly client: Client<typeof ChatService>,
-    private readonly actionOptions: (
-      options?: CallOptions,
-    ) => CallOptions | undefined,
+    private readonly actionOptions: (options?: CallOptions) => CallOptions | undefined,
     private readonly eventStream?: BotEventStream,
   ) {}
 
@@ -178,23 +169,19 @@ export class SoulFireChat {
     options: WatchChatOptions = {},
   ): Stream.Stream<ChatMatch, SoulFireOperationError> {
     if (this.eventStream === undefined)
-      return Stream.fail(
-        rpcError(
-          "chat.watch",
-          new Error("The bot event stream is unavailable"),
-        ),
-      );
-    const sources =
-      options.sources === undefined ? undefined : new Set(options.sources);
+      return Stream.fail(rpcError("chat.watch", new Error("The bot event stream is unavailable")));
+    const sources = options.sources === undefined ? undefined : new Set(options.sources);
     return this.eventStream({ includeChat: true }, options.call).pipe(
-      Stream.filterMap(Filter.fromPredicateOption((envelope) => {
-        if (
-          envelope.event.case !== "chat" ||
-          (sources !== undefined && !sources.has(envelope.event.value.source))
-        )
-          return Option.none();
-        return Option.fromNullishOr(matchChat(envelope.event.value, matcher));
-      })),
+      Stream.filterMap(
+        Filter.fromPredicateOption((envelope) => {
+          if (
+            envelope.event.case !== "chat" ||
+            (sources !== undefined && !sources.has(envelope.event.value.source))
+          )
+            return Option.none();
+          return Option.fromNullishOr(matchChat(envelope.event.value, matcher));
+        }),
+      ),
     );
   }
 
@@ -212,10 +199,7 @@ export class SoulFireChat {
         Option.isSome(match)
           ? Effect.succeed(match.value)
           : Effect.fail(
-              rpcError(
-                "chat.waitFor",
-                new Error("The bot event stream ended before chat matched"),
-              ),
+              rpcError("chat.waitFor", new Error("The bot event stream ended before chat matched")),
             ),
       ),
     );
@@ -225,12 +209,12 @@ export class SoulFireChat {
           Effect.timeoutOrElse({
             duration: options.timeoutMs,
             orElse: () =>
-              Effect.fail(rpcError(
-                "chat.waitFor",
-                new Error(
-                  `Timed out after ${options.timeoutMs} ms waiting for chat`,
+              Effect.fail(
+                rpcError(
+                  "chat.waitFor",
+                  new Error(`Timed out after ${options.timeoutMs} ms waiting for chat`),
                 ),
-              )),
+              ),
           }),
         );
   }
@@ -240,14 +224,9 @@ export class SoulFireChat {
   }
 }
 
-export function matchChat(
-  event: BotChatEvent,
-  matcher: ChatMatcher,
-): ChatMatch | undefined {
+export function matchChat(event: BotChatEvent, matcher: ChatMatcher): ChatMatch | undefined {
   if (typeof matcher === "string") {
-    return event.plainText.includes(matcher)
-      ? { captures: [], event, groups: {} }
-      : undefined;
+    return event.plainText.includes(matcher) ? { captures: [], event, groups: {} } : undefined;
   }
   if (typeof matcher === "function") {
     return matcher(event) ? { captures: [], event, groups: {} } : undefined;

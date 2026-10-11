@@ -4,12 +4,9 @@ import {
   type BotTaskProgress,
 } from "@soulfiremc/sdk/generated/soulfire/task_pb";
 
-const collectBlocksProgressType =
-  "soulfire.v1.CollectBlocksTaskProgressDetail";
+const collectBlocksProgressType = "soulfire.v1.CollectBlocksTaskProgressDetail";
 
-export function decodeSmokeTaskProgress(
-  progress: BotTaskProgress | undefined,
-): unknown {
+export function decodeSmokeTaskProgress(progress: BotTaskProgress | undefined): unknown {
   if (progress?.detail === undefined) {
     return progress;
   }
@@ -21,10 +18,7 @@ export function decodeSmokeTaskProgress(
   return {
     ...summary,
     detailType: typeName,
-    detail: fromBinary(
-      CollectBlocksTaskProgressDetailSchema,
-      detail.value,
-    ),
+    detail: fromBinary(CollectBlocksTaskProgressDetailSchema, detail.value),
   };
 }
 

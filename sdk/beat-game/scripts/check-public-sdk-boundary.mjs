@@ -23,9 +23,7 @@ for (const file of files) {
 }
 
 if (violations.length > 0) {
-  throw new Error(
-    `Beat-game package crossed the public SDK boundary:\n${violations.join("\n")}`,
-  );
+  throw new Error(`Beat-game package crossed the public SDK boundary:\n${violations.join("\n")}`);
 }
 
 async function collect(directoryUrl) {
@@ -35,7 +33,7 @@ async function collect(directoryUrl) {
   for (const entry of entries) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
-      results.push(...await collect(new URL(`${entry.name}/`, directoryUrl)));
+      results.push(...(await collect(new URL(`${entry.name}/`, directoryUrl))));
     } else if (extname(entry.name) === ".ts") {
       results.push(path);
     }

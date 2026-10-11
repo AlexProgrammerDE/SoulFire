@@ -11,7 +11,16 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import * as NodeRuntime from "@effect/platform-node/NodeRuntime";
 import { Cause, Console, Data, Effect, Result } from "effect";
-import { E2E_DIR, type E2ETest, saveMinecraftLog, seconds, soulfireJar, startMinecraft, startSoulFire, stopMinecraft } from "./harness.ts";
+import {
+  E2E_DIR,
+  type E2ETest,
+  saveMinecraftLog,
+  seconds,
+  soulfireJar,
+  startMinecraft,
+  startSoulFire,
+  stopMinecraft,
+} from "./harness.ts";
 
 class TestsFailed extends Data.TaggedError("TestsFailed")<{ readonly message: string }> {}
 
@@ -24,16 +33,24 @@ const { values: flags, positionals: names } = parseArgs({
 });
 
 const tests: E2ETest[] = [];
-for (const file of readdirSync(path.join(E2E_DIR, "tests")).filter((f) => f.endsWith(".ts")).sort()) {
+for (const file of readdirSync(path.join(E2E_DIR, "tests"))
+  .filter((f) => f.endsWith(".ts"))
+  .sort()) {
   tests.push((await import(path.join(E2E_DIR, "tests", file))).default);
 }
 if (!tests.length) throw new Error("no tests in tests/");
 const selected = names.length ? tests.filter((t) => names.includes(t.name)) : tests;
 const unknown = names.filter((n) => !tests.some((t) => t.name === n));
-if (unknown.length) throw new Error(`no such test: ${unknown.join(", ")} (have: ${tests.map((t) => t.name).join(", ")})`);
+if (unknown.length)
+  throw new Error(
+    `no such test: ${unknown.join(", ")} (have: ${tests.map((t) => t.name).join(", ")})`,
+  );
 
 const jar = soulfireJar();
-if (!existsSync(jar)) throw new Error(`no SoulFire jar at ${jar}: run ./gradlew :dedicated-launcher:uberJar, or set SOULFIRE_E2E_JAR`);
+if (!existsSync(jar))
+  throw new Error(
+    `no SoulFire jar at ${jar}: run ./gradlew :dedicated-launcher:uberJar, or set SOULFIRE_E2E_JAR`,
+  );
 
 const runDir = path.join(E2E_DIR, "runs", new Date().toISOString().replace(/[:.]/g, "-"));
 mkdirSync(runDir, { recursive: true });
@@ -42,12 +59,17 @@ const program = Effect.gen(function* () {
   yield* Console.log(`[e2e] logs in ${path.relative(process.cwd(), runDir)}`);
   // Added first, so it runs last: after the bot and SoulFire have stopped.
   yield* Effect.addFinalizer(() =>
-    saveMinecraftLog(path.join(runDir, "minecraft.log")).pipe(Effect.andThen(flags.stop ? stopMinecraft : Effect.void)));
+    saveMinecraftLog(path.join(runDir, "minecraft.log")).pipe(
+      Effect.andThen(flags.stop ? stopMinecraft : Effect.void),
+    ),
+  );
 
-  const [setUp, bot] = yield* Effect.timed(Effect.gen(function* () {
-    const minecraft = yield* startMinecraft({ fresh: flags.fresh });
-    return yield* startSoulFire(jar, minecraft, path.join(runDir, "soulfire.log"));
-  }));
+  const [setUp, bot] = yield* Effect.timed(
+    Effect.gen(function* () {
+      const minecraft = yield* startMinecraft({ fresh: flags.fresh });
+      return yield* startSoulFire(jar, minecraft, path.join(runDir, "soulfire.log"));
+    }),
+  );
   yield* Console.log(`[e2e] set up in ${seconds(setUp)}\n`);
 
   let failed = 0;
@@ -57,12 +79,18 @@ const program = Effect.gen(function* () {
       yield* Console.log(`  ok    ${test.name} (${seconds(took)})`);
     } else {
       failed++;
-      const message = "message" in result.failure ? result.failure.message : Cause.pretty(Cause.fail(result.failure));
-      yield* Console.log(`  FAIL  ${test.name} (${seconds(took)})\n        ${message.replace(/\n/g, "\n        ")}`);
+      const message =
+        "message" in result.failure
+          ? result.failure.message
+          : Cause.pretty(Cause.fail(result.failure));
+      yield* Console.log(
+        `  FAIL  ${test.name} (${seconds(took)})\n        ${message.replace(/\n/g, "\n        ")}`,
+      );
     }
   }
   yield* Console.log(`\n${selected.length - failed}/${selected.length} passed`);
-  if (failed) return yield* new TestsFailed({ message: `${failed} of ${selected.length} tests failed` });
+  if (failed)
+    return yield* new TestsFailed({ message: `${failed} of ${selected.length} tests failed` });
 });
 
 NodeRuntime.runMain(Effect.scoped(program));

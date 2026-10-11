@@ -81,21 +81,19 @@ describe("beat-game requirements", () => {
       defaultBeatGameStrategy,
     );
 
-    expect(requirements.find(({ key }) => key === "food-supply"))
-      .toMatchObject({
-        currentCount: 4,
-        targetCount: 4,
-        satisfied: true,
-      });
+    expect(requirements.find(({ key }) => key === "food-supply")).toMatchObject({
+      currentCount: 4,
+      targetCount: 4,
+      satisfied: true,
+    });
     expect(requirements.find(({ key }) => key === "food")).toMatchObject({
       currentCount: 0,
       targetCount: 8,
       satisfied: false,
     });
-    expect(requirements.findIndex(({ key }) => key === "food-supply"))
-      .toBeLessThan(
-        requirements.findIndex(({ key }) => key === "cobblestone"),
-      );
+    expect(requirements.findIndex(({ key }) => key === "food-supply")).toBeLessThan(
+      requirements.findIndex(({ key }) => key === "cobblestone"),
+    );
   });
 
   it("counts safe forage toward the edible supply reserve", () => {
@@ -110,12 +108,11 @@ describe("beat-game requirements", () => {
       defaultBeatGameStrategy,
     );
 
-    expect(requirements.find(({ key }) => key === "food-supply"))
-      .toMatchObject({
-        currentCount: 8,
-        targetCount: 4,
-        satisfied: true,
-      });
+    expect(requirements.find(({ key }) => key === "food-supply")).toMatchObject({
+      currentCount: 8,
+      targetCount: 4,
+      satisfied: true,
+    });
     expect(requirements.find(({ key }) => key === "food")).toMatchObject({
       currentCount: 0,
       targetCount: 8,
@@ -124,9 +121,7 @@ describe("beat-game requirements", () => {
   });
 
   it("shrinks the bootstrap log reserve as durable equipment comes online", () => {
-    const logRequirement = (
-      counts: Readonly<Record<string, number>>,
-    ) =>
+    const logRequirement = (counts: Readonly<Record<string, number>>) =>
       requirementsForPhase(
         BeatGamePhase.PREPARE_OVERWORLD,
         observation({ counts }).inventory,
@@ -137,41 +132,47 @@ describe("beat-game requirements", () => {
       targetCount: 8,
       satisfied: false,
     });
-    expect(logRequirement({
-      "minecraft:wooden_pickaxe": 1,
-      "minecraft:oak_log": 4,
-    })).toMatchObject({
+    expect(
+      logRequirement({
+        "minecraft:wooden_pickaxe": 1,
+        "minecraft:oak_log": 4,
+      }),
+    ).toMatchObject({
       targetCount: 4,
       satisfied: true,
     });
-    expect(logRequirement({
-      "minecraft:stone_pickaxe": 1,
-      "minecraft:raw_iron": 7,
-      "minecraft:oak_log": 2,
-    })).toMatchObject({
+    expect(
+      logRequirement({
+        "minecraft:stone_pickaxe": 1,
+        "minecraft:raw_iron": 7,
+        "minecraft:oak_log": 2,
+      }),
+    ).toMatchObject({
       targetCount: 2,
       satisfied: true,
     });
-    expect(logRequirement({
-      "minecraft:wooden_pickaxe": 1,
-      "minecraft:cooked_chicken": 8,
-      "minecraft:oak_log": 3,
-    })).toMatchObject({
+    expect(
+      logRequirement({
+        "minecraft:wooden_pickaxe": 1,
+        "minecraft:cooked_chicken": 8,
+        "minecraft:oak_log": 3,
+      }),
+    ).toMatchObject({
       targetCount: 3,
       satisfied: true,
     });
-    expect(logRequirement({
-      "minecraft:shield": 1,
-    })).toMatchObject({
+    expect(
+      logRequirement({
+        "minecraft:shield": 1,
+      }),
+    ).toMatchObject({
       targetCount: 2,
       satisfied: false,
     });
   });
 
   it("credits crafted equipment toward the preparation iron budget", () => {
-    const ironRequirement = (
-      counts: Readonly<Record<string, number>>,
-    ) =>
+    const ironRequirement = (counts: Readonly<Record<string, number>>) =>
       requirementsForPhase(
         BeatGamePhase.PREPARE_OVERWORLD,
         observation({ counts }).inventory,
@@ -183,19 +184,23 @@ describe("beat-game requirements", () => {
       targetCount: 7,
       satisfied: false,
     });
-    expect(ironRequirement({
-      "minecraft:shield": 1,
-      "minecraft:iron_ingot": 6,
-    })).toMatchObject({
+    expect(
+      ironRequirement({
+        "minecraft:shield": 1,
+        "minecraft:iron_ingot": 6,
+      }),
+    ).toMatchObject({
       currentCount: 6,
       targetCount: 6,
       satisfied: true,
     });
-    expect(ironRequirement({
-      "minecraft:shield": 1,
-      "minecraft:iron_pickaxe": 1,
-      "minecraft:bucket": 1,
-    })).toMatchObject({
+    expect(
+      ironRequirement({
+        "minecraft:shield": 1,
+        "minecraft:iron_pickaxe": 1,
+        "minecraft:bucket": 1,
+      }),
+    ).toMatchObject({
       currentCount: 0,
       targetCount: 0,
       satisfied: true,
@@ -208,11 +213,11 @@ describe("beat-game requirements", () => {
       portalStrategy: PortalStrategy.OBSIDIAN,
     };
 
-    expect(requirementsForPhase(
-      BeatGamePhase.ENTER_NETHER,
-      observation().inventory,
-      strategy,
-    ).map(({ key }) => key)).toEqual([
+    expect(
+      requirementsForPhase(BeatGamePhase.ENTER_NETHER, observation().inventory, strategy).map(
+        ({ key }) => key,
+      ),
+    ).toEqual([
       "logs",
       "basic-melee-weapon",
       "food-supply",
@@ -228,16 +233,18 @@ describe("beat-game requirements", () => {
       "pickaxe",
     ]);
 
-    expect(requirementsForPhase(
-      BeatGamePhase.ENTER_NETHER,
-      observation({
-        counts: {
-          "minecraft:diamond_pickaxe": 1,
-          "minecraft:obsidian": strategy.targetObsidianCount,
-        },
-      }).inventory,
-      strategy,
-    ).map(({ key }) => key)).not.toContain("diamond-pickaxe");
+    expect(
+      requirementsForPhase(
+        BeatGamePhase.ENTER_NETHER,
+        observation({
+          counts: {
+            "minecraft:diamond_pickaxe": 1,
+            "minecraft:obsidian": strategy.targetObsidianCount,
+          },
+        }).inventory,
+        strategy,
+      ).map(({ key }) => key),
+    ).not.toContain("diamond-pickaxe");
   });
 
   it("revalidates survival supplies before entering the Nether", () => {
@@ -272,12 +279,8 @@ describe("beat-game requirements", () => {
       targetCount: 4,
       satisfied: true,
     });
-    expect(
-      requirements.filter(({ key }) => key === "water-bucket"),
-    ).toHaveLength(1);
-    expect(
-      requirements.filter(({ key }) => key === "ignition"),
-    ).toHaveLength(1);
+    expect(requirements.filter(({ key }) => key === "water-bucket")).toHaveLength(1);
+    expect(requirements.filter(({ key }) => key === "ignition")).toHaveLength(1);
     expect(requirements.find(({ key }) => key === "iron")).toMatchObject({
       currentCount: 7,
       targetCount: 3,
@@ -307,13 +310,7 @@ describe("beat-game requirements", () => {
 
     expect(requirements.every(({ satisfied }) => satisfied)).toBe(true);
     expect(requirements.map(({ key }) => key)).not.toEqual(
-      expect.arrayContaining([
-        "iron",
-        "water-bucket",
-        "lava-bucket",
-        "ignition",
-        "obsidian",
-      ]),
+      expect.arrayContaining(["iron", "water-bucket", "lava-bucket", "ignition", "obsidian"]),
     );
   });
 
@@ -342,15 +339,11 @@ describe("beat-game requirements", () => {
       targetCount: 1,
       satisfied: false,
     });
-    expect(requirements.findIndex(({ key }) => key === "iron"))
-      .toBeLessThan(requirements.findIndex(({ key }) => key === "shield"));
+    expect(requirements.findIndex(({ key }) => key === "iron")).toBeLessThan(
+      requirements.findIndex(({ key }) => key === "shield"),
+    );
     expect(requirements.map(({ key }) => key)).not.toEqual(
-      expect.arrayContaining([
-        "water-bucket",
-        "lava-bucket",
-        "ignition",
-        "obsidian",
-      ]),
+      expect.arrayContaining(["water-bucket", "lava-bucket", "ignition", "obsidian"]),
     );
   });
 
@@ -377,14 +370,10 @@ describe("beat-game requirements", () => {
   });
 
   it("prices missing cast-portal buckets in ingots", () => {
-    const requirements = requirementsForPhase(
-      BeatGamePhase.ENTER_NETHER,
-      observation().inventory,
-      {
-        ...defaultBeatGameStrategy,
-        portalStrategy: PortalStrategy.CAST,
-      },
-    );
+    const requirements = requirementsForPhase(BeatGamePhase.ENTER_NETHER, observation().inventory, {
+      ...defaultBeatGameStrategy,
+      portalStrategy: PortalStrategy.CAST,
+    });
 
     expect(requirements.find(({ key }) => key === "iron")).toMatchObject({
       currentCount: 0,

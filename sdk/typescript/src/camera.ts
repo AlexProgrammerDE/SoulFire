@@ -48,10 +48,7 @@ export class SoulFireCamera {
     call?: CallOptions,
   ): Effect.Effect<BotRenderPovResponse, SoulFireOperationError> {
     return rpc("SoulFireCamera.capture", (signal) =>
-      this.client.renderBotPov(
-        { ...options, ...this.scope() },
-        withSignal(call, signal),
-      ),
+      this.client.renderBotPov({ ...options, ...this.scope() }, withSignal(call, signal)),
     );
   }
 
@@ -75,13 +72,10 @@ export class SoulFireCamera {
     options: CameraStreamOptions = {},
   ): Stream.Stream<BotPovFrame, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         const { call, ...request } = options;
         return rpcStream("SoulFireCamera.frames", (signal) =>
-          this.client.watchBotPov(
-            { ...request, ...this.scope() },
-            withSignal(call, signal),
-          ),
+          this.client.watchBotPov({ ...request, ...this.scope() }, withSignal(call, signal)),
         );
       }),
     );
@@ -97,10 +91,7 @@ export class SoulFireCamera {
     call?: CallOptions,
   ): Effect.Effect<BotWorldMapResponse, SoulFireOperationError> {
     return rpc("SoulFireCamera.worldMap", (signal) =>
-      this.client.getBotWorldMap(
-        { ...options, ...this.scope() },
-        withSignal(call, signal),
-      ),
+      this.client.getBotWorldMap({ ...options, ...this.scope() }, withSignal(call, signal)),
     );
   }
 
@@ -112,9 +103,7 @@ export class SoulFireCamera {
 /**
  * Decodes the image payload returned by a camera capture or stream frame.
  */
-export function decodeCameraImage(
-  image: Pick<BotRenderPovResponse, "imageBase64">,
-): Uint8Array {
+export function decodeCameraImage(image: Pick<BotRenderPovResponse, "imageBase64">): Uint8Array {
   const binary = globalThis.atob(image.imageBase64);
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
 }

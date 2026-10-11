@@ -3,23 +3,27 @@
   "version": "2.10.4",
   "description": "Effect-first beat-the-game runner for the official SoulFire SDK.",
   "keywords": [
-    "minecraft",
+    "automation",
     "bot",
-    "soulfire",
     "effect",
-    "automation"
+    "minecraft",
+    "soulfire"
   ],
-  "author": "SoulFire",
-  "license": "AGPL-3.0-only",
   "homepage": "https://soulfiremc.com/docs/sdk/automation",
+  "bugs": {
+    "url": "https://github.com/soulfiremc-com/SoulFire/issues"
+  },
+  "license": "AGPL-3.0-only",
+  "author": "SoulFire",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/soulfiremc-com/SoulFire.git",
     "directory": "sdk/beat-game"
   },
-  "bugs": {
-    "url": "https://github.com/soulfiremc-com/SoulFire/issues"
-  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -32,10 +36,9 @@
       "import": "./dist/node.js"
     }
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bun run clean && tsc -p tsconfig.build.json",
     "check": "bun run typecheck && bun run test && bun run build && bun run typecheck:smoke && bun run check:boundary && bun run check:browser",
@@ -54,9 +57,6 @@
   "dependencies": {
     "@soulfiremc/sdk": "workspace:*"
   },
-  "peerDependencies": {
-    "effect": "^4.0.0"
-  },
   "devDependencies": {
     "@bufbuild/protobuf": "2.15.0",
     "@effect/platform-node": "4.0.0",
@@ -66,7 +66,7 @@
     "typescript": "7.0.2",
     "vitest": "5.0.2"
   },
-  "publishConfig": {
-    "access": "public"
+  "peerDependencies": {
+    "effect": "^4.0.0"
   }
 }

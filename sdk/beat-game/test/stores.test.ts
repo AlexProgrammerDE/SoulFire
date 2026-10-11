@@ -1,10 +1,4 @@
-import {
-  mkdtemp,
-  readdir,
-  readFile,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -22,9 +16,11 @@ import { checkpoint } from "./fixtures.js";
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) =>
-    rm(directory, { force: true, recursive: true })
-  ));
+  await Promise.all(
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { force: true, recursive: true })),
+  );
 });
 
 describe("beat-game checkpoint stores", () => {
@@ -37,10 +33,9 @@ describe("beat-game checkpoint stores", () => {
     expect(loaded).toEqual(initial);
     expect(loaded).not.toBe(initial);
 
-    const conflict = await Effect.runPromise(store.save(
-      { ...initial, revision: 2 },
-      0,
-    ).pipe(Effect.result));
+    const conflict = await Effect.runPromise(
+      store.save({ ...initial, revision: 2 }, 0).pipe(Effect.result),
+    );
     expect(Result.isFailure(conflict)).toBe(true);
     if (Result.isFailure(conflict)) {
       expect(conflict.failure).toBeInstanceOf(BeatGameCheckpointError);
@@ -58,10 +53,7 @@ describe("beat-game checkpoint stores", () => {
     const files = await readdir(directory);
     const checkpointFile = files.find((file) => file.endsWith(".json"));
     expect(checkpointFile).toBeDefined();
-    const source = await readFile(
-      join(directory, checkpointFile ?? ""),
-      "utf8",
-    );
+    const source = await readFile(join(directory, checkpointFile ?? ""), "utf8");
     expect(JSON.parse(source)).toMatchObject({
       runId: "run-1",
       revision: 1,
@@ -79,21 +71,20 @@ describe("beat-game checkpoint stores", () => {
     const store = new JsonFileBeatGameCheckpointStore(directory);
     const initial = checkpoint(BeatGamePhase.LOCATE_STRONGHOLD);
     await Effect.runPromise(store.save(initial, undefined));
-    const file = (await readdir(directory)).find((entry) =>
-      entry.endsWith(".json")
-    );
+    const file = (await readdir(directory)).find((entry) => entry.endsWith(".json"));
     expect(file).toBeDefined();
-    await writeFile(join(directory, file ?? ""), JSON.stringify({
-      ...initial,
-      planner: {
-        ...initial.planner,
-        phase: "NOT_A_REAL_PHASE",
-      },
-    }));
-
-    const loaded = await Effect.runPromise(
-      store.load(initial.runId).pipe(Effect.result),
+    await writeFile(
+      join(directory, file ?? ""),
+      JSON.stringify({
+        ...initial,
+        planner: {
+          ...initial.planner,
+          phase: "NOT_A_REAL_PHASE",
+        },
+      }),
     );
+
+    const loaded = await Effect.runPromise(store.load(initial.runId).pipe(Effect.result));
     expect(Result.isFailure(loaded)).toBe(true);
     if (Result.isFailure(loaded)) {
       expect(loaded.failure).toBeInstanceOf(BeatGameCheckpointError);
@@ -103,23 +94,30 @@ describe("beat-game checkpoint stores", () => {
   it("rejects corrupt durable exploration progress", async () => {
     const store = new InMemoryBeatGameCheckpointStore();
     const initial = checkpoint(BeatGamePhase.PREPARE_OVERWORLD);
-    const result = await Effect.runPromise(store.save({
-      ...initial,
-      memory: {
-        ...initial.memory,
-        explorationFrontiers: {
-          "minecraft:overworld:find-logs": {
-            origin: {
-              x: 0,
-              y: 64,
-              z: 0,
-              dimension: "minecraft:overworld",
+    const result = await Effect.runPromise(
+      store
+        .save(
+          {
+            ...initial,
+            memory: {
+              ...initial.memory,
+              explorationFrontiers: {
+                "minecraft:overworld:find-logs": {
+                  origin: {
+                    x: 0,
+                    y: 64,
+                    z: 0,
+                    dimension: "minecraft:overworld",
+                  },
+                  nextIndex: 0,
+                },
+              },
             },
-            nextIndex: 0,
           },
-        },
-      },
-    }, undefined).pipe(Effect.result));
+          undefined,
+        )
+        .pipe(Effect.result),
+    );
 
     expect(Result.isFailure(result)).toBe(true);
     if (Result.isFailure(result)) {
@@ -130,25 +128,32 @@ describe("beat-game checkpoint stores", () => {
   it("rejects corrupt pending exploration attempt state", async () => {
     const store = new InMemoryBeatGameCheckpointStore();
     const initial = checkpoint(BeatGamePhase.PREPARE_OVERWORLD);
-    const result = await Effect.runPromise(store.save({
-      ...initial,
-      memory: {
-        ...initial.memory,
-        explorationFrontiers: {
-          "minecraft:overworld:find-logs": {
-            progressVersion: 2,
-            origin: {
-              x: 0,
-              y: 64,
-              z: 0,
-              dimension: "minecraft:overworld",
+    const result = await Effect.runPromise(
+      store
+        .save(
+          {
+            ...initial,
+            memory: {
+              ...initial.memory,
+              explorationFrontiers: {
+                "minecraft:overworld:find-logs": {
+                  progressVersion: 2,
+                  origin: {
+                    x: 0,
+                    y: 64,
+                    z: 0,
+                    dimension: "minecraft:overworld",
+                  },
+                  nextIndex: 1,
+                  targetAttempts: -1,
+                },
+              },
             },
-            nextIndex: 1,
-            targetAttempts: -1,
           },
-        },
-      },
-    }, undefined).pipe(Effect.result));
+          undefined,
+        )
+        .pipe(Effect.result),
+    );
 
     expect(Result.isFailure(result)).toBe(true);
     if (Result.isFailure(result)) {

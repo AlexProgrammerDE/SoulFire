@@ -67,12 +67,14 @@ deadline; change it with `readyTimeoutMs`.
 For several bots, install once and get resources by name:
 
 ```ts
-const soulfire = yield* SoulFire.install();
-const instance = yield* soulfire.getOrCreateInstance("farm", {
-  server: "localhost:25565",
-});
-const builder = yield* instance.getOrCreateBot("Builder");
-const miner = yield* instance.getOrCreateBot("Miner");
+const soulfire = yield * SoulFire.install();
+const instance =
+  yield *
+  soulfire.getOrCreateInstance("farm", {
+    server: "localhost:25565",
+  });
+const builder = yield * instance.getOrCreateBot("Builder");
+const miner = yield * instance.getOrCreateBot("Miner");
 ```
 
 Instance names belong to the authenticated SoulFire user. Bot names belong to
@@ -87,12 +89,13 @@ starting it. Configure the instance, then use `yield* bot.connect()` when ready.
 Microsoft accounts need a device-code sign-in on their first creation:
 
 ```ts
-const bot = yield* instance.getOrCreateBot("main-account", {
-  auth: "microsoft",
-  onDeviceCode: (code) => Effect.logInfo(
-    `Sign in at ${code.verificationUri} with code ${code.userCode}`,
-  ),
-});
+const bot =
+  yield *
+  instance.getOrCreateBot("main-account", {
+    auth: "microsoft",
+    onDeviceCode: (code) =>
+      Effect.logInfo(`Sign in at ${code.verificationUri} with code ${code.userCode}`),
+  });
 ```
 
 The default handler logs the sign-in URL and code. Later calls reuse the saved
@@ -104,8 +107,8 @@ account. `onDeviceCode` returns an Effect, like other SDK callbacks.
 Use an item or block ID, or prefix a tag with `#`. IDs default to `minecraft`.
 
 ```ts
-yield* bot.collect("#logs", { count: 8 });
-const logs = yield* bot.inventory.count("#logs");
+yield * bot.collect("#logs", { count: 8 });
+const logs = yield * bot.inventory.count("#logs");
 ```
 
 Use `bot.tasks.collectBlocks` when you need a durable task handle. Structured
@@ -151,19 +154,17 @@ import { SoulFire, SoulFireService } from "@soulfiremc/sdk";
 
 const program = Effect.gen(function* () {
   const soulfire = yield* SoulFireService;
-  yield* soulfire
-    .instance("instance-uuid")
-    .bot("bot-uuid")
-    .chat
-    .send("Ready");
+  yield* soulfire.instance("instance-uuid").bot("bot-uuid").chat.send("Ready");
 });
 
 await Effect.runPromise(
   program.pipe(
-    Effect.provide(SoulFire.layer({
-      baseUrl: "https://soulfire.example.com",
-      token: "your-api-token",
-    })),
+    Effect.provide(
+      SoulFire.layer({
+        baseUrl: "https://soulfire.example.com",
+        token: "your-api-token",
+      }),
+    ),
   ),
 );
 ```
@@ -190,9 +191,7 @@ const program = Effect.scoped(
     const soulfire = yield* SoulFire.connect(options);
     const bot = soulfire.instance(instanceId).bot(botId);
 
-    yield* bot.events().pipe(
-      Stream.runForEach((event) => Effect.logInfo(event.event.case)),
-    );
+    yield* bot.events().pipe(Stream.runForEach((event) => Effect.logInfo(event.event.case)));
   }),
 );
 ```
@@ -211,8 +210,8 @@ bot observations, actions, pathfinding, tasks, control leases, and plugin APIs.
 import { beatGame } from "@soulfiremc/beat-game";
 
 const bot = soulfire.instance(instanceId).bot(botId);
-const run = yield* beatGame(bot);
-const result = yield* run.awaitCompletion;
+const run = yield * beatGame(bot);
+const result = yield * run.awaitCompletion;
 ```
 
 See the
@@ -233,37 +232,41 @@ const builders = {
   online: true,
   dimensions: ["minecraft:overworld"],
   minimumHealth: 12,
-  metadata: [{
-    namespace: "fleet",
-    key: "role",
-    equals: "builder",
-  }],
+  metadata: [
+    {
+      namespace: "fleet",
+      key: "role",
+      equals: "builder",
+    },
+  ],
 };
 
-const assignments = yield* instance.fleet.distribute(
-  schematicSections,
-  builders,
-);
+const assignments = yield * instance.fleet.distribute(schematicSections, builders);
 
-const group = yield* instance.fleet.startTasks(
-  builders,
-  BuildTaskSchema,
-  (bot, index, total) => ({
-    ...buildInputFor(assignments[index]!.items),
-    partitionIndex: index,
-    partitionCount: total,
-  }),
-  BuildTaskResultSchema,
-  { concurrency: 4 },
-);
+const group =
+  yield *
+  instance.fleet.startTasks(
+    builders,
+    BuildTaskSchema,
+    (bot, index, total) => ({
+      ...buildInputFor(assignments[index]!.items),
+      partitionIndex: index,
+      partitionCount: total,
+    }),
+    BuildTaskResultSchema,
+    { concurrency: 4 },
+  );
 
-yield* group.events().pipe(
-  Stream.runForEach(({ bot, event }) =>
-    Effect.logInfo(`${bot.id}: ${event.task?.summary ?? "task update"}`)
-  ),
-);
+yield *
+  group
+    .events()
+    .pipe(
+      Stream.runForEach(({ bot, event }) =>
+        Effect.logInfo(`${bot.id}: ${event.task?.summary ?? "task update"}`),
+      ),
+    );
 
-const report = yield* group.results();
+const report = yield * group.results();
 ```
 
 Selectors can combine bot IDs, account names and types, controller state,
@@ -279,20 +282,22 @@ the bot's current view or place a free camera at an explicit position and
 rotation:
 
 ```ts
-const image = yield* bot.camera.capture({
-  width: 1280,
-  height: 720,
-  cameraX: 120.5,
-  cameraY: 80,
-  cameraZ: -32.5,
-  yRot: 180,
-  xRot: -20,
-  fov: 80,
-  maxDistance: 256,
-  includeHud: false,
-  includeHands: false,
-  includeDebugTrace: true,
-});
+const image =
+  yield *
+  bot.camera.capture({
+    width: 1280,
+    height: 720,
+    cameraX: 120.5,
+    cameraY: 80,
+    cameraZ: -32.5,
+    yRot: 180,
+    xRot: -20,
+    fov: 80,
+    maxDistance: 256,
+    includeHud: false,
+    includeHands: false,
+    includeDebugTrace: true,
+  });
 
 const png = decodeCameraImage(image);
 ```
@@ -301,21 +306,22 @@ const png = decodeCameraImage(image);
 scheduled frames were dropped while the transport was backpressured.
 
 ```ts
-yield* bot.camera.frames({
-  width: 854,
-  height: 480,
-  intervalMs: 250,
-}).pipe(
-  Stream.runForEach((frame) =>
-    persistFrame(decodeCameraImage(frame.render!))
-  ),
-);
+yield *
+  bot.camera
+    .frames({
+      width: 854,
+      height: 480,
+      intervalMs: 250,
+    })
+    .pipe(Stream.runForEach((frame) => persistFrame(decodeCameraImage(frame.render!))));
 
-const map = yield* bot.camera.worldMap({
-  radius: 128,
-  sampleStep: 2,
-  includeEntities: true,
-});
+const map =
+  yield *
+  bot.camera.worldMap({
+    radius: 128,
+    sampleStep: 2,
+    includeEntities: true,
+  });
 ```
 
 World maps contain one surface sample per grid column, including loaded state,
@@ -328,16 +334,15 @@ ID, reports progress, participates in resource arbitration, and can be
 cancelled explicitly.
 
 ```ts
-const task = yield* bot.tasks.autoEat(
-  ["minecraft:bread", "minecraft:cooked_beef"],
-  {
+const task =
+  yield *
+  bot.tasks.autoEat(["minecraft:bread", "minecraft:cooked_beef"], {
     foodLevel: 14,
     maximumMeals: 1,
-  },
-);
+  });
 
-const result = yield* task.result();
-yield* Effect.logInfo(`Ate ${result.mealsEaten} meal`);
+const result = yield * task.result();
+yield * Effect.logInfo(`Ate ${result.mealsEaten} meal`);
 ```
 
 The task API currently includes durable pathfinding, block collection, cuboid
@@ -355,79 +360,91 @@ Managed combat can acquire targets on the server and select the strongest
 allowed weapon:
 
 ```ts
-const hunt = yield* bot.tasks.attackNearest(
-  { entityTypes: ["minecraft:zombie"] },
-  {
-    radius: 48,
-    maximumTargets: 3,
-    weapon: { tags: ["minecraft:swords"] },
-  },
-);
+const hunt =
+  yield *
+  bot.tasks.attackNearest(
+    { entityTypes: ["minecraft:zombie"] },
+    {
+      radius: 48,
+      maximumTargets: 3,
+      weapon: { tags: ["minecraft:swords"] },
+    },
+  );
 
-const archer = yield* bot.tasks.rangedAttack(target, {
-  minimumRange: 10,
-  maximumRange: 32,
-  maximumShots: 6,
-  weapon: { itemIds: ["minecraft:bow"] },
-  leadTarget: true,
-  compensateGravity: true,
-  strafe: true,
-});
+const archer =
+  yield *
+  bot.tasks.rangedAttack(target, {
+    minimumRange: 10,
+    maximumRange: 32,
+    maximumShots: 6,
+    weapon: { itemIds: ["minecraft:bow"] },
+    leadTarget: true,
+    compensateGravity: true,
+    strafe: true,
+  });
 
-const escape = yield* bot.tasks.flee(
-  { categories: [EntityCategory.HOSTILE] },
-  { triggerRadius: 8, safeDistance: 20 },
-);
+const escape =
+  yield *
+  bot.tasks.flee({ categories: [EntityCategory.HOSTILE] }, { triggerRadius: 8, safeDistance: 20 });
 
-const defense = yield* bot.tasks.guard(
-  { x: 120, y: 64, z: -32 },
-  { categories: [EntityCategory.HOSTILE] },
-  {
-    guardRadius: 16,
-    maximumPursuitDistance: 24,
-  },
-);
+const defense =
+  yield *
+  bot.tasks.guard(
+    { x: 120, y: 64, z: -32 },
+    { categories: [EntityCategory.HOSTILE] },
+    {
+      guardRadius: 16,
+      maximumPursuitDistance: 24,
+    },
+  );
 
-const escort = yield* bot.tasks.protect(
-  teammate,
-  { categories: [EntityCategory.HOSTILE] },
-);
+const escort = yield * bot.tasks.protect(teammate, { categories: [EntityCategory.HOSTILE] });
 
-const rest = yield* bot.tasks.sleep({
-  searchRadius: 24,
-  waitUntilPossible: true,
-});
+const rest =
+  yield *
+  bot.tasks.sleep({
+    searchRadius: 24,
+    waitUntilPossible: true,
+  });
 
-const fishing = yield* bot.tasks.fish({
-  maximumCatches: 3,
-});
+const fishing =
+  yield *
+  bot.tasks.fish({
+    maximumCatches: 3,
+  });
 
-const harvest = yield* bot.tasks.farm({
-  cropIds: ["minecraft:wheat", "minecraft:carrots"],
-  center: farmCenter,
-  radius: 16,
-  maximumHarvests: 24,
-  replant: true,
-});
+const harvest =
+  yield *
+  bot.tasks.farm({
+    cropIds: ["minecraft:wheat", "minecraft:carrots"],
+    center: farmCenter,
+    radius: 16,
+    maximumHarvests: 24,
+    replant: true,
+  });
 
-const breeding = yield* bot.tasks.breed({
-  animals: { entityTypes: ["minecraft:cow"] },
-  food: { itemIds: ["minecraft:wheat"] },
-  maximumPairs: 2,
-});
+const breeding =
+  yield *
+  bot.tasks.breed({
+    animals: { entityTypes: ["minecraft:cow"] },
+    food: { itemIds: ["minecraft:wheat"] },
+    maximumPairs: 2,
+  });
 
-const scouting = yield* bot.tasks.explore({
-  origin: basePosition,
-  radius: 512,
-  waypointSpacing: 64,
-  maximumWaypoints: 8,
-  returnToOrigin: true,
-  purpose: "village-scouting",
-});
+const scouting =
+  yield *
+  bot.tasks.explore({
+    origin: basePosition,
+    radius: 512,
+    waypointSpacing: 64,
+    maximumWaypoints: 8,
+    returnToOrigin: true,
+    purpose: "village-scouting",
+  });
 
-const supplies = yield* bot.tasks.withdraw(
-  storageChest,
-  [
+const supplies =
+  yield *
+  bot.tasks.withdraw(storageChest, [
     {
       selector: { itemIds: ["minecraft:bread"] },
       count: 16,
@@ -437,59 +454,64 @@ const supplies = yield* bot.tasks.withdraw(
       count: 8,
       allowPartial: true,
     },
-  ],
-);
+  ]);
 ```
 
 Recipes combine discovery with execution:
 
 ```ts
-const recipes = yield* bot.recipes.list({
-  resultItemId: "minecraft:iron_ingot",
-});
+const recipes =
+  yield *
+  bot.recipes.list({
+    resultItemId: "minecraft:iron_ingot",
+  });
 
-const smelting = yield* bot.recipes.smelt(
-  { itemIds: ["minecraft:raw_iron"] },
-  8,
-  {
+const smelting =
+  yield *
+  bot.recipes.smelt({ itemIds: ["minecraft:raw_iron"] }, 8, {
     fuel: { tags: ["minecraft:coals"] },
     station: furnacePosition,
-  },
-);
+  });
 
-yield* smelting.result();
+yield * smelting.result();
 
-const brewing = yield* bot.recipes.brew(
-  { fingerprint: waterPotionFingerprint },
-  { itemIds: ["minecraft:nether_wart"] },
-  3,
-  {
-    expectedResult: { fingerprint: awkwardPotionFingerprint },
-    station: brewingStandPosition,
-  },
-);
+const brewing =
+  yield *
+  bot.recipes.brew(
+    { fingerprint: waterPotionFingerprint },
+    { itemIds: ["minecraft:nether_wart"] },
+    3,
+    {
+      expectedResult: { fingerprint: awkwardPotionFingerprint },
+      station: brewingStandPosition,
+    },
+  );
 
-yield* brewing.result();
+yield * brewing.result();
 
 // Open a villager menu through an entity interaction first.
-const offers = yield* bot.recipes.listVillagerTrades();
-const trading = yield* bot.recipes.villagerTrade(offers.offers[0]!.offerIndex, 3, {
-  expectedResult: {
-    itemIds: [offers.offers[0]!.result!.itemId],
-  },
-});
-yield* trading.result();
+const offers = yield * bot.recipes.listVillagerTrades();
+const trading =
+  yield *
+  bot.recipes.villagerTrade(offers.offers[0]!.offerIndex, 3, {
+    expectedResult: {
+      itemIds: [offers.offers[0]!.result!.itemId],
+    },
+  });
+yield * trading.result();
 ```
 
 Inventory recommendations use server-side Minecraft data and expose their
 score factors:
 
 ```ts
-const tool = yield* bot.inventory.bestTool(blockPosition, {
-  preferHotbar: true,
-  preferHighDurability: true,
-  preferredEnchantmentIds: ["minecraft:fortune"],
-});
+const tool =
+  yield *
+  bot.inventory.bestTool(blockPosition, {
+    preferHotbar: true,
+    preferHighDurability: true,
+    preferredEnchantmentIds: ["minecraft:fortune"],
+  });
 ```
 
 ## Compose behaviors
@@ -514,7 +536,7 @@ const workflow = cleanup(
   releaseTemporaryClaims,
 );
 
-const results = yield* workflow.run(bot);
+const results = yield * workflow.run(bot);
 ```
 
 The SDK includes `sequence`, `parallel`, `race`, `repeat`, `retry`, `timeout`,
@@ -533,8 +555,8 @@ descriptors.
 Use a companion module when one is available:
 
 ```ts
-const plugin = yield* soulfire.plugins.require(examplePlugin);
-const reply = yield* plugin.echo(instanceId, "hello");
+const plugin = yield * soulfire.plugins.require(examplePlugin);
+const reply = yield * plugin.echo(instanceId, "hello");
 ```
 
 Use `soulfire.plugins.reflective(pluginId)` to inspect and call an installed
@@ -544,15 +566,16 @@ Plugins can also publish permission-scoped protobuf events. Typed consumers get
 the decoded message and the delivery envelope through an Effect stream:
 
 ```ts
-yield* soulfire.plugins
-  .typedEvents("example", TickSchema, { instanceId })
-  .pipe(
-    Stream.runForEach(({ event, value }) =>
-      value === undefined
-        ? Effect.logInfo(`Ready at sequence ${event.sequence}`)
-        : Effect.logInfo(`Tick ${value.sequence}`)
-    ),
-  );
+yield *
+  soulfire.plugins
+    .typedEvents("example", TickSchema, { instanceId })
+    .pipe(
+      Stream.runForEach(({ event, value }) =>
+        value === undefined
+          ? Effect.logInfo(`Ready at sequence ${event.sequence}`)
+          : Effect.logInfo(`Tick ${value.sequence}`),
+      ),
+    );
 ```
 
 The first envelope reports whether the stream resumed after `afterSequence`.
@@ -587,7 +610,12 @@ function runs one scoped workflow and forwards request cancellation to its fiber
 import { Effect } from "effect";
 import { SoulFire, type SoulFireOptions } from "@soulfiremc/sdk";
 
-export async function announce(options: SoulFireOptions, instanceId: string, botId: string, signal: AbortSignal): Promise<void> {
+export async function announce(
+  options: SoulFireOptions,
+  instanceId: string,
+  botId: string,
+  signal: AbortSignal,
+): Promise<void> {
   await Effect.runPromise(
     Effect.scoped(
       Effect.gen(function* () {
@@ -629,23 +657,22 @@ boundaries, where cancellation signals must reach the RPC call.
 Effect-first object model:
 
 ```ts
-const server = yield* soulfire.admin.serverInfo();
-const users = yield* soulfire.admin.users();
-const metrics = yield* soulfire.admin.instanceMetrics(instance.id);
-const audits = yield* soulfire.admin.auditLog(instance.id);
+const server = yield * soulfire.admin.serverInfo();
+const users = yield * soulfire.admin.users();
+const metrics = yield * soulfire.admin.instanceMetrics(instance.id);
+const audits = yield * soulfire.admin.auditLog(instance.id);
 
-yield* soulfire.admin.logs({
-  scope: {
-    scope: {
-      case: "instance",
-      value: { instanceId: instance.id },
-    },
-  },
-}).pipe(
-  Stream.runForEach((entry) =>
-    Effect.logInfo(entry.message?.message ?? "")
-  ),
-);
+yield *
+  soulfire.admin
+    .logs({
+      scope: {
+        scope: {
+          case: "instance",
+          value: { instanceId: instance.id },
+        },
+      },
+    })
+    .pipe(Stream.runForEach((entry) => Effect.logInfo(entry.message?.message ?? "")));
 ```
 
 The admin API covers self-service tokens and profile changes, server settings,
@@ -662,13 +689,16 @@ advanced, version-dependent API:
 ```ts
 import { PacketDirection } from "@soulfiremc/sdk";
 
-const info = yield* bot.protocol.info();
-const schemas = yield* bot.protocol.schemas(PacketDirection.SERVERBOUND);
+const info = yield * bot.protocol.info();
+const schemas = yield * bot.protocol.schemas(PacketDirection.SERVERBOUND);
 
-yield* bot.protocol.packets({
-  directions: [PacketDirection.CLIENTBOUND],
-  names: ["minecraft:game_event"],
-}).pipe(Stream.runDrain);
+yield *
+  bot.protocol
+    .packets({
+      directions: [PacketDirection.CLIENTBOUND],
+      names: ["minecraft:game_event"],
+    })
+    .pipe(Stream.runDrain);
 ```
 
 Raw sends accept one complete unframed native packet, including its packet ID.
@@ -682,9 +712,7 @@ ViaVersion protocol.
 Generated protobuf services remain available as an advanced escape hatch:
 
 ```ts
-import {
-  InstanceService,
-} from "@soulfiremc/sdk/generated/soulfire/instance_pb";
+import { InstanceService } from "@soulfiremc/sdk/generated/soulfire/instance_pb";
 
 const instances = soulfire.service(InstanceService);
 ```

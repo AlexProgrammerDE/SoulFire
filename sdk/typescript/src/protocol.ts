@@ -18,9 +18,7 @@ type BotScoped<T extends DescMessage> = Omit<
   "$typeName" | "botId" | "instanceId"
 >;
 
-export type WatchPacketsOptions = BotScoped<
-  typeof WatchPacketsRequestSchema
-> & {
+export type WatchPacketsOptions = BotScoped<typeof WatchPacketsRequestSchema> & {
   call?: CallOptions;
 };
 
@@ -42,9 +40,7 @@ export class SoulFireProtocol {
     private readonly client: Client<typeof BotProtocolService>,
   ) {}
 
-  public info(
-    options?: CallOptions,
-  ): Effect.Effect<BotProtocolInfo, SoulFireOperationError> {
+  public info(options?: CallOptions): Effect.Effect<BotProtocolInfo, SoulFireOperationError> {
     return rpc("SoulFireProtocol.info", (signal) =>
       this.client.getProtocolInfo(this.scope(), withSignal(options, signal)),
     );
@@ -56,10 +52,7 @@ export class SoulFireProtocol {
   ): Effect.Effect<readonly PacketSchema[], SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       const response = yield* rpc("SoulFireProtocol.schemas", (signal) =>
-        this.client.listPacketSchemas(
-          { ...this.scope(), direction },
-          withSignal(options, signal),
-        ),
+        this.client.listPacketSchemas({ ...this.scope(), direction }, withSignal(options, signal)),
       );
       return response.packets;
     });
@@ -69,13 +62,10 @@ export class SoulFireProtocol {
     options: WatchPacketsOptions = {},
   ): Stream.Stream<RawPacketEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         const { call, ...request } = options;
         return rpcStream("SoulFireProtocol.packets", (signal) =>
-          this.client.watchPackets(
-            { ...request, ...this.scope() },
-            withSignal(call, signal),
-          ),
+          this.client.watchPackets({ ...request, ...this.scope() }, withSignal(call, signal)),
         );
       }),
     );
@@ -97,9 +87,7 @@ export class SoulFireProtocol {
           {
             ...this.scope(),
             encodedPacket,
-            ...(options.expectedName === undefined
-              ? {}
-              : { expectedName: options.expectedName }),
+            ...(options.expectedName === undefined ? {} : { expectedName: options.expectedName }),
           },
           withSignal(options.call, signal),
         ),

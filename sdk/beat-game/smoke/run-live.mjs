@@ -13,10 +13,7 @@ const configuration = {
   botIds: commaSeparatedEnvironment("SOULFIRE_SMOKE_BOT_IDS"),
   runId: environment("SOULFIRE_SMOKE_RUN_ID", "beat-game-live-smoke"),
   teamId: environment("SOULFIRE_SMOKE_TEAM_ID", "beat-game-live-smoke-team"),
-  checkpointDirectory: environment(
-    "SOULFIRE_SMOKE_CHECKPOINT_DIR",
-    "./beat-game-checkpoints",
-  ),
+  checkpointDirectory: environment("SOULFIRE_SMOKE_CHECKPOINT_DIR", "./beat-game-checkpoints"),
   startBots: booleanEnvironment("SOULFIRE_SMOKE_START_BOTS", true),
   crashAfterCheckpoints: optionalPositiveIntegerEnvironment(
     "SOULFIRE_SMOKE_CRASH_AFTER_CHECKPOINTS",

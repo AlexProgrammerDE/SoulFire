@@ -1,7 +1,4 @@
-import {
-  BotActionStatus,
-  type BotActionResult,
-} from "./generated/soulfire/bot_live_pb.js";
+import { BotActionStatus, type BotActionResult } from "./generated/soulfire/bot_live_pb.js";
 
 /**
  * Thrown when a bot action ends in a status other than COMPLETED. `result`
@@ -19,9 +16,7 @@ export class SoulFireActionError extends Error {
  * Returns `result` if the action completed, and throws `SoulFireActionError`
  * otherwise.
  */
-export function requireCompletedAction(
-  result: BotActionResult | undefined,
-): BotActionResult {
+export function requireCompletedAction(result: BotActionResult | undefined): BotActionResult {
   if (result === undefined) {
     throw new Error("SoulFire did not return a bot action result");
   }

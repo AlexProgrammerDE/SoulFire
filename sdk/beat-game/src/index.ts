@@ -214,7 +214,4 @@ export {
   type BeatGameRun,
   type BeatGameTeamRun,
 } from "./run.js";
-export {
-  InMemoryBeatGameCheckpointStore,
-  type BeatGameCheckpointStore,
-} from "./stores.js";
+export { InMemoryBeatGameCheckpointStore, type BeatGameCheckpointStore } from "./stores.js";

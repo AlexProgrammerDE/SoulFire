@@ -47,11 +47,7 @@ export function rpcStream<A>(
             try: () => iterator.next(),
             catch: (cause) => rpcError(operation, cause),
           }).pipe(
-            Effect.flatMap((result) =>
-              result.done
-                ? Cause.done()
-                : Effect.succeed(result.value),
-            ),
+            Effect.flatMap((result) => (result.done ? Cause.done() : Effect.succeed(result.value))),
           ),
         ),
       ),
@@ -59,15 +55,9 @@ export function rpcStream<A>(
   );
 }
 
-export function withSignal(
-  options: CallOptions | undefined,
-  signal: AbortSignal,
-): CallOptions {
+export function withSignal(options: CallOptions | undefined, signal: AbortSignal): CallOptions {
   return {
     ...options,
-    signal:
-      options?.signal === undefined
-        ? signal
-        : AbortSignal.any([options.signal, signal]),
+    signal: options?.signal === undefined ? signal : AbortSignal.any([options.signal, signal]),
   };
 }

@@ -8,10 +8,7 @@ import {
   summarizeSmokeEnvironment,
   summarizeSmokeSpatialDiagnostics,
 } from "../smoke/debug-diagnostics.js";
-import {
-  BeatGamePhase,
-  defaultBeatGameStrategy,
-} from "../src/index.js";
+import { BeatGamePhase, defaultBeatGameStrategy } from "../src/index.js";
 import { checkpoint, observation } from "./fixtures.js";
 
 const origin = {
@@ -39,22 +36,37 @@ describe("smoke spatial diagnostics", () => {
         block("minecraft:stone", 11, 63, -4, true),
       ],
       entities: [
-        entity("minecraft:cow", 7, { x: 16, y: 64, z: -4 }, {
-          x: 1,
-          y: 0,
-          z: 0,
-        }),
-        entity("minecraft:creeper", 8, { x: 14, y: 64, z: -4 }, {
-          x: 0,
-          y: 0,
-          z: 0,
-        }),
-        {
-          ...entity("minecraft:item", 9, { x: 11, y: 64, z: -4 }, {
+        entity(
+          "minecraft:cow",
+          7,
+          { x: 16, y: 64, z: -4 },
+          {
+            x: 1,
+            y: 0,
+            z: 0,
+          },
+        ),
+        entity(
+          "minecraft:creeper",
+          8,
+          { x: 14, y: 64, z: -4 },
+          {
             x: 0,
             y: 0,
             z: 0,
-          }),
+          },
+        ),
+        {
+          ...entity(
+            "minecraft:item",
+            9,
+            { x: 11, y: 64, z: -4 },
+            {
+              x: 0,
+              y: 0,
+              z: 0,
+            },
+          ),
           itemId: "minecraft:beef",
         },
       ],
@@ -125,27 +137,31 @@ describe("smoke spatial diagnostics", () => {
   });
 
   it("measures active path progress against the exact traced goal", () => {
-    const diagnostics = buildSmokeActivePathDiagnostics({
-      pathId: "path-1",
-      startedAt: "2026-08-03T10:00:00.000Z",
-      origin,
-      goal: {
-        type: "xz",
-        x: 20,
-        z: -4,
-        dimension: origin.dimension,
-        radius: 2,
+    const diagnostics = buildSmokeActivePathDiagnostics(
+      {
+        pathId: "path-1",
+        startedAt: "2026-08-03T10:00:00.000Z",
+        origin,
+        goal: {
+          type: "xz",
+          x: 20,
+          z: -4,
+          dimension: origin.dimension,
+          radius: 2,
+        },
+        policy: {
+          allowMining: false,
+          allowPlacing: false,
+          maxFallDistance: 3,
+          maxSearchTimeMs: 30_000,
+        },
       },
-      policy: {
-        allowMining: false,
-        allowPlacing: false,
-        maxFallDistance: 3,
-        maxSearchTimeMs: 30_000,
+      {
+        ...origin,
+        x: 16,
       },
-    }, {
-      ...origin,
-      x: 16,
-    }, "2026-08-03T10:00:01.250Z");
+      "2026-08-03T10:00:01.250Z",
+    );
 
     expect(diagnostics).toMatchObject({
       status: "active",
@@ -192,8 +208,7 @@ describe("smoke decision diagnostics", () => {
       action: "survive:night-shelter",
       actionId: "shelter-1",
       retryCount: 0,
-      reason:
-        "The bot is deliberately sheltered while hostile-night travel would be unsafe",
+      reason: "The bot is deliberately sheltered while hostile-night travel would be unsafe",
     });
   });
 
@@ -217,18 +232,20 @@ describe("smoke decision diagnostics", () => {
       },
       memory: {
         ...checkpoint(BeatGamePhase.ENTER_NETHER).memory,
-        deathPositions: [{
-          key: "death-1",
-          value: {
-            x: 100,
-            y: 63,
-            z: -20,
-            dimension: "minecraft:overworld",
-            inventoryCounts: { "minecraft:iron_pickaxe": 1 },
+        deathPositions: [
+          {
+            key: "death-1",
+            value: {
+              x: 100,
+              y: 63,
+              z: -20,
+              dimension: "minecraft:overworld",
+              inventoryCounts: { "minecraft:iron_pickaxe": 1 },
+            },
+            observedAt: "2026-01-01T00:01:00.000Z",
+            confidence: 1,
           },
-          observedAt: "2026-01-01T00:01:00.000Z",
-          confidence: 1,
-        }],
+        ],
       },
     });
 
@@ -255,23 +272,21 @@ describe("smoke decision diagnostics", () => {
         action: "satisfy:logs",
         requirement: { key: "logs", missingCount: 4 },
       },
-      reason:
-        "logs is the highest-priority actionable requirement: 4 missing (0/4, priority 120)",
+      reason: "logs is the highest-priority actionable requirement: 4 missing (0/4, priority 120)",
     });
-    if (
-      diagnostics.nextIfReplanned.decision.type !== "satisfy-requirement"
-    ) {
+    if (diagnostics.nextIfReplanned.decision.type !== "satisfy-requirement") {
       throw new Error("Expected a requirement decision");
     }
-    expect(diagnostics.nextIfReplanned.decision.requirement)
-      .not.toHaveProperty("itemIds");
+    expect(diagnostics.nextIfReplanned.decision.requirement).not.toHaveProperty("itemIds");
     expect(diagnostics.blockers).toMatchObject({
       pendingRequirements: [{ key: "logs", missingCount: 4 }],
-      rememberedDeaths: [{
-        key: "death-1",
-        position: { x: 100, y: 63, z: -20 },
-        inventoryItemCount: 1,
-      }],
+      rememberedDeaths: [
+        {
+          key: "death-1",
+          position: { x: 100, y: 63, z: -20 },
+          inventoryItemCount: 1,
+        },
+      ],
       recoveryCandidate: {
         key: "death-1",
         inventoryItemCount: 1,
@@ -304,21 +319,23 @@ describe("smoke decision diagnostics", () => {
       },
       memory: {
         ...checkpoint(BeatGamePhase.ENTER_NETHER).memory,
-        deathPositions: [{
-          key: "valuable-death",
-          value: {
-            x: 40,
-            y: -20,
-            z: -44,
-            dimension: "minecraft:overworld",
-            inventoryCounts: {
-              "minecraft:iron_pickaxe": 1,
-              "minecraft:cobblestone": 64,
+        deathPositions: [
+          {
+            key: "valuable-death",
+            value: {
+              x: 40,
+              y: -20,
+              z: -44,
+              dimension: "minecraft:overworld",
+              inventoryCounts: {
+                "minecraft:iron_pickaxe": 1,
+                "minecraft:cobblestone": 64,
+              },
             },
+            observedAt: "2026-08-03T10:00:00.000Z",
+            confidence: 1,
           },
-          observedAt: "2026-08-03T10:00:00.000Z",
-          confidence: 1,
-        }],
+        ],
       },
     });
 
@@ -339,20 +356,21 @@ describe("smoke decision diagnostics", () => {
       sameDimension: true,
       horizontalDistance: 50,
       verticalDistance: -84,
-      reason:
-        "Corpse recovery is deferred while food 8 is at or below the eating threshold 14",
+      reason: "Corpse recovery is deferred while food 8 is at or below the eating threshold 14",
     });
   });
 });
 
 describe("smoke environment diagnostics", () => {
   it("reports the current day phase and weather without losing game time", () => {
-    expect(summarizeSmokeEnvironment({
-      clocks: new Map(),
-      gameTime: 36_500n,
-      raining: true,
-      rainLevel: 0.75,
-    })).toEqual({
+    expect(
+      summarizeSmokeEnvironment({
+        clocks: new Map(),
+        gameTime: 36_500n,
+        raining: true,
+        rainLevel: 0.75,
+      }),
+    ).toEqual({
       clocks: [],
       gameTime: 36_500n,
       dayTime: 12_500,
@@ -366,10 +384,12 @@ describe("smoke environment diagnostics", () => {
   });
 
   it("distinguishes dawn from the hostile night window", () => {
-    expect(summarizeSmokeEnvironment({
-      clocks: new Map(),
-      gameTime: 47_945n,
-    })).toEqual({
+    expect(
+      summarizeSmokeEnvironment({
+        clocks: new Map(),
+        gameTime: 47_945n,
+      }),
+    ).toEqual({
       clocks: [],
       gameTime: 47_945n,
       dayTime: 23_945,
@@ -420,10 +440,12 @@ describe("smoke stuck diagnostics", () => {
       name: "recover-death",
       ageMs: 120_000,
     });
-    expect(diagnostics.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "path-no-displacement" }),
-      expect.objectContaining({ code: "repeated-replan-reason" }),
-    ]));
+    expect(diagnostics.findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "path-no-displacement" }),
+        expect.objectContaining({ code: "repeated-replan-reason" }),
+      ]),
+    );
   });
 
   it("detects task progress that remains frozen across observations", () => {
@@ -460,9 +482,11 @@ describe("smoke stuck diagnostics", () => {
       current: "4",
       total: "20",
     });
-    expect(diagnostics.findings).toContainEqual(expect.objectContaining({
-      code: "task-progress-stalled",
-    }));
+    expect(diagnostics.findings).toContainEqual(
+      expect.objectContaining({
+        code: "task-progress-stalled",
+      }),
+    );
   });
 
   it("detects repeated unreachable collection targets across moving tasks", () => {
@@ -479,32 +503,40 @@ describe("smoke stuck diagnostics", () => {
           detailType: "soulfire.v1.CollectBlocksTaskProgressDetail",
           detail: {
             phase: 6,
-            activeTargets: [{
-              x: 19,
-              y: 66,
-              z: -16,
-              dimension: "minecraft:overworld",
-            }],
-            rejectedTargets: [{
-              x: 19,
-              y: 66,
-              z: -16,
-              dimension: "minecraft:overworld",
-            }],
-            failedApproaches: [{
-              target: {
+            activeTargets: [
+              {
                 x: 19,
                 y: 66,
                 z: -16,
                 dimension: "minecraft:overworld",
               },
-              playerPositions: [{
-                x,
-                y: 63,
-                z: -14,
+            ],
+            rejectedTargets: [
+              {
+                x: 19,
+                y: 66,
+                z: -16,
                 dimension: "minecraft:overworld",
-              }],
-            }],
+              },
+            ],
+            failedApproaches: [
+              {
+                target: {
+                  x: 19,
+                  y: 66,
+                  z: -16,
+                  dimension: "minecraft:overworld",
+                },
+                playerPositions: [
+                  {
+                    x,
+                    y: 63,
+                    z: -14,
+                    dimension: "minecraft:overworld",
+                  },
+                ],
+              },
+            ],
             completedBreaks: [],
             consecutiveStalledPaths: 3,
           },
@@ -535,13 +567,15 @@ describe("smoke stuck diagnostics", () => {
       completedBreaks: 0,
       consecutiveStalledPaths: 3,
     });
-    expect(diagnostics.findings).toContainEqual(expect.objectContaining({
-      code: "repeated-collection-target",
-      evidence: expect.objectContaining({
-        target: "minecraft:overworld:19,66,-16",
-        count: 3,
+    expect(diagnostics.findings).toContainEqual(
+      expect.objectContaining({
+        code: "repeated-collection-target",
+        evidence: expect.objectContaining({
+          target: "minecraft:overworld:19,66,-16",
+          count: 3,
+        }),
       }),
-    }));
+    );
   });
 
   it("reports a moving active route as progressing", () => {
@@ -583,14 +617,16 @@ describe("smoke stuck diagnostics", () => {
       capturedAt: "2026-08-03T10:02:00.000Z",
       currentAction: "build-and-enter-nether",
       currentActionStartedAt: "2026-08-03T10:00:00.000Z",
-      activity: [{
-        observedAt: "2026-08-03T10:01:55.000Z",
-        kind: "task-progress-observed",
-        task: {
-          taskId: "portal-1",
-          progress: { fraction: 0.5, message: "Following route" },
+      activity: [
+        {
+          observedAt: "2026-08-03T10:01:55.000Z",
+          kind: "task-progress-observed",
+          task: {
+            taskId: "portal-1",
+            progress: { fraction: 0.5, message: "Following route" },
+          },
         },
-      }],
+      ],
     });
 
     expect(diagnostics).toMatchObject({
@@ -772,13 +808,7 @@ describe("smoke stuck diagnostics", () => {
   });
 });
 
-function block(
-  blockId: string,
-  x: number,
-  y: number,
-  z: number,
-  solid: boolean,
-) {
+function block(blockId: string, x: number, y: number, z: number, solid: boolean) {
   return {
     blockId,
     position: { x, y, z, dimension: origin.dimension },
@@ -808,12 +838,7 @@ function entity(
   };
 }
 
-function surface(
-  x: number,
-  z: number,
-  surfaceY: number,
-  blockId: string,
-) {
+function surface(x: number, z: number, surfaceY: number, blockId: string) {
   return {
     x,
     z,

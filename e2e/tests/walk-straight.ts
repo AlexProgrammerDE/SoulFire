@@ -13,7 +13,9 @@ export default {
     Effect.gen(function* () {
       const { x, y, z } = START;
       yield* rcon(`forceload add ${x - 16} ${z - 16} ${x + LENGTH + 16} ${z + 16}`);
-      yield* rcon(`fill ${x - 2} ${y - 4} ${z - 2} ${x + LENGTH + 2} ${y + 4} ${z + 2} minecraft:air`);
+      yield* rcon(
+        `fill ${x - 2} ${y - 4} ${z - 2} ${x + LENGTH + 2} ${y + 4} ${z + 2} minecraft:air`,
+      );
       yield* rcon(`fill ${x} ${y - 1} ${z} ${x + LENGTH} ${y - 1} ${z} minecraft:stone`);
       yield* placeBot(bot, { x: x + 0.5, y, z: z + 0.5 });
 
@@ -22,6 +24,9 @@ export default {
       yield* route.result();
 
       const at = blockOf(yield* serverPosition);
-      yield* check(at.x === goal.x && at.y === goal.y && at.z === goal.z, `route done, but the bot is at ${JSON.stringify(at)}, not ${JSON.stringify(goal)}`);
+      yield* check(
+        at.x === goal.x && at.y === goal.y && at.z === goal.z,
+        `route done, but the bot is at ${JSON.stringify(at)}, not ${JSON.stringify(goal)}`,
+      );
     }),
 } satisfies E2ETest;

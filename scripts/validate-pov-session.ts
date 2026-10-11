@@ -15,8 +15,7 @@ import {
   type PovFrame,
 } from "../sdk/typescript/src/generated/soulfire/pov_pb";
 
-const [url, instanceId, botId, otherBotId, output, mode] =
-  process.argv.slice(2);
+const [url, instanceId, botId, otherBotId, output, mode] = process.argv.slice(2);
 const token = process.env.SF_POV_TEST_TOKEN;
 assert.ok(token);
 const transport = createGrpcWebTransport({
@@ -60,11 +59,7 @@ const watching = (async () => {
       { signal: abort.signal },
     )) {
       assert.ok(frame.data.length > 0, "Encoded access unit must not be empty");
-      if (
-        !latest ||
-        frame.width !== latest.width ||
-        frame.height !== latest.height
-      )
+      if (!latest || frame.width !== latest.width || frame.height !== latest.height)
         assert.ok(frame.keyFrame, "New dimensions must start with a keyframe");
       if (latest)
         assert.ok(
@@ -74,7 +69,10 @@ const watching = (async () => {
       latest = frame;
       frameCount++;
       encodedBytes += frame.data.length;
-      if (frame.keyFrame) { keyFrames++; latestKey = frame; }
+      if (frame.keyFrame) {
+        keyFrames++;
+        latestKey = frame;
+      }
     }
   } catch (error) {
     if (!abort.signal.aborted) streamError = error;
@@ -91,12 +89,15 @@ async function input(
       sessionId,
       sequence: ++sequence,
       captured,
-      feedback: mode === "adaptive" ? {
-        receivedSequence: latest?.sequence ?? 0n,
-        deliveryDelayMs,
-        decoderQueueSize: 0,
-        decoderRecoveries: 0,
-      } : undefined,
+      feedback:
+        mode === "adaptive"
+          ? {
+              receivedSequence: latest?.sequence ?? 0n,
+              deliveryDelayMs,
+              decoderQueueSize: 0,
+              decoderRecoveries: 0,
+            }
+          : undefined,
       requestKeyFrame,
       width,
       height,
@@ -140,18 +141,10 @@ try {
     await writeFile(`${output}/transition-ready`, "");
     const deadline = performance.now() + 60000;
     while (
-      (await bots.getBotInfo({ instanceId, botId })).liveState?.dimension !==
-      "minecraft:the_nether"
+      (await bots.getBotInfo({ instanceId, botId })).liveState?.dimension !== "minecraft:the_nether"
     ) {
-      assert.equal(
-        streamError,
-        undefined,
-        "World transfer must not end the stream",
-      );
-      assert.ok(
-        performance.now() < deadline,
-        "Dimension transfer did not complete",
-      );
+      assert.equal(streamError, undefined, "World transfer must not end the stream");
+      assert.ok(performance.now() < deadline, "Dimension transfer did not complete");
       await sleep(100);
     }
     const framesAtTransfer = frameCount;
@@ -160,11 +153,7 @@ try {
       "Frames must continue in the new dimension",
     );
     await saveFrame("interactive-nether");
-    assert.equal(
-      streamError,
-      undefined,
-      "Dimension changes must preserve the session",
-    );
+    assert.equal(streamError, undefined, "Dimension changes must preserve the session");
     console.log(
       JSON.stringify({
         dimensionTransfer: true,
@@ -174,32 +163,62 @@ try {
   } else if (mode === "adaptive") {
     const initial = latest!.targetBitrate;
     assert.ok(initial > 0);
-    await until(() => latest!.targetBitrate > initial, "Healthy delivery must increase target bitrate");
+    await until(
+      () => latest!.targetBitrate > initial,
+      "Healthy delivery must increase target bitrate",
+    );
     const raised = latest!.targetBitrate;
     deliveryDelayMs = 250;
     await until(() => latest!.targetBitrate < raised, "Delivery backlog must lower target bitrate");
     const lowered = latest!.targetBitrate;
     deliveryDelayMs = 0;
     await saveFrame("interactive-adaptive-bitrate");
-    await until(() => latest!.targetBitrate > lowered, "Healthy delivery must recover target bitrate");
-    console.log(JSON.stringify({ adaptiveBitrate: true, initial, raised, lowered, recovered: latest!.targetBitrate }));
+    await until(
+      () => latest!.targetBitrate > lowered,
+      "Healthy delivery must recover target bitrate",
+    );
+    console.log(
+      JSON.stringify({
+        adaptiveBitrate: true,
+        initial,
+        raised,
+        lowered,
+        recovered: latest!.targetBitrate,
+      }),
+    );
   } else if (mode === "cursor") {
     captured = true;
-    await input([{ kind: Kind.KEY, code: 256, action: 1 }, { kind: Kind.KEY, code: 256, action: 0 }]);
+    await input([
+      { kind: Kind.KEY, code: 256, action: 1 },
+      { kind: Kind.KEY, code: 256, action: 0 },
+    ]);
     await until(() => !!latest?.screenOpen, "Escape must open the pause menu");
     for (let y = 0.2; y <= 0.8 && latest?.cursorShape !== CursorShape.POINTER; y += 0.05) {
       const before = latest!.sequence;
       await input([{ kind: Kind.MOVE, x: 0.5, y }]);
       await until(() => latest!.sequence > before + 2n, "Cursor hover must render");
     }
-    assert.equal(latest?.cursorShape, CursorShape.POINTER, "Pause buttons must request a pointing hand");
+    assert.equal(
+      latest?.cursorShape,
+      CursorShape.POINTER,
+      "Pause buttons must request a pointing hand",
+    );
     await saveFrame("interactive-pointer-cursor");
-    await input([{ kind: Kind.KEY, code: 256, action: 1 }, { kind: Kind.KEY, code: 256, action: 0 }]);
+    await input([
+      { kind: Kind.KEY, code: 256, action: 1 },
+      { kind: Kind.KEY, code: 256, action: 0 },
+    ]);
     await until(() => latest?.screenOpen === false, "Escape must close the pause menu");
-    await input([{ kind: Kind.KEY, code: 84, action: 1 }, { kind: Kind.KEY, code: 84, action: 0 }]);
+    await input([
+      { kind: Kind.KEY, code: 84, action: 1 },
+      { kind: Kind.KEY, code: 84, action: 0 },
+    ]);
     await until(() => !!latest?.screenOpen, "Chat must open");
     await input([{ kind: Kind.MOVE, x: 0.3, y: 0.975 }]);
-    await until(() => latest?.cursorShape === CursorShape.TEXT, "Chat input must request a text cursor");
+    await until(
+      () => latest?.cursorShape === CursorShape.TEXT,
+      "Chat input must request a text cursor",
+    );
     await saveFrame("interactive-text-cursor");
     await pov.input({
       sessionId,
@@ -209,7 +228,10 @@ try {
       captured,
       clipboard: "SoulFire clipboard validation",
     });
-    await input([{ kind: Kind.KEY, code: 257, action: 1 }, { kind: Kind.KEY, code: 257, action: 0 }]);
+    await input([
+      { kind: Kind.KEY, code: 257, action: 1 },
+      { kind: Kind.KEY, code: 257, action: 0 },
+    ]);
     await until(() => latest?.screenOpen === false, "Closing chat must hide the cursor");
     console.log(JSON.stringify({ pointingCursor: true, textCursor: true, hiddenInWorld: true }));
   } else if (mode === "world") {
@@ -217,8 +239,7 @@ try {
     await input([{ kind: Kind.SCROLL, y: 1 }]);
     await sleep(200);
     assert.equal(
-      (await bots.getBotInfo({ instanceId, botId })).liveState!
-        .selectedHotbarSlot,
+      (await bots.getBotInfo({ instanceId, botId })).liveState!.selectedHotbarSlot,
       8,
       "Wheel must select the previous hotbar slot",
     );
@@ -232,8 +253,7 @@ try {
       { kind: Kind.BUTTON, code: 2, action: 0 },
     ]);
     await sleep(250);
-    const selected = (await bots.getBotInfo({ instanceId, botId })).liveState!
-      .selectedHotbarSlot;
+    const selected = (await bots.getBotInfo({ instanceId, botId })).liveState!.selectedHotbarSlot;
     const inventory = await bots.getInventoryState({ instanceId, botId });
     assert.equal(
       inventory.slots.find((slot) => slot.slot === 36 + selected)?.itemId,
@@ -250,10 +270,7 @@ try {
       { kind: Kind.KEY, code: 256, action: 1 },
       { kind: Kind.KEY, code: 256, action: 0 },
     ]);
-    await until(
-      () => latest?.screenOpen === false,
-      "Escape must close the chest",
-    );
+    await until(() => latest?.screenOpen === false, "Escape must close the chest");
     await input([
       { kind: Kind.BUTTON, code: 0, action: 1 },
       { kind: Kind.BUTTON, code: 0, action: 0 },
@@ -265,11 +282,7 @@ try {
       botId,
       position: { x: 0, y: -60, z: 4 },
     });
-    assert.equal(
-      block.block?.blockId,
-      "minecraft:air",
-      "Left click must break the target block",
-    );
+    assert.equal(block.block?.blockId, "minecraft:air", "Left click must break the target block");
     await pov.input({
       sessionId,
       sequence: ++sequence,
@@ -279,10 +292,7 @@ try {
       escape: true,
     });
     captured = false;
-    await until(
-      () => !!latest?.screenOpen,
-      "Escape must open the pause menu from the world",
-    );
+    await until(() => !!latest?.screenOpen, "Escape must open the pause menu from the world");
     await pov.input({
       sessionId,
       sequence: ++sequence,
@@ -291,10 +301,7 @@ try {
       captured: false,
       escape: true,
     });
-    await until(
-      () => latest?.screenOpen === false,
-      "Escape must close the pause menu",
-    );
+    await until(() => latest?.screenOpen === false, "Escape must close the pause menu");
     captured = true;
     const tapJump = async () => {
       await input([{ kind: Kind.KEY, code: 32, action: 1 }]);
@@ -312,14 +319,8 @@ try {
     const airborne = (await bots.getBotInfo({ instanceId, botId })).liveState!;
     await sleep(600);
     const hovering = (await bots.getBotInfo({ instanceId, botId })).liveState!;
-    assert.ok(
-      hovering.y > -58,
-      "Double jump must enable flight and Space must ascend",
-    );
-    assert.ok(
-      Math.abs(hovering.y - airborne.y) < 0.1,
-      "Flying must hover after releasing Space",
-    );
+    assert.ok(hovering.y > -58, "Double jump must enable flight and Space must ascend");
+    assert.ok(Math.abs(hovering.y - airborne.y) < 0.1, "Flying must hover after releasing Space");
     await tapJump();
     await tapJump();
     await sleep(1500);
@@ -337,34 +338,25 @@ try {
     );
   } else {
     const before = (await bots.getBotInfo({ instanceId, botId })).liveState!;
-    const otherBefore = (
-      await bots.getBotInfo({ instanceId, botId: otherBotId })
-    ).liveState!;
+    const otherBefore = (await bots.getBotInfo({ instanceId, botId: otherBotId })).liveState!;
     captured = true;
     await input([{ kind: Kind.KEY, code: 87, action: 1 }]);
     await sleep(1100);
     await input([{ kind: Kind.KEY, code: 87, action: 0 }]);
     const after = (await bots.getBotInfo({ instanceId, botId })).liveState!;
-    const otherAfter = (
-      await bots.getBotInfo({ instanceId, botId: otherBotId })
-    ).liveState!;
+    const otherAfter = (await bots.getBotInfo({ instanceId, botId: otherBotId })).liveState!;
     assert.ok(
       Math.hypot(after.x - before.x, after.z - before.z) > 0.5,
       "W must move the controlled bot",
     );
     assert.ok(
-      Math.hypot(otherAfter.x - otherBefore.x, otherAfter.z - otherBefore.z) <
-        0.05,
+      Math.hypot(otherAfter.x - otherBefore.x, otherAfter.z - otherBefore.z) < 0.05,
       "Input must not move another bot",
     );
     await input([{ kind: Kind.MOVE, relative: true, x: 100, y: 30 }]);
     await sleep(250);
     const rotated = (await bots.getBotInfo({ instanceId, botId })).liveState!;
-    assert.notEqual(
-      rotated.yRot,
-      after.yRot,
-      "Relative mouse movement must rotate the bot",
-    );
+    assert.notEqual(rotated.yRot, after.yRot, "Relative mouse movement must rotate the bot");
     await input([
       { kind: Kind.KEY, code: 69, action: 1 },
       { kind: Kind.KEY, code: 69, action: 0 },
@@ -390,12 +382,8 @@ try {
       { kind: Kind.KEY, code: 69, action: 1 },
       { kind: Kind.KEY, code: 69, action: 0 },
     ]);
-    await until(
-      () => latest?.screenOpen === false,
-      "E must close the inventory",
-    );
-    const afterInventory = (await bots.getBotInfo({ instanceId, botId }))
-      .liveState!;
+    await until(() => latest?.screenOpen === false, "E must close the inventory");
+    const afterInventory = (await bots.getBotInfo({ instanceId, botId })).liveState!;
     assert.equal(
       afterInventory.yRot,
       rotated.yRot,
@@ -429,29 +417,27 @@ try {
     assert.ok(frameCount > 10, "Continuous frame delivery");
     // Keep the stream alive beyond the HTTP server's normal request timeout.
     await sleep(11000);
-    assert.equal(
-      streamError,
-      undefined,
-      "An active session must not hit the ordinary RPC timeout",
-    );
+    assert.equal(streamError, undefined, "An active session must not hit the ordinary RPC timeout");
     await saveFrame("interactive-world-settled");
     clearInterval(heartbeat);
     captured = true;
     await input([{ kind: Kind.KEY, code: 87, action: 1 }]);
-    await until(
-      () => !!streamError,
-      "Missing heartbeats must terminate the stream",
-    );
+    await until(() => !!streamError, "Missing heartbeats must terminate the stream");
     await sleep(300);
     const timedOut = (await bots.getBotInfo({ instanceId, botId })).liveState!;
     await sleep(500);
-    const afterTimeout = (await bots.getBotInfo({ instanceId, botId }))
-      .liveState!;
-    assert.ok(timedOut.health > 0 && afterTimeout.health > 0, "The timeout probe must remain alive");
-    assert.equal(afterTimeout.health, timedOut.health, "Damage must not interfere with the movement check");
+    const afterTimeout = (await bots.getBotInfo({ instanceId, botId })).liveState!;
     assert.ok(
-      Math.hypot(afterTimeout.x - timedOut.x, afterTimeout.z - timedOut.z) <
-        0.05,
+      timedOut.health > 0 && afterTimeout.health > 0,
+      "The timeout probe must remain alive",
+    );
+    assert.equal(
+      afterTimeout.health,
+      timedOut.health,
+      "Damage must not interfere with the movement check",
+    );
+    assert.ok(
+      Math.hypot(afterTimeout.x - timedOut.x, afterTimeout.z - timedOut.z) < 0.05,
       `Heartbeat timeout must release held movement: ${JSON.stringify([timedOut, afterTimeout].map(({ x, y, z, health }) => ({ x, y, z, health })))}`,
     );
     console.log(

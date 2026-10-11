@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { Effect, Semaphore, type Scope } from "effect";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createHmac } from "node:crypto";
@@ -6,10 +7,7 @@ import path from "node:path";
 import readline from "node:readline";
 
 import { operationError, type SoulFireOperationError } from "./errors.js";
-import type {
-  LocalSoulFireServer,
-  SoulFireInstallOptions,
-} from "./install-types.js";
+import type { LocalSoulFireServer, SoulFireInstallOptions } from "./install-types.js";
 import {
   ensureDownload,
   ensureJvm,
@@ -20,7 +18,6 @@ import {
   resolveDedicatedAsset,
   resolveRelease,
 } from "./local-server-io.js";
-
 
 const ROOT_USER_UUID = "00000000-0000-0000-0000-000000000000";
 const DEFAULT_STARTUP_TIMEOUT_MS = 120_000;
@@ -41,8 +38,7 @@ export function installLocalServer(
   options: SoulFireInstallOptions = {},
 ): Effect.Effect<LocalServerHandle, SoulFireOperationError, Scope.Scope> {
   return Effect.gen(function* () {
-    const startupTimeout =
-      options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS;
+    const startupTimeout = options.startupTimeoutMs ?? DEFAULT_STARTUP_TIMEOUT_MS;
     if (!Number.isFinite(startupTimeout) || startupTimeout <= 0) {
       return yield* Effect.fail(
         operationError(
@@ -84,11 +80,8 @@ export function installLocalServer(
         catch: (cause) => operationError("install.release", cause),
       });
       yield* installIO("install.download", (signal) =>
-        ensureDownload(
-          jar.browser_download_url,
-          jarPath,
-          digest,
-          (input, init) => fetchImplementation(input, { ...init, signal }),
+        ensureDownload(jar.browser_download_url, jarPath, digest, (input, init) =>
+          fetchImplementation(input, { ...init, signal }),
         ),
       );
       installedVersion = release.tag_name;
@@ -98,8 +91,7 @@ export function installLocalServer(
       );
     const runDirectory = path.join(directory, "server");
     yield* installIO("install.mkdir", () => mkdir(runDirectory, { recursive: true }));
-    const port =
-      options.port ?? (yield* installIO("install.port", () => findAvailablePort()));
+    const port = options.port ?? (yield* installIO("install.port", () => findAvailablePort()));
     if (!Number.isSafeInteger(port) || port < 1 || port > 65535)
       return yield* Effect.fail(
         operationError(
@@ -109,21 +101,12 @@ export function installLocalServer(
       );
     const logs: string[] = [];
     const spawnServer = () =>
-      spawn(
-        javaPath,
-        [
-          ...(options.javaArgs ?? []),
-          `-Dsf.grpc.port=${port}`,
-          "-jar",
-          jarPath,
-        ],
-        {
-          cwd: runDirectory,
-          env: { ...process.env, JAVA_HOME: javaHome },
-          stdio: "pipe",
-          windowsHide: true,
-        },
-      );
+      spawn(javaPath, [...(options.javaArgs ?? []), `-Dsf.grpc.port=${port}`, "-jar", jarPath], {
+        cwd: runDirectory,
+        env: { ...process.env, JAVA_HOME: javaHome },
+        stdio: "pipe",
+        windowsHide: true,
+      });
     const semaphore = yield* Semaphore.make(1);
     let child: ChildProcessWithoutNullStreams;
     let info: LocalSoulFireServer;
@@ -136,7 +119,7 @@ export function installLocalServer(
       const output = readline.createInterface({ input: current.stdout });
       const errors = readline.createInterface({ input: current.stderr });
       const onLine = (rawLine: string) => {
-        const line = rawLine.replace(/\u001B\[[0-9;]*[A-Za-z]/g, "").trim();
+        const line = stripVTControlCharacters(rawLine).trim();
         if (line.length === 0) return;
         logs.push(line);
         try {
@@ -155,21 +138,18 @@ export function installLocalServer(
         Effect.timeoutOrElse({
           duration: startupTimeout,
           orElse: () =>
-            Effect.fail(operationError(
-              "install.ready",
-              new Error(
-                "SoulFire did not finish loading before the startup timeout",
+            Effect.fail(
+              operationError(
+                "install.ready",
+                new Error("SoulFire did not finish loading before the startup timeout"),
               ),
-            )),
+            ),
         }),
         Effect.onError(() => stopChild(current)),
       );
       if (current.pid === undefined)
         return yield* Effect.fail(
-          operationError(
-            "install.pid",
-            new Error("SoulFire process did not provide a process ID"),
-          ),
+          operationError("install.pid", new Error("SoulFire process did not provide a process ID")),
         );
       info = {
         baseUrl: `http://127.0.0.1:${port}`,
@@ -181,13 +161,9 @@ export function installLocalServer(
         version: installedVersion,
       };
     });
-    const stop = Effect.suspend(() =>
-      child === undefined ? Effect.void : stopChild(child),
-    );
+    const stop = Effect.suspend(() => (child === undefined ? Effect.void : stopChild(child)));
     // Register process ownership before waiting for readiness.
-    yield* Effect.acquireRelease(Effect.void, () =>
-      semaphore.withPermits(1)(stop),
-    );
+    yield* Effect.acquireRelease(Effect.void, () => semaphore.withPermits(1)(stop));
     yield* start();
     const secretKey = yield* installIO("install.token", () =>
       readFile(path.join(runDirectory, "secret-key.bin")),
@@ -199,8 +175,7 @@ export function installLocalServer(
       token: createRootApiToken(secretKey),
       isRunning: () => child.exitCode === null && child.signalCode === null,
       logs: () => [...logs],
-      restart: () =>
-        semaphore.withPermits(1)(stop.pipe(Effect.andThen(start()))),
+      restart: () => semaphore.withPermits(1)(stop.pipe(Effect.andThen(start()))),
       stop: () => semaphore.withPermits(1)(stop),
       close: () => semaphore.withPermits(1)(stop),
     };
@@ -226,16 +201,13 @@ function waitForServerReady(
     const onLine = (line: string) => {
       if (line.includes("Finished loading!")) finish(Effect.void);
     };
-    const onError = (cause: Error) =>
-      finish(Effect.fail(operationError("install.ready", cause)));
+    const onError = (cause: Error) => finish(Effect.fail(operationError("install.ready", cause)));
     const onExit = (code: number | null) =>
       finish(
         Effect.fail(
           operationError(
             "install.ready",
-            new Error(
-              `SoulFire exited before finishing loading (exit code ${code ?? "unknown"})`,
-            ),
+            new Error(`SoulFire exited before finishing loading (exit code ${code ?? "unknown"})`),
           ),
         ),
       );
@@ -249,11 +221,7 @@ function waitForServerReady(
 
 function stopChild(child: ChildProcessWithoutNullStreams): Effect.Effect<void> {
   return Effect.suspend(() => {
-    if (
-      child.pid === undefined ||
-      child.exitCode !== null ||
-      child.signalCode !== null
-    )
+    if (child.pid === undefined || child.exitCode !== null || child.signalCode !== null)
       return Effect.void;
     return Effect.callback<void>((resume) => {
       const onExit = () => resume(Effect.void);
@@ -281,9 +249,7 @@ function stopChild(child: ChildProcessWithoutNullStreams): Effect.Effect<void> {
 
 function createRootApiToken(secretKey: Buffer): string {
   const issuedAt = Math.floor(Date.now() / 1_000);
-  const header = Buffer.from(
-    JSON.stringify({ alg: "HS256", typ: "JWT" }),
-  ).toString("base64url");
+  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
   const claims = Buffer.from(
     JSON.stringify({
       aud: ["api"],
@@ -292,12 +258,15 @@ function createRootApiToken(secretKey: Buffer): string {
     }),
   ).toString("base64url");
   const unsignedToken = `${header}.${claims}`;
-  const signature = createHmac("sha256", secretKey)
-    .update(unsignedToken)
-    .digest("base64url");
+  const signature = createHmac("sha256", secretKey).update(unsignedToken).digest("base64url");
   return `${unsignedToken}.${signature}`;
 }
 
-function installIO<A>(operation: string, call: (signal: AbortSignal) => Promise<A>): Effect.Effect<A, SoulFireOperationError> {
-  return Effect.tryPromise({ try: call, catch: (cause) => operationError(operation, cause) }).pipe(Effect.withSpan(operation));
+function installIO<A>(
+  operation: string,
+  call: (signal: AbortSignal) => Promise<A>,
+): Effect.Effect<A, SoulFireOperationError> {
+  return Effect.tryPromise({ try: call, catch: (cause) => operationError(operation, cause) }).pipe(
+    Effect.withSpan(operation),
+  );
 }

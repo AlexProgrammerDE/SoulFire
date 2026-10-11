@@ -48,12 +48,12 @@ export const collectWithProgress = Effect.scoped(
       server: "localhost:25565",
       username: "Builder",
     });
-    yield* bot.tasks.runCollectBlocks([], {
-      tags: ["minecraft:logs"],
-      count: 16,
-    }).pipe(
-      Stream.runForEach((event) => Effect.logInfo(event.task?.summary ?? "Task update")),
-    );
+    yield* bot.tasks
+      .runCollectBlocks([], {
+        tags: ["minecraft:logs"],
+        count: 16,
+      })
+      .pipe(Stream.runForEach((event) => Effect.logInfo(event.task?.summary ?? "Task update")));
   }),
 );
 // #endregion collectWithProgress

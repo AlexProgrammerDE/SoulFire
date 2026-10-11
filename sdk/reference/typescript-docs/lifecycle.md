@@ -2,12 +2,12 @@
 
 Choose the entry point for your runtime:
 
-| Import | Use |
-| --- | --- |
-| `@soulfiremc/sdk/node` | Node.js connections, managed installation, and `createBot` |
-| `@soulfiremc/sdk/bun` | Bun connections, managed installation, and `createBot` |
-| `@soulfiremc/sdk/browser` | Browser connections to an existing SoulFire server |
-| `@soulfiremc/sdk` | Universal connection API with an existing transport or fetch implementation |
+| Import                    | Use                                                                         |
+| ------------------------- | --------------------------------------------------------------------------- |
+| `@soulfiremc/sdk/node`    | Node.js connections, managed installation, and `createBot`                  |
+| `@soulfiremc/sdk/bun`     | Bun connections, managed installation, and `createBot`                      |
+| `@soulfiremc/sdk/browser` | Browser connections to an existing SoulFire server                          |
+| `@soulfiremc/sdk`         | Universal connection API with an existing transport or fetch implementation |
 
 `SoulFire.connect` takes a SoulFire gRPC-Web URL, such as `http://localhost:38765`.
 Bot provisioning takes a Minecraft address, such as `localhost:25565`.
@@ -65,12 +65,12 @@ Read that session's state when you open observation separately.
 
 ## Use the correct timeout
 
-| Limit | Unit | Controls |
-| --- | --- | --- |
-| `readyTimeoutMs` | Milliseconds | Bot startup and initial player snapshot |
-| `startupTimeoutMs` | Milliseconds | Managed SoulFire process startup |
-| `defaultTimeoutMs` or `call.timeoutMs` | Milliseconds | RPC transport timeout |
-| Task `deadline` | Absolute `Date` | Server task execution |
+| Limit                                  | Unit            | Controls                                |
+| -------------------------------------- | --------------- | --------------------------------------- |
+| `readyTimeoutMs`                       | Milliseconds    | Bot startup and initial player snapshot |
+| `startupTimeoutMs`                     | Milliseconds    | Managed SoulFire process startup        |
+| `defaultTimeoutMs` or `call.timeoutMs` | Milliseconds    | RPC transport timeout                   |
+| Task `deadline`                        | Absolute `Date` | Server task execution                   |
 
 A shorter RPC timeout can fail before the readiness deadline. A task deadline
 is independent of the client request timeout.

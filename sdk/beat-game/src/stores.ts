@@ -14,10 +14,7 @@ import {
 export interface BeatGameCheckpointStore {
   readonly load: (
     runId: string,
-  ) => Effect.Effect<
-    BeatGameCheckpoint | undefined,
-    BeatGameCheckpointError
-  >;
+  ) => Effect.Effect<BeatGameCheckpoint | undefined, BeatGameCheckpointError>;
   readonly save: (
     checkpoint: BeatGameCheckpoint,
     expectedRevision: number | undefined,
@@ -28,16 +25,12 @@ export interface BeatGameCheckpointStore {
   ) => Effect.Effect<void, BeatGameCheckpointError>;
 }
 
-export class InMemoryBeatGameCheckpointStore
-  implements BeatGameCheckpointStore {
+export class InMemoryBeatGameCheckpointStore implements BeatGameCheckpointStore {
   readonly #checkpoints = new Map<string, BeatGameCheckpoint>();
 
   public readonly load = (
     runId: string,
-  ): Effect.Effect<
-    BeatGameCheckpoint | undefined,
-    BeatGameCheckpointError
-  > =>
+  ): Effect.Effect<BeatGameCheckpoint | undefined, BeatGameCheckpointError> =>
     Effect.sync(() => {
       const checkpoint = this.#checkpoints.get(runId);
       return checkpoint === undefined ? undefined : clone(checkpoint);
@@ -61,11 +54,7 @@ export class InMemoryBeatGameCheckpointStore
           ),
       });
       const current = this.#checkpoints.get(checkpoint.runId);
-      yield* validateCheckpointRevision(
-        checkpoint,
-        current,
-        expectedRevision,
-      );
+      yield* validateCheckpointRevision(checkpoint, current, expectedRevision);
       const stored = clone(checkpoint);
       this.#checkpoints.set(checkpoint.runId, stored);
       return clone(stored);
@@ -77,17 +66,16 @@ export class InMemoryBeatGameCheckpointStore
   ): Effect.Effect<void, BeatGameCheckpointError> =>
     Effect.gen({ self: this }, function* () {
       const current = this.#checkpoints.get(runId);
-      if (
-        expectedRevision !== undefined
-        && current?.revision !== expectedRevision
-      ) {
-        return yield* Effect.fail(makeCheckpointError(
-          current,
-          runId,
-          `Checkpoint revision changed before removal`,
-          expectedRevision,
-          current?.revision,
-        ));
+      if (expectedRevision !== undefined && current?.revision !== expectedRevision) {
+        return yield* Effect.fail(
+          makeCheckpointError(
+            current,
+            runId,
+            `Checkpoint revision changed before removal`,
+            expectedRevision,
+            current?.revision,
+          ),
+        );
       }
       this.#checkpoints.delete(runId);
     });
@@ -100,42 +88,50 @@ export function validateCheckpointRevision(
 ): Effect.Effect<void, BeatGameCheckpointError> {
   if (current === undefined) {
     if (expectedRevision !== undefined) {
-      return Effect.fail(makeCheckpointError(
-        checkpoint,
-        checkpoint.runId,
-        "Checkpoint does not exist at the expected revision",
-        expectedRevision,
-        undefined,
-      ));
+      return Effect.fail(
+        makeCheckpointError(
+          checkpoint,
+          checkpoint.runId,
+          "Checkpoint does not exist at the expected revision",
+          expectedRevision,
+          undefined,
+        ),
+      );
     }
     if (checkpoint.revision !== 1) {
-      return Effect.fail(makeCheckpointError(
-        checkpoint,
-        checkpoint.runId,
-        "A new checkpoint must start at revision 1",
-        1,
-        checkpoint.revision,
-      ));
+      return Effect.fail(
+        makeCheckpointError(
+          checkpoint,
+          checkpoint.runId,
+          "A new checkpoint must start at revision 1",
+          1,
+          checkpoint.revision,
+        ),
+      );
     }
     return Effect.void;
   }
   if (expectedRevision !== current.revision) {
-    return Effect.fail(makeCheckpointError(
-      checkpoint,
-      checkpoint.runId,
-      "Checkpoint revision conflict",
-      expectedRevision,
-      current.revision,
-    ));
+    return Effect.fail(
+      makeCheckpointError(
+        checkpoint,
+        checkpoint.runId,
+        "Checkpoint revision conflict",
+        expectedRevision,
+        current.revision,
+      ),
+    );
   }
   if (checkpoint.revision !== current.revision + 1) {
-    return Effect.fail(makeCheckpointError(
-      checkpoint,
-      checkpoint.runId,
-      "Checkpoint revision must increase by one",
-      current.revision + 1,
-      checkpoint.revision,
-    ));
+    return Effect.fail(
+      makeCheckpointError(
+        checkpoint,
+        checkpoint.runId,
+        "Checkpoint revision must increase by one",
+        current.revision + 1,
+        checkpoint.revision,
+      ),
+    );
   }
   return Effect.void;
 }
@@ -169,25 +165,17 @@ export function assertValidCheckpoint(
   expectedRunId?: string,
 ): asserts value is BeatGameCheckpoint {
   const checkpoint = record(value, "checkpoint");
-  if (
-    checkpoint.schemaVersion !== BEAT_GAME_CHECKPOINT_SCHEMA_VERSION
-  ) {
+  if (checkpoint.schemaVersion !== BEAT_GAME_CHECKPOINT_SCHEMA_VERSION) {
     throw new TypeError("Unsupported beat-game checkpoint schema version");
   }
   const runId = nonEmptyString(checkpoint.runId, "checkpoint.runId");
   if (expectedRunId !== undefined && runId !== expectedRunId) {
-    throw new TypeError(
-      `Checkpoint run ID ${runId} does not match ${expectedRunId}`,
-    );
+    throw new TypeError(`Checkpoint run ID ${runId} does not match ${expectedRunId}`);
   }
   for (const key of ["teamId", "instanceId", "botId", "connectionEpoch"]) {
     nonEmptyString(checkpoint[key], `checkpoint.${key}`);
   }
-  enumValue(
-    checkpoint.role,
-    Object.values(BeatGameTeamRole),
-    "checkpoint.role",
-  );
+  enumValue(checkpoint.role, Object.values(BeatGameTeamRole), "checkpoint.role");
   positiveInteger(checkpoint.revision, "checkpoint.revision");
   timestamp(checkpoint.createdAt, "checkpoint.createdAt");
   timestamp(checkpoint.updatedAt, "checkpoint.updatedAt");
@@ -203,78 +191,33 @@ export function assertValidCheckpoint(
 
 function stableActionResult(value: unknown): void {
   const result = record(value, "checkpoint.lastStableAction");
-  nonEmptyString(
-    result.action,
-    "checkpoint.lastStableAction.action",
-  );
-  enumValue(
-    result.phase,
-    Object.values(BeatGamePhase),
-    "checkpoint.lastStableAction.phase",
-  );
-  timestamp(
-    result.completedAt,
-    "checkpoint.lastStableAction.completedAt",
-  );
+  nonEmptyString(result.action, "checkpoint.lastStableAction.action");
+  enumValue(result.phase, Object.values(BeatGamePhase), "checkpoint.lastStableAction.phase");
+  timestamp(result.completedAt, "checkpoint.lastStableAction.completedAt");
   enumValue(
     result.evidence,
-    [
-      "TASK_RESULT",
-      "OBSERVED_STATE",
-      "OBSERVATION_AFTER_UNCERTAIN_RESULT",
-    ],
+    ["TASK_RESULT", "OBSERVED_STATE", "OBSERVATION_AFTER_UNCERTAIN_RESULT"],
     "checkpoint.lastStableAction.evidence",
   );
-  nonEmptyString(
-    result.connectionEpoch,
-    "checkpoint.lastStableAction.connectionEpoch",
-  );
-  unsignedIntegerString(
-    result.playerRevision,
-    "checkpoint.lastStableAction.playerRevision",
-  );
-  unsignedIntegerString(
-    result.inventoryRevision,
-    "checkpoint.lastStableAction.inventoryRevision",
-  );
+  nonEmptyString(result.connectionEpoch, "checkpoint.lastStableAction.connectionEpoch");
+  unsignedIntegerString(result.playerRevision, "checkpoint.lastStableAction.playerRevision");
+  unsignedIntegerString(result.inventoryRevision, "checkpoint.lastStableAction.inventoryRevision");
 }
 
 function plannerState(value: unknown): void {
   const planner = record(value, "checkpoint.planner");
-  enumValue(
-    planner.phase,
-    Object.values(BeatGamePhase),
-    "checkpoint.planner.phase",
-  );
-  enumValue(
-    planner.status,
-    Object.values(BeatGameRunStatus),
-    "checkpoint.planner.status",
-  );
+  enumValue(planner.phase, Object.values(BeatGamePhase), "checkpoint.planner.phase");
+  enumValue(planner.status, Object.values(BeatGameRunStatus), "checkpoint.planner.status");
   nonEmptyString(planner.objective, "checkpoint.planner.objective");
-  nonNegativeInteger(
-    planner.retryCount,
-    "checkpoint.planner.retryCount",
-  );
-  stringArray(
-    planner.completedActions,
-    "checkpoint.planner.completedActions",
-  );
-  if (
-    planner.currentAction !== undefined
-    && typeof planner.currentAction !== "string"
-  ) {
+  nonNegativeInteger(planner.retryCount, "checkpoint.planner.retryCount");
+  stringArray(planner.completedActions, "checkpoint.planner.completedActions");
+  if (planner.currentAction !== undefined && typeof planner.currentAction !== "string") {
     throw new TypeError("checkpoint.planner.currentAction must be a string");
   }
   if (planner.currentActionId !== undefined) {
-    nonEmptyString(
-      planner.currentActionId,
-      "checkpoint.planner.currentActionId",
-    );
+    nonEmptyString(planner.currentActionId, "checkpoint.planner.currentActionId");
     if (planner.currentAction === undefined) {
-      throw new TypeError(
-        "checkpoint.planner.currentActionId requires currentAction",
-      );
+      throw new TypeError("checkpoint.planner.currentActionId requires currentAction");
     }
   }
   timestamp(planner.startedAt, "checkpoint.planner.startedAt");
@@ -283,10 +226,7 @@ function plannerState(value: unknown): void {
     throw new TypeError("checkpoint.planner.requirements must be an array");
   }
   planner.requirements.forEach((requirement, index) => {
-    const item = record(
-      requirement,
-      `checkpoint.planner.requirements[${index}]`,
-    );
+    const item = record(requirement, `checkpoint.planner.requirements[${index}]`);
     const prefix = `checkpoint.planner.requirements[${index}]`;
     nonEmptyString(item.key, `${prefix}.key`);
     stringArray(item.itemIds, `${prefix}.itemIds`);
@@ -301,25 +241,14 @@ function plannerState(value: unknown): void {
 function worldMemory(value: unknown): void {
   const memory = record(value, "checkpoint.memory");
   memoryEntries(memory.blocks, "checkpoint.memory.blocks", blockObservation);
-  memoryEntries(
-    memory.entities,
-    "checkpoint.memory.entities",
-    entityObservation,
-  );
-  memoryEntries(
-    memory.containers,
-    "checkpoint.memory.containers",
-    blockObservation,
-  );
+  memoryEntries(memory.entities, "checkpoint.memory.entities", entityObservation);
+  memoryEntries(memory.containers, "checkpoint.memory.containers", blockObservation);
   memoryEntries(memory.portals, "checkpoint.memory.portals", blockObservation);
   if (!Array.isArray(memory.portalWorkspaces)) {
     throw new TypeError("checkpoint.memory.portalWorkspaces must be an array");
   }
   memory.portalWorkspaces.forEach((workspace, index) =>
-    portalWorkspace(
-      workspace,
-      `checkpoint.memory.portalWorkspaces[${index}]`,
-    )
+    portalWorkspace(workspace, `checkpoint.memory.portalWorkspaces[${index}]`),
   );
   if (!Array.isArray(memory.places)) {
     throw new TypeError("checkpoint.memory.places must be an array");
@@ -328,15 +257,19 @@ function worldMemory(value: unknown): void {
     const name = `checkpoint.memory.places[${index}]`;
     const item = record(place, name);
     nonEmptyString(item.key, `${name}.key`);
-    enumValue(item.kind, [
-      "FORTRESS",
-      "BASTION",
-      "BLAZE_SPAWNER",
-      "SAFE_CORRIDOR",
-      "SHELTER",
-      "END_ENTRY",
-      "END_FIGHT",
-    ], `${name}.kind`);
+    enumValue(
+      item.kind,
+      [
+        "FORTRESS",
+        "BASTION",
+        "BLAZE_SPAWNER",
+        "SAFE_CORRIDOR",
+        "SHELTER",
+        "END_ENTRY",
+        "END_FIGHT",
+      ],
+      `${name}.kind`,
+    );
     position(item.position, `${name}.position`);
     timestamp(item.observedAt, `${name}.observedAt`);
     confidence(item.confidence, `${name}.confidence`);
@@ -348,33 +281,16 @@ function worldMemory(value: unknown): void {
     throw new TypeError("checkpoint.memory.skillHistory must be an array");
   }
   memory.skillHistory.forEach((skill, index) =>
-    durableSkill(skill, `checkpoint.memory.skillHistory[${index}]`)
+    durableSkill(skill, `checkpoint.memory.skillHistory[${index}]`),
   );
-  memoryEntries(
-    memory.unreachable,
-    "checkpoint.memory.unreachable",
-    position,
-  );
-  memoryEntries(
-    memory.deathPositions,
-    "checkpoint.memory.deathPositions",
-    deathPosition,
-  );
+  memoryEntries(memory.unreachable, "checkpoint.memory.unreachable", position);
+  memoryEntries(memory.deathPositions, "checkpoint.memory.deathPositions", deathPosition);
   if (memory.explorationFrontiers !== undefined) {
-    const frontiers = record(
-      memory.explorationFrontiers,
-      "checkpoint.memory.explorationFrontiers",
-    );
+    const frontiers = record(memory.explorationFrontiers, "checkpoint.memory.explorationFrontiers");
     for (const [key, value] of Object.entries(frontiers)) {
       nonEmptyString(key, "checkpoint.memory.explorationFrontiers key");
-      const frontier = record(
-        value,
-        `checkpoint.memory.explorationFrontiers.${key}`,
-      );
-      position(
-        frontier.origin,
-        `checkpoint.memory.explorationFrontiers.${key}.origin`,
-      );
+      const frontier = record(value, `checkpoint.memory.explorationFrontiers.${key}`);
+      position(frontier.origin, `checkpoint.memory.explorationFrontiers.${key}.origin`);
       positiveInteger(
         frontier.nextIndex,
         `checkpoint.memory.explorationFrontiers.${key}.nextIndex`,
@@ -387,10 +303,7 @@ function worldMemory(value: unknown): void {
         }
       }
       if (frontier.target !== undefined) {
-        position(
-          frontier.target,
-          `checkpoint.memory.explorationFrontiers.${key}.target`,
-        );
+        position(frontier.target, `checkpoint.memory.explorationFrontiers.${key}.target`);
       }
       if (frontier.targetAttempts !== undefined) {
         nonNegativeInteger(
@@ -413,11 +326,7 @@ function worldMemory(value: unknown): void {
     }
   }
   if (memory.latestDeath !== undefined) {
-    memoryEntry(
-      memory.latestDeath,
-      "checkpoint.memory.latestDeath",
-      position,
-    );
+    memoryEntry(memory.latestDeath, "checkpoint.memory.latestDeath", position);
   }
   if (!Array.isArray(memory.eyeSamples)) {
     throw new TypeError("checkpoint.memory.eyeSamples must be an array");
@@ -425,50 +334,30 @@ function worldMemory(value: unknown): void {
   memory.eyeSamples.forEach((sample, index) => {
     const item = record(sample, `checkpoint.memory.eyeSamples[${index}]`);
     position(item.origin, `checkpoint.memory.eyeSamples[${index}].origin`);
-    const direction = record(
-      item.direction,
-      `checkpoint.memory.eyeSamples[${index}].direction`,
-    );
+    const direction = record(item.direction, `checkpoint.memory.eyeSamples[${index}].direction`);
     finiteNumber(direction.x, "eye sample direction.x");
     finiteNumber(direction.z, "eye sample direction.z");
     timestamp(item.observedAt, "eye sample observedAt");
     confidence(item.confidence, "eye sample confidence");
   });
   if (memory.strongholdEstimate !== undefined) {
-    position(
-      memory.strongholdEstimate,
-      "checkpoint.memory.strongholdEstimate",
-    );
+    position(memory.strongholdEstimate, "checkpoint.memory.strongholdEstimate");
   }
 }
 
 function durableSkill(value: unknown, name: string): void {
   const skill = record(value, name);
   nonEmptyString(skill.skillId, `${name}.skillId`);
-  enumValue(
-    skill.kind,
-    Object.values(BeatGameDurableSkillKind),
-    `${name}.kind`,
-  );
+  enumValue(skill.kind, Object.values(BeatGameDurableSkillKind), `${name}.kind`);
   enumValue(skill.phase, Object.values(BeatGamePhase), `${name}.phase`);
   nonEmptyString(skill.action, `${name}.action`);
-  enumValue(
-    skill.status,
-    Object.values(BeatGameDurableSkillStatus),
-    `${name}.status`,
-  );
+  enumValue(skill.status, Object.values(BeatGameDurableSkillStatus), `${name}.status`);
   nonEmptyString(skill.substep, `${name}.substep`);
   positionArray(skill.targets, `${name}.targets`);
   positionArray(skill.protectedBlocks, `${name}.protectedBlocks`);
   stringArray(skill.protectedItemIds, `${name}.protectedItemIds`);
-  positionArray(
-    skill.completedWorldChanges,
-    `${name}.completedWorldChanges`,
-  );
-  nonNegativeIntegerRecord(
-    skill.requiredResources,
-    `${name}.requiredResources`,
-  );
+  positionArray(skill.completedWorldChanges, `${name}.completedWorldChanges`);
+  nonNegativeIntegerRecord(skill.requiredResources, `${name}.requiredResources`);
   nonNegativeIntegerRecord(skill.retries, `${name}.retries`);
   if (skill.completionEvidence !== undefined) {
     nonEmptyString(skill.completionEvidence, `${name}.completionEvidence`);
@@ -486,45 +375,24 @@ function portalWorkspace(value: unknown, name: string): void {
   position(workspace.origin, `${name}.origin`);
   enumValue(workspace.axis, ["x", "z"], `${name}.axis`);
   enumValue(workspace.method, ["OBSIDIAN", "CAST"], `${name}.method`);
-  enumValue(workspace.status, [
-    "RESERVED",
-    "BUILDING",
-    "IGNITED",
-    "ENTERING",
-    "ENTERED",
-    "ABANDONED",
-  ], `${name}.status`);
+  enumValue(
+    workspace.status,
+    ["RESERVED", "BUILDING", "IGNITED", "ENTERING", "ENTERED", "ABANDONED"],
+    `${name}.status`,
+  );
   positionArray(workspace.targetFrame, `${name}.targetFrame`);
   positionArray(workspace.observedFrame, `${name}.observedFrame`);
   positionArray(workspace.interior, `${name}.interior`);
   positionArray(workspace.protectedBlocks, `${name}.protectedBlocks`);
-  positionArray(
-    workspace.candidateLavaSources,
-    `${name}.candidateLavaSources`,
-  );
-  positionArray(
-    workspace.rejectedLavaSources,
-    `${name}.rejectedLavaSources`,
-  );
+  positionArray(workspace.candidateLavaSources, `${name}.candidateLavaSources`);
+  positionArray(workspace.rejectedLavaSources, `${name}.rejectedLavaSources`);
   if (workspace.waterSource !== undefined) {
     position(workspace.waterSource, `${name}.waterSource`);
   }
   positionArray(workspace.waterFlow, `${name}.waterFlow`);
-  enumValue(
-    workspace.bucketState,
-    ["UNKNOWN", "EMPTY", "WATER", "LAVA"],
-    `${name}.bucketState`,
-  );
-  enumValue(
-    workspace.ignitionState,
-    ["NOT_ATTEMPTED", "IGNITED"],
-    `${name}.ignitionState`,
-  );
-  enumValue(
-    workspace.interiorState,
-    ["UNKNOWN", "CLEAR", "PORTAL"],
-    `${name}.interiorState`,
-  );
+  enumValue(workspace.bucketState, ["UNKNOWN", "EMPTY", "WATER", "LAVA"], `${name}.bucketState`);
+  enumValue(workspace.ignitionState, ["NOT_ATTEMPTED", "IGNITED"], `${name}.ignitionState`);
+  enumValue(workspace.interiorState, ["UNKNOWN", "CLEAR", "PORTAL"], `${name}.interiorState`);
   nonNegativeInteger(workspace.entryAttempts, `${name}.entryAttempts`);
   timestamp(workspace.observedAt, `${name}.observedAt`);
   timestamp(workspace.updatedAt, `${name}.updatedAt`);
@@ -571,9 +439,7 @@ function memoryEntries(
   if (!Array.isArray(value)) {
     throw new TypeError(`${name} must be an array`);
   }
-  value.forEach((entry, index) =>
-    memoryEntry(entry, `${name}[${index}]`, validateValue)
-  );
+  value.forEach((entry, index) => memoryEntry(entry, `${name}[${index}]`, validateValue));
 }
 
 function memoryEntry(
@@ -665,10 +531,7 @@ function unsignedIntegerString(value: unknown, name: string): void {
 }
 
 function stringArray(value: unknown, name: string): void {
-  if (
-    !Array.isArray(value)
-    || value.some((item) => typeof item !== "string")
-  ) {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
     throw new TypeError(`${name} must be an array of strings`);
   }
 }
@@ -712,11 +575,7 @@ function confidence(value: unknown, name: string): void {
   }
 }
 
-function enumValue<T>(
-  value: unknown,
-  values: readonly T[],
-  name: string,
-): void {
+function enumValue<T>(value: unknown, values: readonly T[], name: string): void {
   if (!values.includes(value as T)) {
     throw new TypeError(`${name} is not a supported value`);
   }

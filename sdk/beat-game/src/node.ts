@@ -1,11 +1,4 @@
-import {
-  mkdir,
-  open,
-  readFile,
-  rename,
-  rm,
-  stat,
-} from "node:fs/promises";
+import { mkdir, open, readFile, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { Effect } from "effect";
@@ -24,8 +17,7 @@ export interface JsonFileCheckpointStoreOptions {
   readonly staleLockMs?: number;
 }
 
-export class JsonFileBeatGameCheckpointStore
-  implements BeatGameCheckpointStore {
+export class JsonFileBeatGameCheckpointStore implements BeatGameCheckpointStore {
   readonly #lockTimeoutMs: number;
   readonly #staleLockMs: number;
 
@@ -33,22 +25,13 @@ export class JsonFileBeatGameCheckpointStore
     private readonly directory: string,
     options: JsonFileCheckpointStoreOptions = {},
   ) {
-    this.#lockTimeoutMs = positiveInteger(
-      options.lockTimeoutMs ?? 5_000,
-      "lockTimeoutMs",
-    );
-    this.#staleLockMs = positiveInteger(
-      options.staleLockMs ?? 30_000,
-      "staleLockMs",
-    );
+    this.#lockTimeoutMs = positiveInteger(options.lockTimeoutMs ?? 5_000, "lockTimeoutMs");
+    this.#staleLockMs = positiveInteger(options.staleLockMs ?? 30_000, "staleLockMs");
   }
 
   public readonly load = (
     runId: string,
-  ): Effect.Effect<
-    BeatGameCheckpoint | undefined,
-    BeatGameCheckpointError
-  > =>
+  ): Effect.Effect<BeatGameCheckpoint | undefined, BeatGameCheckpointError> =>
     Effect.tryPromise({
       try: async () => this.#read(runId),
       catch: (cause) =>
@@ -72,26 +55,18 @@ export class JsonFileBeatGameCheckpointStore
           assertValidCheckpoint(checkpoint);
           const current = await this.#read(checkpoint.runId);
           const validation = Effect.runSync(
-            Effect.result(validateCheckpointRevision(
-              checkpoint,
-              current,
-              expectedRevision,
-            )),
+            Effect.result(validateCheckpointRevision(checkpoint, current, expectedRevision)),
           );
           if (validation._tag === "Failure") {
             throw validation.failure;
           }
           await mkdir(this.directory, { recursive: true });
           const path = this.#path(checkpoint.runId);
-          const temporary =
-            `${path}.${process.pid}.${crypto.randomUUID()}.tmp`;
+          const temporary = `${path}.${process.pid}.${crypto.randomUUID()}.tmp`;
           try {
             const handle = await open(temporary, "wx", 0o600);
             try {
-              await handle.writeFile(
-                `${JSON.stringify(checkpoint, null, 2)}\n`,
-                "utf8",
-              );
+              await handle.writeFile(`${JSON.stringify(checkpoint, null, 2)}\n`, "utf8");
               await handle.sync();
             } finally {
               await handle.close();
@@ -107,13 +82,13 @@ export class JsonFileBeatGameCheckpointStore
         cause instanceof BeatGameCheckpointError
           ? cause
           : makeCheckpointError(
-            checkpoint,
-            checkpoint.runId,
-            `Could not save checkpoint ${checkpoint.runId}`,
-            expectedRevision,
-            undefined,
-            cause,
-          ),
+              checkpoint,
+              checkpoint.runId,
+              `Could not save checkpoint ${checkpoint.runId}`,
+              expectedRevision,
+              undefined,
+              cause,
+            ),
     });
 
   public readonly remove = (
@@ -124,10 +99,7 @@ export class JsonFileBeatGameCheckpointStore
       try: async () =>
         this.#withLock(runId, async () => {
           const current = await this.#read(runId);
-          if (
-            expectedRevision !== undefined
-            && current?.revision !== expectedRevision
-          ) {
+          if (expectedRevision !== undefined && current?.revision !== expectedRevision) {
             throw makeCheckpointError(
               current,
               runId,
@@ -142,13 +114,13 @@ export class JsonFileBeatGameCheckpointStore
         cause instanceof BeatGameCheckpointError
           ? cause
           : makeCheckpointError(
-            undefined,
-            runId,
-            `Could not remove checkpoint ${runId}`,
-            expectedRevision,
-            undefined,
-            cause,
-          ),
+              undefined,
+              runId,
+              `Could not remove checkpoint ${runId}`,
+              expectedRevision,
+              undefined,
+              cause,
+            ),
     });
 
   async #read(runId: string): Promise<BeatGameCheckpoint | undefined> {
@@ -163,10 +135,7 @@ export class JsonFileBeatGameCheckpointStore
     }
   }
 
-  async #withLock<T>(
-    runId: string,
-    operation: () => Promise<T>,
-  ): Promise<T> {
+  async #withLock<T>(runId: string, operation: () => Promise<T>): Promise<T> {
     await mkdir(this.directory, { recursive: true });
     const lockPath = `${this.#path(runId)}.lock`;
     const deadline = Date.now() + this.#lockTimeoutMs;
@@ -189,9 +158,7 @@ export class JsonFileBeatGameCheckpointStore
           continue;
         }
         if (Date.now() >= deadline) {
-          throw new Error(
-            `Timed out waiting for checkpoint lock ${lockPath}`,
-          );
+          throw new Error(`Timed out waiting for checkpoint lock ${lockPath}`);
         }
         await delay(50);
       }
@@ -242,10 +209,7 @@ async function syncDirectory(directory: string): Promise<void> {
       await handle.close();
     }
   } catch (error) {
-    if (
-      isNodeError(error)
-      && ["EINVAL", "EISDIR", "ENOTSUP", "EPERM"].includes(error.code ?? "")
-    ) {
+    if (isNodeError(error) && ["EINVAL", "EISDIR", "ENOTSUP", "EPERM"].includes(error.code ?? "")) {
       return;
     }
     throw error;

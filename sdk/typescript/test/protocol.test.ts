@@ -21,7 +21,7 @@ describe("SoulFireProtocol", () => {
           let sendRequest: SendRawPacketRequest | undefined;
           const transport = createRouterTransport(({ service }) => {
             service(BotProtocolService, {
-              getProtocolInfo(request) {
+              getProtocolInfo(_request) {
                 return {
                   minecraftProtocolVersion: 772,
                   minecraftVersionName: "26.2",
@@ -68,9 +68,7 @@ describe("SoulFireProtocol", () => {
             baseUrl: "https://soulfire.example.com",
             transport,
           });
-          const protocol = soulfire
-            .instance("instance-id")
-            .bot("bot-id").protocol;
+          const protocol = soulfire.instance("instance-id").bot("bot-id").protocol;
           const info = yield* protocol.info();
           const schemas = yield* protocol.schemas(PacketDirection.CLIENTBOUND);
           const events = Array.from(

@@ -29,10 +29,7 @@ import type {
   VillagerTradeTaskOptions,
 } from "./tasks.js";
 
-type RecipeRequest<T extends DescMessage> = Omit<
-  MessageInitShape<T>,
-  "$typeName" | "scope"
->;
+type RecipeRequest<T extends DescMessage> = Omit<MessageInitShape<T>, "$typeName" | "scope">;
 
 export class SoulFireRecipes {
   public constructor(
@@ -52,10 +49,7 @@ export class SoulFireRecipes {
     options?: CallOptions,
   ): Effect.Effect<ListRecipesResponse, SoulFireOperationError> {
     return rpc("SoulFireRecipes.list", (signal) =>
-      this.client.listRecipes(
-        { ...request, scope: this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.listRecipes({ ...request, scope: this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -69,10 +63,7 @@ export class SoulFireRecipes {
     options?: CallOptions,
   ): Effect.Effect<CanCraftResponse, SoulFireOperationError> {
     return rpc("SoulFireRecipes.canCraft", (signal) =>
-      this.client.canCraft(
-        { ...request, scope: this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.canCraft({ ...request, scope: this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -83,10 +74,7 @@ export class SoulFireRecipes {
     options?: CallOptions,
   ): Effect.Effect<ListVillagerTradesResponse, SoulFireOperationError> {
     return rpc("SoulFireRecipes.listVillagerTrades", (signal) =>
-      this.client.listVillagerTrades(
-        { scope: this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.listVillagerTrades({ scope: this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -98,10 +86,7 @@ export class SoulFireRecipes {
     recipeId: string,
     count = 1,
     options: CraftTaskOptions = {},
-  ): Effect.Effect<
-    SoulFireTask<typeof CraftTaskResultSchema>,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<SoulFireTask<typeof CraftTaskResultSchema>, SoulFireOperationError> {
     return this.tasks.craft(recipeId, count, options);
   }
 
@@ -115,7 +100,7 @@ export class SoulFireRecipes {
     options: CraftTaskOptions = {},
   ): Stream.Stream<BotTaskEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return this.tasks.runCraft(recipeId, count, options);
       }),
     );
@@ -128,10 +113,7 @@ export class SoulFireRecipes {
     input: MessageInitShape<typeof ItemSelectorSchema>,
     count = 1,
     options: SmeltTaskOptions = {},
-  ): Effect.Effect<
-    SoulFireTask<typeof SmeltTaskResultSchema>,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<SoulFireTask<typeof SmeltTaskResultSchema>, SoulFireOperationError> {
     return this.tasks.smelt(input, count, options);
   }
 
@@ -145,7 +127,7 @@ export class SoulFireRecipes {
     options: SmeltTaskOptions = {},
   ): Stream.Stream<BotTaskEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return this.tasks.runSmelt(input, count, options);
       }),
     );
@@ -159,10 +141,7 @@ export class SoulFireRecipes {
     ingredient: MessageInitShape<typeof ItemSelectorSchema>,
     count = 1,
     options: BrewTaskOptions = {},
-  ): Effect.Effect<
-    SoulFireTask<typeof BrewTaskResultSchema>,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<SoulFireTask<typeof BrewTaskResultSchema>, SoulFireOperationError> {
     return this.tasks.brew(input, ingredient, count, options);
   }
 
@@ -176,7 +155,7 @@ export class SoulFireRecipes {
     options: BrewTaskOptions = {},
   ): Stream.Stream<BotTaskEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return this.tasks.runBrew(input, ingredient, count, options);
       }),
     );
@@ -190,10 +169,7 @@ export class SoulFireRecipes {
     offerIndex: number,
     count = 1,
     options: VillagerTradeTaskOptions = {},
-  ): Effect.Effect<
-    SoulFireTask<typeof VillagerTradeTaskResultSchema>,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<SoulFireTask<typeof VillagerTradeTaskResultSchema>, SoulFireOperationError> {
     return this.tasks.villagerTrade(offerIndex, count, options);
   }
 
@@ -207,7 +183,7 @@ export class SoulFireRecipes {
     options: VillagerTradeTaskOptions = {},
   ): Stream.Stream<BotTaskEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return this.tasks.runVillagerTrade(offerIndex, count, options);
       }),
     );

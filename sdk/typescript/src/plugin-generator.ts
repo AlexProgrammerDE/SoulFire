@@ -123,9 +123,7 @@ interface GenerationModel {
   readonly pythonModuleName: string;
 }
 
-export function pluginMetadata(
-  descriptor: PluginApiDescriptor,
-): PluginSdkMetadata {
+export function pluginMetadata(descriptor: PluginApiDescriptor): PluginSdkMetadata {
   return {
     pluginId: descriptor.pluginId,
     pluginVersion: descriptor.pluginVersion,
@@ -141,17 +139,13 @@ export function pluginMetadata(
     taskTypes: descriptor.taskTypes.map((task) => ({
       inputTypeUrl: task.inputTypeUrl,
       resultTypeUrl: task.resultTypeUrl,
-      ...(task.progressTypeUrl === undefined
-        ? {}
-        : { progressTypeUrl: task.progressTypeUrl }),
+      ...(task.progressTypeUrl === undefined ? {} : { progressTypeUrl: task.progressTypeUrl }),
       permissions: [...task.permissions],
     })),
     ...(descriptor.documentationUrl === undefined
       ? {}
       : { documentationUrl: descriptor.documentationUrl }),
-    ...(descriptor.sourceUrl === undefined
-      ? {}
-      : { sourceUrl: descriptor.sourceUrl }),
+    ...(descriptor.sourceUrl === undefined ? {} : { sourceUrl: descriptor.sourceUrl }),
     ...(descriptor.sdkPackages?.typescriptPackage === undefined
       ? {}
       : { typescriptPackage: descriptor.sdkPackages.typescriptPackage }),
@@ -161,9 +155,7 @@ export function pluginMetadata(
   };
 }
 
-export async function generatePluginSdk(
-  options: GeneratePluginSdkOptions,
-): Promise<string> {
+export async function generatePluginSdk(options: GeneratePluginSdkOptions): Promise<string> {
   const model = generationModel(options);
   const defaultDirectory = `${model.pythonPackageName}-${options.language}`;
   const outputDirectory = resolve(options.outputDirectory ?? defaultDirectory);
@@ -198,25 +190,15 @@ export async function generatePluginSdk(
 }
 
 function generationModel(options: GeneratePluginSdkOptions): GenerationModel {
-  const descriptorSha256 = createHash("sha256")
-    .update(options.descriptorSet)
-    .digest("hex");
-  const descriptorSet = fromBinary(
-    FileDescriptorSetSchema,
-    options.descriptorSet,
-  );
+  const descriptorSha256 = createHash("sha256").update(options.descriptorSet).digest("hex");
+  const descriptorSet = fromBinary(FileDescriptorSetSchema, options.descriptorSet);
   const inferred = inferMetadata(descriptorSet, descriptorSha256);
   const supplied = options.metadata;
   const pluginId = options.pluginId ?? supplied?.pluginId ?? inferred.pluginId;
   if (pluginId.length === 0) {
-    throw new Error(
-      "Unable to infer a plugin ID from the descriptor. Pass --plugin.",
-    );
+    throw new Error("Unable to infer a plugin ID from the descriptor. Pass --plugin.");
   }
-  if (
-    supplied !== undefined &&
-    supplied.descriptorSha256.toLowerCase() !== descriptorSha256
-  ) {
+  if (supplied !== undefined && supplied.descriptorSha256.toLowerCase() !== descriptorSha256) {
     throw new Error(
       `Descriptor hash mismatch: expected ${supplied.descriptorSha256}, received ${descriptorSha256}`,
     );
@@ -227,14 +209,9 @@ function generationModel(options: GeneratePluginSdkOptions): GenerationModel {
   const metadata: PluginSdkMetadata = {
     ...(supplied ?? inferred),
     pluginId,
-    pluginVersion:
-      options.pluginVersion ??
-      supplied?.pluginVersion ??
-      inferred.pluginVersion,
+    pluginVersion: options.pluginVersion ?? supplied?.pluginVersion ?? inferred.pluginVersion,
     apiMajorVersion:
-      options.apiMajorVersion ??
-      supplied?.apiMajorVersion ??
-      inferred.apiMajorVersion,
+      options.apiMajorVersion ?? supplied?.apiMajorVersion ?? inferred.apiMajorVersion,
     requiredSoulFireVersion:
       options.requiredSoulFireVersion ??
       supplied?.requiredSoulFireVersion ??
@@ -253,9 +230,7 @@ function generationModel(options: GeneratePluginSdkOptions): GenerationModel {
     tasks.length === 0 &&
     metadata.taskTypeUrls.length === 0
   ) {
-    throw new Error(
-      "The descriptor set does not contain a plugin RPC service, event, or task",
-    );
+    throw new Error("The descriptor set does not contain a plugin RPC service, event, or task");
   }
   const sourceFiles = sourceClosure(descriptorSet.file, [
     ...services.map((service) => service.fileName),
@@ -268,13 +243,9 @@ function generationModel(options: GeneratePluginSdkOptions): GenerationModel {
   ]);
   const safeId = packageSegment(pluginId);
   const typescriptPackageName =
-    options.packageName ??
-    metadata.typescriptPackage ??
-    `soulfire-plugin-${safeId}`;
+    options.packageName ?? metadata.typescriptPackage ?? `soulfire-plugin-${safeId}`;
   const pythonPackageName =
-    options.packageName ??
-    metadata.pythonPackage ??
-    `soulfire-plugin-${safeId}`;
+    options.packageName ?? metadata.pythonPackage ?? `soulfire-plugin-${safeId}`;
 
   return {
     descriptorSet,
@@ -315,8 +286,7 @@ function inferMetadata(
     author: "",
     license: "LicenseRef-Proprietary",
     requiredSoulFireVersion: "*",
-    apiMajorVersion:
-      versionPart === undefined ? 1 : Number.parseInt(versionPart.slice(1), 10),
+    apiMajorVersion: versionPart === undefined ? 1 : Number.parseInt(versionPart.slice(1), 10),
     descriptorSha256,
     serviceNames: services.map(({ fullName }) => fullName),
     eventTypeUrls: [],
@@ -358,9 +328,7 @@ function serviceModels(
   );
 }
 
-function indexPythonTypes(
-  descriptorSet: FileDescriptorSet,
-): ReadonlyMap<string, PythonType> {
+function indexPythonTypes(descriptorSet: FileDescriptorSet): ReadonlyMap<string, PythonType> {
   const result = new Map<string, PythonType>();
   for (const file of descriptorSet.file) {
     const moduleName = protoPythonModule(file.name);
@@ -390,9 +358,7 @@ function eventModels(
   typeUrls: readonly string[],
 ): readonly EventModel[] {
   return [...new Set(typeUrls)].map((typeUrl) => {
-    const typeName = typeUrl.includes("/")
-      ? typeUrl.slice(typeUrl.lastIndexOf("/") + 1)
-      : typeUrl;
+    const typeName = typeUrl.includes("/") ? typeUrl.slice(typeUrl.lastIndexOf("/") + 1) : typeUrl;
     const messageType = requirePythonType(messageTypes, `.${typeName}`);
     const simpleName = typeName.slice(typeName.lastIndexOf(".") + 1);
     return {
@@ -409,30 +375,18 @@ function taskModels(
   tasks: readonly PluginTaskMetadata[],
 ): readonly TaskModel[] {
   return tasks.map((task) => {
-    const inputType = requirePythonType(
-      messageTypes,
-      `.${typeNameFromUrl(task.inputTypeUrl)}`,
-    );
-    const resultType = requirePythonType(
-      messageTypes,
-      `.${typeNameFromUrl(task.resultTypeUrl)}`,
-    );
-    const inputName =
-      typeNameFromUrl(task.inputTypeUrl).split(".").at(-1) ?? "PluginTask";
+    const inputType = requirePythonType(messageTypes, `.${typeNameFromUrl(task.inputTypeUrl)}`);
+    const resultType = requirePythonType(messageTypes, `.${typeNameFromUrl(task.resultTypeUrl)}`);
+    const inputName = typeNameFromUrl(task.inputTypeUrl).split(".").at(-1) ?? "PluginTask";
     const methodName = inputName.replace(/Task$/, "") || inputName;
     const progressType =
       task.progressTypeUrl === undefined
         ? undefined
-        : requirePythonType(
-            messageTypes,
-            `.${typeNameFromUrl(task.progressTypeUrl)}`,
-          );
+        : requirePythonType(messageTypes, `.${typeNameFromUrl(task.progressTypeUrl)}`);
     return {
       inputTypeUrl: task.inputTypeUrl,
       resultTypeUrl: task.resultTypeUrl,
-      ...(task.progressTypeUrl === undefined
-        ? {}
-        : { progressTypeUrl: task.progressTypeUrl }),
+      ...(task.progressTypeUrl === undefined ? {} : { progressTypeUrl: task.progressTypeUrl }),
       localName: lowerCamel(methodName),
       pythonName: snakeCase(methodName),
       inputType,
@@ -443,20 +397,13 @@ function taskModels(
 }
 
 function typeNameFromUrl(typeUrl: string): string {
-  return typeUrl.includes("/")
-    ? typeUrl.slice(typeUrl.lastIndexOf("/") + 1)
-    : typeUrl;
+  return typeUrl.includes("/") ? typeUrl.slice(typeUrl.lastIndexOf("/") + 1) : typeUrl;
 }
 
-function requirePythonType(
-  types: ReadonlyMap<string, PythonType>,
-  fullName: string,
-): PythonType {
+function requirePythonType(types: ReadonlyMap<string, PythonType>, fullName: string): PythonType {
   const type = types.get(fullName);
   if (type === undefined) {
-    throw new Error(
-      `RPC message type is missing from descriptor set: ${fullName}`,
-    );
+    throw new Error(`RPC message type is missing from descriptor set: ${fullName}`);
   }
   return type;
 }
@@ -483,10 +430,7 @@ function sourceClosure(
   return [...included].sort();
 }
 
-async function generateTypeScript(
-  outputDirectory: string,
-  model: GenerationModel,
-): Promise<void> {
+async function generateTypeScript(outputDirectory: string, model: GenerationModel): Promise<void> {
   const packageJson = {
     name: model.typescriptPackageName,
     version: model.metadata.pluginVersion,
@@ -555,21 +499,9 @@ async function generateTypeScript(
     `${JSON.stringify(tsconfig, null, 2)}\n`,
     "utf8",
   );
-  await writeFile(
-    join(outputDirectory, "bunfig.toml"),
-    '[install]\nlinker = "hoisted"\n',
-    "utf8",
-  );
-  await writeFile(
-    join(outputDirectory, "src", "index.ts"),
-    typeScriptEffectSource(model),
-    "utf8",
-  );
-  await writeFile(
-    join(outputDirectory, "README.md"),
-    typeScriptReadme(model),
-    "utf8",
-  );
+  await writeFile(join(outputDirectory, "bunfig.toml"), '[install]\nlinker = "hoisted"\n', "utf8");
+  await writeFile(join(outputDirectory, "src", "index.ts"), typeScriptEffectSource(model), "utf8");
+  await writeFile(join(outputDirectory, "README.md"), typeScriptReadme(model), "utf8");
   await runBufGenerate(outputDirectory, model.sourceFiles, {
     version: "v2",
     plugins: [
@@ -583,15 +515,8 @@ async function generateTypeScript(
   await rewriteTypeScriptSharedImports(outputDirectory);
 }
 
-async function generatePython(
-  outputDirectory: string,
-  model: GenerationModel,
-): Promise<void> {
-  const moduleDirectory = join(
-    outputDirectory,
-    "src",
-    ...model.pythonModuleName.split("."),
-  );
+async function generatePython(outputDirectory: string, model: GenerationModel): Promise<void> {
+  const moduleDirectory = join(outputDirectory, "src", ...model.pythonModuleName.split("."));
   await mkdir(moduleDirectory, { recursive: true });
   const pyproject = `[build-system]
 requires = ["hatchling>=1.27"]
@@ -630,16 +555,8 @@ target-version = "py314"
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 `;
   await writeFile(join(outputDirectory, "pyproject.toml"), pyproject, "utf8");
-  await writeFile(
-    join(moduleDirectory, "sdk.py"),
-    pythonSdkSource(model),
-    "utf8",
-  );
-  await writeFile(
-    join(moduleDirectory, "__init__.py"),
-    pythonInitSource(model),
-    "utf8",
-  );
+  await writeFile(join(moduleDirectory, "sdk.py"), pythonSdkSource(model), "utf8");
+  await writeFile(join(moduleDirectory, "__init__.py"), pythonInitSource(model), "utf8");
   await writeFile(join(moduleDirectory, "py.typed"), "", "utf8");
   await writeFile(
     join(moduleDirectory, "plugin-api.binpb"),
@@ -649,11 +566,7 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
     join(moduleDirectory, "soulfire-plugin.json"),
     await readFile(join(outputDirectory, "soulfire-plugin.json")),
   );
-  await writeFile(
-    join(outputDirectory, "README.md"),
-    pythonReadme(model),
-    "utf8",
-  );
+  await writeFile(join(outputDirectory, "README.md"), pythonReadme(model), "utf8");
   await runBufGenerate(outputDirectory, model.sourceFiles, {
     version: "v2",
     plugins: [
@@ -718,11 +631,7 @@ function resolveBufExecutable(): string {
   }
   try {
     const packagePath = require.resolve(`${packageName}/package.json`);
-    return join(
-      dirname(packagePath),
-      "bin",
-      process.platform === "win32" ? "buf.exe" : "buf",
-    );
+    return join(dirname(packagePath), "bin", process.platform === "win32" ? "buf.exe" : "buf");
   } catch (error) {
     throw new Error(
       `The optional Buf binary package ${packageName} is unavailable. Reinstall @soulfiremc/sdk with optional dependencies enabled.`,
@@ -735,10 +644,7 @@ function typeScriptEffectSource(model: GenerationModel): string {
   const imports = typeScriptImports(model);
   const clients = model.services.map(effectServiceSource).join("\n\n");
   const fields = model.services
-    .map(
-      (service) =>
-        `    private readonly ${service.localName}: ${service.name}Client,`,
-    )
+    .map((service) => `    private readonly ${service.localName}: ${service.name}Client,`)
     .join("\n");
   const constructors = model.services
     .map(
@@ -764,8 +670,7 @@ function typeScriptEffectSource(model: GenerationModel): string {
     )`,
       ),
       ...model.events.map(
-        (event) =>
-          `descriptor.eventTypeUrls.includes(${JSON.stringify(event.typeUrl)})`,
+        (event) => `descriptor.eventTypeUrls.includes(${JSON.stringify(event.typeUrl)})`,
       ),
       ...model.tasks.map(
         (task) =>
@@ -834,29 +739,13 @@ function typeScriptImports(model: GenerationModel): string {
     addImport(groups, service.fileName, service.name);
   }
   for (const event of model.events) {
-    addImport(
-      groups,
-      event.messageType.fileName,
-      event.messageType.typescriptSchemaName,
-    );
+    addImport(groups, event.messageType.fileName, event.messageType.typescriptSchemaName);
   }
   for (const task of model.tasks) {
-    addImport(
-      groups,
-      task.inputType.fileName,
-      task.inputType.typescriptSchemaName,
-    );
-    addImport(
-      groups,
-      task.resultType.fileName,
-      task.resultType.typescriptSchemaName,
-    );
+    addImport(groups, task.inputType.fileName, task.inputType.typescriptSchemaName);
+    addImport(groups, task.resultType.fileName, task.resultType.typescriptSchemaName);
     if (task.progressType !== undefined) {
-      addImport(
-        groups,
-        task.progressType.fileName,
-        task.progressType.typescriptSchemaName,
-      );
+      addImport(groups, task.progressType.fileName, task.progressType.typescriptSchemaName);
     }
   }
   return [...groups.entries()]
@@ -987,17 +876,22 @@ plugin = _PluginModule()
 }
 
 function pythonPluginClientClass(model: GenerationModel, className: string): string {
-  const fields = model.services.map((service) =>
-    `        self.${service.pythonName} = ${service.name}Effects(
+  const fields = model.services
+    .map(
+      (service) =>
+        `        self.${service.pythonName} = ${service.name}Effects(
             catalog.service(${service.name}Client)
-        )`
-  ).join("\n");
+        )`,
+    )
+    .join("\n");
   const sections = [
     `    def __init__(self, catalog: PluginCatalog) -> None:
         self._catalog = catalog${fields.length === 0 ? "" : `\n${fields}`}`,
     pythonEventMethods(model.events),
     pythonTaskMethods(model.tasks),
-  ].filter((value) => value.length > 0).join("\n\n");
+  ]
+    .filter((value) => value.length > 0)
+    .join("\n\n");
   return `class ${className}:
     __slots__ = (${pythonSlots(model.services)})
 
@@ -1089,24 +983,29 @@ function pythonRuntimeImports(model: GenerationModel): string {
     effectImports.length > 0 ? `from effect_py import ${effectImports.join(", ")}` : "",
     "from soulfire.errors import SoulFireOperationError",
     "from soulfire.plugin_api_pb2 import PluginApiDescriptor",
-    model.events.length > 0 ? "from soulfire.plugins import PluginCatalog, TypedPluginEvent" : "from soulfire.plugins import PluginCatalog",
+    model.events.length > 0
+      ? "from soulfire.plugins import PluginCatalog, TypedPluginEvent"
+      : "from soulfire.plugins import PluginCatalog",
     model.events.length > 0 || hasStreamingMethods ? "from soulfire.streams import Stream" : "",
-    model.tasks.length > 0 ? "from soulfire.tasks import SoulFireTask, SoulFireTasks, TaskStartOptions" : "",
-    transportImports.length > 0 ? `from soulfire.transport import ${transportImports.join(", ")}` : "",
+    model.tasks.length > 0
+      ? "from soulfire.tasks import SoulFireTask, SoulFireTasks, TaskStartOptions"
+      : "",
+    transportImports.length > 0
+      ? `from soulfire.transport import ${transportImports.join(", ")}`
+      : "",
   ];
   return [
     model.tasks.length > 0 ? "from typing import Unpack" : "",
     imports.filter((value) => value.length > 0).join("\n"),
-  ].filter((value) => value.length > 0).join("\n\n");
+  ]
+    .filter((value) => value.length > 0)
+    .join("\n\n");
 }
 
 function pythonImports(model: GenerationModel): string {
   const groups = new Map<string, Set<string>>();
   for (const service of model.services) {
-    const connect = pythonImportModule(
-      model,
-      protoPythonConnectModule(service.fileName),
-    );
+    const connect = pythonImportModule(model, protoPythonConnectModule(service.fileName));
     addImport(groups, connect, `${service.name}Client`);
     for (const method of service.methods) {
       addImport(
@@ -1158,20 +1057,18 @@ function pythonImports(model: GenerationModel): string {
     .join("\n");
 }
 
-function addImport(
-  imports: Map<string, Set<string>>,
-  module: string,
-  name: string,
-): void {
+function addImport(imports: Map<string, Set<string>>, module: string, name: string): void {
   const names = imports.get(module) ?? new Set<string>();
   names.add(name);
   imports.set(module, names);
 }
 
 function pythonServiceSource(service: ServiceModel): string {
-  const methods = service.methods.map((method) => {
-    const operation = `${service.fullName}/${method.name}`;
-    return method.serverStreaming ? `    def ${method.pythonName}(
+  const methods = service.methods
+    .map((method) => {
+      const operation = `${service.fullName}/${method.name}`;
+      return method.serverStreaming
+        ? `    def ${method.pythonName}(
         self,
         request: ${method.inputType.expression},
         *,
@@ -1180,7 +1077,8 @@ function pythonServiceSource(service: ServiceModel): string {
         return rpc_stream(
             ${JSON.stringify(operation)},
             lambda: self._client.${method.pythonName}(request, timeout_ms=timeout_ms),
-        )` : `    @fn(${JSON.stringify(operation)})
+        )`
+        : `    @fn(${JSON.stringify(operation)})
     def ${method.pythonName}(
         self,
         request: ${method.inputType.expression},
@@ -1193,7 +1091,8 @@ function pythonServiceSource(service: ServiceModel): string {
                 lambda: self._client.${method.pythonName}(request, timeout_ms=timeout_ms),
             )
         )`;
-  }).join("\n\n");
+    })
+    .join("\n\n");
   return `class ${service.name}Effects:
     __slots__ = ("_client",)
 
@@ -1204,27 +1103,36 @@ ${methods}`;
 }
 
 function pythonEventMethods(events: readonly EventModel[]): string {
-  return events.map((event) => `    def ${event.pythonName}(
+  return events
+    .map(
+      (event) => `    def ${event.pythonName}(
         self, *, instance_id: str | None = None, bot_id: str | None = None,
         task_id: str | None = None, after_sequence: int = 0, timeout_ms: int | None = None,
     ) -> Stream[TypedPluginEvent[${event.messageType.expression}], SoulFireOperationError]:
         return self._catalog.typed_events(
             PLUGIN_ID, ${event.messageType.expression}, instance_id=instance_id,
             bot_id=bot_id, task_id=task_id, after_sequence=after_sequence, timeout_ms=timeout_ms,
-        )`).join("\n\n");
+        )`,
+    )
+    .join("\n\n");
 }
 
 function pythonTaskMethods(tasks: readonly TaskModel[]): string {
-  return tasks.map((task) => `    def ${task.pythonName}(
+  return tasks
+    .map(
+      (task) => `    def ${task.pythonName}(
         self, tasks: SoulFireTasks, task_input: ${task.inputType.expression},
         **options: Unpack[TaskStartOptions],
     ) -> Effect[SoulFireTask[${task.resultType.expression}], SoulFireOperationError]:
-        return tasks.start(task_input, ${task.resultType.expression}, **options)`).join("\n\n");
+        return tasks.start(task_input, ${task.resultType.expression}, **options)`,
+    )
+    .join("\n\n");
 }
 
 function pythonInitSource(model: GenerationModel): string {
   const exports = [
-    `${pascalCase(model.metadata.pluginId)}PluginClient`, "plugin",
+    `${pascalCase(model.metadata.pluginId)}PluginClient`,
+    "plugin",
     ...model.services.map((service) => `${service.name}Effects`),
   ].sort();
   return `from .sdk import (
@@ -1282,9 +1190,7 @@ This package requires plugin API major version ${model.metadata.apiMajorVersion}
 `;
 }
 
-async function inspectOutput(
-  outputDirectory: string,
-): Promise<"missing" | "empty"> {
+async function inspectOutput(outputDirectory: string): Promise<"missing" | "empty"> {
   try {
     await access(outputDirectory);
   } catch {
@@ -1292,9 +1198,7 @@ async function inspectOutput(
   }
   const entries = await readdir(outputDirectory);
   if (entries.length > 0) {
-    throw new Error(
-      `Output directory is not empty: ${outputDirectory}. Choose a new directory.`,
-    );
+    throw new Error(`Output directory is not empty: ${outputDirectory}. Choose a new directory.`);
   }
   return "empty";
 }
@@ -1412,10 +1316,7 @@ function pythonImportModule(model: GenerationModel, fullName: string): string {
   if (fullName.startsWith(prefix)) {
     return `.${fullName.slice(prefix.length)}`;
   }
-  if (
-    fullName.startsWith("soulfire.") ||
-    fullName.startsWith("google.protobuf.")
-  ) {
+  if (fullName.startsWith("soulfire.") || fullName.startsWith("google.protobuf.")) {
     return fullName;
   }
   throw new Error(
@@ -1423,46 +1324,32 @@ function pythonImportModule(model: GenerationModel, fullName: string): string {
   );
 }
 
-async function rewriteTypeScriptSharedImports(
-  outputDirectory: string,
-): Promise<void> {
+async function rewriteTypeScriptSharedImports(outputDirectory: string): Promise<void> {
   const generatedRoot = join(outputDirectory, "src", "generated");
   const files = await listTypeScriptFiles(generatedRoot);
   const existingFiles = new Set(files);
   for (const file of files) {
     const source = await readFile(file, "utf8");
     let changed = false;
-    const rewritten = source.replace(
-      /from "(\.[^"]+_pb\.js)"/g,
-      (match, specifier: string) => {
-        const target = resolve(
-          dirname(file),
-          specifier.replace(/\.js$/, ".ts"),
-        );
-        if (existingFiles.has(target)) {
-          return match;
-        }
-        const modulePath = relative(generatedRoot, target)
-          .replaceAll("\\", "/")
-          .replace(/\.ts$/, "");
-        if (modulePath.startsWith("../")) {
-          throw new Error(
-            `Generated import escapes its output directory: ${specifier}`,
-          );
-        }
-        changed = true;
-        return `from "@soulfiremc/sdk/generated/${modulePath}"`;
-      },
-    );
+    const rewritten = source.replace(/from "(\.[^"]+_pb\.js)"/g, (match, specifier: string) => {
+      const target = resolve(dirname(file), specifier.replace(/\.js$/, ".ts"));
+      if (existingFiles.has(target)) {
+        return match;
+      }
+      const modulePath = relative(generatedRoot, target).replaceAll("\\", "/").replace(/\.ts$/, "");
+      if (modulePath.startsWith("../")) {
+        throw new Error(`Generated import escapes its output directory: ${specifier}`);
+      }
+      changed = true;
+      return `from "@soulfiremc/sdk/generated/${modulePath}"`;
+    });
     if (changed) {
       await writeFile(file, rewritten, "utf8");
     }
   }
 }
 
-async function listTypeScriptFiles(
-  directory: string,
-): Promise<readonly string[]> {
+async function listTypeScriptFiles(directory: string): Promise<readonly string[]> {
   const result: string[] = [];
   const visit = async (current: string): Promise<void> => {
     for (const entry of await readdir(current, { withFileTypes: true })) {

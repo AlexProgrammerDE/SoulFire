@@ -1,11 +1,6 @@
 import { Code, ConnectError } from "@connectrpc/connect";
 import { create } from "@bufbuild/protobuf";
-import {
-  Deferred,
-  Effect,
-  Fiber,
-  Stream,
-} from "effect";
+import { Deferred, Effect, Fiber, Stream } from "effect";
 import { TestClock } from "effect/testing";
 import { describe, expect, it } from "vitest";
 import { rpcError } from "../src/errors.js";
@@ -106,18 +101,23 @@ describe("observation scopes", () => {
       ),
     ));
   it("propagates terminal RPC failures to current and later subscribers", () =>
-    Effect.runPromise(Effect.scoped(Effect.gen(function* () {
-      const release = yield* Deferred.make<void>();
-      const failure = rpcError("watch", new ConnectError("revoked", Code.PermissionDenied));
-      const session = yield* BotSession.open(() => Stream.concat(
-        Stream.make(create(BotEventSchema, { envelope: { sequence: 1n } })),
-        Stream.fromEffect(Deferred.await(release).pipe(Effect.andThen(Effect.fail(failure)))),
-      ));
-      const waiter = yield* session.once("stateDelta").pipe(Effect.forkScoped);
-      yield* Effect.yieldNow;
-      yield* Deferred.succeed(release, undefined);
-      expect(yield* Fiber.join(waiter).pipe(Effect.flip)).toBe(failure);
-      expect(yield* session.once("stateDelta").pipe(Effect.flip)).toBe(failure);
-    }))));
-
+    Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const release = yield* Deferred.make<void>();
+          const failure = rpcError("watch", new ConnectError("revoked", Code.PermissionDenied));
+          const session = yield* BotSession.open(() =>
+            Stream.concat(
+              Stream.make(create(BotEventSchema, { envelope: { sequence: 1n } })),
+              Stream.fromEffect(Deferred.await(release).pipe(Effect.andThen(Effect.fail(failure)))),
+            ),
+          );
+          const waiter = yield* session.once("stateDelta").pipe(Effect.forkScoped);
+          yield* Effect.yieldNow;
+          yield* Deferred.succeed(release, undefined);
+          expect(yield* Fiber.join(waiter).pipe(Effect.flip)).toBe(failure);
+          expect(yield* session.once("stateDelta").pipe(Effect.flip)).toBe(failure);
+        }),
+      ),
+    ));
 });

@@ -1,0 +1,28 @@
+{
+  "plugins": ["typescript", "effecttsgo"],
+  "categories": {
+    "correctness": "error"
+  },
+  "$schema": "./node_modules/@effect/tsgo/oxlint-schema.json",
+  "extends": ["./node_modules/@effect/tsgo/oxlint-presets/recommended.json"],
+  "options": {
+    "typeAware": true
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/generated/**",
+    "**/gen/**",
+    ".repos/**",
+    "sdk/typescript/src/generated/**",
+    "sdk/beat-game/src/generated/**",
+    "sdk/reference/.source/**"
+  ],
+  "rules": {
+    "effecttsgo/any-unknown-in-error-context": "off",
+    "effecttsgo/unsafe-effect-type-assertion": "off",
+    "effecttsgo/strict-effect-provide": "off"
+  }
+}

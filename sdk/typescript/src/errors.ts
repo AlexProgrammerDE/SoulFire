@@ -6,10 +6,7 @@ import { SoulFireCapabilityError, SoulFireCompatibilityError } from "./connectio
 
 export class SoulFireTaskError extends Error {
   public constructor(public readonly task: BotTask) {
-    super(
-      task.failure?.message ??
-        `Task ${task.taskId} ended in status ${task.status}`,
-    );
+    super(task.failure?.message ?? `Task ${task.taskId} ended in status ${task.status}`);
     this.name = "SoulFireTaskError";
   }
 }
@@ -40,10 +37,8 @@ interface SoulFireRpcErrorFields {
   readonly retryable: boolean;
 }
 
-const SoulFireRpcErrorBase: TaggedErrorConstructor<
-  "SoulFireRpcError",
-  SoulFireRpcErrorFields
-> = Data.TaggedError("SoulFireRpcError")<SoulFireRpcErrorFields>;
+const SoulFireRpcErrorBase: TaggedErrorConstructor<"SoulFireRpcError", SoulFireRpcErrorFields> =
+  Data.TaggedError("SoulFireRpcError")<SoulFireRpcErrorFields>;
 
 export class SoulFireRpcError extends SoulFireRpcErrorBase {}
 
@@ -85,24 +80,18 @@ const SoulFireValidationErrorBase: TaggedErrorConstructor<
 
 export class SoulFireValidationError extends SoulFireValidationErrorBase {}
 
-const SoulFireStateErrorBase: TaggedErrorConstructor<
-  "SoulFireStateError",
-  LocalErrorFields
-> = Data.TaggedError("SoulFireStateError")<LocalErrorFields>;
+const SoulFireStateErrorBase: TaggedErrorConstructor<"SoulFireStateError", LocalErrorFields> =
+  Data.TaggedError("SoulFireStateError")<LocalErrorFields>;
 
 export class SoulFireStateError extends SoulFireStateErrorBase {}
 
-const SoulFireInstallErrorBase: TaggedErrorConstructor<
-  "SoulFireInstallError",
-  LocalErrorFields
-> = Data.TaggedError("SoulFireInstallError")<LocalErrorFields>;
+const SoulFireInstallErrorBase: TaggedErrorConstructor<"SoulFireInstallError", LocalErrorFields> =
+  Data.TaggedError("SoulFireInstallError")<LocalErrorFields>;
 
 export class SoulFireInstallError extends SoulFireInstallErrorBase {}
 
-const SoulFireTimeoutErrorBase: TaggedErrorConstructor<
-  "SoulFireTimeoutError",
-  LocalErrorFields
-> = Data.TaggedError("SoulFireTimeoutError")<LocalErrorFields>;
+const SoulFireTimeoutErrorBase: TaggedErrorConstructor<"SoulFireTimeoutError", LocalErrorFields> =
+  Data.TaggedError("SoulFireTimeoutError")<LocalErrorFields>;
 
 export class SoulFireTimeoutError extends SoulFireTimeoutErrorBase {}
 
@@ -117,25 +106,30 @@ export type SoulFireOperationError =
   | SoulFireInstallError
   | SoulFireTimeoutError;
 
-export function operationError(
-  operation: string,
-  cause: unknown,
-): SoulFireOperationError {
-  if (cause instanceof SoulFireRpcError || cause instanceof SoulFireTaskFailed
-    || cause instanceof SoulFireActionError || cause instanceof SoulFireCapabilityError
-    || cause instanceof SoulFireCompatibilityError || cause instanceof SoulFireValidationError
-    || cause instanceof SoulFireStateError || cause instanceof SoulFireInstallError
-    || cause instanceof SoulFireTimeoutError)
+export function operationError(operation: string, cause: unknown): SoulFireOperationError {
+  if (
+    cause instanceof SoulFireRpcError ||
+    cause instanceof SoulFireTaskFailed ||
+    cause instanceof SoulFireActionError ||
+    cause instanceof SoulFireCapabilityError ||
+    cause instanceof SoulFireCompatibilityError ||
+    cause instanceof SoulFireValidationError ||
+    cause instanceof SoulFireStateError ||
+    cause instanceof SoulFireInstallError ||
+    cause instanceof SoulFireTimeoutError
+  )
     return cause;
-  if (cause instanceof SoulFireTaskError) return new SoulFireTaskFailed({
-        task: cause.task,
-        cause,
-        message: cause.message,
-      });
+  if (cause instanceof SoulFireTaskError)
+    return new SoulFireTaskFailed({
+      task: cause.task,
+      cause,
+      message: cause.message,
+    });
   if (cause instanceof ConnectError) return rpcError(operation, cause);
   const fields = { operation, cause, message: errorMessage(cause, operation) };
   if (operation.startsWith("install.")) return new SoulFireInstallError(fields);
-  if (cause instanceof TypeError || cause instanceof RangeError) return new SoulFireValidationError(fields);
+  if (cause instanceof TypeError || cause instanceof RangeError)
+    return new SoulFireValidationError(fields);
   return new SoulFireStateError(fields);
 }
 
@@ -149,9 +143,7 @@ export function rpcError(operation: string, cause: unknown): SoulFireRpcError {
     });
   }
   const requestId =
-    cause.metadata.get("x-soulfire-request-id") ??
-    cause.metadata.get("x-request-id") ??
-    undefined;
+    cause.metadata.get("x-soulfire-request-id") ?? cause.metadata.get("x-request-id") ?? undefined;
   return new SoulFireRpcError({
     operation,
     cause,

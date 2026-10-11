@@ -59,19 +59,14 @@ export function approachLiquidSourceFromSide(
   options: ApproachLiquidSourceOptions,
 ): Effect.Effect<BeatGameBlockObservation, BeatGameDriverError> {
   return Effect.gen(function* () {
-    const nearbySources = [...sources].sort((left, right) =>
-      Math.min(
-        PREFERRED_LIQUID_SOURCE_CLUSTER_SIZE,
-        liquidSourceClusterSize(right, sources),
-      )
-      - Math.min(
-        PREFERRED_LIQUID_SOURCE_CLUSTER_SIZE,
-        liquidSourceClusterSize(left, sources),
-      )
-      || Math.abs(observation.player.position.y - left.position.y)
-      - Math.abs(observation.player.position.y - right.position.y)
-      || distanceSquared(observation.player.position, left.position)
-      - distanceSquared(observation.player.position, right.position)
+    const nearbySources = [...sources].sort(
+      (left, right) =>
+        Math.min(PREFERRED_LIQUID_SOURCE_CLUSTER_SIZE, liquidSourceClusterSize(right, sources)) -
+          Math.min(PREFERRED_LIQUID_SOURCE_CLUSTER_SIZE, liquidSourceClusterSize(left, sources)) ||
+        Math.abs(observation.player.position.y - left.position.y) -
+          Math.abs(observation.player.position.y - right.position.y) ||
+        distanceSquared(observation.player.position, left.position) -
+          distanceSquared(observation.player.position, right.position),
     );
     for (const source of nearbySources) {
       const targetable = yield* targetableLiquidSourceFromCurrentPosition(
@@ -88,34 +83,29 @@ export function approachLiquidSourceFromSide(
       (source) =>
         queryLiquidInteractionVolume(driver, source.position).pipe(
           Effect.map((blocks) => {
-            const candidates = liquidInteractionStandCandidates(
-              source.position,
-            ).map((position) => ({
-              position,
-              sightlineObstructions: liquidSightlineObstructions(
-                blocks,
+            const candidates = liquidInteractionStandCandidates(source.position)
+              .map((position) => ({
                 position,
-                source.position,
-              ),
-            })).sort((left, right) =>
-              left.sightlineObstructions.length
-                - right.sightlineObstructions.length
-              || distanceSquared(
-                observation.player.position,
-                left.position,
-              )
-                - distanceSquared(
-                  observation.player.position,
-                  right.position,
-                )
-            );
+                sightlineObstructions: liquidSightlineObstructions(
+                  blocks,
+                  position,
+                  source.position,
+                ),
+              }))
+              .sort(
+                (left, right) =>
+                  left.sightlineObstructions.length - right.sightlineObstructions.length ||
+                  distanceSquared(observation.player.position, left.position) -
+                    distanceSquared(observation.player.position, right.position),
+              );
             return { source, blocks, candidates };
           }),
-      ),
+        ),
       { concurrency: 1 },
-    )).sort((left, right) =>
-      liquidSourceExposureCount(right.blocks, right.source.position)
-      - liquidSourceExposureCount(left.blocks, left.source.position)
+    )).sort(
+      (left, right) =>
+        liquidSourceExposureCount(right.blocks, right.source.position) -
+        liquidSourceExposureCount(left.blocks, left.source.position),
     );
 
     const attemptedDryStands = new Set<string>();
@@ -123,13 +113,13 @@ export function approachLiquidSourceFromSide(
       for (const candidate of prepared.candidates) {
         const key = positionKey(candidate.position);
         if (
-          attemptedDryStands.has(key)
-          || options.requireTargetableSource === true
-            && candidate.sightlineObstructions.length > 0
-            && !canClearLiquidSourceRoofSightline(
+          attemptedDryStands.has(key) ||
+          (options.requireTargetableSource === true &&
+            candidate.sightlineObstructions.length > 0 &&
+            !canClearLiquidSourceRoofSightline(
               prepared.source.position,
               candidate.sightlineObstructions,
-            )
+            ))
         ) {
           continue;
         }
@@ -178,12 +168,9 @@ export function approachLiquidSourceFromSide(
       for (const candidate of prepared.candidates) {
         const key = positionKey(candidate.position);
         if (
-          attemptedExcavationStands.has(key)
-          || options.requireTargetableSource === true
-            && !standExcavationClearsSightline(
-              candidate.position,
-              candidate.sightlineObstructions,
-            )
+          attemptedExcavationStands.has(key) ||
+          (options.requireTargetableSource === true &&
+            !standExcavationClearsSightline(candidate.position, candidate.sightlineObstructions))
         ) {
           continue;
         }
@@ -224,15 +211,16 @@ export function approachLiquidSourceFromSide(
         }
       }
     }
-    return yield* Effect.fail(new BeatGameDriverError({
-      operation: "approach-liquid-source",
-      code: "unreachable",
-      retryable: true,
-      message:
-        `Could not reach, excavate, or target a safe side-on stand beside ${
+    return yield* Effect.fail(
+      new BeatGameDriverError({
+        operation: "approach-liquid-source",
+        code: "unreachable",
+        retryable: true,
+        message: `Could not reach, excavate, or target a safe side-on stand beside ${
           nearbySources.length
         } nearby liquid source${nearbySources.length === 1 ? "" : "s"}`,
-    }));
+      }),
+    );
   });
 }
 
@@ -240,10 +228,10 @@ function liquidSourceClusterSize(
   source: BeatGameBlockObservation,
   sources: readonly BeatGameBlockObservation[],
 ): number {
-  return sources.filter((candidate) =>
-    candidate.position.dimension === source.position.dimension
-    && distanceSquared(candidate.position, source.position)
-      <= LIQUID_SOURCE_CLUSTER_RADIUS ** 2
+  return sources.filter(
+    (candidate) =>
+      candidate.position.dimension === source.position.dimension &&
+      distanceSquared(candidate.position, source.position) <= LIQUID_SOURCE_CLUSTER_RADIUS ** 2,
   ).length;
 }
 
@@ -264,40 +252,31 @@ function targetableLiquidSourceFromCurrentPosition(
       y: sourceCenter.y - eyePosition.y,
       z: sourceCenter.z - eyePosition.z,
     };
-    const sourceDistance = Math.sqrt(distanceSquared(
-      eyePosition,
-      sourceCenter,
-    ));
+    const sourceDistance = Math.sqrt(distanceSquared(eyePosition, sourceCenter));
     if (sourceDistance > LIQUID_INTERACTION_REACH) {
       return undefined;
     }
     const obstruction = (yield* driver.raycast({
       direction,
-      maximumDistance: Math.min(
-        LIQUID_INTERACTION_REACH,
-        sourceDistance + 0.05,
-      ),
+      maximumDistance: Math.min(LIQUID_INTERACTION_REACH, sourceDistance + 0.05),
       includeFluids: true,
     })).block;
     if (obstruction === undefined) {
       return undefined;
     }
     const targetedSource = acceptableSources.find((source) =>
-      sameBlockPosition(obstruction.position, source.position)
+      sameBlockPosition(obstruction.position, source.position),
     );
     if (targetedSource !== undefined) {
       return targetedSource;
     }
-    return isFlowingFluid(obstruction)
-        && (yield* hasNoSolidLiquidSightlineObstruction(
-          driver,
-          direction,
-          Math.min(
-            LIQUID_INTERACTION_REACH,
-            sourceDistance + 0.05,
-          ),
-          aimedSource.position,
-        ))
+    return isFlowingFluid(obstruction) &&
+      (yield* hasNoSolidLiquidSightlineObstruction(
+        driver,
+        direction,
+        Math.min(LIQUID_INTERACTION_REACH, sourceDistance + 0.05),
+        aimedSource.position,
+      ))
       ? aimedSource
       : undefined;
   });
@@ -309,15 +288,15 @@ function hasNoSolidLiquidSightlineObstruction(
   maximumDistance: number,
   source: BeatGameBlockPosition,
 ): Effect.Effect<boolean, BeatGameDriverError> {
-  return driver.raycast({
-    direction,
-    maximumDistance,
-    includeFluids: false,
-  }).pipe(
-    Effect.map(({ block }) =>
-      block === undefined || sameBlockPosition(block.position, source)
-    ),
-  );
+  return driver
+    .raycast({
+      direction,
+      maximumDistance,
+      includeFluids: false,
+    })
+    .pipe(
+      Effect.map(({ block }) => block === undefined || sameBlockPosition(block.position, source)),
+    );
 }
 
 function exposeLiquidSourceThroughRoof(
@@ -342,45 +321,36 @@ function exposeLiquidSourceThroughRoof(
         y: sourceCenter.y - eyePosition.y,
         z: sourceCenter.z - eyePosition.z,
       };
-      const sourceDistance = Math.sqrt(distanceSquared(
-        eyePosition,
-        sourceCenter,
-      ));
+      const sourceDistance = Math.sqrt(distanceSquared(eyePosition, sourceCenter));
       if (sourceDistance > LIQUID_INTERACTION_REACH) {
         return undefined;
       }
       const obstruction = (yield* driver.raycast({
         direction,
-        maximumDistance: Math.min(
-          LIQUID_INTERACTION_REACH,
-          sourceDistance + 0.05,
-        ),
+        maximumDistance: Math.min(LIQUID_INTERACTION_REACH, sourceDistance + 0.05),
         includeFluids: true,
       })).block;
       if (obstruction === undefined) {
         return undefined;
       }
       const targetable = acceptableSources.find((source) =>
-        sameBlockPosition(obstruction.position, source.position)
+        sameBlockPosition(obstruction.position, source.position),
       );
       if (targetable !== undefined) {
         return targetable;
       }
       if (
-        clearedBlocks === LIQUID_SOURCE_ROOF_CLEARING_BLOCKS
-        || obstruction.position.y <= aimedSource.position.y
-        || !obstruction.diggable
-        || obstruction.blockId === "minecraft:obsidian"
-        || isGravityAffectedBlockId(obstruction.blockId)
-        || isPlayerStabilityBlock(
-          current.player.position,
-          obstruction.position,
-        )
+        clearedBlocks === LIQUID_SOURCE_ROOF_CLEARING_BLOCKS ||
+        obstruction.position.y <= aimedSource.position.y ||
+        !obstruction.diggable ||
+        obstruction.blockId === "minecraft:obsidian" ||
+        isGravityAffectedBlockId(obstruction.blockId) ||
+        isPlayerStabilityBlock(current.player.position, obstruction.position)
       ) {
         return undefined;
       }
-      const digTool = LIQUID_SOURCE_DIG_TOOL_IDS.find((itemId) =>
-        (current.inventory.counts[itemId] ?? 0) > 0
+      const digTool = LIQUID_SOURCE_DIG_TOOL_IDS.find(
+        (itemId) => (current.inventory.counts[itemId] ?? 0) > 0,
       );
       if (digTool !== undefined) {
         yield* driver.act({
@@ -401,77 +371,64 @@ function canClearLiquidSourceRoofSightline(
   source: BeatGameBlockPosition,
   obstructions: readonly BeatGameBlockObservation[],
 ): boolean {
-  return obstructions.length <= LIQUID_SOURCE_ROOF_CLEARING_BLOCKS
-    && obstructions.every((obstruction) =>
-      obstruction.position.y > source.y
-      && obstruction.diggable
-      && obstruction.blockId !== "minecraft:obsidian"
-      && !isGravityAffectedBlockId(obstruction.blockId)
-    );
+  return (
+    obstructions.length <= LIQUID_SOURCE_ROOF_CLEARING_BLOCKS &&
+    obstructions.every(
+      (obstruction) =>
+        obstruction.position.y > source.y &&
+        obstruction.diggable &&
+        obstruction.blockId !== "minecraft:obsidian" &&
+        !isGravityAffectedBlockId(obstruction.blockId),
+    )
+  );
 }
 
-function isPlayerStabilityBlock(
-  player: BeatGamePosition,
-  block: BeatGameBlockPosition,
-): boolean {
+function isPlayerStabilityBlock(player: BeatGamePosition, block: BeatGameBlockPosition): boolean {
   if (player.dimension !== block.dimension) {
     return false;
   }
   const body = floorBlockPosition(player);
-  return block.x === body.x
-    && block.z === body.z
-    && block.y >= body.y - 1
-    && block.y <= body.y + 1;
+  return block.x === body.x && block.z === body.z && block.y >= body.y - 1 && block.y <= body.y + 1;
 }
 
 function queryLiquidInteractionVolume(
   driver: BeatGameDriver,
   source: BeatGameBlockPosition,
-): Effect.Effect<
-  ReadonlyMap<string, BeatGameBlockObservation>,
-  BeatGameDriverError
-> {
-  return driver.queryBlocks({
-    center: blockCenter(source),
-    radius: LIQUID_INTERACTION_VOLUME_RADIUS,
-    selector: {},
-    maximumResults: LIQUID_INTERACTION_VOLUME_MAXIMUM_RESULTS,
-  }).pipe(
-    Effect.map((blocks) =>
-      new Map(blocks.map((block) => [positionKey(block.position), block]))
-    ),
-  );
+): Effect.Effect<ReadonlyMap<string, BeatGameBlockObservation>, BeatGameDriverError> {
+  return driver
+    .queryBlocks({
+      center: blockCenter(source),
+      radius: LIQUID_INTERACTION_VOLUME_RADIUS,
+      selector: {},
+      maximumResults: LIQUID_INTERACTION_VOLUME_MAXIMUM_RESULTS,
+    })
+    .pipe(
+      Effect.map((blocks) => new Map(blocks.map((block) => [positionKey(block.position), block]))),
+    );
 }
 
 function queryLiquidInteractionStandBlocks(
   driver: BeatGameDriver,
   candidate: BeatGamePosition,
   fallback: ReadonlyMap<string, BeatGameBlockObservation>,
-): Effect.Effect<
-  ReadonlyMap<string, BeatGameBlockObservation>,
-  BeatGameDriverError
-> {
+): Effect.Effect<ReadonlyMap<string, BeatGameBlockObservation>, BeatGameDriverError> {
   const body = floorBlockPosition(candidate);
-  const positions = [
-    { ...body, y: body.y - 1 },
-    body,
-    { ...body, y: body.y + 1 },
-  ];
+  const positions = [{ ...body, y: body.y - 1 }, body, { ...body, y: body.y + 1 }];
   return Effect.forEach(
     positions,
     (position) =>
-      driver.queryBlocks({
-        center: blockCenter(position),
-        radius: 0.25,
-        selector: {},
-        maximumResults: 1,
-      }).pipe(
-        Effect.map((blocks) =>
-          blocks.find((block) =>
-            sameBlockPosition(block.position, position)
-          )
+      driver
+        .queryBlocks({
+          center: blockCenter(position),
+          radius: 0.25,
+          selector: {},
+          maximumResults: 1,
+        })
+        .pipe(
+          Effect.map((blocks) =>
+            blocks.find((block) => sameBlockPosition(block.position, position)),
+          ),
         ),
-      ),
     { concurrency: "unbounded" },
   ).pipe(
     Effect.map((blocks) => {
@@ -502,76 +459,60 @@ function pathfindToLiquidInteractionStand(
     driver.pathfind(candidate, radius, policy).pipe(Effect.as(true));
   return Effect.gen(function* () {
     let current = (yield* driver.observe).player.position;
-    for (
-      let segment = 0;
-      segment < LIQUID_INTERACTION_APPROACH_MAXIMUM_SEGMENTS;
-      segment += 1
-    ) {
+    for (let segment = 0; segment < LIQUID_INTERACTION_APPROACH_MAXIMUM_SEGMENTS; segment += 1) {
       const remainingDistance = Math.sqrt(distanceSquared(current, candidate));
       if (remainingDistance <= LIQUID_INTERACTION_APPROACH_SEGMENT_LENGTH) {
         break;
       }
-      const progress = LIQUID_INTERACTION_APPROACH_SEGMENT_LENGTH
-        / remainingDistance;
+      const progress = LIQUID_INTERACTION_APPROACH_SEGMENT_LENGTH / remainingDistance;
       const waypoint = {
         x: current.x + (candidate.x - current.x) * progress,
         y: current.y + (candidate.y - current.y) * progress,
         z: current.z + (candidate.z - current.z) * progress,
         dimension: candidate.dimension,
       } satisfies BeatGamePosition;
-      const reachedWaypoint = yield* driver.pathfind(
-        waypoint,
-        LIQUID_INTERACTION_APPROACH_SEGMENT_RADIUS,
-        {
+      const reachedWaypoint = yield* driver
+        .pathfind(waypoint, LIQUID_INTERACTION_APPROACH_SEGMENT_RADIUS, {
           ...policy,
           allowMining: path.allowMining,
-        },
-      ).pipe(
-        Effect.as(true),
-        Effect.catchTag("BeatGameDriverError", () => Effect.succeed(false)),
-      );
+        })
+        .pipe(
+          Effect.as(true),
+          Effect.catchTag("BeatGameDriverError", () => Effect.succeed(false)),
+        );
       if (!reachedWaypoint) {
         return false;
       }
       const latest = (yield* driver.observe).player.position;
       const latestDistance = Math.sqrt(distanceSquared(latest, candidate));
       if (
-        latest.dimension !== candidate.dimension
-        || remainingDistance - latestDistance
-          < LIQUID_INTERACTION_APPROACH_MINIMUM_PROGRESS
+        latest.dimension !== candidate.dimension ||
+        remainingDistance - latestDistance < LIQUID_INTERACTION_APPROACH_MINIMUM_PROGRESS
       ) {
         return false;
       }
       current = latest;
     }
     if (
-      Math.sqrt(distanceSquared(current, candidate))
-        > LIQUID_INTERACTION_APPROACH_SEGMENT_LENGTH
+      Math.sqrt(distanceSquared(current, candidate)) > LIQUID_INTERACTION_APPROACH_SEGMENT_LENGTH
     ) {
       return false;
     }
     return yield* attempt(LIQUID_INTERACTION_STAND_RADIUS).pipe(
-      Effect.catchTag(
-        "BeatGameDriverError",
-        () => attempt(LIQUID_INTERACTION_FALLBACK_STAND_RADIUS),
+      Effect.catchTag("BeatGameDriverError", () =>
+        attempt(LIQUID_INTERACTION_FALLBACK_STAND_RADIUS),
       ),
       Effect.catchTag("BeatGameDriverError", () => Effect.succeed(false)),
     );
   });
 }
 
-function liquidInteractionStandCandidates(
-  source: BeatGameBlockPosition,
-): BeatGamePosition[] {
+function liquidInteractionStandCandidates(source: BeatGameBlockPosition): BeatGamePosition[] {
   const sourceCenter = blockCenter(source);
   const candidates: BeatGamePosition[] = [];
   const horizontalReach = Math.floor(LIQUID_INTERACTION_REACH);
   for (let xOffset = -horizontalReach; xOffset <= horizontalReach; xOffset++) {
-    for (
-      let zOffset = -horizontalReach;
-      zOffset <= horizontalReach;
-      zOffset++
-    ) {
+    for (let zOffset = -horizontalReach; zOffset <= horizontalReach; zOffset++) {
       if (xOffset === 0 && zOffset === 0) {
         continue;
       }
@@ -586,10 +527,7 @@ function liquidInteractionStandCandidates(
           ...candidate,
           y: candidate.y + 1.62,
         };
-        if (
-          Math.sqrt(distanceSquared(eyePosition, sourceCenter))
-            <= LIQUID_INTERACTION_REACH
-        ) {
+        if (Math.sqrt(distanceSquared(eyePosition, sourceCenter)) <= LIQUID_INTERACTION_REACH) {
           candidates.push(candidate);
         }
       }
@@ -610,14 +548,15 @@ function liquidSourceExposureCount(
     { x: 0, y: 0, z: 1 },
     { x: 0, y: 0, z: -1 },
   ].filter((offset) => {
-    const neighbor = blocks.get(positionKey({
-      ...source,
-      x: source.x + offset.x,
-      y: source.y + offset.y,
-      z: source.z + offset.z,
-    }));
-    return neighbor?.replaceable === true
-      && !isFluidBlock(neighbor.blockId);
+    const neighbor = blocks.get(
+      positionKey({
+        ...source,
+        x: source.x + offset.x,
+        y: source.y + offset.y,
+        z: source.z + offset.z,
+      }),
+    );
+    return neighbor?.replaceable === true && !isFluidBlock(neighbor.blockId);
   }).length;
 }
 
@@ -649,11 +588,7 @@ function liquidSightlineObstructions(
     }
     visited.add(key);
     const block = blocks.get(key);
-    if (
-      block !== undefined
-      && !block.replaceable
-      && !isFluidBlock(block.blockId)
-    ) {
+    if (block !== undefined && !block.replaceable && !isFluidBlock(block.blockId)) {
       obstructions.push(block);
     }
   }
@@ -666,9 +601,8 @@ function standExcavationClearsSightline(
 ): boolean {
   const body = floorBlockPosition(candidate);
   const head = { ...body, y: body.y + 1 };
-  return obstructions.every((block) =>
-    sameBlockPosition(block.position, body)
-    || sameBlockPosition(block.position, head)
+  return obstructions.every(
+    (block) => sameBlockPosition(block.position, body) || sameBlockPosition(block.position, head),
   );
 }
 
@@ -680,12 +614,12 @@ function isSafeLiquidInteractionStand(
   const feet = blocks.get(positionKey(body));
   const head = blocks.get(positionKey({ ...body, y: body.y + 1 }));
   const support = blocks.get(positionKey({ ...body, y: body.y - 1 }));
-  return feet?.replaceable === true
-    && head?.replaceable === true
-    && isStableSupport(support)
-    && ![feet, head, support].some((block) =>
-      block !== undefined && isFluidBlock(block.blockId)
-    );
+  return (
+    feet?.replaceable === true &&
+    head?.replaceable === true &&
+    isStableSupport(support) &&
+    ![feet, head, support].some((block) => block !== undefined && isFluidBlock(block.blockId))
+  );
 }
 
 function isExcavatableLiquidInteractionStand(
@@ -697,38 +631,39 @@ function isExcavatableLiquidInteractionStand(
   const feet = blocks.get(positionKey(body));
   const head = blocks.get(positionKey({ ...body, y: body.y + 1 }));
   const support = blocks.get(positionKey({ ...body, y: body.y - 1 }));
-  const horizontalDistance = Math.max(
-    Math.abs(body.x - source.x),
-    Math.abs(body.z - source.z),
+  const horizontalDistance = Math.max(Math.abs(body.x - source.x), Math.abs(body.z - source.z));
+  return (
+    horizontalDistance >= 2 &&
+    isStableSupport(support) &&
+    [feet, head].every(
+      (block) =>
+        block !== undefined &&
+        !isFluidBlock(block.blockId) &&
+        (block.replaceable || (block.diggable && !isGravityAffectedBlockId(block.blockId))),
+    )
   );
-  return horizontalDistance >= 2
-    && isStableSupport(support)
-    && [feet, head].every((block) =>
-      block !== undefined
-      && !isFluidBlock(block.blockId)
-      && (
-        block.replaceable
-        || block.diggable && !isGravityAffectedBlockId(block.blockId)
-      )
-    );
 }
 
 function isStableSupport(
   block: BeatGameBlockObservation | undefined,
 ): block is BeatGameBlockObservation {
-  return block !== undefined
-    && block.solid === true
-    && !block.replaceable
-    && !isGravityAffectedBlockId(block.blockId);
+  return (
+    block !== undefined &&
+    block.solid === true &&
+    !block.replaceable &&
+    !isGravityAffectedBlockId(block.blockId)
+  );
 }
 
 function isGravityAffectedBlockId(blockId: string): boolean {
-  return blockId === "minecraft:sand"
-    || blockId === "minecraft:red_sand"
-    || blockId === "minecraft:gravel"
-    || blockId === "minecraft:dragon_egg"
-    || blockId.endsWith("_concrete_powder")
-    || blockId.endsWith("_anvil");
+  return (
+    blockId === "minecraft:sand" ||
+    blockId === "minecraft:red_sand" ||
+    blockId === "minecraft:gravel" ||
+    blockId === "minecraft:dragon_egg" ||
+    blockId.endsWith("_concrete_powder") ||
+    blockId.endsWith("_anvil")
+  );
 }
 
 function isFluidBlock(blockId: string): boolean {
@@ -736,9 +671,11 @@ function isFluidBlock(blockId: string): boolean {
 }
 
 function isFlowingFluid(block: BeatGameBlockObservation): boolean {
-  return isFluidBlock(block.blockId)
-    && block.properties.level !== undefined
-    && block.properties.level !== "0";
+  return (
+    isFluidBlock(block.blockId) &&
+    block.properties.level !== undefined &&
+    block.properties.level !== "0"
+  );
 }
 
 function blockCenter(position: BeatGameBlockPosition): BeatGamePosition {
@@ -750,9 +687,7 @@ function blockCenter(position: BeatGameBlockPosition): BeatGamePosition {
   };
 }
 
-function floorBlockPosition(
-  position: BeatGamePosition,
-): BeatGameBlockPosition {
+function floorBlockPosition(position: BeatGamePosition): BeatGameBlockPosition {
   return {
     x: Math.floor(position.x),
     y: Math.floor(position.y),
@@ -761,14 +696,13 @@ function floorBlockPosition(
   };
 }
 
-function sameBlockPosition(
-  left: BeatGameBlockPosition,
-  right: BeatGameBlockPosition,
-): boolean {
-  return left.x === right.x
-    && left.y === right.y
-    && left.z === right.z
-    && left.dimension === right.dimension;
+function sameBlockPosition(left: BeatGameBlockPosition, right: BeatGameBlockPosition): boolean {
+  return (
+    left.x === right.x &&
+    left.y === right.y &&
+    left.z === right.z &&
+    left.dimension === right.dimension
+  );
 }
 
 function positionKey(position: BeatGameBlockPosition): string {

@@ -26,7 +26,10 @@ async function replaceVersion(path, pattern, replacement) {
     throw new Error(`Expected exactly one SDK version in ${path}, found ${matches?.length ?? 0}`);
   }
 
-  await writeFile(path, contents.replace(pattern, () => replacement));
+  await writeFile(
+    path,
+    contents.replace(pattern, () => replacement),
+  );
 }
 
 await updateJsonVersion("sdk/typescript/package.json");
@@ -47,11 +50,7 @@ await replaceVersion(
   /^export const SDK_VERSION = "[^"]+";$/m,
   `export const SDK_VERSION = "${version}";`,
 );
-await replaceVersion(
-  "sdk/python/pyproject.toml",
-  /^version = "[^"]+"$/m,
-  `version = "${version}"`,
-);
+await replaceVersion("sdk/python/pyproject.toml", /^version = "[^"]+"$/m, `version = "${version}"`);
 await replaceVersion(
   "sdk/python/src/soulfire/connection.py",
   /^SDK_VERSION: Final = "[^"]+"$/m,

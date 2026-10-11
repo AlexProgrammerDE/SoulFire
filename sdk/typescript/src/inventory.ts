@@ -26,10 +26,7 @@ import {
   type UnequipItemRequestSchema,
 } from "./generated/soulfire/inventory_pb.js";
 
-type InventoryRequest<T extends DescMessage> = Omit<
-  MessageInitShape<T>,
-  "$typeName" | "scope"
->;
+type InventoryRequest<T extends DescMessage> = Omit<MessageInitShape<T>, "$typeName" | "scope">;
 
 export interface ContainerMutationOptions {
   call?: CallOptions;
@@ -41,10 +38,7 @@ export type InventoryRankOptions = Omit<
   "kind"
 >;
 
-export type InventoryRankingOptions = Omit<
-  InventoryRankOptions,
-  "equipmentSlot" | "targetBlock"
->;
+export type InventoryRankingOptions = Omit<InventoryRankOptions, "equipmentSlot" | "targetBlock">;
 
 /**
  * A block container opened with `inventory.open`. `await using` closes it.
@@ -55,9 +49,7 @@ export class SoulFireContainer {
   public constructor(
     private readonly scope: { instanceId: string; botId: string },
     private readonly client: Client<typeof InventoryService>,
-    private readonly actionOptions: (
-      options?: CallOptions,
-    ) => CallOptions | undefined,
+    private readonly actionOptions: (options?: CallOptions) => CallOptions | undefined,
     private current: ContainerSnapshot,
   ) {}
 
@@ -74,19 +66,14 @@ export class SoulFireContainer {
    * meantime.
    */
 
-  public refresh(
-    options?: CallOptions,
-  ): Effect.Effect<ContainerSnapshot, SoulFireOperationError> {
+  public refresh(options?: CallOptions): Effect.Effect<ContainerSnapshot, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       yield* Effect.try({
         try: () => this.requireOpen(),
         catch: (cause) => operationError("SoulFireContainer.refresh", cause),
       });
       const response = yield* rpc("SoulFireContainer.refresh", (signal) =>
-        this.client.getContainerSnapshot(
-          { scope: this.scope },
-          withSignal(options, signal),
-        ),
+        this.client.getContainerSnapshot({ scope: this.scope }, withSignal(options, signal)),
       );
       if (
         response.container === undefined ||
@@ -116,13 +103,7 @@ export class SoulFireContainer {
     count: number,
     options: ContainerMutationOptions = {},
   ): Effect.Effect<ContainerSnapshot, SoulFireOperationError> {
-    return this.transfer(
-      selector,
-      count,
-      InventoryArea.PLAYER,
-      InventoryArea.CONTAINER,
-      options,
-    );
+    return this.transfer(selector, count, InventoryArea.PLAYER, InventoryArea.CONTAINER, options);
   }
 
   /**
@@ -135,13 +116,7 @@ export class SoulFireContainer {
     count: number,
     options: ContainerMutationOptions = {},
   ): Effect.Effect<ContainerSnapshot, SoulFireOperationError> {
-    return this.transfer(
-      selector,
-      count,
-      InventoryArea.CONTAINER,
-      InventoryArea.PLAYER,
-      options,
-    );
+    return this.transfer(selector, count, InventoryArea.CONTAINER, InventoryArea.PLAYER, options);
   }
 
   public close(
@@ -235,9 +210,7 @@ export class SoulFireInventory {
     private readonly instanceId: string,
     private readonly botId: string,
     private readonly client: Client<typeof InventoryService>,
-    private readonly actionOptions: (
-      options?: CallOptions,
-    ) => CallOptions | undefined,
+    private readonly actionOptions: (options?: CallOptions) => CallOptions | undefined,
   ) {}
 
   /**
@@ -248,15 +221,10 @@ export class SoulFireInventory {
    * The open menu (the player's inventory when no container is open), with
    * every slot.
    */
-  public snapshot(
-    options?: CallOptions,
-  ): Effect.Effect<ContainerSnapshot, SoulFireOperationError> {
+  public snapshot(options?: CallOptions): Effect.Effect<ContainerSnapshot, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       const response = yield* rpc("SoulFireInventory.snapshot", (signal) =>
-        this.client.getContainerSnapshot(
-          { scope: this.scope() },
-          withSignal(options, signal),
-        ),
+        this.client.getContainerSnapshot({ scope: this.scope() }, withSignal(options, signal)),
       );
       if (response.container === undefined) {
         return yield* Effect.fail(
@@ -280,14 +248,11 @@ export class SoulFireInventory {
   ): Effect.Effect<bigint, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       const normalized = yield* Effect.try({
-        try: () => typeof request === "string" ? { selector: itemSelector(request) } : request,
+        try: () => (typeof request === "string" ? { selector: itemSelector(request) } : request),
         catch: (cause) => operationError("SoulFireInventory.count", cause),
       });
       const response = yield* rpc("SoulFireInventory.count", (signal) =>
-        this.client.countItems(
-          { ...normalized, scope: this.scope() },
-          withSignal(options, signal),
-        ),
+        this.client.countItems({ ...normalized, scope: this.scope() }, withSignal(options, signal)),
       );
       return response.count;
     });
@@ -334,24 +299,14 @@ export class SoulFireInventory {
     targetBlock: MessageInitShape<typeof BlockPositionSchema>,
     options: InventoryRankingOptions = {},
     call?: CallOptions,
-  ): Effect.Effect<
-    InventoryItemRecommendation | undefined,
-    SoulFireOperationError
-  > {
-    return this.best(
-      InventoryRecommendationKind.TOOL,
-      { ...options, targetBlock },
-      call,
-    );
+  ): Effect.Effect<InventoryItemRecommendation | undefined, SoulFireOperationError> {
+    return this.best(InventoryRecommendationKind.TOOL, { ...options, targetBlock }, call);
   }
 
   public bestWeapon(
     options: InventoryRankingOptions = {},
     call?: CallOptions,
-  ): Effect.Effect<
-    InventoryItemRecommendation | undefined,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<InventoryItemRecommendation | undefined, SoulFireOperationError> {
     return this.best(InventoryRecommendationKind.MELEE_WEAPON, options, call);
   }
 
@@ -359,34 +314,21 @@ export class SoulFireInventory {
     equipmentSlot: "head" | "chest" | "legs" | "feet",
     options: InventoryRankingOptions = {},
     call?: CallOptions,
-  ): Effect.Effect<
-    InventoryItemRecommendation | undefined,
-    SoulFireOperationError
-  > {
-    return this.best(
-      InventoryRecommendationKind.ARMOR,
-      { ...options, equipmentSlot },
-      call,
-    );
+  ): Effect.Effect<InventoryItemRecommendation | undefined, SoulFireOperationError> {
+    return this.best(InventoryRecommendationKind.ARMOR, { ...options, equipmentSlot }, call);
   }
 
   public bestFood(
     options: InventoryRankingOptions = {},
     call?: CallOptions,
-  ): Effect.Effect<
-    InventoryItemRecommendation | undefined,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<InventoryItemRecommendation | undefined, SoulFireOperationError> {
     return this.best(InventoryRecommendationKind.FOOD, options, call);
   }
 
   public bestScaffold(
     options: InventoryRankingOptions = {},
     call?: CallOptions,
-  ): Effect.Effect<
-    InventoryItemRecommendation | undefined,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<InventoryItemRecommendation | undefined, SoulFireOperationError> {
     return this.best(InventoryRecommendationKind.SCAFFOLD, options, call);
   }
 
@@ -523,15 +465,9 @@ export class SoulFireInventory {
 
   private best(
     kind: InventoryRecommendationKind,
-    options: Omit<
-      InventoryRequest<typeof RankInventoryItemsRequestSchema>,
-      "kind"
-    >,
+    options: Omit<InventoryRequest<typeof RankInventoryItemsRequestSchema>, "kind">,
     call?: CallOptions,
-  ): Effect.Effect<
-    InventoryItemRecommendation | undefined,
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<InventoryItemRecommendation | undefined, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       const response = yield* rpc("SoulFireInventory.best", (signal) =>
         this.client.rankInventoryItems(
@@ -560,9 +496,7 @@ export class SoulFireInventory {
   }
 }
 
-function requireContainer(
-  response: InventoryMutationResponse,
-): ContainerSnapshot {
+function requireContainer(response: InventoryMutationResponse): ContainerSnapshot {
   if (response.container === undefined) {
     throw new Error("SoulFire did not return a container snapshot");
   }

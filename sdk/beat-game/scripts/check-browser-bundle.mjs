@@ -14,13 +14,7 @@ for (const entry of entries) {
     write: false,
   });
   const output = result.outputFiles[0];
-  if (
-    result.outputFiles.length !== 1 ||
-    output === undefined ||
-    output.contents.length === 0
-  ) {
-    throw new Error(
-      `The browser beat-game bundle for ${entry.pathname} was empty`,
-    );
+  if (result.outputFiles.length !== 1 || output === undefined || output.contents.length === 0) {
+    throw new Error(`The browser beat-game bundle for ${entry.pathname} was empty`);
   }
 }

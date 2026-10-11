@@ -10,10 +10,7 @@ import type { BeatGamePlannerDecision } from "./planner.js";
 const SKILL_HISTORY_LIMIT = 64;
 const PORTAL_WORKSPACE_HISTORY_LIMIT = 16;
 
-type ActionDecision = Exclude<
-  BeatGamePlannerDecision,
-  { readonly type: "advance-phase" }
->;
+type ActionDecision = Exclude<BeatGamePlannerDecision, { readonly type: "advance-phase" }>;
 
 export function durableSkillKindForDecision(
   decision: ActionDecision,
@@ -62,21 +59,18 @@ export function startOrResumeDurableSkill(
       },
     };
   }
-  const memory = current === undefined
-    ? checkpoint.memory
-    : {
-      ...checkpoint.memory,
-      skillHistory: appendSkillHistory(
-        checkpoint.memory.skillHistory,
-        {
-          ...current,
-          status: BeatGameDurableSkillStatus.ABANDONED,
-          completionEvidence:
-            `superseded by ${kind} while starting ${decision.action}`,
-          updatedAt: now,
-        },
-      ),
-    };
+  const memory =
+    current === undefined
+      ? checkpoint.memory
+      : {
+          ...checkpoint.memory,
+          skillHistory: appendSkillHistory(checkpoint.memory.skillHistory, {
+            ...current,
+            status: BeatGameDurableSkillStatus.ABANDONED,
+            completionEvidence: `superseded by ${kind} while starting ${decision.action}`,
+            updatedAt: now,
+          }),
+        };
   return {
     ...checkpoint,
     memory,
@@ -101,24 +95,18 @@ export function startDurableSkillIfIdle(
   if (current !== undefined) {
     return current.kind === kind && current.action === action
       ? {
-        ...checkpoint,
-        activeSkill: {
-          ...current,
-          status: BeatGameDurableSkillStatus.ACTIVE,
-          updatedAt: now,
-        },
-      }
+          ...checkpoint,
+          activeSkill: {
+            ...current,
+            status: BeatGameDurableSkillStatus.ACTIVE,
+            updatedAt: now,
+          },
+        }
       : checkpoint;
   }
   return {
     ...checkpoint,
-    activeSkill: createDurableSkill(
-      createId(),
-      kind,
-      checkpoint.planner.phase,
-      action,
-      now,
-    ),
+    activeSkill: createDurableSkill(createId(), kind, checkpoint.planner.phase, action, now),
   };
 }
 
@@ -149,16 +137,18 @@ export function advanceDurableSkill(
   checkpoint: BeatGameCheckpoint,
   substep: string,
   now: string,
-  update: Partial<Pick<
-    BeatGameDurableSkillState,
-    | "completedWorldChanges"
-    | "completionEvidence"
-    | "portalWorkspace"
-    | "protectedBlocks"
-    | "protectedItemIds"
-    | "requiredResources"
-    | "targets"
-  >> = {},
+  update: Partial<
+    Pick<
+      BeatGameDurableSkillState,
+      | "completedWorldChanges"
+      | "completionEvidence"
+      | "portalWorkspace"
+      | "protectedBlocks"
+      | "protectedItemIds"
+      | "requiredResources"
+      | "targets"
+    >
+  > = {},
 ): BeatGameCheckpoint {
   const skill = checkpoint.activeSkill;
   if (skill === undefined) {
@@ -174,15 +164,16 @@ export function advanceDurableSkill(
   return {
     ...checkpoint,
     activeSkill,
-    memory: activeSkill.portalWorkspace === undefined
-      ? checkpoint.memory
-      : {
-        ...checkpoint.memory,
-        portalWorkspaces: upsertPortalWorkspace(
-          checkpoint.memory.portalWorkspaces,
-          activeSkill.portalWorkspace,
-        ),
-      },
+    memory:
+      activeSkill.portalWorkspace === undefined
+        ? checkpoint.memory
+        : {
+            ...checkpoint.memory,
+            portalWorkspaces: upsertPortalWorkspace(
+              checkpoint.memory.portalWorkspaces,
+              activeSkill.portalWorkspace,
+            ),
+          },
   };
 }
 
@@ -208,16 +199,11 @@ export function completeDurableSkill(
     ...withoutActiveSkill,
     memory: {
       ...checkpoint.memory,
-      skillHistory: appendSkillHistory(
-        checkpoint.memory.skillHistory,
-        completed,
-      ),
-      portalWorkspaces: completed.portalWorkspace === undefined
-        ? checkpoint.memory.portalWorkspaces
-        : upsertPortalWorkspace(
-          checkpoint.memory.portalWorkspaces,
-          completed.portalWorkspace,
-        ),
+      skillHistory: appendSkillHistory(checkpoint.memory.skillHistory, completed),
+      portalWorkspaces:
+        completed.portalWorkspace === undefined
+          ? checkpoint.memory.portalWorkspaces
+          : upsertPortalWorkspace(checkpoint.memory.portalWorkspaces, completed.portalWorkspace),
     },
   };
 }
@@ -242,16 +228,11 @@ export function abandonActiveDurableSkill(
     ...withoutActiveSkill,
     memory: {
       ...checkpoint.memory,
-      skillHistory: appendSkillHistory(
-        checkpoint.memory.skillHistory,
-        abandoned,
-      ),
-      portalWorkspaces: abandoned.portalWorkspace === undefined
-        ? checkpoint.memory.portalWorkspaces
-        : upsertPortalWorkspace(
-          checkpoint.memory.portalWorkspaces,
-          abandoned.portalWorkspace,
-        ),
+      skillHistory: appendSkillHistory(checkpoint.memory.skillHistory, abandoned),
+      portalWorkspaces:
+        abandoned.portalWorkspace === undefined
+          ? checkpoint.memory.portalWorkspaces
+          : upsertPortalWorkspace(checkpoint.memory.portalWorkspaces, abandoned.portalWorkspace),
     },
   };
 }
@@ -263,8 +244,8 @@ export function latestResumablePortalWorkspace(
   if (active !== undefined && active.status !== "ABANDONED") {
     return active;
   }
-  return checkpoint.memory.portalWorkspaces.findLast((workspace) =>
-    workspace.status !== "ABANDONED" && workspace.status !== "ENTERED"
+  return checkpoint.memory.portalWorkspaces.findLast(
+    (workspace) => workspace.status !== "ABANDONED" && workspace.status !== "ENTERED",
   );
 }
 
@@ -293,9 +274,7 @@ function createDurableSkill(
   };
 }
 
-function durableRequirementSkill(
-  requirementKey: string,
-): BeatGameDurableSkillKind | undefined {
+function durableRequirementSkill(requirementKey: string): BeatGameDurableSkillKind | undefined {
   switch (requirementKey) {
     case "lava-bucket":
     case "water-bucket":
@@ -314,10 +293,9 @@ function appendSkillHistory(
   history: readonly BeatGameDurableSkillState[],
   skill: BeatGameDurableSkillState,
 ): readonly BeatGameDurableSkillState[] {
-  return [
-    ...history.filter(({ skillId }) => skillId !== skill.skillId),
-    skill,
-  ].slice(-SKILL_HISTORY_LIMIT);
+  return [...history.filter(({ skillId }) => skillId !== skill.skillId), skill].slice(
+    -SKILL_HISTORY_LIMIT,
+  );
 }
 
 function upsertPortalWorkspace(
@@ -325,9 +303,7 @@ function upsertPortalWorkspace(
   workspace: BeatGamePortalWorkspace,
 ): readonly BeatGamePortalWorkspace[] {
   return [
-    ...workspaces.filter(({ workspaceId }) =>
-      workspaceId !== workspace.workspaceId
-    ),
+    ...workspaces.filter(({ workspaceId }) => workspaceId !== workspace.workspaceId),
     workspace,
   ].slice(-PORTAL_WORKSPACE_HISTORY_LIMIT);
 }

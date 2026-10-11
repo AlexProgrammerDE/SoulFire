@@ -62,9 +62,7 @@ export const EDIBLE_FOOD_ITEM_IDS = [
   "minecraft:tropical_fish",
 ] as const;
 
-export const EMERGENCY_FOOD_ITEM_IDS = [
-  "minecraft:rotten_flesh",
-] as const;
+export const EMERGENCY_FOOD_ITEM_IDS = ["minecraft:rotten_flesh"] as const;
 
 export const CRITICAL_HUNGER_FOOD_LEVEL = 6;
 export const URGENT_HUNGER_FOOD_LEVEL = 10;
@@ -98,16 +96,9 @@ export const PLANK_ITEM_IDS = [
   "minecraft:warped_planks",
 ] as const;
 
-const REQUIREMENTS: Readonly<
-  Record<BeatGamePhase, readonly BeatGameRequirementDefinition[]>
-> = {
+const REQUIREMENTS: Readonly<Record<BeatGamePhase, readonly BeatGameRequirementDefinition[]>> = {
   [BeatGamePhase.PREPARE_OVERWORLD]: [
-    itemRequirement(
-      "logs",
-      LOG_ITEM_IDS,
-      ({ targetLogCount }) => targetLogCount,
-      120,
-    ),
+    itemRequirement("logs", LOG_ITEM_IDS, ({ targetLogCount }) => targetLogCount, 120),
     itemRequirement(
       "basic-melee-weapon",
       [
@@ -155,24 +146,9 @@ const REQUIREMENTS: Readonly<
       ({ targetIronCount }) => targetIronCount,
       103,
     ),
-    itemRequirement(
-      "shield",
-      ["minecraft:shield"],
-      () => 1,
-      102,
-    ),
-    itemRequirement(
-      "pickaxe",
-      ["minecraft:iron_pickaxe", "minecraft:stone_pickaxe"],
-      () => 1,
-      68,
-    ),
-    itemRequirement(
-      "water-bucket",
-      ["minecraft:water_bucket"],
-      () => 1,
-      65,
-    ),
+    itemRequirement("shield", ["minecraft:shield"], () => 1, 102),
+    itemRequirement("pickaxe", ["minecraft:iron_pickaxe", "minecraft:stone_pickaxe"], () => 1, 68),
+    itemRequirement("water-bucket", ["minecraft:water_bucket"], () => 1, 65),
     itemRequirement(
       "ignition",
       ["minecraft:flint_and_steel", "minecraft:fire_charge"],
@@ -226,24 +202,9 @@ const REQUIREMENTS: Readonly<
     ),
   ],
   [BeatGamePhase.FIGHT_ENDER_DRAGON]: [
-    itemRequirement(
-      "food",
-      COOKED_FOOD_ITEM_IDS,
-      ({ targetFoodCount }) => targetFoodCount,
-      100,
-    ),
-    itemRequirement(
-      "ranged-weapon",
-      ["minecraft:bow", "minecraft:crossbow"],
-      () => 1,
-      80,
-    ),
-    itemRequirement(
-      "arrows",
-      ["minecraft:arrow"],
-      () => 32,
-      75,
-    ),
+    itemRequirement("food", COOKED_FOOD_ITEM_IDS, ({ targetFoodCount }) => targetFoodCount, 100),
+    itemRequirement("ranged-weapon", ["minecraft:bow", "minecraft:crossbow"], () => 1, 80),
+    itemRequirement("arrows", ["minecraft:arrow"], () => 32, 75),
   ],
   [BeatGamePhase.EXIT_END]: [],
   [BeatGamePhase.COMPLETE]: [],
@@ -255,22 +216,15 @@ export function requirementsForPhase(
   strategy: BeatGameStrategy,
   context: BeatGameRequirementContext = {},
 ): readonly BeatGameItemRequirement[] {
-  const definitions = phase === BeatGamePhase.ENTER_NETHER
-    ? portalRequirements(
-      inventory,
-      strategy,
-      context.reusablePortalAvailable === true,
-    )
-    : phase === BeatGamePhase.PREPARE_OVERWORLD
-    ? prepareOverworldRequirements(inventory)
-    : REQUIREMENTS[phase];
+  const definitions =
+    phase === BeatGamePhase.ENTER_NETHER
+      ? portalRequirements(inventory, strategy, context.reusablePortalAvailable === true)
+      : phase === BeatGamePhase.PREPARE_OVERWORLD
+        ? prepareOverworldRequirements(inventory)
+        : REQUIREMENTS[phase];
   return definitions
-    .map((definition) =>
-      materializeRequirement(definition, inventory, strategy)
-    )
-    .sort((left, right) =>
-      right.priority - left.priority || left.key.localeCompare(right.key)
-    );
+    .map((definition) => materializeRequirement(definition, inventory, strategy))
+    .sort((left, right) => right.priority - left.priority || left.key.localeCompare(right.key));
 }
 
 function prepareOverworldRequirements(
@@ -289,17 +243,14 @@ function prepareOverworldRequirements(
     if (definition.key === "iron") {
       return {
         ...definition,
-        target: ({ targetIronCount }) =>
-          Math.max(0, targetIronCount - investedIron),
+        target: ({ targetIronCount }) => Math.max(0, targetIronCount - investedIron),
       };
     }
     return definition;
   });
 }
 
-function preparedEquipmentIronInvestment(
-  inventory: BeatGameInventory,
-): number {
+function preparedEquipmentIronInvestment(inventory: BeatGameInventory): number {
   const hasShield = (inventory.counts["minecraft:shield"] ?? 0) > 0;
   const hasDurablePickaxe = [
     "minecraft:netherite_pickaxe",
@@ -307,16 +258,19 @@ function preparedEquipmentIronInvestment(
     "minecraft:iron_pickaxe",
   ].some((itemId) => (inventory.counts[itemId] ?? 0) > 0);
   const hasLiquidContainer =
-    (inventory.counts["minecraft:bucket"] ?? 0)
-      + (inventory.counts["minecraft:water_bucket"] ?? 0)
-      + (inventory.counts["minecraft:lava_bucket"] ?? 0) > 0;
+    (inventory.counts["minecraft:bucket"] ?? 0) +
+      (inventory.counts["minecraft:water_bucket"] ?? 0) +
+      (inventory.counts["minecraft:lava_bucket"] ?? 0) >
+    0;
   const hasIgnition =
-    (inventory.counts["minecraft:flint_and_steel"] ?? 0) > 0
-    || (inventory.counts["minecraft:fire_charge"] ?? 0) > 0;
-  return Number(hasShield)
-    + 3 * Number(hasDurablePickaxe)
-    + 3 * Number(hasLiquidContainer)
-    + Number(hasIgnition);
+    (inventory.counts["minecraft:flint_and_steel"] ?? 0) > 0 ||
+    (inventory.counts["minecraft:fire_charge"] ?? 0) > 0;
+  return (
+    Number(hasShield) +
+    3 * Number(hasDurablePickaxe) +
+    3 * Number(hasLiquidContainer) +
+    Number(hasIgnition)
+  );
 }
 
 function overworldLogTarget(inventory: BeatGameInventory): number {
@@ -324,14 +278,12 @@ function overworldLogTarget(inventory: BeatGameInventory): number {
     return 2;
   }
   if (
-    (inventory.counts["minecraft:raw_iron"] ?? 0) > 0
-    || (inventory.counts["minecraft:iron_ingot"] ?? 0) > 0
+    (inventory.counts["minecraft:raw_iron"] ?? 0) > 0 ||
+    (inventory.counts["minecraft:iron_ingot"] ?? 0) > 0
   ) {
     return 2;
   }
-  const hasCookedFood = COOKED_FOOD_ITEM_IDS.some((itemId) =>
-    (inventory.counts[itemId] ?? 0) > 0
-  );
+  const hasCookedFood = COOKED_FOOD_ITEM_IDS.some((itemId) => (inventory.counts[itemId] ?? 0) > 0);
   if (hasCookedFood) {
     return 3;
   }
@@ -350,14 +302,8 @@ function portalRequirements(
   strategy: BeatGameStrategy,
   reusablePortalAvailable: boolean,
 ): readonly BeatGameRequirementDefinition[] {
-  const survivalRequirements = REQUIREMENTS[
-    BeatGamePhase.PREPARE_OVERWORLD
-  ]
-    .filter(({ key }) =>
-      key !== "iron"
-      && key !== "water-bucket"
-      && key !== "ignition"
-    )
+  const survivalRequirements = REQUIREMENTS[BeatGamePhase.PREPARE_OVERWORLD]
+    .filter(({ key }) => key !== "iron" && key !== "water-bucket" && key !== "ignition")
     .map((definition) => {
       if (definition.key === "logs") {
         return {
@@ -369,8 +315,7 @@ function portalRequirements(
       if (definition.key === "food-supply") {
         return {
           ...definition,
-          target: ({ targetFoodCount }: BeatGameStrategy) =>
-            Math.min(targetFoodCount, 8),
+          target: ({ targetFoodCount }: BeatGameStrategy) => Math.min(targetFoodCount, 8),
         };
       }
       return definition;
@@ -378,85 +323,49 @@ function portalRequirements(
   if (reusablePortalAvailable) {
     return [
       ...survivalRequirements,
-      ...(
-        (inventory.counts["minecraft:shield"] ?? 0) === 0
-          ? [itemRequirement(
-            "iron",
-            ["minecraft:iron_ingot"],
-            () => 1,
-            103,
-          )]
-          : []
-      ),
+      ...((inventory.counts["minecraft:shield"] ?? 0) === 0
+        ? [itemRequirement("iron", ["minecraft:iron_ingot"], () => 1, 103)]
+        : []),
     ];
   }
   const hasCompleteObsidianFrame =
-    (inventory.counts["minecraft:obsidian"] ?? 0)
-      >= strategy.targetObsidianCount;
-  const useObsidian = strategy.portalStrategy === PortalStrategy.OBSIDIAN
-    || (
-      strategy.portalStrategy === PortalStrategy.AUTO
-      && hasCompleteObsidianFrame
-    );
-  const missingLiquidBuckets = Number(
-    (inventory.counts["minecraft:water_bucket"] ?? 0) === 0,
-  ) + Number(
-    !useObsidian
-      && (inventory.counts["minecraft:lava_bucket"] ?? 0) === 0,
-  );
+    (inventory.counts["minecraft:obsidian"] ?? 0) >= strategy.targetObsidianCount;
+  const useObsidian =
+    strategy.portalStrategy === PortalStrategy.OBSIDIAN ||
+    (strategy.portalStrategy === PortalStrategy.AUTO && hasCompleteObsidianFrame);
+  const missingLiquidBuckets =
+    Number((inventory.counts["minecraft:water_bucket"] ?? 0) === 0) +
+    Number(!useObsidian && (inventory.counts["minecraft:lava_bucket"] ?? 0) === 0);
   const missingBucketCount = Math.max(
     0,
     missingLiquidBuckets - (inventory.counts["minecraft:bucket"] ?? 0),
   );
-  const portalEquipmentIronTarget = 3 * missingBucketCount
-    + Number((inventory.counts["minecraft:shield"] ?? 0) === 0)
-    + Number(
-      (inventory.counts["minecraft:flint_and_steel"] ?? 0) === 0
-        && (inventory.counts["minecraft:fire_charge"] ?? 0) === 0,
+  const portalEquipmentIronTarget =
+    3 * missingBucketCount +
+    Number((inventory.counts["minecraft:shield"] ?? 0) === 0) +
+    Number(
+      (inventory.counts["minecraft:flint_and_steel"] ?? 0) === 0 &&
+        (inventory.counts["minecraft:fire_charge"] ?? 0) === 0,
     );
   return [
     ...survivalRequirements,
-    ...(
-      useObsidian
-        && !hasCompleteObsidianFrame
-        && (inventory.counts["minecraft:diamond_pickaxe"] ?? 0) === 0
-        ? [itemRequirement(
-          "diamond-pickaxe",
-          ["minecraft:diamond_pickaxe"],
-          () => 1,
-          110,
-        )]
-        : []
-    ),
-    ...(
-      portalEquipmentIronTarget > 0
-        ? [itemRequirement(
-          "iron",
-          ["minecraft:iron_ingot"],
-          () => portalEquipmentIronTarget,
-          103,
-        )]
-        : []
-    ),
+    ...(useObsidian &&
+    !hasCompleteObsidianFrame &&
+    (inventory.counts["minecraft:diamond_pickaxe"] ?? 0) === 0
+      ? [itemRequirement("diamond-pickaxe", ["minecraft:diamond_pickaxe"], () => 1, 110)]
+      : []),
+    ...(portalEquipmentIronTarget > 0
+      ? [itemRequirement("iron", ["minecraft:iron_ingot"], () => portalEquipmentIronTarget, 103)]
+      : []),
     useObsidian
       ? itemRequirement(
-        "obsidian",
-        ["minecraft:obsidian"],
-        ({ targetObsidianCount }) => targetObsidianCount,
-        100,
-      )
-      : itemRequirement(
-        "lava-bucket",
-        ["minecraft:lava_bucket"],
-        () => 1,
-        100,
-      ),
-    itemRequirement(
-      "water-bucket",
-      ["minecraft:water_bucket"],
-      () => 1,
-      101,
-    ),
+          "obsidian",
+          ["minecraft:obsidian"],
+          ({ targetObsidianCount }) => targetObsidianCount,
+          100,
+        )
+      : itemRequirement("lava-bucket", ["minecraft:lava_bucket"], () => 1, 100),
+    itemRequirement("water-bucket", ["minecraft:water_bucket"], () => 1, 101),
     itemRequirement(
       "ignition",
       ["minecraft:flint_and_steel", "minecraft:fire_charge"],
@@ -472,16 +381,14 @@ export function unsatisfiedRequirements(
   strategy: BeatGameStrategy,
   context: BeatGameRequirementContext = {},
 ): readonly BeatGameItemRequirement[] {
-  return requirementsForPhase(phase, inventory, strategy, context)
-    .filter(({ satisfied }) => !satisfied);
+  return requirementsForPhase(phase, inventory, strategy, context).filter(
+    ({ satisfied }) => !satisfied,
+  );
 }
 
 export function requirementCount(
   inventory: BeatGameInventory,
-  definition: Pick<
-    BeatGameRequirementDefinition,
-    "itemIds" | "tags"
-  >,
+  definition: Pick<BeatGameRequirementDefinition, "itemIds" | "tags">,
 ): number {
   const direct = (definition.itemIds ?? []).reduce(
     (total, itemId) => total + (inventory.counts[itemId] ?? 0),
@@ -499,10 +406,7 @@ function materializeRequirement(
   inventory: BeatGameInventory,
   strategy: BeatGameStrategy,
 ): BeatGameItemRequirement {
-  const targetCount = nonNegativeInteger(
-    definition.target(strategy),
-    `${definition.key}.target`,
-  );
+  const targetCount = nonNegativeInteger(definition.target(strategy), `${definition.key}.target`);
   const currentCount = requirementCount(inventory, definition);
   return {
     key: definition.key,

@@ -1,10 +1,4 @@
-import {
-  mkdir,
-  mkdtemp,
-  rm,
-  stat,
-  utimes,
-} from "node:fs/promises";
+import { mkdir, mkdtemp, rm, stat, utimes } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -14,25 +8,21 @@ import { pruneArtifactRuns } from "../smoke/artifact-retention.js";
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) =>
-    rm(directory, { recursive: true, force: true })
-  ));
+  await Promise.all(
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { recursive: true, force: true })),
+  );
 });
 
 describe("pruneArtifactRuns", () => {
   it("keeps the current run and the newest retained runs", async () => {
-    const rootDirectory = await mkdtemp(
-      path.join(os.tmpdir(), "soulfire-artifacts-"),
-    );
+    const rootDirectory = await mkdtemp(path.join(os.tmpdir(), "soulfire-artifacts-"));
     temporaryDirectories.push(rootDirectory);
     const currentDirectory = path.join(rootDirectory, "current");
     const oldDirectory = path.join(rootDirectory, "old");
     const recentDirectory = path.join(rootDirectory, "recent");
-    await Promise.all([
-      mkdir(currentDirectory),
-      mkdir(oldDirectory),
-      mkdir(recentDirectory),
-    ]);
+    await Promise.all([mkdir(currentDirectory), mkdir(oldDirectory), mkdir(recentDirectory)]);
     await utimes(oldDirectory, new Date(1_000), new Date(1_000));
     await utimes(recentDirectory, new Date(2_000), new Date(2_000));
 
@@ -49,15 +39,15 @@ describe("pruneArtifactRuns", () => {
   });
 
   it("refuses to prune around an artifact directory outside its root", async () => {
-    const rootDirectory = await mkdtemp(
-      path.join(os.tmpdir(), "soulfire-artifacts-"),
-    );
+    const rootDirectory = await mkdtemp(path.join(os.tmpdir(), "soulfire-artifacts-"));
     temporaryDirectories.push(rootDirectory);
 
-    await expect(pruneArtifactRuns({
-      rootDirectory,
-      currentDirectory: path.join(rootDirectory, "nested", "current"),
-      maximumRuns: 2,
-    })).rejects.toThrow("must be a direct child");
+    await expect(
+      pruneArtifactRuns({
+        rootDirectory,
+        currentDirectory: path.join(rootDirectory, "nested", "current"),
+        maximumRuns: 2,
+      }),
+    ).rejects.toThrow("must be a direct child");
   });
 });

@@ -22,17 +22,11 @@ const nodeHttpClientLayer = NodeHttpClient.layerUndiciNoDispatcher.pipe(
 function connect(
   options: SoulFireOptions,
 ): Effect.Effect<SoulFireClient, SoulFireConnectionError, Scope.Scope> {
-  return UniversalSoulFire.connectWithHttpClient(options).pipe(
-    Effect.provide(nodeHttpClientLayer),
-  );
+  return UniversalSoulFire.connectWithHttpClient(options).pipe(Effect.provide(nodeHttpClientLayer));
 }
 
-function layer(
-  options: SoulFireOptions,
-): Layer.Layer<SoulFireService, SoulFireConnectionError> {
-  return UniversalSoulFire.layerWithHttpClient(options).pipe(
-    Layer.provide(nodeHttpClientLayer),
-  );
+function layer(options: SoulFireOptions): Layer.Layer<SoulFireService, SoulFireConnectionError> {
+  return UniversalSoulFire.layerWithHttpClient(options).pipe(Layer.provide(nodeHttpClientLayer));
 }
 
 function install(
@@ -40,8 +34,7 @@ function install(
 ): Effect.Effect<SoulFireClient, SoulFireConnectionError, Scope.Scope> {
   return Effect.gen(function* () {
     const httpClient = yield* HttpClient.HttpClient;
-    const fetchImplementation =
-      options.fetch ?? makeEffectHttpClientFetch(httpClient);
+    const fetchImplementation = options.fetch ?? makeEffectHttpClientFetch(httpClient);
     const localServer = yield* installLocalServer({
       ...options,
       fetch: fetchImplementation,
@@ -85,10 +78,11 @@ export const SoulFire = {
   layer,
   install,
   installLayer,
-  createBot: (options: ManagedBotOptions) => Effect.gen(function* () {
-    const client = yield* install(options.installation);
-    return yield* client.createBot(options);
-  }),
+  createBot: (options: ManagedBotOptions) =>
+    Effect.gen(function* () {
+      const client = yield* install(options.installation);
+      return yield* client.createBot(options);
+    }),
 } as const;
 
 function connectionOptions(
@@ -103,8 +97,6 @@ function connectionOptions(
       ? {}
       : { defaultTimeoutMs: options.defaultTimeoutMs }),
     ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
-    ...(options.interceptors === undefined
-      ? {}
-      : { interceptors: options.interceptors }),
+    ...(options.interceptors === undefined ? {} : { interceptors: options.interceptors }),
   };
 }

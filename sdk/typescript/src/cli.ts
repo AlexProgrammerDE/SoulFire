@@ -29,10 +29,7 @@ interface GenerateArguments {
 }
 
 async function main(arguments_: readonly string[]): Promise<void> {
-  const nodeMajor = Number.parseInt(
-    process.versions.node.split(".")[0] ?? "",
-    10,
-  );
+  const nodeMajor = Number.parseInt(process.versions.node.split(".")[0] ?? "", 10);
   if (!Number.isFinite(nodeMajor) || nodeMajor < 22) {
     throw new Error("soulfire-sdk requires Node.js 22 or newer");
   }
@@ -67,26 +64,16 @@ async function main(arguments_: readonly string[]): Promise<void> {
     descriptorSet: source.descriptorSet,
     ...(source.metadata === undefined ? {} : { metadata: source.metadata }),
     ...(options.plugin === undefined ? {} : { pluginId: options.plugin }),
-    ...(options.pluginVersion === undefined
-      ? {}
-      : { pluginVersion: options.pluginVersion }),
-    ...(options.apiMajorVersion === undefined
-      ? {}
-      : { apiMajorVersion: options.apiMajorVersion }),
+    ...(options.pluginVersion === undefined ? {} : { pluginVersion: options.pluginVersion }),
+    ...(options.apiMajorVersion === undefined ? {} : { apiMajorVersion: options.apiMajorVersion }),
     ...(options.requiredSoulFireVersion === undefined
       ? {}
       : { requiredSoulFireVersion: options.requiredSoulFireVersion }),
     language: options.language,
-    ...(options.output === undefined
-      ? {}
-      : { outputDirectory: options.output }),
-    ...(options.packageName === undefined
-      ? {}
-      : { packageName: options.packageName }),
+    ...(options.output === undefined ? {} : { outputDirectory: options.output }),
+    ...(options.packageName === undefined ? {} : { packageName: options.packageName }),
   });
-  process.stdout.write(
-    `Generated ${options.language} plugin SDK at ${outputDirectory}\n`,
-  );
+  process.stdout.write(`Generated ${options.language} plugin SDK at ${outputDirectory}\n`);
 }
 
 async function downloadDescriptor(
@@ -116,9 +103,7 @@ async function downloadDescriptor(
   );
 }
 
-function parseGenerateArguments(
-  arguments_: readonly string[],
-): GenerateArguments {
+function parseGenerateArguments(arguments_: readonly string[]): GenerateArguments {
   const values = new Map<string, string>();
   for (let index = 0; index < arguments_.length; index += 1) {
     const key = arguments_[index];
@@ -185,16 +170,11 @@ function parseGenerateArguments(
     ...(packageName === undefined ? {} : { packageName }),
     ...(pluginVersion === undefined ? {} : { pluginVersion }),
     ...(apiMajorVersion === undefined ? {} : { apiMajorVersion }),
-    ...(requiredSoulFireVersion === undefined
-      ? {}
-      : { requiredSoulFireVersion }),
+    ...(requiredSoulFireVersion === undefined ? {} : { requiredSoulFireVersion }),
   };
 }
 
-function optionalPositiveInteger(
-  value: string | undefined,
-  option: string,
-): number | undefined {
+function optionalPositiveInteger(value: string | undefined, option: string): number | undefined {
   if (value === undefined) {
     return undefined;
   }

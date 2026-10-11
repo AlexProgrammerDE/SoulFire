@@ -12,8 +12,7 @@ export const BeatGamePhase = {
   COMPLETE: "COMPLETE",
 } as const;
 
-export type BeatGamePhase =
-  typeof BeatGamePhase[keyof typeof BeatGamePhase];
+export type BeatGamePhase = (typeof BeatGamePhase)[keyof typeof BeatGamePhase];
 
 export const BeatGameRunStatus = {
   CREATED: "CREATED",
@@ -25,8 +24,7 @@ export const BeatGameRunStatus = {
   FAILED: "FAILED",
 } as const;
 
-export type BeatGameRunStatus =
-  typeof BeatGameRunStatus[keyof typeof BeatGameRunStatus];
+export type BeatGameRunStatus = (typeof BeatGameRunStatus)[keyof typeof BeatGameRunStatus];
 
 export const BeatGameTeamRole = {
   LEAD: "LEAD",
@@ -36,8 +34,7 @@ export const BeatGameTeamRole = {
   END_SUPPORT: "END_SUPPORT",
 } as const;
 
-export type BeatGameTeamRole =
-  typeof BeatGameTeamRole[keyof typeof BeatGameTeamRole];
+export type BeatGameTeamRole = (typeof BeatGameTeamRole)[keyof typeof BeatGameTeamRole];
 
 export const BeatGameObjective = {
   BOOTSTRAP: "BOOTSTRAP",
@@ -48,8 +45,7 @@ export const BeatGameObjective = {
   COMPLETE: "COMPLETE",
 } as const;
 
-export type BeatGameObjective =
-  typeof BeatGameObjective[keyof typeof BeatGameObjective];
+export type BeatGameObjective = (typeof BeatGameObjective)[keyof typeof BeatGameObjective];
 
 export const PortalStrategy = {
   AUTO: "AUTO",
@@ -57,8 +53,7 @@ export const PortalStrategy = {
   CAST: "CAST",
 } as const;
 
-export type PortalStrategy =
-  typeof PortalStrategy[keyof typeof PortalStrategy];
+export type PortalStrategy = (typeof PortalStrategy)[keyof typeof PortalStrategy];
 
 export const BeatGamePathSearchMode = {
   PRECISION: "PRECISION",
@@ -68,7 +63,7 @@ export const BeatGamePathSearchMode = {
 } as const;
 
 export type BeatGamePathSearchMode =
-  typeof BeatGamePathSearchMode[keyof typeof BeatGamePathSearchMode];
+  (typeof BeatGamePathSearchMode)[keyof typeof BeatGamePathSearchMode];
 
 export const BeatGameDurableSkillKind = {
   PORTAL_CONSTRUCTION: "PORTAL_CONSTRUCTION",
@@ -84,7 +79,7 @@ export const BeatGameDurableSkillKind = {
 } as const;
 
 export type BeatGameDurableSkillKind =
-  typeof BeatGameDurableSkillKind[keyof typeof BeatGameDurableSkillKind];
+  (typeof BeatGameDurableSkillKind)[keyof typeof BeatGameDurableSkillKind];
 
 export const BeatGameDurableSkillStatus = {
   ACTIVE: "ACTIVE",
@@ -94,7 +89,7 @@ export const BeatGameDurableSkillStatus = {
 } as const;
 
 export type BeatGameDurableSkillStatus =
-  typeof BeatGameDurableSkillStatus[keyof typeof BeatGameDurableSkillStatus];
+  (typeof BeatGameDurableSkillStatus)[keyof typeof BeatGameDurableSkillStatus];
 
 export interface BeatGamePosition {
   readonly x: number;
@@ -157,11 +152,9 @@ export interface BeatGameStrategy {
   readonly path: BeatGamePathPolicy;
 }
 
-export type BeatGameStrategyOptions =
-  & Partial<Omit<BeatGameStrategy, "path">>
-  & {
-    readonly path?: Partial<BeatGamePathPolicy>;
-  };
+export type BeatGameStrategyOptions = Partial<Omit<BeatGameStrategy, "path">> & {
+  readonly path?: Partial<BeatGamePathPolicy>;
+};
 
 export const defaultBeatGameStrategy: BeatGameStrategy = {
   portalStrategy: PortalStrategy.AUTO,
@@ -317,8 +310,7 @@ export interface BeatGamePortalWorkspace {
   readonly origin: BeatGameBlockPosition;
   readonly axis: "x" | "z";
   readonly method: "OBSIDIAN" | "CAST";
-  readonly status: "RESERVED" | "BUILDING" | "IGNITED" | "ENTERING"
-    | "ENTERED" | "ABANDONED";
+  readonly status: "RESERVED" | "BUILDING" | "IGNITED" | "ENTERING" | "ENTERED" | "ABANDONED";
   readonly targetFrame: readonly BeatGameBlockPosition[];
   readonly observedFrame: readonly BeatGameBlockPosition[];
   readonly interior: readonly BeatGameBlockPosition[];
@@ -357,8 +349,14 @@ export interface BeatGameDurableSkillState {
 
 export interface BeatGameWorldPlace {
   readonly key: string;
-  readonly kind: "FORTRESS" | "BASTION" | "BLAZE_SPAWNER"
-    | "SAFE_CORRIDOR" | "SHELTER" | "END_ENTRY" | "END_FIGHT";
+  readonly kind:
+    | "FORTRESS"
+    | "BASTION"
+    | "BLAZE_SPAWNER"
+    | "SAFE_CORRIDOR"
+    | "SHELTER"
+    | "END_ENTRY"
+    | "END_FIGHT";
   readonly position: BeatGamePosition;
   readonly observedAt: string;
   readonly confidence: number;
@@ -375,12 +373,8 @@ export interface BeatGameWorldMemory {
   readonly skillHistory: readonly BeatGameDurableSkillState[];
   readonly unreachable: readonly BeatGameMemoryEntry<BeatGamePosition>[];
   readonly eyeSamples: readonly BeatGameEyeSample[];
-  readonly deathPositions: readonly BeatGameMemoryEntry<
-    BeatGameDeathPosition
-  >[];
-  readonly explorationFrontiers?: Readonly<
-    Record<string, BeatGameExplorationFrontier>
-  >;
+  readonly deathPositions: readonly BeatGameMemoryEntry<BeatGameDeathPosition>[];
+  readonly explorationFrontiers?: Readonly<Record<string, BeatGameExplorationFrontier>>;
   readonly deathRecoveryFailures?: Readonly<Record<string, number>>;
   readonly latestDeath?: BeatGameMemoryEntry<BeatGamePosition>;
   readonly strongholdEstimate?: BeatGamePosition;
@@ -435,9 +429,7 @@ export interface BeatGameTeamDiscovery {
   readonly observedAt: string;
   readonly expiresAt?: string;
   readonly confidence: number;
-  readonly metadata?: Readonly<
-    Record<string, string | number | boolean>
-  >;
+  readonly metadata?: Readonly<Record<string, string | number | boolean>>;
 }
 
 export interface BeatGameTeamSnapshot {
@@ -470,10 +462,7 @@ export interface BeatGameStableActionResult {
   readonly action: string;
   readonly phase: BeatGamePhase;
   readonly completedAt: string;
-  readonly evidence:
-    | "TASK_RESULT"
-    | "OBSERVED_STATE"
-    | "OBSERVATION_AFTER_UNCERTAIN_RESULT";
+  readonly evidence: "TASK_RESULT" | "OBSERVED_STATE" | "OBSERVATION_AFTER_UNCERTAIN_RESULT";
   readonly connectionEpoch: string;
   readonly playerRevision: string;
   readonly inventoryRevision: string;
@@ -522,68 +511,67 @@ interface BeatGameEventBase {
 }
 
 export type BeatGameEvent =
-  | BeatGameEventBase & {
-    readonly type: "run-started" | "run-paused" | "run-resumed"
-      | "run-stopped" | "run-completed";
-  }
-  | BeatGameEventBase & {
-    readonly type: "phase-changed";
-    readonly previous: BeatGamePhase;
-    readonly current: BeatGamePhase;
-  }
-  | BeatGameEventBase & {
-    readonly type: "objective-changed";
-    readonly objective: string;
-  }
-  | BeatGameEventBase & {
-    readonly type:
-      | "requirement-discovered"
-      | "requirement-updated"
-      | "requirement-satisfied";
-    readonly requirement: BeatGameItemRequirement;
-  }
-  | BeatGameEventBase & {
-    readonly type: "requirement-claimed";
-    readonly requirement: BeatGameItemRequirement;
-    readonly claim: BeatGameClaim;
-  }
-  | BeatGameEventBase & {
-    readonly type: "action-started" | "action-retried"
-      | "action-progressed" | "action-succeeded" | "action-failed";
-    readonly action: string;
-    readonly attempt: number;
-    readonly detail?: string;
-  }
-  | BeatGameEventBase & {
-    readonly type: "checkpoint-saved" | "checkpoint-restored";
-    readonly revision: number;
-  }
-  | BeatGameEventBase & {
-    readonly type: "bot-disconnected" | "bot-recovered"
-      | "death-observed" | "items-recovered";
-    readonly detail?: string;
-  }
-  | BeatGameEventBase & {
-    readonly type: "team-role-changed";
-    readonly role: BeatGameTeamRole;
-  }
-  | BeatGameEventBase & {
-    readonly type: "team-claim-changed";
-    readonly claim: BeatGameClaim;
-    readonly released: boolean;
-  }
-  | BeatGameEventBase & {
-    readonly type: "observation-recorded";
-    readonly observedAt: string;
-    readonly connectionEpoch: string;
-    readonly playerRevision: string;
-    readonly inventoryRevision: string;
-  }
-  | BeatGameEventBase & {
-    readonly type: "diagnostic";
-    readonly message: string;
-    readonly data?: Readonly<Record<string, unknown>>;
-  };
+  | (BeatGameEventBase & {
+      readonly type: "run-started" | "run-paused" | "run-resumed" | "run-stopped" | "run-completed";
+    })
+  | (BeatGameEventBase & {
+      readonly type: "phase-changed";
+      readonly previous: BeatGamePhase;
+      readonly current: BeatGamePhase;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "objective-changed";
+      readonly objective: string;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "requirement-discovered" | "requirement-updated" | "requirement-satisfied";
+      readonly requirement: BeatGameItemRequirement;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "requirement-claimed";
+      readonly requirement: BeatGameItemRequirement;
+      readonly claim: BeatGameClaim;
+    })
+  | (BeatGameEventBase & {
+      readonly type:
+        | "action-started"
+        | "action-retried"
+        | "action-progressed"
+        | "action-succeeded"
+        | "action-failed";
+      readonly action: string;
+      readonly attempt: number;
+      readonly detail?: string;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "checkpoint-saved" | "checkpoint-restored";
+      readonly revision: number;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "bot-disconnected" | "bot-recovered" | "death-observed" | "items-recovered";
+      readonly detail?: string;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "team-role-changed";
+      readonly role: BeatGameTeamRole;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "team-claim-changed";
+      readonly claim: BeatGameClaim;
+      readonly released: boolean;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "observation-recorded";
+      readonly observedAt: string;
+      readonly connectionEpoch: string;
+      readonly playerRevision: string;
+      readonly inventoryRevision: string;
+    })
+  | (BeatGameEventBase & {
+      readonly type: "diagnostic";
+      readonly message: string;
+      readonly data?: Readonly<Record<string, unknown>>;
+    });
 
 export interface BeatGameTeamOptions {
   readonly teamId?: string;

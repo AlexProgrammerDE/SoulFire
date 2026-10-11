@@ -33,13 +33,8 @@ describe("Effect behavior combinators", () => {
             }),
           );
           const never = defineBehavior<number>(() => Effect.never);
-          expect(yield* sequence(first, second).run(effectBot)).toEqual([
-            1,
-            "two",
-          ]);
-          expect(yield* retry(unstable, { attempts: 3 }).run(effectBot)).toBe(
-            3,
-          );
+          expect(yield* sequence(first, second).run(effectBot)).toEqual([1, "two"]);
+          expect(yield* retry(unstable, { attempts: 3 }).run(effectBot)).toBe(3);
           expect(yield* race(never, first).run(effectBot)).toBe(1);
         }),
       ),
@@ -63,9 +58,7 @@ describe("Effect behavior combinators", () => {
               cleaned = true;
             }),
           );
-          const exit = yield* Effect.exit(
-            cleanup(failing, finalizer).run(effectBot),
-          );
+          const exit = yield* Effect.exit(cleanup(failing, finalizer).run(effectBot));
           expect(Exit.isFailure(exit)).toBe(true);
           expect(cleaned).toBe(true);
         }),
@@ -76,11 +69,9 @@ describe("Effect behavior combinators", () => {
       Effect.gen(function* () {
         let value = 0;
         const action = defineBehavior(() => Effect.sync(() => ++value));
-        const workflow = until(
-          action,
-          (result) => Effect.succeed(result % 2 === 0),
-          { maximumIterations: 2 },
-        );
+        const workflow = until(action, (result) => Effect.succeed(result % 2 === 0), {
+          maximumIterations: 2,
+        });
         expect(yield* workflow.run(effectBot)).toBe(2);
         expect(yield* workflow.run(effectBot)).toBe(4);
         const failure = yield* Effect.flip(
@@ -106,9 +97,7 @@ describe("Effect behavior combinators", () => {
               }),
           ),
         );
-        const winner = defineBehavior(() =>
-          Deferred.await(started).pipe(Effect.as(1)),
-        );
+        const winner = defineBehavior(() => Deferred.await(started).pipe(Effect.as(1)));
         expect(yield* race(loser, winner).run(effectBot)).toBe(1);
         expect(released).toBe(true);
       }),
@@ -119,15 +108,24 @@ class Counter extends Context.Service<Counter, { readonly value: number }>()("te
 class CustomFailure extends Data.TaggedError("CustomFailure")<{}> {}
 
 it("preserves custom behavior errors and required services through composition", () => {
-  const dependent = defineBehavior(() => Effect.gen(function* () {
-    const counter = yield* Counter;
-    if (counter.value < 0) return yield* Effect.fail(new CustomFailure());
-    return counter.value;
-  }));
-  const composed = sequence(dependent, defineBehavior(() => Effect.succeed("done")));
-  expectTypeOf(composed.run(effectBot)).toEqualTypeOf<Effect.Effect<readonly [number, string], CustomFailure, Counter>>();
-  return Effect.runPromise(composed.run(effectBot).pipe(
-    Effect.provideService(Counter, { value: 4 }),
-    Effect.tap((result) => Effect.sync(() => expect(result).toEqual([4, "done"]))),
-  ));
+  const dependent = defineBehavior(() =>
+    Effect.gen(function* () {
+      const counter = yield* Counter;
+      if (counter.value < 0) return yield* Effect.fail(new CustomFailure());
+      return counter.value;
+    }),
+  );
+  const composed = sequence(
+    dependent,
+    defineBehavior(() => Effect.succeed("done")),
+  );
+  expectTypeOf(composed.run(effectBot)).toEqualTypeOf<
+    Effect.Effect<readonly [number, string], CustomFailure, Counter>
+  >();
+  return Effect.runPromise(
+    composed.run(effectBot).pipe(
+      Effect.provideService(Counter, { value: 4 }),
+      Effect.tap((result) => Effect.sync(() => expect(result).toEqual([4, "done"]))),
+    ),
+  );
 });

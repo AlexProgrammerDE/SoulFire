@@ -19,34 +19,39 @@ describe("smoke task progress diagnostics", () => {
         z: 45,
         dimension: "minecraft:overworld",
       },
-      activeTargets: [{
-        x: -131,
-        y: 72,
-        z: 45,
-        dimension: "minecraft:overworld",
-      }],
-      failedApproaches: [{
-        target: {
+      activeTargets: [
+        {
           x: -131,
           y: 72,
           z: 45,
           dimension: "minecraft:overworld",
         },
-        playerPositions: [{
-          x: -131,
-          y: 64,
-          z: 45,
-          dimension: "minecraft:overworld",
-        }],
-      }],
+      ],
+      failedApproaches: [
+        {
+          target: {
+            x: -131,
+            y: 72,
+            z: 45,
+            dimension: "minecraft:overworld",
+          },
+          playerPositions: [
+            {
+              x: -131,
+              y: 64,
+              z: 45,
+              dimension: "minecraft:overworld",
+            },
+          ],
+        },
+      ],
       pathCurrentMovement: 3,
       pathTotalMovements: 12,
     });
     const progress = create(BotTaskProgressSchema, {
       message: "Following collection route",
       detail: create(AnySchema, {
-        typeUrl:
-          "type.googleapis.com/soulfire.v1.CollectBlocksTaskProgressDetail",
+        typeUrl: "type.googleapis.com/soulfire.v1.CollectBlocksTaskProgressDetail",
         value: toBinary(CollectBlocksTaskProgressDetailSchema, detail),
       }),
     });
@@ -57,10 +62,12 @@ describe("smoke task progress diagnostics", () => {
         phase: CollectBlocksTaskProgressDetail_Phase.FOLLOWING_ROUTE,
         playerPosition: { x: -131, y: 64, z: 45 },
         activeTargets: [{ x: -131, y: 72, z: 45 }],
-        failedApproaches: [{
-          target: { x: -131, y: 72, z: 45 },
-          playerPositions: [{ x: -131, y: 64, z: 45 }],
-        }],
+        failedApproaches: [
+          {
+            target: { x: -131, y: 72, z: 45 },
+            playerPositions: [{ x: -131, y: 64, z: 45 }],
+          },
+        ],
         pathCurrentMovement: 3,
         pathTotalMovements: 12,
       },

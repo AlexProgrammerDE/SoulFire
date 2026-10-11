@@ -8,9 +8,7 @@ const sourceResponse = await fetch(
 );
 
 if (!sourceResponse.ok) {
-  throw new Error(
-    `Failed to fetch Mineflayer API reference: ${sourceResponse.status}`,
-  );
+  throw new Error(`Failed to fetch Mineflayer API reference: ${sourceResponse.status}`);
 }
 
 const headings = (await sourceResponse.text())
@@ -18,9 +16,7 @@ const headings = (await sourceResponse.text())
   .filter((line) => line.startsWith("#### "))
   .map((line) => line.slice(5));
 const canonicalHeadings = `${headings.join("\n")}\n`;
-const digest = createHash("sha256")
-  .update(canonicalHeadings)
-  .digest("hex");
+const digest = createHash("sha256").update(canonicalHeadings).digest("hex");
 
 if (headings.length !== matrix.source.headingCount) {
   throw new Error(

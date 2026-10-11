@@ -3,28 +3,32 @@
   "version": "2.10.4",
   "description": "TypeScript SDK for automating SoulFire bots over gRPC-Web.",
   "keywords": [
-    "minecraft",
-    "bot",
     "automation",
+    "bot",
     "grpc-web",
+    "minecraft",
     "soulfire"
   ],
-  "author": "SoulFire",
-  "license": "AGPL-3.0-only",
   "homepage": "https://soulfiremc.com/docs/sdk/typescript",
+  "bugs": {
+    "url": "https://github.com/soulfiremc-com/SoulFire/issues"
+  },
+  "license": "AGPL-3.0-only",
+  "author": "SoulFire",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/soulfiremc-com/SoulFire.git",
     "directory": "sdk/typescript"
   },
-  "bugs": {
-    "url": "https://github.com/soulfiremc-com/SoulFire/issues"
-  },
-  "type": "module",
-  "sideEffects": false,
   "bin": {
     "soulfire-sdk": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -55,10 +59,9 @@
       "import": "./dist/generated/*.js"
     }
   },
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "bun run clean && tsc -p tsconfig.build.json",
     "check": "bun run typecheck && bun run test && bun run build && bun run check:browser",
@@ -76,6 +79,16 @@
     "adm-zip": "0.6.1",
     "tar": "7.5.22"
   },
+  "devDependencies": {
+    "@types/node": "26.6.3",
+    "effect": "4.0.0",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2",
+    "vitest": "5.0.2"
+  },
+  "peerDependencies": {
+    "effect": "^4.0.0"
+  },
   "optionalDependencies": {
     "@bufbuild/buf-darwin-arm64": "1.73.0",
     "@bufbuild/buf-darwin-x64": "1.73.0",
@@ -84,18 +97,5 @@
     "@bufbuild/buf-linux-x64": "1.73.0",
     "@bufbuild/buf-win32-arm64": "1.73.0",
     "@bufbuild/buf-win32-x64": "1.73.0"
-  },
-  "peerDependencies": {
-    "effect": "^4.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "26.6.3",
-    "effect": "4.0.0",
-    "esbuild": "0.28.2",
-    "typescript": "7.0.2",
-    "vitest": "5.0.2"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

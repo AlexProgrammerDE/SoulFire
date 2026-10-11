@@ -9,17 +9,11 @@ import {
   type SoulFireBot,
 } from "@soulfiremc/sdk";
 import { create } from "@bufbuild/protobuf";
-import {
-  BotTaskFailureSchema,
-  BotTaskSchema,
-} from "@soulfiremc/sdk/generated/soulfire/task_pb";
+import { BotTaskFailureSchema, BotTaskSchema } from "@soulfiremc/sdk/generated/soulfire/task_pb";
 import { Effect, Fiber, Stream } from "effect";
 import { describe, expect, it } from "vitest";
 
-import {
-  defaultBeatGameStrategy,
-  makeSoulFireBeatGameDriver,
-} from "../src/index.js";
+import { defaultBeatGameStrategy, makeSoulFireBeatGameDriver } from "../src/index.js";
 
 function effectBot(
   taskResult: Effect.Effect<unknown, unknown> = Effect.succeed({}),
@@ -190,9 +184,7 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.withControl(
-      driver.withControl(Effect.void),
-    ));
+    await Effect.runPromise(driver.withControl(driver.withControl(Effect.void)));
 
     expect(calls.controlAcquisitions).toBe(1);
     expect(calls.controlReleases).toBe(1);
@@ -228,11 +220,8 @@ describe("production SoulFire beat-game driver", () => {
   });
 
   it("maps semantic creeper fuse metadata", async () => {
-    const { bot } = effectBot(
-      Effect.succeed({}),
-      Effect.succeed({}),
-      Stream.empty,
-      [{
+    const { bot } = effectBot(Effect.succeed({}), Effect.succeed({}), Stream.empty, [
+      {
         reference: {
           connectionEpoch: "connection-epoch",
           networkId: 42,
@@ -253,14 +242,16 @@ describe("production SoulFire beat-game driver", () => {
           creeper_powered: false,
           creeper_ignited: false,
         },
-      }],
-    );
+      },
+    ]);
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    const entities = await Effect.runPromise(driver.queryEntities({
-      radius: 8,
-      selector: { entityTypes: ["minecraft:creeper"] },
-    }));
+    const entities = await Effect.runPromise(
+      driver.queryEntities({
+        radius: 8,
+        selector: { entityTypes: ["minecraft:creeper"] },
+      }),
+    );
 
     expect(entities).toHaveLength(1);
     expect(entities[0]).toMatchObject({
@@ -293,9 +284,7 @@ describe("production SoulFire beat-game driver", () => {
     );
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    const events = await Effect.runPromise(
-      driver.events.pipe(Stream.take(1), Stream.runCollect),
-    );
+    const events = await Effect.runPromise(driver.events.pipe(Stream.take(1), Stream.runCollect));
 
     expect(Array.from(events)).toEqual([
       expect.objectContaining({
@@ -310,27 +299,35 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.runTask({
-      type: "collect-blocks",
-      blockIds: ["minecraft:oak_log"],
-      tags: ["minecraft:logs"],
-      count: 3,
-      searchRadius: 40,
-    }, {
-      ...defaultBeatGameStrategy.path,
-      additionalPlaceItemIds: ["minecraft:oak_log"],
-      protectedBlocks: [{
-        x: 4,
-        y: 65,
-        z: -2,
-        dimension: "minecraft:overworld",
-      }],
-      sprint: false,
-      minimumY: 63,
-      maximumY: 96,
-    }, {
-      idempotencyKey: "beat-game:test-action",
-    }));
+    await Effect.runPromise(
+      driver.runTask(
+        {
+          type: "collect-blocks",
+          blockIds: ["minecraft:oak_log"],
+          tags: ["minecraft:logs"],
+          count: 3,
+          searchRadius: 40,
+        },
+        {
+          ...defaultBeatGameStrategy.path,
+          additionalPlaceItemIds: ["minecraft:oak_log"],
+          protectedBlocks: [
+            {
+              x: 4,
+              y: 65,
+              z: -2,
+              dimension: "minecraft:overworld",
+            },
+          ],
+          sprint: false,
+          minimumY: 63,
+          maximumY: 96,
+        },
+        {
+          idempotencyKey: "beat-game:test-action",
+        },
+      ),
+    );
 
     expect(calls.collect).toEqual([
       ["minecraft:oak_log"],
@@ -348,12 +345,14 @@ describe("production SoulFire beat-game driver", () => {
           allowPlacing: true,
           avoidFluids: false,
           additionalPlaceItemIds: ["minecraft:oak_log"],
-          protectedBlocks: [{
-            x: 4,
-            y: 65,
-            z: -2,
-            dimension: "minecraft:overworld",
-          }],
+          protectedBlocks: [
+            {
+              x: 4,
+              y: 65,
+              z: -2,
+              dimension: "minecraft:overworld",
+            },
+          ],
           sprint: false,
           minimumY: 63,
           maximumY: 96,
@@ -373,14 +372,19 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.runTask({
-      type: "auto-eat",
-      foodItemIds: ["minecraft:cooked_mutton"],
-      foodLevel: 18,
-      maximumMeals: 8,
-      completeWhenNoFood: true,
-      restoreSelectedSlot: false,
-    }, defaultBeatGameStrategy.path));
+    await Effect.runPromise(
+      driver.runTask(
+        {
+          type: "auto-eat",
+          foodItemIds: ["minecraft:cooked_mutton"],
+          foodLevel: 18,
+          maximumMeals: 8,
+          completeWhenNoFood: true,
+          restoreSelectedSlot: false,
+        },
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
     expect(calls.eat).toEqual([
       ["minecraft:cooked_mutton"],
@@ -397,18 +401,23 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.runTask({
-      type: "flee",
-      selector: {
-        networkId: 42,
-        uuid: "00000000-0000-0000-0000-000000000042",
-        alive: true,
-      },
-      triggerRadius: 12,
-      safeDistance: 16,
-      completeWhenSafe: true,
-      maximumEscapes: 1,
-    }, defaultBeatGameStrategy.path));
+    await Effect.runPromise(
+      driver.runTask(
+        {
+          type: "flee",
+          selector: {
+            networkId: 42,
+            uuid: "00000000-0000-0000-0000-000000000042",
+            alive: true,
+          },
+          triggerRadius: 12,
+          safeDistance: 16,
+          completeWhenSafe: true,
+          maximumEscapes: 1,
+        },
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
     expect(calls.flee).toEqual([
       {
@@ -433,47 +442,59 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.runTask({
-      type: "sleep",
-      bed: {
-        x: 8,
-        y: 64,
-        z: -3,
-        dimension: "minecraft:overworld",
-      },
-      searchRadius: 32,
-      waitUntilPossible: false,
-      retryIntervalTicks: 20,
-    }, defaultBeatGameStrategy.path));
+    await Effect.runPromise(
+      driver.runTask(
+        {
+          type: "sleep",
+          bed: {
+            x: 8,
+            y: 64,
+            z: -3,
+            dimension: "minecraft:overworld",
+          },
+          searchRadius: 32,
+          waitUntilPossible: false,
+          retryIntervalTicks: 20,
+        },
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
-    expect(calls.sleep).toEqual(expect.objectContaining({
-      bed: {
-        x: 8,
-        y: 64,
-        z: -3,
-        dimension: "minecraft:overworld",
-      },
-      searchRadius: 32,
-      waitUntilPossible: false,
-      retryIntervalTicks: 20,
-    }));
+    expect(calls.sleep).toEqual(
+      expect.objectContaining({
+        bed: {
+          x: 8,
+          y: 64,
+          z: -3,
+          dimension: "minecraft:overworld",
+        },
+        searchRadius: 32,
+        waitUntilPossible: false,
+        retryIntervalTicks: 20,
+      }),
+    );
   });
 
   it("normalizes precise player coordinates for block-position tasks", async () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.runTask({
-      type: "explore",
-      origin: {
-        x: 8.5,
-        y: 86,
-        z: -3.5,
-        dimension: "minecraft:overworld",
-      },
-      radius: 32,
-      maximumWaypoints: 3,
-    }, defaultBeatGameStrategy.path));
+    await Effect.runPromise(
+      driver.runTask(
+        {
+          type: "explore",
+          origin: {
+            x: 8.5,
+            y: 86,
+            z: -3.5,
+            dimension: "minecraft:overworld",
+          },
+          radius: 32,
+          maximumWaypoints: 3,
+        },
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
     expect(calls.explore).toMatchObject({
       origin: {
@@ -497,19 +518,30 @@ describe("production SoulFire beat-game driver", () => {
       }),
     });
     const cause = new SoulFireTaskError(task);
-    const { bot } = effectBot(Effect.fail(new SoulFireTaskFailed({
-      task,
-      cause,
-      message: cause.message,
-    })));
+    const { bot } = effectBot(
+      Effect.fail(
+        new SoulFireTaskFailed({
+          task,
+          cause,
+          message: cause.message,
+        }),
+      ),
+    );
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    const error = await Effect.runPromise(Effect.flip(driver.runTask({
-      type: "collect-blocks",
-      blockIds: ["minecraft:oak_log"],
-      count: 1,
-      searchRadius: 16,
-    }, defaultBeatGameStrategy.path)));
+    const error = await Effect.runPromise(
+      Effect.flip(
+        driver.runTask(
+          {
+            type: "collect-blocks",
+            blockIds: ["minecraft:oak_log"],
+            count: 1,
+            searchRadius: 16,
+          },
+          defaultBeatGameStrategy.path,
+        ),
+      ),
+    );
 
     expect(error.code).toBe("not_found");
   });
@@ -522,16 +554,17 @@ describe("production SoulFire beat-game driver", () => {
       retryable: false,
       message: "No matching item is available",
     });
-    const { bot } = effectBot(
-      Effect.succeed({}),
-      Effect.fail(cause),
-    );
+    const { bot } = effectBot(Effect.succeed({}), Effect.fail(cause));
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    const error = await Effect.runPromise(Effect.flip(driver.act({
-      type: "select-item",
-      selector: { itemIds: ["minecraft:iron_pickaxe"] },
-    })));
+    const error = await Effect.runPromise(
+      Effect.flip(
+        driver.act({
+          type: "select-item",
+          selector: { itemIds: ["minecraft:iron_pickaxe"] },
+        }),
+      ),
+    );
 
     expect(error).toMatchObject({
       operation: "act.select-item",
@@ -544,12 +577,14 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.act({
-      type: "attack-entity",
-      connectionEpoch: "00000000-0000-0000-0000-000000000042",
-      networkId: 42,
-      sprinting: true,
-    }));
+    await Effect.runPromise(
+      driver.act({
+        type: "attack-entity",
+        connectionEpoch: "00000000-0000-0000-0000-000000000042",
+        networkId: 42,
+        sprinting: true,
+      }),
+    );
 
     expect(calls.attack).toEqual({
       connectionEpoch: "00000000-0000-0000-0000-000000000042",
@@ -562,11 +597,13 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.act({
-      type: "equip-item",
-      selector: { itemIds: ["minecraft:shield"] },
-      equipmentSlot: "offhand",
-    }));
+    await Effect.runPromise(
+      driver.act({
+        type: "equip-item",
+        selector: { itemIds: ["minecraft:shield"] },
+        equipmentSlot: "offhand",
+      }),
+    );
 
     expect(calls.equip).toEqual({
       selector: {
@@ -581,11 +618,16 @@ describe("production SoulFire beat-game driver", () => {
     const { bot, calls } = effectBot();
     const driver = makeSoulFireBeatGameDriver(bot);
 
-    await Effect.runPromise(driver.runTask({
-      type: "auto-armor",
-      maximumEquips: 4,
-      completeWhenNoUpgrade: true,
-    }, defaultBeatGameStrategy.path));
+    await Effect.runPromise(
+      driver.runTask(
+        {
+          type: "auto-armor",
+          maximumEquips: 4,
+          completeWhenNoUpgrade: true,
+        },
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
     expect(calls.armor).toMatchObject({
       maximumEquips: 4,
@@ -596,12 +638,17 @@ describe("production SoulFire beat-game driver", () => {
   it("cancels its durable server task when interrupted", async () => {
     const { bot, calls } = effectBot(Effect.never);
     const driver = makeSoulFireBeatGameDriver(bot);
-    const fiber = Effect.runFork(driver.runTask({
-      type: "collect-blocks",
-      blockIds: ["minecraft:oak_log"],
-      count: 1,
-      searchRadius: 16,
-    }, defaultBeatGameStrategy.path));
+    const fiber = Effect.runFork(
+      driver.runTask(
+        {
+          type: "collect-blocks",
+          blockIds: ["minecraft:oak_log"],
+          count: 1,
+          searchRadius: 16,
+        },
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
     await Effect.runPromise(Fiber.interrupt(fiber));
 
@@ -611,16 +658,18 @@ describe("production SoulFire beat-game driver", () => {
   it("cancels durable pathfinding when interrupted", async () => {
     const { bot, calls } = effectBot(Effect.never);
     const driver = makeSoulFireBeatGameDriver(bot);
-    const fiber = Effect.runFork(driver.pathfind(
-      {
-        x: 10,
-        y: 64,
-        z: 20,
-        dimension: "minecraft:overworld",
-      },
-      2,
-      defaultBeatGameStrategy.path,
-    ));
+    const fiber = Effect.runFork(
+      driver.pathfind(
+        {
+          x: 10,
+          y: 64,
+          z: 20,
+          dimension: "minecraft:overworld",
+        },
+        2,
+        defaultBeatGameStrategy.path,
+      ),
+    );
 
     await Effect.runPromise(Fiber.interrupt(fiber));
 

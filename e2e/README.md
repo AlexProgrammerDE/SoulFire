@@ -22,8 +22,7 @@ bun run test breed-cows                         # only those named
 SOULFIRE_E2E_JAR=/path/to/other.jar bun run test breed-cows
 ```
 
-The first run downloads the server and generates the world. The container (`soulfire-e2e`, port
-25566) keeps running between runs; `--fresh` replaces it, `--stop` removes it at the end. Each
+The first run downloads the server and generates the world. The container (`soulfire-e2e`, port 25566) keeps running between runs; `--fresh` replaces it, `--stop` removes it at the end. Each
 run writes `soulfire.log` and `minecraft.log` to `runs/<time>/`.
 
 ## Writing a test

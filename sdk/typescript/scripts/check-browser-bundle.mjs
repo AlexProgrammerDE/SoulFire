@@ -15,11 +15,7 @@ for (const entry of entries) {
     write: false,
   });
   const output = result.outputFiles[0];
-  if (
-    result.outputFiles.length !== 1 ||
-    output === undefined ||
-    output.contents.length === 0
-  ) {
+  if (result.outputFiles.length !== 1 || output === undefined || output.contents.length === 0) {
     throw new Error(`The browser SDK bundle for ${entry.pathname} was empty`);
   }
   sizes.push(`${entry.pathname.split("/").at(-1)} ${output.contents.length}`);

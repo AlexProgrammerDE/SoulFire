@@ -324,9 +324,7 @@ describe("SoulFireBot", () => {
                 return {};
               },
               sendChat(_request, context) {
-                actionTokens.push(
-                  context.requestHeader.get("X-SoulFire-Control-Token"),
-                );
+                actionTokens.push(context.requestHeader.get("X-SoulFire-Control-Token"));
                 return {
                   result: {
                     actionId: "action-id",
@@ -366,9 +364,7 @@ describe("SoulFireBot", () => {
             service(BotService, {
               clickContainerButton(request, context) {
                 clicks.push(request);
-                tokens.push(
-                  context.requestHeader.get("X-SoulFire-Control-Token"),
-                );
+                tokens.push(context.requestHeader.get("X-SoulFire-Control-Token"));
                 return request.buttonId < 3
                   ? { success: true }
                   : {

@@ -42,10 +42,6 @@
     "./generated/soulfire/world_pb": "./src/generated/soulfire/world_pb.ts"
   },
   "publish": {
-    "include": [
-      "README.md",
-      "package.json",
-      "src/**/*.ts"
-    ]
+    "include": ["README.md", "package.json", "src/**/*.ts"]
   }
 }

@@ -1,9 +1,4 @@
-import {
-  lstat,
-  mkdir,
-  readdir,
-  rm,
-} from "node:fs/promises";
+import { lstat, mkdir, readdir, rm } from "node:fs/promises";
 import path from "node:path";
 
 export interface PruneArtifactRunsOptions {
@@ -28,24 +23,26 @@ export async function pruneArtifactRuns(
 
   await mkdir(rootDirectory, { recursive: true });
   const entries = await readdir(rootDirectory, { withFileTypes: true });
-  const candidates = await Promise.all(entries.flatMap((entry) => {
-    if (!entry.isDirectory()) {
-      return [];
-    }
-    const directory = path.join(rootDirectory, entry.name);
-    if (directory === currentDirectory) {
-      return [];
-    }
-    return [lstat(directory).then((stats) => ({
-      directory,
-      modifiedAt: stats.mtimeMs,
-    }))];
-  }));
+  const candidates = await Promise.all(
+    entries.flatMap((entry) => {
+      if (!entry.isDirectory()) {
+        return [];
+      }
+      const directory = path.join(rootDirectory, entry.name);
+      if (directory === currentDirectory) {
+        return [];
+      }
+      return [
+        lstat(directory).then((stats) => ({
+          directory,
+          modifiedAt: stats.mtimeMs,
+        })),
+      ];
+    }),
+  );
   candidates.sort((left, right) => right.modifiedAt - left.modifiedAt);
 
   const remove = candidates.slice(Math.max(0, options.maximumRuns - 1));
-  await Promise.all(remove.map(({ directory }) =>
-    rm(directory, { recursive: true, force: true })
-  ));
+  await Promise.all(remove.map(({ directory }) => rm(directory, { recursive: true, force: true })));
   return remove.map(({ directory }) => directory);
 }

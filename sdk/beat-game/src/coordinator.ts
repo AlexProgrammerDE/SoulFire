@@ -67,9 +67,7 @@ export interface BeatGameCoordinator {
   readonly snapshot: (
     teamId: string,
   ) => Effect.Effect<BeatGameTeamSnapshot, BeatGameCoordinationError>;
-  readonly reset: (
-    teamId: string,
-  ) => Effect.Effect<void, BeatGameCoordinationError>;
+  readonly reset: (teamId: string) => Effect.Effect<void, BeatGameCoordinationError>;
 }
 
 interface InternalMember {
@@ -193,8 +191,7 @@ export class InMemoryBeatGameCoordinator implements BeatGameCoordinator {
         botId: request.botId,
         purpose: request.purpose,
         createdAt: new Date(now).toISOString(),
-        expiresAt: new Date(now + positiveInteger(request.ttlMs, "ttlMs"))
-          .toISOString(),
+        expiresAt: new Date(now + positiveInteger(request.ttlMs, "ttlMs")).toISOString(),
         fencingToken: ++team.fencingToken,
       };
       team.claims.set(request.key, claim);
@@ -251,15 +248,13 @@ export class InMemoryBeatGameCoordinator implements BeatGameCoordinator {
     coordinationEffect("publishDiscovery", () => {
       const team = this.#requiredTeam(teamId);
       if (!team.members.has(discovery.botId)) {
-        throw new Error(
-          `Bot ${discovery.botId} is not registered with team ${teamId}`,
-        );
+        throw new Error(`Bot ${discovery.botId} is not registered with team ${teamId}`);
       }
       validateDiscovery(discovery);
       const existing = team.discoveries.get(discovery.key);
       if (
-        existing !== undefined
-        && Date.parse(existing.observedAt) > Date.parse(discovery.observedAt)
+        existing !== undefined &&
+        Date.parse(existing.observedAt) > Date.parse(discovery.observedAt)
       ) {
         return;
       }
@@ -303,29 +298,21 @@ export class InMemoryBeatGameCoordinator implements BeatGameCoordinator {
         teamId,
         revision: team.revision,
         objective: objectiveFor(members),
-        ...(team.leaderBotId === undefined
-          ? {}
-          : { leaderBotId: team.leaderBotId }),
+        ...(team.leaderBotId === undefined ? {} : { leaderBotId: team.leaderBotId }),
         leaderFencingToken: team.leaderFencingToken,
         members,
-        claims: [...team.claims.values()].sort((left, right) =>
-          left.key.localeCompare(right.key)
-        ),
+        claims: [...team.claims.values()].sort((left, right) => left.key.localeCompare(right.key)),
         discoveries: [...team.discoveries.values()]
           .sort((left, right) => left.key.localeCompare(right.key))
           .map((discovery) => structuredClone(discovery)),
         sharedRequirements: Object.fromEntries(
-          [...aggregateRequirements(team)].sort(([left], [right]) =>
-            left.localeCompare(right)
-          ),
+          [...aggregateRequirements(team)].sort(([left], [right]) => left.localeCompare(right)),
         ),
         updatedAt: new Date().toISOString(),
       };
     });
 
-  public readonly reset = (
-    teamId: string,
-  ): Effect.Effect<void, BeatGameCoordinationError> =>
+  public readonly reset = (teamId: string): Effect.Effect<void, BeatGameCoordinationError> =>
     coordinationEffect("reset", () => {
       this.#teams.delete(teamId);
     });
@@ -390,10 +377,7 @@ export class InMemoryBeatGameCoordinator implements BeatGameCoordinator {
     const now = Date.now();
     let changed = false;
     for (const [key, discovery] of team.discoveries) {
-      if (
-        discovery.expiresAt !== undefined
-        && Date.parse(discovery.expiresAt) <= now
-      ) {
+      if (discovery.expiresAt !== undefined && Date.parse(discovery.expiresAt) <= now) {
         team.discoveries.delete(key);
         changed = true;
       }
@@ -405,10 +389,11 @@ export class InMemoryBeatGameCoordinator implements BeatGameCoordinator {
 
   #electLeader(team: InternalTeam): void {
     const elected = [...team.members.values()]
-      .filter(({ status }) =>
-        status !== BeatGameRunStatus.COMPLETED
-        && status !== BeatGameRunStatus.FAILED
-        && status !== BeatGameRunStatus.STOPPED
+      .filter(
+        ({ status }) =>
+          status !== BeatGameRunStatus.COMPLETED &&
+          status !== BeatGameRunStatus.FAILED &&
+          status !== BeatGameRunStatus.STOPPED,
       )
       .map(({ botId }) => botId)
       .sort((left, right) => left.localeCompare(right))[0];
@@ -434,14 +419,11 @@ function aggregateRequirements(team: InternalTeam): Map<string, number> {
 function assignedRoles(team: InternalTeam): Map<string, BeatGameTeamRole> {
   const result = new Map<string, BeatGameTeamRole>();
   const members = [...team.members.values()].sort((left, right) =>
-    left.botId.localeCompare(right.botId)
+    left.botId.localeCompare(right.botId),
   );
   const reserved = new Set<BeatGameTeamRole>();
   for (const member of members) {
-    if (
-      member.requestedRole !== undefined
-      && !reserved.has(member.requestedRole)
-    ) {
+    if (member.requestedRole !== undefined && !reserved.has(member.requestedRole)) {
       result.set(member.botId, member.requestedRole);
       reserved.add(member.requestedRole);
     }
@@ -454,17 +436,14 @@ function assignedRoles(team: InternalTeam): Map<string, BeatGameTeamRole> {
     }
     result.set(
       member.botId,
-      available[cursor % Math.max(1, available.length)]
-        ?? BeatGameTeamRole.END_SUPPORT,
+      available[cursor % Math.max(1, available.length)] ?? BeatGameTeamRole.END_SUPPORT,
     );
     cursor += 1;
   }
   return result;
 }
 
-function objectiveFor(
-  members: readonly BeatGameTeamMember[],
-): BeatGameObjective {
+function objectiveFor(members: readonly BeatGameTeamMember[]): BeatGameObjective {
   const maximum = members.reduce(
     (current, member) => Math.max(current, PHASE_ORDER[member.phase]),
     0,
@@ -505,18 +484,17 @@ function validateDiscovery(discovery: BeatGameTeamDiscovery): void {
   if (discovery.key.length === 0) {
     throw new TypeError("discovery.key must not be empty");
   }
-  if (!Number.isFinite(discovery.confidence)
-    || discovery.confidence < 0
-    || discovery.confidence > 1) {
+  if (
+    !Number.isFinite(discovery.confidence) ||
+    discovery.confidence < 0 ||
+    discovery.confidence > 1
+  ) {
     throw new RangeError("discovery.confidence must be between 0 and 1");
   }
   if (!Number.isFinite(Date.parse(discovery.observedAt))) {
     throw new TypeError("discovery.observedAt must be an ISO timestamp");
   }
-  if (
-    discovery.expiresAt !== undefined
-    && !Number.isFinite(Date.parse(discovery.expiresAt))
-  ) {
+  if (discovery.expiresAt !== undefined && !Number.isFinite(Date.parse(discovery.expiresAt))) {
     throw new TypeError("discovery.expiresAt must be an ISO timestamp");
   }
 }
@@ -535,9 +513,8 @@ function coordinationEffect<T>(
         phase: BeatGamePhase.PREPARE_OVERWORLD,
         action: operation,
         retryable: false,
-        message: cause instanceof Error
-          ? cause.message
-          : `Beat-game coordination ${operation} failed`,
+        message:
+          cause instanceof Error ? cause.message : `Beat-game coordination ${operation} failed`,
         cause,
       }),
   });

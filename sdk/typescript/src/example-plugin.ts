@@ -18,9 +18,7 @@ import {
 export class ExamplePluginClient {
   public readonly [SoulFireExtensionTypeId] = true;
 
-  public constructor(
-    private readonly client: Client<typeof ExamplePluginService>,
-  ) {}
+  public constructor(private readonly client: Client<typeof ExamplePluginService>) {}
 
   public echo(
     instanceId: string,
@@ -32,24 +30,16 @@ export class ExamplePluginClient {
     });
   }
 
-  public watchTicks(
-    instanceId: string,
-    count: number,
-  ): Stream.Stream<Tick, SoulFirePluginError> {
+  public watchTicks(instanceId: string, count: number): Stream.Stream<Tick, SoulFirePluginError> {
     return rpcStream("example.watchTicks", (signal) =>
       this.client.watchTicks({ instanceId, count }, { signal }),
-    ).pipe(
-      Stream.mapError(
-        (cause) => new SoulFirePluginError({ pluginId: "example", cause }),
-      ),
-    );
+    ).pipe(Stream.mapError((cause) => new SoulFirePluginError({ pluginId: "example", cause })));
   }
 }
 
 export const examplePlugin: SoulFirePluginModule<ExamplePluginClient> = {
   pluginId: "example",
-  isCompatible: (descriptor) =>
-    descriptor.apiMajorVersion === 1 && hasExampleService(descriptor),
+  isCompatible: (descriptor) => descriptor.apiMajorVersion === 1 && hasExampleService(descriptor),
   create(catalog: PluginCatalog) {
     const client = catalog.service("example", ExamplePluginService);
     return new ExamplePluginClient(client);
@@ -58,7 +48,6 @@ export const examplePlugin: SoulFirePluginModule<ExamplePluginClient> = {
 
 function hasExampleService(descriptor: PluginApiDescriptor): boolean {
   return descriptor.services.some(
-    (service) =>
-      service.fullName === "soulfire.plugin.example.v1.ExamplePluginService",
+    (service) => service.fullName === "soulfire.plugin.example.v1.ExamplePluginService",
   );
 }

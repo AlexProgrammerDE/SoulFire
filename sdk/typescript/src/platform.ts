@@ -8,24 +8,17 @@ import { Effect, Stream } from "effect";
  * ConnectRPC. This keeps SoulFire transports portable across any runtime with
  * an `HttpClient` layer.
  */
-export function makeEffectHttpClientFetch(
-  client: HttpClient.HttpClient,
-): typeof globalThis.fetch {
+export function makeEffectHttpClientFetch(client: HttpClient.HttpClient): typeof globalThis.fetch {
   return async (input, init) => {
     const webRequest = new Request(input, init);
-    let request = HttpClientRequest.make(
-      webRequest.method as HttpMethod,
-    )(webRequest.url);
+    let request = HttpClientRequest.make(webRequest.method as HttpMethod)(webRequest.url);
     if (webRequest.method !== "GET" && webRequest.method !== "HEAD") {
       request = HttpClientRequest.bodyUint8Array(
         request,
         new Uint8Array(await webRequest.arrayBuffer()),
       );
     }
-    request = HttpClientRequest.setHeaders(
-      request,
-      webRequest.headers.entries(),
-    );
+    request = HttpClientRequest.setHeaders(request, webRequest.headers.entries());
     const httpRequest = request;
     return new Promise<Response>((resolve, reject) => {
       const effectController = new AbortController();
@@ -37,9 +30,7 @@ export function makeEffectHttpClientFetch(
       }
 
       let responseResolved = false;
-      let bodyController:
-        | ReadableStreamDefaultController<Uint8Array>
-        | undefined;
+      let bodyController: ReadableStreamDefaultController<Uint8Array> | undefined;
       const transfer = Effect.gen(function* () {
         const response = yield* client.execute(httpRequest);
         const body = new ReadableStream<Uint8Array>({
@@ -51,31 +42,35 @@ export function makeEffectHttpClientFetch(
           },
         });
         responseResolved = true;
-        resolve(new Response(body, {
-          headers: Object.entries(response.headers),
-          status: response.status,
-        }));
+        resolve(
+          new Response(body, {
+            headers: Object.entries(response.headers),
+            status: response.status,
+          }),
+        );
         yield* Stream.runForEach(response.stream, (chunk) =>
-          Effect.sync(() => bodyController?.enqueue(chunk))
+          Effect.sync(() => bodyController?.enqueue(chunk)),
         );
         bodyController?.close();
       });
 
       void Effect.runPromise(transfer, {
         signal: effectController.signal,
-      }).catch((cause) => {
-        if (!responseResolved) {
-          reject(cause);
-          return;
-        }
-        try {
-          bodyController?.error(cause);
-        } catch {
-          // The Fetch consumer already cancelled or closed the body.
-        }
-      }).finally(() => {
-        webRequest.signal.removeEventListener("abort", abort);
-      });
+      })
+        .catch((cause) => {
+          if (!responseResolved) {
+            reject(cause);
+            return;
+          }
+          try {
+            bodyController?.error(cause);
+          } catch {
+            // The Fetch consumer already cancelled or closed the body.
+          }
+        })
+        .finally(() => {
+          webRequest.signal.removeEventListener("abort", abort);
+        });
     });
   };
 }

@@ -10,9 +10,7 @@ interface BeatGameDriverErrorFields {
   readonly cause?: unknown;
 }
 
-const DriverErrorBase = Data.TaggedError("BeatGameDriverError")<
-  BeatGameDriverErrorFields
->;
+const DriverErrorBase = Data.TaggedError("BeatGameDriverError")<BeatGameDriverErrorFields>;
 
 export class BeatGameDriverError extends DriverErrorBase {}
 
@@ -27,27 +25,19 @@ interface BeatGameErrorFields {
   readonly cause?: unknown;
 }
 
-const ProtocolErrorBase = Data.TaggedError("BeatGameProtocolError")<
-  BeatGameErrorFields
->;
+const ProtocolErrorBase = Data.TaggedError("BeatGameProtocolError")<BeatGameErrorFields>;
 
 export class BeatGameProtocolError extends ProtocolErrorBase {}
 
-const ObservationErrorBase = Data.TaggedError("BeatGameObservationError")<
-  BeatGameErrorFields
->;
+const ObservationErrorBase = Data.TaggedError("BeatGameObservationError")<BeatGameErrorFields>;
 
 export class BeatGameObservationError extends ObservationErrorBase {}
 
-const ActionErrorBase = Data.TaggedError("BeatGameActionError")<
-  BeatGameErrorFields
->;
+const ActionErrorBase = Data.TaggedError("BeatGameActionError")<BeatGameErrorFields>;
 
 export class BeatGameActionError extends ActionErrorBase {}
 
-const PathfindingErrorBase = Data.TaggedError("BeatGamePathfindingError")<
-  BeatGameErrorFields
->;
+const PathfindingErrorBase = Data.TaggedError("BeatGamePathfindingError")<BeatGameErrorFields>;
 
 export class BeatGamePathfindingError extends PathfindingErrorBase {}
 
@@ -68,9 +58,7 @@ const CheckpointErrorBase = Data.TaggedError("BeatGameCheckpointError")<
 
 export class BeatGameCheckpointError extends CheckpointErrorBase {}
 
-const CoordinationErrorBase = Data.TaggedError("BeatGameCoordinationError")<
-  BeatGameErrorFields
->;
+const CoordinationErrorBase = Data.TaggedError("BeatGameCoordinationError")<BeatGameErrorFields>;
 
 export class BeatGameCoordinationError extends CoordinationErrorBase {}
 

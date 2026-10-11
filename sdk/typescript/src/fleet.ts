@@ -1,8 +1,4 @@
-import type {
-  DescMessage,
-  MessageInitShape,
-  MessageShape,
-} from "@bufbuild/protobuf";
+import type { DescMessage, MessageInitShape, MessageShape } from "@bufbuild/protobuf";
 import type { Value } from "@bufbuild/protobuf/wkt";
 import type { CallOptions } from "@connectrpc/connect";
 import { Effect, Result, Stream } from "effect";
@@ -54,9 +50,7 @@ export interface FleetSelector {
   near?: FleetPoint & { radius: number };
   metadata?: readonly FleetMetadataSelector[];
   requiredCapabilities?: readonly string[];
-  predicate?: (
-    bot: FleetBot,
-  ) => boolean | Effect.Effect<boolean, SoulFireOperationError>;
+  predicate?: (bot: FleetBot) => boolean | Effect.Effect<boolean, SoulFireOperationError>;
   orderBy?:
     | "configured"
     | "name"
@@ -71,9 +65,7 @@ export interface FleetBot {
   readonly id: string;
   readonly entry: Readonly<BotListEntry>;
   readonly account?: Readonly<MinecraftAccountProto>;
-  readonly metadata: Readonly<
-    Record<string, Readonly<Record<string, unknown>>>
-  >;
+  readonly metadata: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 }
 
 export interface FleetDistributionOptions {
@@ -93,9 +85,7 @@ export interface FleetTaskStartFailure {
   readonly error: unknown;
 }
 
-export interface FleetTaskMember<
-  Result extends DescMessage | undefined = undefined,
-> {
+export interface FleetTaskMember<Result extends DescMessage | undefined = undefined> {
   readonly bot: FleetBot;
   readonly task: SoulFireTask<Result>;
 }
@@ -122,34 +112,22 @@ export type FleetTaskOutcome<Result extends DescMessage | undefined> =
 
 export interface FleetTaskReport<Result extends DescMessage | undefined> {
   readonly outcomes: readonly FleetTaskOutcome<Result>[];
-  readonly fulfilled: readonly Extract<
-    FleetTaskOutcome<Result>,
-    { status: "fulfilled" }
-  >[];
-  readonly rejected: readonly Extract<
-    FleetTaskOutcome<Result>,
-    { status: "rejected" }
-  >[];
+  readonly fulfilled: readonly Extract<FleetTaskOutcome<Result>, { status: "fulfilled" }>[];
+  readonly rejected: readonly Extract<FleetTaskOutcome<Result>, { status: "rejected" }>[];
 }
 
 export interface FleetTaskStartOptions extends TaskStartOptions {
   concurrency?: number;
 }
 
-export class FleetTaskGroupError<
-  Result extends DescMessage | undefined,
-> extends Error {
+export class FleetTaskGroupError<Result extends DescMessage | undefined> extends Error {
   public constructor(public readonly report: FleetTaskReport<Result>) {
-    super(
-      `${report.rejected.length} of ${report.outcomes.length} fleet tasks failed`,
-    );
+    super(`${report.rejected.length} of ${report.outcomes.length} fleet tasks failed`);
     this.name = "FleetTaskGroupError";
   }
 }
 
-export class SoulFireFleetTaskGroup<
-  Result extends DescMessage | undefined = undefined,
-> {
+export class SoulFireFleetTaskGroup<Result extends DescMessage | undefined = undefined> {
   public constructor(
     private readonly members: readonly FleetTaskMember<Result>[],
     public readonly startFailures: readonly FleetTaskStartFailure[],
@@ -180,9 +158,7 @@ export class SoulFireFleetTaskGroup<
     );
   }
 
-  public results(options?: {
-    call?: CallOptions;
-  }): Effect.Effect<FleetTaskReport<Result>> {
+  public results(options?: { call?: CallOptions }): Effect.Effect<FleetTaskReport<Result>> {
     return Effect.forEach(
       this.members,
       ({ bot, task }) =>
@@ -204,13 +180,11 @@ export class SoulFireFleetTaskGroup<
     ).pipe(
       Effect.map((outcomes) =>
         taskReport([
-          ...this.startFailures.map(
-            ({ bot, error }): FleetTaskOutcome<Result> => ({
-              status: "rejected",
-              bot,
-              error,
-            }),
-          ),
+          ...this.startFailures.map(({ bot, error }): FleetTaskOutcome<Result> => ({
+            status: "rejected",
+            bot,
+            error,
+          })),
           ...outcomes,
         ]),
       ),
@@ -239,13 +213,7 @@ export class SoulFireFleetTaskGroup<
     return Effect.gen({ self: this }, function* () {
       const concurrency = yield* Effect.try({
         try: () =>
-          Math.max(
-            1,
-            normalizeNonNegativeInteger(
-              options?.concurrency ?? 8,
-              "concurrency",
-            ),
-          ),
+          Math.max(1, normalizeNonNegativeInteger(options?.concurrency ?? 8, "concurrency")),
         catch: (cause) => operationError("fleet.cancel", cause),
       });
       const outcomes = yield* Effect.forEach(
@@ -300,10 +268,7 @@ export class SoulFireFleet {
         { concurrency: 2 },
       );
       const accounts = new Map(
-        (info.config?.accounts ?? []).map((account) => [
-          account.profileId,
-          account,
-        ]),
+        (info.config?.accounts ?? []).map((account) => [account.profileId, account]),
       );
       let bots = entries
         .map((entry): FleetBot => {
@@ -322,9 +287,7 @@ export class SoulFireFleet {
           bots,
           (bot) => {
             const decision = predicate(bot);
-            return Effect.isEffect(decision)
-              ? decision
-              : Effect.succeed(decision);
+            return Effect.isEffect(decision) ? decision : Effect.succeed(decision);
           },
           { concurrency: "unbounded" },
         );
@@ -334,10 +297,7 @@ export class SoulFireFleet {
           orderBots(bots, selector);
           return selector.limit === undefined
             ? bots
-            : bots.slice(
-                0,
-                normalizeNonNegativeInteger(selector.limit, "limit"),
-              );
+            : bots.slice(0, normalizeNonNegativeInteger(selector.limit, "limit"));
         },
         catch: (cause) => operationError("fleet.select", cause),
       });
@@ -349,9 +309,7 @@ export class SoulFireFleet {
     options?: CallOptions,
   ): Effect.Effect<BotStatus[], SoulFireOperationError> {
     return this.select(selector, options).pipe(
-      Effect.flatMap((bots) =>
-        this.instance.start({ botIds: bots.map(({ id }) => id) }, options),
-      ),
+      Effect.flatMap((bots) => this.instance.start({ botIds: bots.map(({ id }) => id) }, options)),
     );
   }
   public stop(
@@ -359,9 +317,7 @@ export class SoulFireFleet {
     options?: CallOptions,
   ): Effect.Effect<BotStatus[], SoulFireOperationError> {
     return this.select(selector, options).pipe(
-      Effect.flatMap((bots) =>
-        this.instance.stop({ botIds: bots.map(({ id }) => id) }, options),
-      ),
+      Effect.flatMap((bots) => this.instance.stop({ botIds: bots.map(({ id }) => id) }, options)),
     );
   }
   public restart(
@@ -375,10 +331,7 @@ export class SoulFireFleet {
     );
   }
 
-  public startTasks<
-    Input extends DescMessage,
-    Result extends DescMessage | undefined = undefined,
-  >(
+  public startTasks<Input extends DescMessage, Result extends DescMessage | undefined = undefined>(
     selector: FleetSelector,
     inputSchema: Input,
     input:
@@ -396,11 +349,7 @@ export class SoulFireFleet {
     return Effect.gen({ self: this }, function* () {
       const { concurrency: requestedConcurrency = 8, ...taskOptions } = options;
       const concurrency = yield* Effect.try({
-        try: () =>
-          Math.max(
-            1,
-            normalizeNonNegativeInteger(requestedConcurrency, "concurrency"),
-          ),
+        try: () => Math.max(1, normalizeNonNegativeInteger(requestedConcurrency, "concurrency")),
         catch: (cause) => operationError("fleet.startTasks", cause),
       });
       const bots = yield* this.select(selector, taskOptions.call);
@@ -410,13 +359,8 @@ export class SoulFireFleet {
         (bot, index) =>
           Effect.uninterruptibleMask((restore) =>
             Effect.gen({ self: this }, function* () {
-              const value =
-                typeof input === "function"
-                  ? input(bot, index, bots.length)
-                  : input;
-              const taskInput = Effect.isEffect(value)
-                ? yield* restore(value)
-                : value;
+              const value = typeof input === "function" ? input(bot, index, bots.length) : input;
+              const taskInput = Effect.isEffect(value) ? yield* restore(value) : value;
               const task = yield* this.instance
                 .bot(bot.id)
                 .tasks.start(inputSchema, taskInput, resultSchema, taskOptions);
@@ -430,8 +374,7 @@ export class SoulFireFleet {
         Effect.onError(() =>
           Effect.forEach(
             started,
-            ({ task }) =>
-              task.cancel("fleet task start aborted").pipe(Effect.ignore),
+            ({ task }) => task.cancel("fleet task start aborted").pipe(Effect.ignore),
             { concurrency, discard: true },
           ),
         ),
@@ -460,10 +403,7 @@ export class SoulFireFleet {
           const maximumItems =
             options.maximumItemsPerBot === undefined
               ? Number.POSITIVE_INFINITY
-              : normalizeNonNegativeInteger(
-                  options.maximumItemsPerBot,
-                  "maximumItemsPerBot",
-                );
+              : normalizeNonNegativeInteger(options.maximumItemsPerBot, "maximumItemsPerBot");
           const buckets = bots.map(() => [] as Item[]);
 
           if ((options.strategy ?? "round-robin") === "contiguous") {
@@ -471,20 +411,14 @@ export class SoulFireFleet {
             for (let index = 0; index < bots.length; index++) {
               const remainingBots = bots.length - index;
               const remainingItems = items.length - offset;
-              const size = Math.min(
-                maximumItems,
-                Math.ceil(remainingItems / remainingBots),
-              );
+              const size = Math.min(maximumItems, Math.ceil(remainingItems / remainingBots));
               buckets[index]!.push(...items.slice(offset, offset + size));
               offset += size;
             }
           } else {
             let botIndex = 0;
             for (const item of items) {
-              while (
-                botIndex < bots.length &&
-                buckets[botIndex]!.length >= maximumItems
-              ) {
+              while (botIndex < bots.length && buckets[botIndex]!.length >= maximumItems) {
                 botIndex++;
               }
               if (botIndex >= bots.length) {
@@ -495,10 +429,7 @@ export class SoulFireFleet {
             }
           }
 
-          const assigned = buckets.reduce(
-            (total, bucket) => total + bucket.length,
-            0,
-          );
+          const assigned = buckets.reduce((total, bucket) => total + bucket.length, 0);
           if ((options.requireAll ?? true) && assigned !== items.length) {
             throw new RangeError(
               `Fleet capacity ${assigned} is smaller than ${items.length} items`,
@@ -525,11 +456,9 @@ function matchesSelector(bot: FleetBot, selector: FleetSelector): boolean {
     selector.accountNames !== undefined &&
     !selector.accountNames.some(
       (name) =>
-        name.localeCompare(
-          entry.accountName ?? account?.lastKnownName ?? "",
-          undefined,
-          { sensitivity: "accent" },
-        ) === 0,
+        name.localeCompare(entry.accountName ?? account?.lastKnownName ?? "", undefined, {
+          sensitivity: "accent",
+        }) === 0,
     )
   ) {
     return false;
@@ -582,26 +511,18 @@ function matchesSelector(bot: FleetBot, selector: FleetSelector): boolean {
   if (selector.near !== undefined) {
     if (
       live === undefined ||
-      (selector.near.dimension !== undefined &&
-        live.dimension !== selector.near.dimension) ||
-      distanceSquared(live, selector.near) >
-        selector.near.radius * selector.near.radius
+      (selector.near.dimension !== undefined && live.dimension !== selector.near.dimension) ||
+      distanceSquared(live, selector.near) > selector.near.radius * selector.near.radius
     ) {
       return false;
     }
   }
-  return (selector.metadata ?? []).every((condition) =>
-    matchesMetadata(bot, condition),
-  );
+  return (selector.metadata ?? []).every((condition) => matchesMetadata(bot, condition));
 }
 
-function matchesMetadata(
-  bot: FleetBot,
-  condition: FleetMetadataSelector,
-): boolean {
+function matchesMetadata(bot: FleetBot, condition: FleetMetadataSelector): boolean {
   const namespace = bot.metadata[condition.namespace];
-  const present =
-    namespace !== undefined && Object.hasOwn(namespace, condition.key);
+  const present = namespace !== undefined && Object.hasOwn(namespace, condition.key);
   if (condition.exists !== undefined && present !== condition.exists) {
     return false;
   }
@@ -630,11 +551,7 @@ function orderBots(bots: FleetBot[], selector: FleetSelector): void {
   bots.sort((left, right) => {
     switch (order) {
       case "name":
-        return (
-          left.entry.accountName ??
-          left.account?.lastKnownName ??
-          ""
-        ).localeCompare(
+        return (left.entry.accountName ?? left.account?.lastKnownName ?? "").localeCompare(
           right.entry.accountName ?? right.account?.lastKnownName ?? "",
         );
       case "health":
@@ -661,10 +578,7 @@ function metadataRecord(
     namespaces.map((namespace) => [
       namespace.namespace,
       Object.fromEntries(
-        namespace.entries.map((entry) => [
-          entry.key,
-          valueToUnknown(entry.value),
-        ]),
+        namespace.entries.map((entry) => [entry.key, valueToUnknown(entry.value)]),
       ),
     ]),
   );
@@ -683,10 +597,7 @@ function valueToUnknown(value: Value | undefined): unknown {
       return value.kind.value;
     case "structValue":
       return Object.fromEntries(
-        Object.entries(value.kind.value.fields).map(([key, child]) => [
-          key,
-          valueToUnknown(child),
-        ]),
+        Object.entries(value.kind.value.fields).map(([key, child]) => [key, valueToUnknown(child)]),
       );
     case "listValue":
       return value.kind.value.values.map(valueToUnknown);
@@ -701,8 +612,7 @@ function deepEqual(left: unknown, right: unknown): boolean {
   }
   if (Array.isArray(left) && Array.isArray(right)) {
     return (
-      left.length === right.length &&
-      left.every((value, index) => deepEqual(value, right[index]))
+      left.length === right.length && left.every((value, index) => deepEqual(value, right[index]))
     );
   }
   if (
@@ -718,21 +628,15 @@ function deepEqual(left: unknown, right: unknown): boolean {
     return (
       leftEntries.length === Object.keys(rightRecord).length &&
       leftEntries.every(
-        ([key, value]) =>
-          Object.hasOwn(rightRecord, key) && deepEqual(value, rightRecord[key]),
+        ([key, value]) => Object.hasOwn(rightRecord, key) && deepEqual(value, rightRecord[key]),
       )
     );
   }
   return false;
 }
 
-function includes<T>(
-  values: readonly T[] | undefined,
-  value: T | undefined,
-): boolean {
-  return (
-    values === undefined || (value !== undefined && values.includes(value))
-  );
+function includes<T>(values: readonly T[] | undefined, value: T | undefined): boolean {
+  return values === undefined || (value !== undefined && values.includes(value));
 }
 
 function distanceSquared(
@@ -761,17 +665,11 @@ function taskReport<Result extends DescMessage | undefined>(
   return {
     outcomes,
     fulfilled: outcomes.filter(
-      (
-        outcome,
-      ): outcome is Extract<
-        FleetTaskOutcome<Result>,
-        { status: "fulfilled" }
-      > => outcome.status === "fulfilled",
+      (outcome): outcome is Extract<FleetTaskOutcome<Result>, { status: "fulfilled" }> =>
+        outcome.status === "fulfilled",
     ),
     rejected: outcomes.filter(
-      (
-        outcome,
-      ): outcome is Extract<FleetTaskOutcome<Result>, { status: "rejected" }> =>
+      (outcome): outcome is Extract<FleetTaskOutcome<Result>, { status: "rejected" }> =>
         outcome.status === "rejected",
     ),
   };

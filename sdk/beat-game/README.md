@@ -30,9 +30,7 @@ const program = Effect.scoped(
     const run = yield* beatGame(bot);
 
     yield* Effect.forkScoped(
-      run.events.pipe(
-        Stream.runForEach((event) => Effect.logInfo(event.type)),
-      ),
+      run.events.pipe(Stream.runForEach((event) => Effect.logInfo(event.type))),
     );
 
     return yield* run.awaitCompletion;
@@ -52,13 +50,14 @@ compare-and-set revisions, per-run locks, atomic replacement, and file-system
 sync before reporting a successful save.
 
 ```ts
-import { JsonFileBeatGameCheckpointStore } from
-  "@soulfiremc/beat-game/node";
+import { JsonFileBeatGameCheckpointStore } from "@soulfiremc/beat-game/node";
 
-const run = yield* beatGame(bot, {
-  runId: "survival-01",
-  checkpointStore: new JsonFileBeatGameCheckpointStore("./runs"),
-});
+const run =
+  yield *
+  beatGame(bot, {
+    runId: "survival-01",
+    checkpointStore: new JsonFileBeatGameCheckpointStore("./runs"),
+  });
 ```
 
 Pass the same `runId`, bot, instance, team ID, and store after a process
@@ -72,16 +71,18 @@ worker can reattach instead of submitting the same task twice.
 ```ts
 import { beatGameTeam } from "@soulfiremc/beat-game";
 
-const team = yield* beatGameTeam(
-  botIds.map((botId) => soulfire.instance(instanceId).bot(botId)),
-  {
-    teamId: "release-run",
-    checkpointStore,
-    coordinator,
-  },
-);
+const team =
+  yield *
+  beatGameTeam(
+    botIds.map((botId) => soulfire.instance(instanceId).bot(botId)),
+    {
+      teamId: "release-run",
+      checkpointStore,
+      coordinator,
+    },
+  );
 
-const results = yield* team.awaitCompletion;
+const results = yield * team.awaitCompletion;
 ```
 
 The default coordinator assigns roles deterministically, aggregates
@@ -95,26 +96,30 @@ Hooks replace one policy action while keeping the normal timeout, retry,
 claim, checkpoint, and control lifecycle.
 
 ```ts
-const run = yield* beatGame(bot, {
-  hooks: {
-    fightEnderDragon: ({ driver, strategy }) =>
-      customFight(driver, strategy).pipe(Effect.as(true)),
-  },
-});
+const run =
+  yield *
+  beatGame(bot, {
+    hooks: {
+      fightEnderDragon: ({ driver, strategy }) =>
+        customFight(driver, strategy).pipe(Effect.as(true)),
+    },
+  });
 ```
 
 A hook can call a typed plugin companion SDK. The plugin remains opt-in and
 SoulFire core stays independent of the game plan.
 
 ```ts
-const combatPlugin = yield* soulfire.plugins.require(combatPluginModule);
+const combatPlugin = yield * soulfire.plugins.require(combatPluginModule);
 
-const run = yield* beatGame(bot, {
-  hooks: {
-    fightEnderDragon: ({ checkpoint }) =>
-      combatPlugin.fightDragon(checkpoint.botId).pipe(Effect.as(true)),
-  },
-});
+const run =
+  yield *
+  beatGame(bot, {
+    hooks: {
+      fightEnderDragon: ({ checkpoint }) =>
+        combatPlugin.fightDragon(checkpoint.botId).pipe(Effect.as(true)),
+    },
+  });
 ```
 
 ## Call from an async host

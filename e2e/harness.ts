@@ -19,7 +19,10 @@ const REPO_DIR = path.dirname(E2E_DIR);
 // ---- errors ----------------------------------------------------------------------------------
 
 /** A command (docker, RCON) that couldn't run, or whose output says it failed. */
-export class CommandFailed extends Data.TaggedError("CommandFailed")<{ readonly command: string; readonly message: string }> {}
+export class CommandFailed extends Data.TaggedError("CommandFailed")<{
+  readonly command: string;
+  readonly message: string;
+}> {}
 
 /** Something a test or the setup expected didn't happen. */
 export class CheckFailed extends Data.TaggedError("CheckFailed")<{ readonly message: string }> {}
@@ -31,13 +34,20 @@ export const check = (condition: boolean, message: string): Effect.Effect<void, 
   condition ? Effect.void : Effect.fail(new CheckFailed({ message }));
 
 /** Retries `effect` until it succeeds or `timeout` has passed; then fails with its last error. */
-export const eventually = <A, E, R>(effect: Effect.Effect<A, E, R>, timeout: Duration.Input, interval: Duration.Input = "250 millis") =>
-  Effect.retry(effect, Schedule.spaced(interval).pipe(Schedule.upTo({ duration: timeout })));
+export const eventually = <A, E, R>(
+  effect: Effect.Effect<A, E, R>,
+  timeout: Duration.Input,
+  interval: Duration.Input = "250 millis",
+) => Effect.retry(effect, Schedule.spaced(interval).pipe(Schedule.upTo({ duration: timeout })));
 
 const run = (command: string, args: readonly string[], options: { maxBuffer?: number } = {}) =>
   Effect.tryPromise({
     try: () => execFileAsync(command, [...args], options),
-    catch: (e) => new CommandFailed({ command: `${command} ${args.join(" ")}`, message: e instanceof Error ? e.message : String(e) }),
+    catch: (e) =>
+      new CommandFailed({
+        command: `${command} ${args.join(" ")}`,
+        message: e instanceof Error ? e.message : String(e),
+      }),
   });
 
 // ---- Minecraft server ------------------------------------------------------------------------
@@ -51,18 +61,25 @@ export const MINECRAFT_VERSION = "26.3";
 /** Not 25565, so a server someone runs for play keeps its port. */
 const MINECRAFT_PORT = Number(process.env.SOULFIRE_E2E_MINECRAFT_PORT ?? 25566);
 /** A flat world of one air layer: nothing exists that a test didn't build. */
-const VOID_WORLD = JSON.stringify({ layers: [{ block: "minecraft:air", height: 1 }], biome: "minecraft:the_void" });
+const VOID_WORLD = JSON.stringify({
+  layers: [{ block: "minecraft:air", height: 1 }],
+  biome: "minecraft:the_void",
+});
 /** First start downloads the server jar and generates the world. */
 const MINECRAFT_START_TIMEOUT = "5 minutes";
 
 /** Command output that means the command failed (RCON itself still succeeds). */
-const RCON_ERROR = /Unknown or incomplete command|Incorrect argument|Expected |Invalid |That position is not loaded|No player was found|Unknown |Could not /;
+const RCON_ERROR =
+  /Unknown or incomplete command|Incorrect argument|Expected |Invalid |That position is not loaded|No player was found|Unknown |Could not /;
 
 /**
  * Runs a server command and returns its output. Fails when the output says the command failed,
  * unless `check` is false (for commands whose failure is the answer, like `execute if`).
  */
-export const rcon = (command: string, { check = true } = {}): Effect.Effect<string, CommandFailed> =>
+export const rcon = (
+  command: string,
+  { check = true } = {},
+): Effect.Effect<string, CommandFailed> =>
   run("docker", ["exec", CONTAINER, "rcon-cli", command]).pipe(
     Effect.map(({ stdout }) => stdout.trim()),
     Effect.filterOrFail(
@@ -71,7 +88,12 @@ export const rcon = (command: string, { check = true } = {}): Effect.Effect<stri
     ),
   );
 
-const containerRunning = run("docker", ["inspect", "--format", "{{.State.Running}}", CONTAINER]).pipe(
+const containerRunning = run("docker", [
+  "inspect",
+  "--format",
+  "{{.State.Running}}",
+  CONTAINER,
+]).pipe(
   Effect.map(({ stdout }) => stdout.trim() === "true"),
   Effect.orElseSucceed(() => false),
 );
@@ -86,22 +108,38 @@ export const stopMinecraft = run("docker", ["rm", "--force", CONTAINER]).pipe(Ef
 
 export const saveMinecraftLog = (file: string) =>
   run("docker", ["logs", CONTAINER], { maxBuffer: 64 * 1024 * 1024 }).pipe(
-    Effect.flatMap(({ stdout, stderr }) => Effect.sync(() => appendFileSync(file, stdout + stderr))),
+    Effect.flatMap(({ stdout, stderr }) =>
+      Effect.sync(() => appendFileSync(file, stdout + stderr)),
+    ),
     Effect.ignore,
   );
 
 /** Starts the server, or reuses the one left running by an earlier run (on the same port). */
-export const startMinecraft = Effect.fn("startMinecraft")(function* ({ fresh }: { fresh: boolean }) {
-  if (fresh || ((yield* containerRunning) && (yield* publishedAddress) !== `127.0.0.1:${MINECRAFT_PORT}`)) {
+export const startMinecraft = Effect.fn("startMinecraft")(function* ({
+  fresh,
+}: {
+  fresh: boolean;
+}) {
+  if (
+    fresh ||
+    ((yield* containerRunning) && (yield* publishedAddress) !== `127.0.0.1:${MINECRAFT_PORT}`)
+  ) {
     yield* stopMinecraft;
   }
   if (yield* containerRunning) {
     yield* Console.log(`[minecraft] reusing container ${CONTAINER}`);
   } else {
-    yield* Console.log(`[minecraft] starting ${IMAGE} (Minecraft ${MINECRAFT_VERSION}, void world)...`);
+    yield* Console.log(
+      `[minecraft] starting ${IMAGE} (Minecraft ${MINECRAFT_VERSION}, void world)...`,
+    );
     yield* run("docker", [
-      "run", "--detach", "--rm", "--name", CONTAINER,
-      "--publish", `127.0.0.1:${MINECRAFT_PORT}:25565`,
+      "run",
+      "--detach",
+      "--rm",
+      "--name",
+      CONTAINER,
+      "--publish",
+      `127.0.0.1:${MINECRAFT_PORT}:25565`,
       ...env({
         EULA: "TRUE",
         TYPE: "VANILLA",
@@ -124,7 +162,13 @@ export const startMinecraft = Effect.fn("startMinecraft")(function* ({ fresh }: 
     ]);
   }
   const ready = eventually(rcon("list"), MINECRAFT_START_TIMEOUT, "1 second").pipe(
-    Effect.mapError((e) => new CommandFailed({ command: e.command, message: `the server didn't start: ${e.message} (see \`docker logs ${CONTAINER}\`)` })),
+    Effect.mapError(
+      (e) =>
+        new CommandFailed({
+          command: e.command,
+          message: `the server didn't start: ${e.message} (see \`docker logs ${CONTAINER}\`)`,
+        }),
+    ),
   );
   const [took] = yield* Effect.timed(ready);
   yield* Console.log(`[minecraft] ready in ${seconds(took)}`);
@@ -133,14 +177,25 @@ export const startMinecraft = Effect.fn("startMinecraft")(function* ({ fresh }: 
 });
 
 /** A world where nothing changes on its own, and a pad to spawn on (the void kills). */
-const prepareWorld = Effect.forEach([
-  ...["advance_time false", "advance_weather false", "spawn_mobs false", "random_tick_speed 0", "respawn_radius 0", "show_advancement_messages false"].map((rule) => `gamerule ${rule}`),
-  "time set noon",
-  "weather clear",
-  "forceload add -16 -16 15 15",
-  "fill -2 63 -2 2 63 2 minecraft:stone",
-  "setworldspawn 0 64 0",
-], (command) => rcon(command), { discard: true });
+const prepareWorld = Effect.forEach(
+  [
+    ...[
+      "advance_time false",
+      "advance_weather false",
+      "spawn_mobs false",
+      "random_tick_speed 0",
+      "respawn_radius 0",
+      "show_advancement_messages false",
+    ].map((rule) => `gamerule ${rule}`),
+    "time set noon",
+    "weather clear",
+    "forceload add -16 -16 15 15",
+    "fill -2 63 -2 2 63 2 minecraft:stone",
+    "setworldspawn 0 64 0",
+  ],
+  (command) => rcon(command),
+  { discard: true },
+);
 
 function env(vars: Record<string, string>) {
   return Object.entries(vars).flatMap(([k, v]) => ["--env", `${k}=${v}`]);
@@ -151,8 +206,16 @@ function env(vars: Record<string, string>) {
 /** The jar `./gradlew :dedicated-launcher:uberJar` builds, unless SOULFIRE_E2E_JAR names another. */
 export function soulfireJar() {
   if (process.env.SOULFIRE_E2E_JAR) return path.resolve(process.env.SOULFIRE_E2E_JAR);
-  const version = readFileSync(path.join(REPO_DIR, "gradle.properties"), "utf8").match(/^maven_version=(.+)$/m)?.[1];
-  return path.join(REPO_DIR, "dedicated-launcher", "build", "libs", `SoulFireDedicated-${version}.jar`);
+  const version = readFileSync(path.join(REPO_DIR, "gradle.properties"), "utf8").match(
+    /^maven_version=(.+)$/m,
+  )?.[1];
+  return path.join(
+    REPO_DIR,
+    "dedicated-launcher",
+    "build",
+    "libs",
+    `SoulFireDedicated-${version}.jar`,
+  );
 }
 
 /** Java 25: SOULFIRE_E2E_JAVA, else the `java` on PATH. */
@@ -188,18 +251,24 @@ const BOT_SETTINGS: Record<string, Record<string, ReturnType<typeof value>>> = {
  * in. SoulFire's console goes to `logFile`. Closing the scope stops the bot and SoulFire, whether
  * the setup finished or not.
  */
-export const startSoulFire = Effect.fn("startSoulFire")(function* (jarPath: string, minecraft: { host: string; port: number }, logFile: string) {
+export const startSoulFire = Effect.fn("startSoulFire")(function* (
+  jarPath: string,
+  minecraft: { host: string; port: number },
+  logFile: string,
+) {
   yield* Console.log(`[soulfire] starting ${path.relative(REPO_DIR, jarPath)}...`);
   const directory = path.join(E2E_DIR, ".soulfire");
   yield* Effect.sync(() => mkdirSync(directory, { recursive: true }));
-  const [took, soulfire] = yield* Effect.timed(SoulFire.install({
-    directory,
-    jarPath,
-    javaPath: javaPath(),
-    javaArgs: ["-Xms1G", "-Xmx4G"],
-    startupTimeoutMs: 180_000,
-    onLog: (line) => appendFileSync(logFile, line + "\n"),
-  }));
+  const [took, soulfire] = yield* Effect.timed(
+    SoulFire.install({
+      directory,
+      jarPath,
+      javaPath: javaPath(),
+      javaArgs: ["-Xms1G", "-Xmx4G"],
+      startupTimeoutMs: 180_000,
+      onLog: (line) => appendFileSync(logFile, line + "\n"),
+    }),
+  );
   yield* Console.log(`[soulfire] ready in ${seconds(took)}`);
 
   // SoulFire keeps its instances in its database: start from a clean one each run.
@@ -214,9 +283,11 @@ export const startSoulFire = Effect.fn("startSoulFire")(function* (jarPath: stri
       yield* instance.setConfigEntry({ namespace, key, value: v });
     }
   }
-  const [joined, bot] = yield* Effect.timed(instance.getOrCreateBot(BOT_NAME, {
-    readyTimeoutMs: 120_000,
-  }));
+  const [joined, bot] = yield* Effect.timed(
+    instance.getOrCreateBot(BOT_NAME, {
+      readyTimeoutMs: 120_000,
+    }),
+  );
   yield* Console.log(`[soulfire] ${BOT_NAME} online in ${seconds(joined)}`);
   return bot;
 });
@@ -246,9 +317,13 @@ export const placeBot = Effect.fn("placeBot")(function* (bot: SoulFireBot, at: P
   yield* eventually(
     Effect.flatMap(bot.world.player(), ({ position: p }) =>
       check(
-        !!p && Math.abs(p.x - at.x) < 0.01 && Math.abs(p.y - at.y) < 0.01 && Math.abs(p.z - at.z) < 0.01,
+        !!p &&
+          Math.abs(p.x - at.x) < 0.01 &&
+          Math.abs(p.y - at.y) < 0.01 &&
+          Math.abs(p.z - at.z) < 0.01,
         `bot not at ${JSON.stringify(at)} after teleport (at ${JSON.stringify(p)})`,
-      )),
+      ),
+    ),
     "10 seconds",
     "100 millis",
   );
@@ -256,13 +331,22 @@ export const placeBot = Effect.fn("placeBot")(function* (bot: SoulFireBot, at: P
 });
 
 /** The bot's position as the server has it (not as SoulFire believes it is). */
-export const serverPosition: Effect.Effect<Pos, CommandFailed | CheckFailed> = Effect.flatMap(rcon(`data get entity ${BOT_NAME} Pos`), (out) => {
-  const m = out.match(/\[(-?[\d.]+)d, (-?[\d.]+)d, (-?[\d.]+)d\]/);
-  return m ? Effect.succeed({ x: Number(m[1]), y: Number(m[2]), z: Number(m[3]) }) : Effect.fail(new CheckFailed({ message: `unexpected Pos output: ${out}` }));
-});
+export const serverPosition: Effect.Effect<Pos, CommandFailed | CheckFailed> = Effect.flatMap(
+  rcon(`data get entity ${BOT_NAME} Pos`),
+  (out) => {
+    const m = out.match(/\[(-?[\d.]+)d, (-?[\d.]+)d, (-?[\d.]+)d\]/);
+    return m
+      ? Effect.succeed({ x: Number(m[1]), y: Number(m[2]), z: Number(m[3]) })
+      : Effect.fail(new CheckFailed({ message: `unexpected Pos output: ${out}` }));
+  },
+);
 
 /** The block a position is in. */
-export const blockOf = (p: Pos): Pos => ({ x: Math.floor(p.x), y: Math.floor(p.y), z: Math.floor(p.z) });
+export const blockOf = (p: Pos): Pos => ({
+  x: Math.floor(p.x),
+  y: Math.floor(p.y),
+  z: Math.floor(p.z),
+});
 
 // ---- helpers ---------------------------------------------------------------------------------
 
@@ -270,9 +354,10 @@ export const seconds = (d: Duration.Duration) => `${(Duration.toMillis(d) / 1000
 
 function value(v: string | number | boolean) {
   const kind =
-    typeof v === "string" ? { case: "stringValue" as const, value: v }
-    : typeof v === "number" ? { case: "numberValue" as const, value: v }
-    : { case: "boolValue" as const, value: v };
+    typeof v === "string"
+      ? { case: "stringValue" as const, value: v }
+      : typeof v === "number"
+        ? { case: "numberValue" as const, value: v }
+        : { case: "boolValue" as const, value: v };
   return create(ValueSchema, { kind });
 }
-

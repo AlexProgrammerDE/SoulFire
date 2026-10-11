@@ -20,10 +20,7 @@ import {
 } from "../src/generated/soulfire/bot_live_pb.js";
 import { BotLiveStateSchema } from "../src/generated/soulfire/bot_pb.js";
 import { UserRole } from "../src/generated/soulfire/common_pb.js";
-import {
-  PathfinderService,
-  PathPlanStatus,
-} from "../src/generated/soulfire/pathfinding_pb.js";
+import { PathfinderService, PathPlanStatus } from "../src/generated/soulfire/pathfinding_pb.js";
 import {
   ExamplePluginService,
   file_soulfire_plugin_example_v1_example,
@@ -102,13 +99,9 @@ describe("SoulFire", () => {
           });
           expect(soulfire.server.id).toBe("server-id");
           expect(soulfire.capabilities.supports("plugin.rpc.v1")).toBe(true);
-          expect(
-            soulfire.plugins.requireDescriptor("example").apiMajorVersion,
-          ).toBe(1);
+          expect(soulfire.plugins.requireDescriptor("example").apiMajorVersion).toBe(1);
           const example = yield* soulfire.plugins.require(examplePlugin);
-          expect((yield* example.echo("instance-id", "hello")).message).toBe(
-            "hello",
-          );
+          expect((yield* example.echo("instance-id", "hello")).message).toBe("hello");
           yield* soulfire.close();
         }),
       ),
@@ -247,10 +240,7 @@ describe("SoulFire", () => {
                     botId: "bot-id",
                     status: BotTaskStatus.COMPLETED,
                     revision: 2n,
-                    result: anyPack(
-                      GoToTaskResultSchema,
-                      create(GoToTaskResultSchema),
-                    ),
+                    result: anyPack(GoToTaskResultSchema, create(GoToTaskResultSchema)),
                   }),
                 });
               },
@@ -297,9 +287,7 @@ describe("SoulFire", () => {
                 .instance("instance-id")
                 .bot("bot-id")
                 .pathfinder.plan(goals.block({ x: 4, y: 64, z: -2 }));
-              const ticks = yield* Stream.runCollect(
-                example.watchTicks("instance-id", 3),
-              );
+              const ticks = yield* Stream.runCollect(example.watchTicks("instance-id", 3));
               return {
                 actionId: action.actionId,
                 echoed: echoed.message,
@@ -353,11 +341,10 @@ describe("SoulFire", () => {
           const ticks = Array.from(
             yield* Stream.runCollect(
               Stream.map(
-                plugin.stream(
-                  "soulfire.plugin.example.v1.ExamplePluginService",
-                  "WatchTicks",
-                  { instanceId: "instance-id", count: 3 },
-                ),
+                plugin.stream("soulfire.plugin.example.v1.ExamplePluginService", "WatchTicks", {
+                  instanceId: "instance-id",
+                  count: 3,
+                }),
                 (tick) => tick.json,
               ),
             ),
@@ -366,11 +353,7 @@ describe("SoulFire", () => {
             typeName: "soulfire.plugin.example.v1.EchoResponse",
             json: { message: "reflective" },
           });
-          expect(ticks).toEqual([
-            { sequence: 1 },
-            { sequence: 2 },
-            { sequence: 3 },
-          ]);
+          expect(ticks).toEqual([{ sequence: 1 }, { sequence: 2 }, { sequence: 3 }]);
         }),
       ),
     ));
@@ -394,13 +377,10 @@ describe("SoulFire", () => {
           });
           const fetch = makeEffectHttpClientFetch(httpClient);
           const response = yield* Effect.promise(() =>
-            fetch(
-              "https://soulfire.example.com/soulfire.v1.SdkService/Handshake",
-              {
-                body: new Uint8Array([1, 2, 3]),
-                method: "POST",
-              },
-            ),
+            fetch("https://soulfire.example.com/soulfire.v1.SdkService/Handshake", {
+              body: new Uint8Array([1, 2, 3]),
+              method: "POST",
+            }),
           );
           expect(requests).toEqual(["POST /soulfire.v1.SdkService/Handshake"]);
           expect(response.status).toBe(201);
@@ -468,10 +448,7 @@ describe("SoulFire", () => {
             baseUrl: "https://soulfire.example.com",
             transport,
           });
-          const session = yield* soulfire
-            .instance("instance-id")
-            .bot("bot-id")
-            .observe();
+          const session = yield* soulfire.instance("instance-id").bot("bot-id").observe();
           expect(session.state.player?.health).toBe(20);
           const delta = session.once("stateDelta");
           releaseDelta?.();
@@ -537,8 +514,7 @@ describe("SoulFire", () => {
                       },
                       snapshot: {
                         reference: {
-                          connectionEpoch:
-                            "00000000-0000-0000-0000-000000000002",
+                          connectionEpoch: "00000000-0000-0000-0000-000000000002",
                           networkId: 42,
                         },
                         entityType: "minecraft:zombie",
@@ -580,10 +556,7 @@ describe("SoulFire", () => {
             baseUrl: "https://soulfire.example.com",
             transport,
           });
-          const session = yield* soulfire
-            .instance("instance-id")
-            .bot("bot-id")
-            .observe();
+          const session = yield* soulfire.instance("instance-id").bot("bot-id").observe();
           const blockUpdate = session.once("blockUpdate");
           releaseWorldEvents?.();
           yield* blockUpdate;
@@ -591,9 +564,7 @@ describe("SoulFire", () => {
             entityType: "minecraft:zombie",
             health: 20,
           });
-          expect(
-            session.state.blockSnapshots.get("minecraft:overworld:1:64:2"),
-          ).toMatchObject({
+          expect(session.state.blockSnapshots.get("minecraft:overworld:1:64:2")).toMatchObject({
             blockId: "minecraft:oak_log",
             properties: { axis: "y" },
           });
@@ -698,12 +669,14 @@ describe("SoulFire", () => {
     );
 
     expect(state.environment.raining).toBe(true);
-    expect(
-      state.playerList.get("00000000-0000-0000-0000-000000000042"),
-    ).toMatchObject({ latencyMs: 42, profileName: "Alex" });
-    expect(
-      state.bossBars.get("00000000-0000-0000-0000-000000000043"),
-    ).toMatchObject({ name: { plainText: "Raid" }, progress: 0.75 });
+    expect(state.playerList.get("00000000-0000-0000-0000-000000000042")).toMatchObject({
+      latencyMs: 42,
+      profileName: "Alex",
+    });
+    expect(state.bossBars.get("00000000-0000-0000-0000-000000000043")).toMatchObject({
+      name: { plainText: "Raid" },
+      progress: 0.75,
+    });
     expect(state.scoreboard.objectives.get("kills")).toMatchObject({
       displayName: { plainText: "Kills" },
       renderType: "integer",
@@ -712,9 +685,7 @@ describe("SoulFire", () => {
       owner: "Alex",
       score: 7,
     });
-    expect(
-      state.resourcePacks.get("00000000-0000-0000-0000-000000000044"),
-    ).toMatchObject({
+    expect(state.resourcePacks.get("00000000-0000-0000-0000-000000000044")).toMatchObject({
       required: true,
       url: "https://example.com/pack.zip",
     });
@@ -762,9 +733,7 @@ function handshakeResponse() {
 }
 
 function registerExamplePlugin(
-  service: Parameters<
-    Parameters<typeof createRouterTransport>[0]
-  >[0]["service"],
+  service: Parameters<Parameters<typeof createRouterTransport>[0]>[0]["service"],
 ): void {
   service(ExamplePluginService, {
     echo(request) {
@@ -789,9 +758,7 @@ describe("release resolution", () => {
               tag_name: "2.9.1",
             }),
           );
-          const release = yield* Effect.promise(() =>
-            resolveRelease(undefined, fetch),
-          );
+          const release = yield* Effect.promise(() => resolveRelease(undefined, fetch));
           expect(release.tag_name).toBe("2.9.1");
           expect(fetch).toHaveBeenCalledWith(
             "https://api.github.com/repos/soulfiremc-com/SoulFire/releases/latest",
@@ -815,9 +782,7 @@ describe("release resolution", () => {
               tag_name: "release/candidate",
             }),
           );
-          yield* Effect.promise(() =>
-            resolveRelease("release/candidate", fetch),
-          );
+          yield* Effect.promise(() => resolveRelease("release/candidate", fetch));
           expect(fetch).toHaveBeenCalledWith(
             "https://api.github.com/repos/soulfiremc-com/SoulFire/releases/tags/release%2Fcandidate",
             expect.anything(),

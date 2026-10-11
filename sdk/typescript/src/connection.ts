@@ -1,6 +1,4 @@
-import type {
-  PluginApiDescriptor,
-} from "./generated/soulfire/plugin_api_pb.js";
+import type { PluginApiDescriptor } from "./generated/soulfire/plugin_api_pb.js";
 import type {
   SdkApiVersion,
   SdkHandshakeResponse,
@@ -50,9 +48,7 @@ export class CapabilitySet {
   readonly #revisions: ReadonlyMap<string, number>;
 
   public constructor(handshake: SdkHandshakeResponse) {
-    this.#revisions = new Map(
-      handshake.capabilities.map(({ id, revision }) => [id, revision]),
-    );
+    this.#revisions = new Map(handshake.capabilities.map(({ id, revision }) => [id, revision]));
   }
 
   public supports(capability: string, minimumRevision = 1): boolean {
@@ -82,16 +78,9 @@ export interface ConnectionMetadata {
   readonly limits: ReadonlyMap<string, bigint>;
 }
 
-export function connectionMetadata(
-  handshake: SdkHandshakeResponse,
-): ConnectionMetadata {
-  if (
-    handshake.apiVersion === undefined
-    || handshake.identity === undefined
-  ) {
-    throw new SoulFireCompatibilityError(
-      "SoulFire returned an incomplete SDK handshake",
-    );
+export function connectionMetadata(handshake: SdkHandshakeResponse): ConnectionMetadata {
+  if (handshake.apiVersion === undefined || handshake.identity === undefined) {
+    throw new SoulFireCompatibilityError("SoulFire returned an incomplete SDK handshake");
   }
   return {
     server: {

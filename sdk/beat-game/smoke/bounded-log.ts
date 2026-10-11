@@ -1,10 +1,4 @@
-import {
-  appendFile,
-  mkdir,
-  rename,
-  rm,
-  stat,
-} from "node:fs/promises";
+import { appendFile, mkdir, rename, rm, stat } from "node:fs/promises";
 import path from "node:path";
 
 export interface BoundedLogOptions {
@@ -36,19 +30,12 @@ export class BoundedLog {
     const write = this.#pending.then(async () => {
       await mkdir(path.dirname(this.#filename), { recursive: true });
       this.#bytes ??= await fileSize(this.#filename);
-      for (
-        let offset = 0;
-        offset < buffer.byteLength;
-        offset += this.#maximumBytes
-      ) {
+      for (let offset = 0; offset < buffer.byteLength; offset += this.#maximumBytes) {
         const chunk = buffer.subarray(
           offset,
           Math.min(offset + this.#maximumBytes, buffer.byteLength),
         );
-        if (
-          this.#bytes > 0
-          && this.#bytes + chunk.byteLength > this.#maximumBytes
-        ) {
+        if (this.#bytes > 0 && this.#bytes + chunk.byteLength > this.#maximumBytes) {
           await this.#rotate();
         }
         await appendFile(this.#filename, chunk);
@@ -71,9 +58,7 @@ export class BoundedLog {
     }
     for (let index = this.#files - 1; index >= 1; index -= 1) {
       const destination = `${this.#filename}.${index}`;
-      const source = index === 1
-        ? this.#filename
-        : `${this.#filename}.${index - 1}`;
+      const source = index === 1 ? this.#filename : `${this.#filename}.${index - 1}`;
       await rm(destination, { force: true });
       await renameIfPresent(source, destination);
     }

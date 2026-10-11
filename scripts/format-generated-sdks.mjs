@@ -48,10 +48,7 @@ function isGeneratedSource(fileName) {
 async function updateJsrExports() {
   const jsrPath = path.join(repositoryRoot, "sdk/typescript/jsr.json");
   const jsr = JSON.parse(await readFile(jsrPath, "utf8"));
-  const generatedRoot = path.join(
-    repositoryRoot,
-    "sdk/typescript/src/generated",
-  );
+  const generatedRoot = path.join(repositoryRoot, "sdk/typescript/src/generated");
   const generated = await generatedTypeScriptModules(generatedRoot);
   jsr.exports = {
     ".": "./src/index.ts",
@@ -72,14 +69,11 @@ async function generatedTypeScriptModules(directory, relative = "") {
     const entryRelative = path.posix.join(relative, entry.name);
     if (entry.isDirectory()) {
       modules.push(
-        ...(await generatedTypeScriptModules(
-          path.join(directory, entry.name),
-          entryRelative,
-        )),
+        ...(await generatedTypeScriptModules(path.join(directory, entry.name), entryRelative)),
       );
     } else if (entry.name.endsWith("_pb.ts")) {
       modules.push(entryRelative);
     }
   }
-  return modules.sort();
+  return modules.sort((a, b) => a.localeCompare(b));
 }

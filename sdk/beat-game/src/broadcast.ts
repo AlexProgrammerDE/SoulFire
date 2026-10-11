@@ -30,11 +30,13 @@ export class ReplayBroadcast<A> {
       );
       if (!ended) {
         yield* Effect.addFinalizer(() =>
-          this.#mutex.withPermits(1)(
-            Effect.sync(() => {
-              this.#subscribers.delete(queue);
-            }),
-          ).pipe(Effect.andThen(Queue.shutdown(queue)))
+          this.#mutex
+            .withPermits(1)(
+              Effect.sync(() => {
+                this.#subscribers.delete(queue);
+              }),
+            )
+            .pipe(Effect.andThen(Queue.shutdown(queue))),
         );
       }
       return Stream.fromQueue(queue);
@@ -53,11 +55,9 @@ export class ReplayBroadcast<A> {
             this.#history.splice(0, this.#history.length - this.replay);
           }
         }
-        yield* Effect.forEach(
-          this.#subscribers,
-          (subscriber) => Queue.offer(subscriber, value),
-          { discard: true },
-        );
+        yield* Effect.forEach(this.#subscribers, (subscriber) => Queue.offer(subscriber, value), {
+          discard: true,
+        });
       }),
     );
   }
@@ -69,11 +69,7 @@ export class ReplayBroadcast<A> {
           return;
         }
         this.#ended = true;
-        yield* Effect.forEach(
-          this.#subscribers,
-          Queue.end,
-          { discard: true },
-        );
+        yield* Effect.forEach(this.#subscribers, Queue.end, { discard: true });
         this.#subscribers.clear();
       }),
     );

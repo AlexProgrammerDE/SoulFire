@@ -9,26 +9,14 @@ import {
   PathfindOptionsSchema,
   type PathfindGoal,
 } from "./generated/soulfire/bot_live_pb.js";
-import {
-  BlockPositionSchema,
-  WorldPositionSchema,
-} from "./generated/soulfire/common_pb.js";
+import { BlockPositionSchema, WorldPositionSchema } from "./generated/soulfire/common_pb.js";
 import type { EntityReference } from "./generated/soulfire/domain_pb.js";
-import {
-  PathfinderService,
-  type PathPlan,
-} from "./generated/soulfire/pathfinding_pb.js";
-import type {
-  FollowEntityTaskOptions,
-  GoToTaskOptions,
-  SoulFireTasks,
-} from "./tasks.js";
+import { PathfinderService, type PathPlan } from "./generated/soulfire/pathfinding_pb.js";
+import type { FollowEntityTaskOptions, GoToTaskOptions, SoulFireTasks } from "./tasks.js";
 
 export type BlockTarget = MessageInitShape<typeof BlockPositionSchema>;
 export type WorldTarget = MessageInitShape<typeof WorldPositionSchema>;
-export type EntityTarget =
-  | Pick<EntityReference, "connectionEpoch" | "networkId">
-  | number;
+export type EntityTarget = Pick<EntityReference, "connectionEpoch" | "networkId"> | number;
 
 export interface PlanPathOptions {
   path?: MessageInitShape<typeof PathfindOptionsSchema>;
@@ -139,9 +127,7 @@ function entityTarget(target: EntityTarget): {
     ? { entityId: target }
     : {
         entityId: target.networkId,
-        ...(target.connectionEpoch.length === 0
-          ? {}
-          : { connectionEpoch: target.connectionEpoch }),
+        ...(target.connectionEpoch.length === 0 ? {} : { connectionEpoch: target.connectionEpoch }),
       };
 }
 
@@ -166,11 +152,7 @@ export interface PathGoals {
   /**
    * An X/Z column at any height. `radius` defaults to 0: that exact column.
    */
-  xz(
-    x: number,
-    z: number,
-    options?: { dimension?: string; radius?: number },
-  ): PathfindGoal;
+  xz(x: number, z: number, options?: { dimension?: string; radius?: number }): PathfindGoal;
   /**
    * A Y level, anywhere in X and Z.
    */
@@ -226,11 +208,7 @@ export const goals: PathGoals = {
     });
   },
 
-  xz(
-    x: number,
-    z: number,
-    options: { dimension?: string; radius?: number } = {},
-  ): PathfindGoal {
+  xz(x: number, z: number, options: { dimension?: string; radius?: number } = {}): PathfindGoal {
     return create(PathfindGoalSchema, {
       goal: {
         case: "xz",

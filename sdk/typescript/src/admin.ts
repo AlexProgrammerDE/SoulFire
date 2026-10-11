@@ -1,19 +1,11 @@
 import type { DescMessage, MessageInitShape } from "@bufbuild/protobuf";
-import {
-  createClient,
-  type CallOptions,
-  type Client,
-  type Transport,
-} from "@connectrpc/connect";
+import { createClient, type CallOptions, type Client, type Transport } from "@connectrpc/connect";
 import { Effect, Stream } from "effect";
 import { type SoulFireOperationError } from "./errors.js";
 import { rpc, rpcStream, withSignal } from "./transport.js";
 
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import {
-  ClientService,
-  type ClientDataResponse,
-} from "./generated/soulfire/client_pb.js";
+import { ClientService, type ClientDataResponse } from "./generated/soulfire/client_pb.js";
 import {
   CommandService,
   type CommandCompletionRequestSchema,
@@ -127,9 +119,7 @@ export class SoulFireAdmin {
     );
   }
 
-  public generateWebDavToken(
-    options?: CallOptions,
-  ): Effect.Effect<string, SoulFireOperationError> {
+  public generateWebDavToken(options?: CallOptions): Effect.Effect<string, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       return (yield* rpc("SoulFireAdmin.generateWebDavToken", (signal) =>
         this.#client.generateWebDAVToken({}, withSignal(options, signal)),
@@ -137,9 +127,7 @@ export class SoulFireAdmin {
     });
   }
 
-  public generateApiToken(
-    options?: CallOptions,
-  ): Effect.Effect<string, SoulFireOperationError> {
+  public generateApiToken(options?: CallOptions): Effect.Effect<string, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       return (yield* rpc("SoulFireAdmin.generateApiToken", (signal) =>
         this.#client.generateAPIToken({}, withSignal(options, signal)),
@@ -153,10 +141,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.updateUsername", (signal) =>
-        this.#client.updateSelfUsername(
-          { username },
-          withSignal(options, signal),
-        ),
+        this.#client.updateSelfUsername({ username }, withSignal(options, signal)),
       ),
       () => undefined,
     );
@@ -174,9 +159,7 @@ export class SoulFireAdmin {
     );
   }
 
-  public invalidateOwnSessions(
-    options?: CallOptions,
-  ): Effect.Effect<void, SoulFireOperationError> {
+  public invalidateOwnSessions(options?: CallOptions): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.invalidateOwnSessions", (signal) =>
         this.#client.invalidateSelfSessions({}, withSignal(options, signal)),
@@ -199,10 +182,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.updateServerConfig", (signal) =>
-        this.#server.updateServerConfig(
-          { config },
-          withSignal(options, signal),
-        ),
+        this.#server.updateServerConfig({ config }, withSignal(options, signal)),
       ),
       () => undefined,
     );
@@ -214,10 +194,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.setServerConfigEntry", (signal) =>
-        this.#server.updateServerConfigEntry(
-          request,
-          withSignal(options, signal),
-        ),
+        this.#server.updateServerConfigEntry(request, withSignal(options, signal)),
       ),
       () => undefined,
     );
@@ -283,10 +260,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.invalidateUserSessions", (signal) =>
-        this.#users.invalidateSessions(
-          { id: userId },
-          withSignal(options, signal),
-        ),
+        this.#users.invalidateSessions({ id: userId }, withSignal(options, signal)),
       ),
       () => undefined,
     );
@@ -298,10 +272,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<string, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       return (yield* rpc("SoulFireAdmin.generateUserApiToken", (signal) =>
-        this.#users.generateUserAPIToken(
-          { id: userId },
-          withSignal(options, signal),
-        ),
+        this.#users.generateUserAPIToken({ id: userId }, withSignal(options, signal)),
       )).token;
     });
   }
@@ -312,10 +283,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<UserPluginPermissionGrant[], SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       return (yield* rpc("SoulFireAdmin.userPluginPermissionGrants", (signal) =>
-        this.#users.listUserPluginPermissionGrants(
-          { userId },
-          withSignal(options, signal),
-        ),
+        this.#users.listUserPluginPermissionGrants({ userId }, withSignal(options, signal)),
       )).grants;
     });
   }
@@ -326,10 +294,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Effect.Effect<UserPluginPermissionGrant, SoulFireOperationError> {
     return rpc("SoulFireAdmin.setUserPluginPermissionGrant", (signal) =>
-      this.#users.setUserPluginPermissionGrant(
-        { ...request, userId },
-        withSignal(options, signal),
-      ),
+      this.#users.setUserPluginPermissionGrant({ ...request, userId }, withSignal(options, signal)),
     );
   }
 
@@ -365,7 +330,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Stream.Stream<LogResponse, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return rpcStream("SoulFireAdmin.logs", (signal) =>
           this.#logs.subscribe(request, withSignal(options, signal)),
         );
@@ -431,10 +396,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<PluginRuntimeStat[], SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       return (yield* rpc("SoulFireAdmin.pluginStats", (signal) =>
-        this.#pluginStats.getInstancePluginStats(
-          { instanceId },
-          withSignal(options, signal),
-        ),
+        this.#pluginStats.getInstancePluginStats({ instanceId }, withSignal(options, signal)),
       )).stats;
     });
   }
@@ -442,16 +404,10 @@ export class SoulFireAdmin {
   public auditLog(
     instanceId: string,
     options?: CallOptions,
-  ): Effect.Effect<
-    InstanceAuditLogResponse_AuditLogEntry[],
-    SoulFireOperationError
-  > {
+  ): Effect.Effect<InstanceAuditLogResponse_AuditLogEntry[], SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       return (yield* rpc("SoulFireAdmin.auditLog", (signal) =>
-        this.#instances.getAuditLog(
-          { id: instanceId },
-          withSignal(options, signal),
-        ),
+        this.#instances.getAuditLog({ id: instanceId }, withSignal(options, signal)),
       )).entry;
     });
   }
@@ -473,10 +429,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Effect.Effect<GetScriptResponse, SoulFireOperationError> {
     return rpc("SoulFireAdmin.script", (signal) =>
-      this.#scripts.getScript(
-        { instanceId, scriptId },
-        withSignal(options, signal),
-      ),
+      this.#scripts.getScript({ instanceId, scriptId }, withSignal(options, signal)),
     );
   }
 
@@ -486,10 +439,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Effect.Effect<CreateScriptResponse, SoulFireOperationError> {
     return rpc("SoulFireAdmin.createScript", (signal) =>
-      this.#scripts.createScript(
-        { ...request, instanceId },
-        withSignal(options, signal),
-      ),
+      this.#scripts.createScript({ ...request, instanceId }, withSignal(options, signal)),
     );
   }
 
@@ -499,10 +449,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Effect.Effect<UpdateScriptResponse, SoulFireOperationError> {
     return rpc("SoulFireAdmin.updateScript", (signal) =>
-      this.#scripts.updateScript(
-        { ...request, instanceId },
-        withSignal(options, signal),
-      ),
+      this.#scripts.updateScript({ ...request, instanceId }, withSignal(options, signal)),
     );
   }
 
@@ -513,10 +460,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.deleteScript", (signal) =>
-        this.#scripts.deleteScript(
-          { instanceId, scriptId },
-          withSignal(options, signal),
-        ),
+        this.#scripts.deleteScript({ instanceId, scriptId }, withSignal(options, signal)),
       ),
       () => undefined,
     );
@@ -528,12 +472,9 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Stream.Stream<ScriptEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return rpcStream("SoulFireAdmin.activateScript", (signal) =>
-          this.#scripts.activateScript(
-            { ...request, instanceId },
-            withSignal(options, signal),
-          ),
+          this.#scripts.activateScript({ ...request, instanceId }, withSignal(options, signal)),
         );
       }),
     );
@@ -546,10 +487,7 @@ export class SoulFireAdmin {
   ): Effect.Effect<void, SoulFireOperationError> {
     return Effect.map(
       rpc("SoulFireAdmin.deactivateScript", (signal) =>
-        this.#scripts.deactivateScript(
-          { instanceId, scriptId },
-          withSignal(options, signal),
-        ),
+        this.#scripts.deactivateScript({ instanceId, scriptId }, withSignal(options, signal)),
       ),
       () => undefined,
     );
@@ -561,10 +499,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Effect.Effect<GetScriptStatusResponse, SoulFireOperationError> {
     return rpc("SoulFireAdmin.scriptStatus", (signal) =>
-      this.#scripts.getScriptStatus(
-        { instanceId, scriptId },
-        withSignal(options, signal),
-      ),
+      this.#scripts.getScriptStatus({ instanceId, scriptId }, withSignal(options, signal)),
     );
   }
 
@@ -574,7 +509,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Stream.Stream<ScriptLogEntry, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return rpcStream("SoulFireAdmin.scriptLogs", (signal) =>
           this.#scripts.subscribeScriptLogs(
             { ...request, instanceId },
@@ -609,10 +544,7 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Effect.Effect<ValidateScriptResponse, SoulFireOperationError> {
     return rpc("SoulFireAdmin.validateScript", (signal) =>
-      this.#scripts.validateScript(
-        { ...request, instanceId },
-        withSignal(options, signal),
-      ),
+      this.#scripts.validateScript({ ...request, instanceId }, withSignal(options, signal)),
     );
   }
 
@@ -622,12 +554,9 @@ export class SoulFireAdmin {
     options?: CallOptions,
   ): Stream.Stream<ScriptEvent, SoulFireOperationError> {
     return Stream.unwrap(
-      Effect.gen({ self: this }, function* () {
+      Effect.sync(() => {
         return rpcStream("SoulFireAdmin.dryRunScript", (signal) =>
-          this.#scripts.dryRunScript(
-            { ...request, instanceId },
-            withSignal(options, signal),
-          ),
+          this.#scripts.dryRunScript({ ...request, instanceId }, withSignal(options, signal)),
         );
       }),
     );

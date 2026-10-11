@@ -2,10 +2,7 @@ import { createClient, createRouterTransport } from "@connectrpc/connect";
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import { SoulFire, SoulFireActionError } from "../src/index.js";
-import {
-  BotActionStatus,
-  BotLiveService,
-} from "../src/generated/soulfire/bot_live_pb.js";
+import { BotActionStatus, BotLiveService } from "../src/generated/soulfire/bot_live_pb.js";
 import { InventoryService } from "../src/generated/soulfire/inventory_pb.js";
 import { SoulFireInventory } from "../src/inventory.js";
 
@@ -96,9 +93,7 @@ describe("workflow resources", () => {
             baseUrl: "https://soulfire.example.com",
             transport,
           });
-          const failure = yield* Effect.flip(
-            soulfire.instance("instance").bot("bot").wake(),
-          );
+          const failure = yield* Effect.flip(soulfire.instance("instance").bot("bot").wake());
           expect(failure).toBeInstanceOf(SoulFireActionError);
         }),
       ),

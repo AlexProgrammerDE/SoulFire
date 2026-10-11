@@ -34,11 +34,7 @@ export function rotationToward(
   const horizontalDistance = Math.hypot(dx, dz);
   return {
     yaw: normalizeDegrees(Math.atan2(-dx, dz) * DEGREES_PER_RADIAN),
-    pitch: clamp(
-      -Math.atan2(dy, horizontalDistance) * DEGREES_PER_RADIAN,
-      -90,
-      90,
-    ),
+    pitch: clamp(-Math.atan2(dy, horizontalDistance) * DEGREES_PER_RADIAN, -90, 90),
   };
 }
 
@@ -74,22 +70,15 @@ export function triangulateStronghold(
     if (left === undefined) {
       continue;
     }
-    for (
-      let rightIndex = leftIndex + 1;
-      rightIndex < samples.length;
-      rightIndex += 1
-    ) {
+    for (let rightIndex = leftIndex + 1; rightIndex < samples.length; rightIndex += 1) {
       const right = samples[rightIndex];
-      if (
-        right === undefined
-        || left.origin.dimension !== right.origin.dimension
-      ) {
+      if (right === undefined || left.origin.dimension !== right.origin.dimension) {
         continue;
       }
       const candidate = intersectSamples(left, right);
       if (
-        candidate !== undefined
-        && (best === undefined || candidate.confidence > best.confidence)
+        candidate !== undefined &&
+        (best === undefined || candidate.confidence > best.confidence)
       ) {
         best = candidate;
       }
@@ -102,10 +91,7 @@ export function createNetherPortalFrame(
   origin: BeatGameBlockPosition,
   axis: "x" | "z" = "x",
 ): PortalFrame {
-  const position = (
-    horizontal: number,
-    vertical: number,
-  ): BeatGameBlockPosition => ({
+  const position = (horizontal: number, vertical: number): BeatGameBlockPosition => ({
     x: origin.x + (axis === "x" ? horizontal : 0),
     y: origin.y + vertical,
     z: origin.z + (axis === "z" ? horizontal : 0),
@@ -139,21 +125,24 @@ export function inferNetherPortalFrames(
   obsidian: readonly BeatGameBlockPosition[],
   reference: BeatGamePosition,
 ): readonly NetherPortalFrameMatch[] {
-  const observedKeys = new Set(obsidian
-    .filter(({ dimension }) => dimension === reference.dimension)
-    .map(positionKey));
+  const observedKeys = new Set(
+    obsidian.filter(({ dimension }) => dimension === reference.dimension).map(positionKey),
+  );
   const candidates = new Map<string, PortalFrame>();
   for (const block of obsidian) {
     if (block.dimension !== reference.dimension) {
       continue;
     }
     for (const axis of ["x", "z"] as const) {
-      const template = createNetherPortalFrame({
-        x: 0,
-        y: 0,
-        z: 0,
-        dimension: block.dimension,
-      }, axis);
+      const template = createNetherPortalFrame(
+        {
+          x: 0,
+          y: 0,
+          z: 0,
+          dimension: block.dimension,
+        },
+        axis,
+      );
       for (const templateBlock of template.blocks) {
         const origin = {
           x: block.x - templateBlock.x,
@@ -162,10 +151,7 @@ export function inferNetherPortalFrames(
           dimension: block.dimension,
         };
         const frame = createNetherPortalFrame(origin, axis);
-        candidates.set(
-          `${axis}:${positionKey(origin)}`,
-          frame,
-        );
+        candidates.set(`${axis}:${positionKey(origin)}`, frame);
       }
     }
   }
@@ -173,19 +159,19 @@ export function inferNetherPortalFrames(
   return [...candidates.values()]
     .map((frame) => ({
       frame,
-      matchingBlocks: frame.blocks.filter((position) =>
-        observedKeys.has(positionKey(position))
-      ).length,
+      matchingBlocks: frame.blocks.filter((position) => observedKeys.has(positionKey(position)))
+        .length,
     }))
     .filter(({ matchingBlocks }) => matchingBlocks > 0)
-    .sort((left, right) =>
-      right.matchingBlocks - left.matchingBlocks
-      || distanceSquared(left.frame.origin, reference)
-        - distanceSquared(right.frame.origin, reference)
-      || left.frame.origin.y - right.frame.origin.y
-      || left.frame.origin.x - right.frame.origin.x
-      || left.frame.origin.z - right.frame.origin.z
-      || left.frame.axis.localeCompare(right.frame.axis)
+    .sort(
+      (left, right) =>
+        right.matchingBlocks - left.matchingBlocks ||
+        distanceSquared(left.frame.origin, reference) -
+          distanceSquared(right.frame.origin, reference) ||
+        left.frame.origin.y - right.frame.origin.y ||
+        left.frame.origin.x - right.frame.origin.x ||
+        left.frame.origin.z - right.frame.origin.z ||
+        left.frame.axis.localeCompare(right.frame.axis),
     );
 }
 
@@ -197,11 +183,7 @@ export function distanceSquared(
   left: Pick<BeatGamePosition, "x" | "y" | "z">,
   right: Pick<BeatGamePosition, "x" | "y" | "z">,
 ): number {
-  return (
-    (left.x - right.x) ** 2
-    + (left.y - right.y) ** 2
-    + (left.z - right.z) ** 2
-  );
+  return (left.x - right.x) ** 2 + (left.y - right.y) ** 2 + (left.z - right.z) ** 2;
 }
 
 function intersectSamples(
@@ -218,23 +200,14 @@ function intersectSamples(
   if (Math.abs(cross) < MINIMUM_INTERSECTION_SINE) {
     return undefined;
   }
-  const leftDistance = cross2(
-    { x: deltaX, z: deltaZ },
-    right.direction,
-  ) / cross;
-  const rightDistance = cross2(
-    { x: deltaX, z: deltaZ },
-    left.direction,
-  ) / cross;
+  const leftDistance = cross2({ x: deltaX, z: deltaZ }, right.direction) / cross;
+  const rightDistance = cross2({ x: deltaX, z: deltaZ }, left.direction) / cross;
   if (leftDistance <= 0 || rightDistance <= 0) {
     return undefined;
   }
   const angleRadians = Math.asin(Math.min(1, Math.abs(cross)));
   const angleDegrees = angleRadians * DEGREES_PER_RADIAN;
-  const geometryConfidence = Math.min(
-    1,
-    baseline / 256,
-  ) * Math.min(1, Math.abs(cross) / 0.35);
+  const geometryConfidence = Math.min(1, baseline / 256) * Math.min(1, Math.abs(cross) / 0.35);
   return {
     position: {
       x: left.origin.x + left.direction.x * leftDistance,
@@ -242,11 +215,7 @@ function intersectSamples(
       z: left.origin.z + left.direction.z * leftDistance,
       dimension: left.origin.dimension,
     },
-    confidence: clamp(
-      geometryConfidence * Math.min(left.confidence, right.confidence),
-      0,
-      1,
-    ),
+    confidence: clamp(geometryConfidence * Math.min(left.confidence, right.confidence), 0, 1),
     baseline,
     angleDegrees,
   };
@@ -260,7 +229,7 @@ function cross2(
 }
 
 function normalizeDegrees(value: number): number {
-  const normalized = ((value + 180) % 360 + 360) % 360 - 180;
+  const normalized = ((((value + 180) % 360) + 360) % 360) - 180;
   return Object.is(normalized, -0) ? 0 : normalized;
 }
 

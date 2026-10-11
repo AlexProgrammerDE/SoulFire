@@ -159,11 +159,7 @@ export { SoulFireProtocol } from "./protocol.js";
 export type { SendRawPacketOptions, WatchPacketsOptions } from "./protocol.js";
 export { SoulFireRecipes } from "./recipes.js";
 export { SoulFireRegistry } from "./registry.js";
-export {
-  BotSession,
-  emptyBotSessionState,
-  reduceBotSessionState,
-} from "./session.js";
+export { BotSession, emptyBotSessionState, reduceBotSessionState } from "./session.js";
 export type {
   BotBossBarState,
   BotEnvironmentState,

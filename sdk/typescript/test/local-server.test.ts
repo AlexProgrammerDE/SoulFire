@@ -6,22 +6,17 @@ import { Effect, Exit, Fiber } from "effect";
 import { describe, expect, it } from "vitest";
 import { installLocalServer } from "../src/local-server.js";
 
-const fixture = fileURLToPath(
-  new URL("./fixtures/managed-server.cjs", import.meta.url),
-);
+const fixture = fileURLToPath(new URL("./fixtures/managed-server.cjs", import.meta.url));
 
 function temporaryInstall() {
   return Effect.acquireRelease(
     Effect.promise(async () => {
-      const directory = await mkdtemp(
-        path.join(os.tmpdir(), "soulfire-install-"),
-      );
+      const directory = await mkdtemp(path.join(os.tmpdir(), "soulfire-install-"));
       const jarPath = path.join(directory, "server.jar");
       await writeFile(jarPath, "fixture");
       return { directory, jarPath, javaPath: process.execPath };
     }),
-    ({ directory }) =>
-      Effect.promise(() => rm(directory, { recursive: true, force: true })),
+    ({ directory }) => Effect.promise(() => rm(directory, { recursive: true, force: true })),
   );
 }
 
@@ -79,8 +74,7 @@ describe("managed process scopes", () => {
               javaArgs: [fixture, "pending"],
               startupTimeoutMs: 10000,
               onLog: (line) => {
-                if (line.startsWith("spawned:"))
-                  markStarted(Number(line.slice(8)));
+                if (line.startsWith("spawned:")) markStarted(Number(line.slice(8)));
               },
             }),
           ).pipe(Effect.forkScoped);
@@ -106,8 +100,7 @@ describe("managed process scopes", () => {
                   javaArgs: [fixture, mode],
                   startupTimeoutMs: mode === "pending" ? 200 : 2000,
                   onLog: (line) => {
-                    if (line.startsWith("spawned:"))
-                      pid = Number(line.slice(8));
+                    if (line.startsWith("spawned:")) pid = Number(line.slice(8));
                   },
                 }),
               ),

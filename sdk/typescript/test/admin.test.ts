@@ -59,9 +59,7 @@ describe("SoulFireAdmin", () => {
                   userId: request.userId,
                   permissionId: request.permissionId,
                   scope: request.scope,
-                  ...(request.resourceId === undefined
-                    ? {}
-                    : { resourceId: request.resourceId }),
+                  ...(request.resourceId === undefined ? {} : { resourceId: request.resourceId }),
                   granted: request.granted,
                   active: true,
                 };
@@ -73,8 +71,7 @@ describe("SoulFireAdmin", () => {
                   snapshots: [],
                   distributions: {
                     dimensionCounts: {
-                      "minecraft:overworld":
-                        request.instanceId === "instance-id" ? 4 : 0,
+                      "minecraft:overworld": request.instanceId === "instance-id" ? 4 : 0,
                     },
                   },
                 };
@@ -116,21 +113,15 @@ describe("SoulFireAdmin", () => {
           const client = yield* soulfire.admin.clientData();
           const token = yield* soulfire.admin.generateApiToken();
           const users = yield* soulfire.admin.users();
-          const grants =
-            yield* soulfire.admin.userPluginPermissionGrants("other-user");
-          const denied = yield* soulfire.admin.setUserPluginPermissionGrant(
-            "other-user",
-            {
-              permissionId: "plugin.example.read",
-              scope: PluginPermissionScope.INSTANCE,
-              resourceId: "instance-id",
-              granted: false,
-            },
-          );
+          const grants = yield* soulfire.admin.userPluginPermissionGrants("other-user");
+          const denied = yield* soulfire.admin.setUserPluginPermissionGrant("other-user", {
+            permissionId: "plugin.example.read",
+            scope: PluginPermissionScope.INSTANCE,
+            resourceId: "instance-id",
+            granted: false,
+          });
           const metrics = yield* soulfire.admin.instanceMetrics("instance-id");
-          const logs = Array.from(
-            yield* Stream.runCollect(soulfire.admin.logs({})),
-          );
+          const logs = Array.from(yield* Stream.runCollect(soulfire.admin.logs({})));
           const scripts = yield* soulfire.admin.scripts("instance-id");
           const dryRun = Array.from(
             yield* Stream.runCollect(
@@ -154,9 +145,7 @@ describe("SoulFireAdmin", () => {
             granted: false,
             active: true,
           });
-          expect(
-            metrics.distributions?.dimensionCounts["minecraft:overworld"],
-          ).toBe(4);
+          expect(metrics.distributions?.dimensionCounts["minecraft:overworld"]).toBe(4);
           expect(logs[0]?.message?.message).toBe("ready");
           expect(scripts[0]).toMatchObject({
             id: "script-id",

@@ -7,14 +7,8 @@ import process from "node:process";
 const repositoryRoot = path.resolve(import.meta.dirname, "../../..");
 const packageDirectory = path.resolve(import.meta.dirname, "..");
 const runCount = positiveIntegerEnvironment("SOULFIRE_QUALIFICATION_RUNS", 5);
-const seed = environment(
-  "SOULFIRE_QUALIFICATION_SEED",
-  "SoulFire beat-game qualification v1",
-);
-const controlled = booleanEnvironment(
-  "SOULFIRE_QUALIFICATION_CONTROLLED",
-  false,
-);
+const seed = environment("SOULFIRE_QUALIFICATION_SEED", "SoulFire beat-game qualification v1");
+const controlled = booleanEnvironment("SOULFIRE_QUALIFICATION_CONTROLLED", false);
 const continueAfterFailure = booleanEnvironment(
   "SOULFIRE_QUALIFICATION_CONTINUE_ON_FAILURE",
   false,
@@ -24,10 +18,12 @@ const qualificationId = environment(
   "SOULFIRE_QUALIFICATION_ID",
   `${new Date().toISOString().replaceAll(/[:.]/gu, "-")}-${randomUUID()}`,
 );
-const artifactRoot = path.resolve(environment(
-  "SOULFIRE_QUALIFICATION_ARTIFACT_DIR",
-  path.join(repositoryRoot, "temp", "beat-game-qualification", qualificationId),
-));
+const artifactRoot = path.resolve(
+  environment(
+    "SOULFIRE_QUALIFICATION_ARTIFACT_DIR",
+    path.join(repositoryRoot, "temp", "beat-game-qualification", qualificationId),
+  ),
+);
 
 interface QualificationMetrics {
   readonly runId: string;
@@ -75,9 +71,7 @@ for (let index = 1; index <= runCount; index += 1) {
   const runId = `${qualificationId}-${index}`;
   const artifactDirectory = path.join(artifactRoot, `run-${index}`);
   await mkdir(artifactDirectory, { recursive: true });
-  process.stdout.write(
-    `Starting beat-game qualification ${index}/${runCount} (${runId})\n`,
-  );
+  process.stdout.write(`Starting beat-game qualification ${index}/${runCount} (${runId})\n`);
   const exitCode = await runCommand(
     process.execPath,
     ["--experimental-strip-types", "smoke/e2e.ts"],
@@ -115,10 +109,7 @@ async function readRunResult(
   exitCode: number,
 ): Promise<QualificationRunResult> {
   try {
-    const source = await readFile(
-      path.join(artifactDirectory, "qualification.json"),
-      "utf8",
-    );
+    const source = await readFile(path.join(artifactDirectory, "qualification.json"), "utf8");
     return {
       index,
       runId,
@@ -139,9 +130,10 @@ async function readRunResult(
 
 async function writeReport(results: readonly QualificationRunResult[]) {
   const completed = results.flatMap(({ metrics }) =>
-    metrics?.completed === true ? [metrics] : []
+    metrics?.completed === true ? [metrics] : [],
   );
-  const durations = completed.map(({ durationMs }) => durationMs)
+  const durations = completed
+    .map(({ durationMs }) => durationMs)
     .sort((left, right) => left - right);
   const report = {
     qualificationId,
@@ -151,9 +143,10 @@ async function writeReport(results: readonly QualificationRunResult[]) {
     requiredConsecutiveRuns: runCount,
     attemptedRuns: results.length,
     successfulRuns: completed.length,
-    qualified: results.length === runCount
-      && completed.length === runCount
-      && results.every(({ exitCode }) => exitCode === 0),
+    qualified:
+      results.length === runCount &&
+      completed.length === runCount &&
+      results.every(({ exitCode }) => exitCode === 0),
     completionRate: results.length === 0 ? 0 : completed.length / results.length,
     medianCompletionTimeMs: percentile(durations, 0.5),
     p95CompletionTimeMs: percentile(durations, 0.95),
@@ -184,10 +177,7 @@ function percentile(values: readonly number[], percentile: number): number | nul
   return values[rank] ?? null;
 }
 
-function sum(
-  values: readonly QualificationMetrics[],
-  key: keyof QualificationMetrics,
-): number {
+function sum(values: readonly QualificationMetrics[], key: keyof QualificationMetrics): number {
   return values.reduce((total, value) => {
     const item = value[key];
     return total + (typeof item === "number" ? item : 0);
@@ -216,11 +206,13 @@ function runCommand(
         resolve(exitCode);
         return;
       }
-      reject(new Error(
-        `${command} ${args.join(" ")} exited with ${exitCode}${
-          signal === null ? "" : ` after ${signal}`
-        }`,
-      ));
+      reject(
+        new Error(
+          `${command} ${args.join(" ")} exited with ${exitCode}${
+            signal === null ? "" : ` after ${signal}`
+          }`,
+        ),
+      );
     });
   });
 }

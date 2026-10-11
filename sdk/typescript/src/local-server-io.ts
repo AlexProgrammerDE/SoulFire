@@ -1,14 +1,13 @@
 import { createHash, randomUUID } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { mkdir, readFile, rename, rm, stat } from "node:fs/promises";
+import { mkdir, rename, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import net from "node:net";
 
 import AdmZip from "adm-zip";
 import * as tar from "tar";
 
-const RELEASES_API =
-  "https://api.github.com/repos/soulfiremc-com/SoulFire/releases";
+const RELEASES_API = "https://api.github.com/repos/soulfiremc-com/SoulFire/releases";
 
 interface GitHubAsset {
   browser_download_url?: string;
@@ -31,10 +30,7 @@ interface AdoptiumRelease {
   release_name?: string;
 }
 
-export async function requireLocalFile(
-  value: string,
-  description: string,
-): Promise<string> {
+export async function requireLocalFile(value: string, description: string): Promise<string> {
   const resolved = path.resolve(value);
   let metadata;
   try {
@@ -69,9 +65,7 @@ export async function resolveRelease(
     },
   });
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch SoulFire release metadata (${response.status})`,
-    );
+    throw new Error(`Failed to fetch SoulFire release metadata (${response.status})`);
   }
 
   const release = (await response.json()) as GitHubRelease;
@@ -91,13 +85,9 @@ export function resolveDedicatedAsset(
   const expectedName = `SoulFireDedicated-${requestedVersion?.trim() ?? release.tag_name}.jar`;
   const asset =
     release.assets.find((candidate) => candidate.name === expectedName) ??
-    release.assets.find((candidate) =>
-      /^SoulFireDedicated-.+\.jar$/.test(candidate.name ?? ""),
-    );
+    release.assets.find((candidate) => /^SoulFireDedicated-.+\.jar$/.test(candidate.name ?? ""));
   if (!asset?.name || !asset.browser_download_url || !asset.digest) {
-    throw new Error(
-      `SoulFire release ${release.tag_name} has no verified dedicated server JAR`,
-    );
+    throw new Error(`SoulFire release ${release.tag_name} has no verified dedicated server JAR`);
   }
   return {
     browser_download_url: asset.browser_download_url,
@@ -138,10 +128,7 @@ export async function ensureJvm(
     throw new Error("JVM metadata was incomplete");
   }
 
-  const temporaryRoot = path.join(
-    path.dirname(jvmDirectory),
-    `.jvm-25-${randomUUID()}`,
-  );
+  const temporaryRoot = path.join(path.dirname(jvmDirectory), `.jvm-25-${randomUUID()}`);
   const archivePath = `${temporaryRoot}.download`;
   await mkdir(temporaryRoot, { recursive: true });
 
@@ -181,10 +168,7 @@ export async function ensureDownload(
   checksum: string,
   fetchImplementation: typeof globalThis.fetch,
 ): Promise<void> {
-  if (
-    (await exists(destination)) &&
-    (await sha256File(destination)) === checksum
-  ) {
+  if ((await exists(destination)) && (await sha256File(destination)) === checksum) {
     return;
   }
 
@@ -210,9 +194,7 @@ async function downloadFile(
     throw new Error(`Download failed for ${url} (${response.status})`);
   }
 
-  const file = await import("node:fs/promises").then(({ open }) =>
-    open(destination, "wx"),
-  );
+  const file = await import("node:fs/promises").then(({ open }) => open(destination, "wx"));
   const hash = createHash("sha256");
   try {
     const reader = response.body.getReader();
@@ -274,19 +256,6 @@ export async function findAvailablePort(): Promise<number> {
   });
 }
 
-function validatePort(port: number): void {
-  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
-    throw new RangeError("port must be an integer between 1 and 65535");
-  }
-}
-
-function requirePid(pid: number | undefined): number {
-  if (pid === undefined) {
-    throw new Error("SoulFire process did not provide a process ID");
-  }
-  return pid;
-}
-
 async function exists(target: string): Promise<boolean> {
   try {
     await stat(target);
@@ -296,9 +265,6 @@ async function exists(target: string): Promise<boolean> {
   }
 }
 
-function stripAnsi(value: string): string {
-  return value.replace(/\u001B\[[0-9;]*[A-Za-z]/g, "");
-}
 function detectArchitecture(): string {
   switch (process.arch) {
     case "arm":
@@ -334,7 +300,5 @@ function detectOs(): string {
 }
 
 export function getJavaHome(jvmDirectory: string): string {
-  return process.platform === "darwin"
-    ? path.join(jvmDirectory, "Contents", "Home")
-    : jvmDirectory;
+  return process.platform === "darwin" ? path.join(jvmDirectory, "Contents", "Home") : jvmDirectory;
 }

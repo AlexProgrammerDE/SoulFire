@@ -19,8 +19,9 @@ describe("beat-game geometry", () => {
     });
 
     expect(frame.blocks).toHaveLength(NETHER_PORTAL_FRAME_OBSIDIAN_COUNT);
-    expect(new Set(frame.blocks.map(({ x, y, z }) => `${x}:${y}:${z}`)).size)
-      .toBe(NETHER_PORTAL_FRAME_OBSIDIAN_COUNT);
+    expect(new Set(frame.blocks.map(({ x, y, z }) => `${x}:${y}:${z}`)).size).toBe(
+      NETHER_PORTAL_FRAME_OBSIDIAN_COUNT,
+    );
     expect(frame.blocks).not.toContainEqual({
       x: 10,
       y: 64,
@@ -106,20 +107,24 @@ describe("beat-game geometry", () => {
       confidence: 1,
     } satisfies BeatGameEyeSample;
 
-    expect(triangulateStronghold([
-      sample,
-      {
-        ...sample,
-        origin: { ...sample.origin, z: 2 },
-        direction: { x: 0.9, z: 0.1 },
-      },
-    ])).toBeUndefined();
+    expect(
+      triangulateStronghold([
+        sample,
+        {
+          ...sample,
+          origin: { ...sample.origin, z: 2 },
+          direction: { x: 0.9, z: 0.1 },
+        },
+      ]),
+    ).toBeUndefined();
   });
 
   it("produces Minecraft yaw and pitch toward a target", () => {
-    expect(rotationToward(
-      { x: 0, y: 64, z: 0, dimension: "minecraft:overworld" },
-      { x: -10, y: 74, z: 0 },
-    )).toEqual({ yaw: 90, pitch: -45 });
+    expect(
+      rotationToward(
+        { x: 0, y: 64, z: 0, dimension: "minecraft:overworld" },
+        { x: -10, y: 74, z: 0 },
+      ),
+    ).toEqual({ yaw: 90, pitch: -45 });
   });
 });

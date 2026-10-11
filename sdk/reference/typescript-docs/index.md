@@ -4,15 +4,15 @@ For a first bot, start with the [TypeScript tutorial](https://soulfiremc.com/doc
 
 ## Choose an API
 
-| Goal | Start here |
-| --- | --- |
-| Connect or install SoulFire | {@link index.SoulFire | SoulFire}, {@link index.SoulFireClient | SoulFireClient} |
-| Provision accounts in an instance | {@link index.SoulFireInstance | SoulFireInstance} |
-| Start a bot, read state, or perform actions | {@link index.SoulFireBot | SoulFireBot} |
-| Run and inspect server jobs | {@link index.SoulFireTasks | SoulFireTasks}, {@link index.SoulFireTask | SoulFireTask} |
-| Observe events and maintain live state | {@link index.BotSession | BotSession} |
-| Query or change inventory | {@link index.SoulFireInventory | SoulFireInventory} |
-| Discover and execute routes | {@link index.SoulFirePathfinder | SoulFirePathfinder} |
+| Goal                                        | Start here                      |
+| ------------------------------------------- | ------------------------------- |
+| Connect or install SoulFire                 | {@link index.SoulFire           | SoulFire}, {@link index.SoulFireClient    | SoulFireClient} |
+| Provision accounts in an instance           | {@link index.SoulFireInstance   | SoulFireInstance}                         |
+| Start a bot, read state, or perform actions | {@link index.SoulFireBot        | SoulFireBot}                              |
+| Run and inspect server jobs                 | {@link index.SoulFireTasks      | SoulFireTasks}, {@link index.SoulFireTask | SoulFireTask}   |
+| Observe events and maintain live state      | {@link index.BotSession         | BotSession}                               |
+| Query or change inventory                   | {@link index.SoulFireInventory  | SoulFireInventory}                        |
+| Discover and execute routes                 | {@link index.SoulFirePathfinder | SoulFirePathfinder}                       |
 
 SDK operations return lazy Effects or Streams.
 Read [connection and bot lifecycle](lifecycle.md) for setup, readiness, cleanup, and timeouts.

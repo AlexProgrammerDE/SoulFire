@@ -113,8 +113,8 @@ export function observation(
       ...(overrides.pathBuildingBlockCount === undefined
         ? {}
         : {
-          pathBuildingBlockCount: overrides.pathBuildingBlockCount,
-        }),
+            pathBuildingBlockCount: overrides.pathBuildingBlockCount,
+          }),
       counts: overrides.counts ?? {},
       ...(overrides.remainingDurability === undefined
         ? {}
@@ -196,20 +196,14 @@ export class FakeBeatGameDriver implements BeatGameDriver {
   > = () => Effect.succeed(this.currentEnvironment);
   public activeControlScopes = 0;
   public maximumActiveControlScopes = 0;
-  public recipeResolver: (
-    resultItemId: string,
-  ) => readonly BeatGameRecipe[] = () => [];
-  public craftabilityResolver: (
-    recipeId: string,
-    count: number,
-  ) => BeatGameCraftability = () => ({
+  public recipeResolver: (resultItemId: string) => readonly BeatGameRecipe[] = () => [];
+  public craftabilityResolver: (recipeId: string, count: number) => BeatGameCraftability = () => ({
     canCraft: false,
     maximumCraftCount: 0,
     missing: [],
   });
   public taskObserver: (task: BeatGameTask) => void = () => undefined;
-  public actionObserver: (action: BeatGamePrimitiveAction) => void =
-    () => undefined;
+  public actionObserver: (action: BeatGamePrimitiveAction) => void = () => undefined;
   public actionResolver: BeatGameDriver["act"] = (action) =>
     Effect.sync(() => {
       this.actionObserver(action);
@@ -224,58 +218,40 @@ export class FakeBeatGameDriver implements BeatGameDriver {
       this.taskObserver(task);
       return {};
     });
-  public blockQueryResolver: (
-    query: BeatGameQueryBlocks,
-  ) => readonly BeatGameBlockObservation[] = () => this.blockResults;
+  public blockQueryResolver: (query: BeatGameQueryBlocks) => readonly BeatGameBlockObservation[] =
+    () => this.blockResults;
   public entityQueryResolver: (
     query: BeatGameQueryEntities,
   ) => readonly BeatGameEntityObservation[] = () => this.entityResults;
   public entityQueryFailureResolver: (
     query: BeatGameQueryEntities,
   ) => BeatGameDriverError | undefined = () => undefined;
-  public raycastResolver: (
-    query: BeatGameRaycastQuery,
-  ) => BeatGameRaycastObservation = () => ({ distance: 0 });
+  public raycastResolver: (query: BeatGameRaycastQuery) => BeatGameRaycastObservation = () => ({
+    distance: 0,
+  });
   public surfaceQueryResolver: (
     center: BeatGamePosition,
     radius: number,
     sampleStep: number,
   ) => readonly BeatGameSurfaceColumn[] = () => this.surfaceColumns;
-  public observationResolver: () => Effect.Effect<
-    BeatGameObservation,
-    BeatGameDriverError
-  > = () => Effect.succeed(this.currentObservation);
-  public pathResolver: BeatGameDriver["pathfind"] = (
-    position,
-    radius,
-    policy,
-  ) =>
+  public observationResolver: () => Effect.Effect<BeatGameObservation, BeatGameDriverError> = () =>
+    Effect.succeed(this.currentObservation);
+  public pathResolver: BeatGameDriver["pathfind"] = (position, radius, policy) =>
     Effect.sync(() => {
       this.paths.push({ position, radius, policy });
     });
-  public xzPathResolver: BeatGameDriver["pathfindXZ"] = (
-    x,
-    z,
-    dimension,
-    radius,
-    policy,
-  ) =>
+  public xzPathResolver: BeatGameDriver["pathfindXZ"] = (x, z, dimension, radius, policy) =>
     Effect.sync(() => {
       this.xzPaths.push({ x, z, dimension, radius, policy });
     });
 
-  public constructor(
-    instanceId = "instance-1",
-    botId = "bot-1",
-  ) {
+  public constructor(instanceId = "instance-1", botId = "bot-1") {
     this.instanceId = instanceId;
     this.botId = botId;
   }
 
   public readonly observe = Effect.suspend(() => this.observationResolver());
-  public readonly environment = Effect.suspend(() =>
-    this.environmentResolver()
-  );
+  public readonly environment = Effect.suspend(() => this.environmentResolver());
   public events: BeatGameDriver["events"] = Stream.empty;
 
   public readonly queryBlocks: BeatGameDriver["queryBlocks"] = (query) =>
@@ -315,28 +291,15 @@ export class FakeBeatGameDriver implements BeatGameDriver {
   public readonly canCraft: BeatGameDriver["canCraft"] = (recipeId, count) =>
     Effect.sync(() => this.craftabilityResolver(recipeId, count));
 
-  public readonly waitForChunks: BeatGameDriver["waitForChunks"] = () =>
-    Effect.void;
+  public readonly waitForChunks: BeatGameDriver["waitForChunks"] = () => Effect.void;
 
-  public readonly pathfind: BeatGameDriver["pathfind"] = (
-    position,
-    radius,
-    policy,
-  ) => this.pathResolver(position, radius, policy);
+  public readonly pathfind: BeatGameDriver["pathfind"] = (position, radius, policy) =>
+    this.pathResolver(position, radius, policy);
 
-  public readonly pathfindXZ: BeatGameDriver["pathfindXZ"] = (
-    x,
-    z,
-    dimension,
-    radius,
-    policy,
-  ) => this.xzPathResolver(x, z, dimension, radius, policy);
+  public readonly pathfindXZ: BeatGameDriver["pathfindXZ"] = (x, z, dimension, radius, policy) =>
+    this.xzPathResolver(x, z, dimension, radius, policy);
 
-  public readonly runTask: BeatGameDriver["runTask"] = (
-    task,
-    policy,
-    execution = {},
-  ) =>
+  public readonly runTask: BeatGameDriver["runTask"] = (task, policy, execution = {}) =>
     Effect.suspend(() => {
       this.taskExecutions.push(execution);
       this.taskPolicies.push(policy);
@@ -408,7 +371,7 @@ export function installStaircaseMovementSimulation(
           if (action.type === "set-movement" && action.forward !== undefined) {
             movingForward = action.forward;
           }
-        })
+        }),
       ),
     );
   driver.observationResolver = () =>
@@ -419,12 +382,12 @@ export function installStaircaseMovementSimulation(
             return;
           }
           const current = driver.currentObservation;
-          const radians = current.player.rotation.yaw * Math.PI / 180;
+          const radians = (current.player.rotation.yaw * Math.PI) / 180;
           const position = current.player.position;
           const x = position.x - Math.sin(radians) * 0.6;
           const z = position.z + Math.cos(radians) * 0.6;
-          const enteredNextTread = Math.floor(x) !== Math.floor(position.x)
-            || Math.floor(z) !== Math.floor(position.z);
+          const enteredNextTread =
+            Math.floor(x) !== Math.floor(position.x) || Math.floor(z) !== Math.floor(position.z);
           driver.currentObservation = {
             ...current,
             player: {
@@ -437,7 +400,7 @@ export function installStaircaseMovementSimulation(
               },
             },
           };
-        })
+        }),
       ),
       Effect.map(() => driver.currentObservation),
     );
@@ -452,23 +415,17 @@ export function installStaircaseMovementSimulation(
               ...current.player,
               position: {
                 ...position,
-                x: Number.isInteger(position.x)
-                  ? position.x + 0.5
-                  : position.x,
-                z: Number.isInteger(position.z)
-                  ? position.z + 0.5
-                  : position.z,
+                x: Number.isInteger(position.x) ? position.x + 0.5 : position.x,
+                z: Number.isInteger(position.z) ? position.z + 0.5 : position.z,
               },
             },
           };
-        })
+        }),
       ),
     );
 }
 
-export function postDragonHooks(
-  driver: FakeBeatGameDriver,
-): BeatGameStrategyHooks {
+export function postDragonHooks(driver: FakeBeatGameDriver): BeatGameStrategyHooks {
   const updateObservation = (
     counts: Readonly<Record<string, number>>,
     dimension = driver.currentObservation.player.position.dimension,
@@ -480,8 +437,7 @@ export function postDragonHooks(
         ...driver.currentObservation.player.position,
         dimension,
       },
-      connectionEpoch:
-        driver.currentObservation.player.connectionEpoch,
+      connectionEpoch: driver.currentObservation.player.connectionEpoch,
     });
   };
   return {
@@ -499,10 +455,7 @@ export function postDragonHooks(
       }),
     exitEnd: ({ observation: current }) =>
       Effect.sync(() => {
-        updateObservation(
-          current.inventory.counts,
-          "minecraft:overworld",
-        );
+        updateObservation(current.inventory.counts, "minecraft:overworld");
       }),
   };
 }

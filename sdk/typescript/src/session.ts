@@ -1,15 +1,6 @@
 import { create, type MessageInitShape } from "@bufbuild/protobuf";
 import type { CallOptions } from "@connectrpc/connect";
-import {
-  Cause,
-  Deferred,
-  Effect,
-  Exit,
-  Option,
-  PubSub,
-  Scope,
-  Stream,
-} from "effect";
+import { Cause, Deferred, Effect, Exit, Option, PubSub, Scope, Stream } from "effect";
 import { operationError, SoulFireTimeoutError, type SoulFireOperationError } from "./errors.js";
 
 import {
@@ -172,7 +163,8 @@ export class BotSession {
     return Effect.gen(function* () {
       const scope = yield* Scope.make();
       yield* Effect.addFinalizer(() => Scope.close(scope, Exit.void));
-      const events = yield* PubSub.sliding<Exit.Exit<BotEvent, SoulFireOperationError>>(SUBSCRIBER_BUFFER_SIZE);
+      const events =
+        yield* PubSub.sliding<Exit.Exit<BotEvent, SoulFireOperationError>>(SUBSCRIBER_BUFFER_SIZE);
       const ready = yield* Deferred.make<void, SoulFireOperationError>();
       const session = new BotSession(events, ready, scope);
       yield* Scope.addFinalizer(scope, PubSub.shutdown(events));
@@ -185,9 +177,7 @@ export class BotSession {
         Effect.forkIn(scope),
       );
       yield* Deferred.await(ready).pipe(
-        Effect.onExit((exit) =>
-          Exit.isFailure(exit) ? Scope.close(scope, exit) : Effect.void,
-        ),
+        Effect.onExit((exit) => (Exit.isFailure(exit) ? Scope.close(scope, exit) : Effect.void)),
       );
       return session;
     });
@@ -199,9 +189,11 @@ export class BotSession {
 
   /** Subscribes lazily; slow readers lose the oldest buffered events. */
   public events(): Stream.Stream<BotEvent, SoulFireOperationError> {
-    return Stream.suspend(() => this.#failure === undefined
-      ? Stream.fromPubSub(this.eventsHub).pipe(Stream.mapEffect((event) => event))
-      : Stream.failCause(this.#failure));
+    return Stream.suspend(() =>
+      this.#failure === undefined
+        ? Stream.fromPubSub(this.eventsHub).pipe(Stream.mapEffect((event) => event))
+        : Stream.failCause(this.#failure),
+    );
   }
 
   public waitFor(
@@ -228,9 +220,12 @@ export class BotSession {
           Effect.timeoutOrElse({
             duration: options.timeoutMs,
             orElse: () =>
-              Effect.fail(new SoulFireTimeoutError({
-                operation: "session.waitFor", message: "Timed out waiting for a bot event",
-              })),
+              Effect.fail(
+                new SoulFireTimeoutError({
+                  operation: "session.waitFor",
+                  message: "Timed out waiting for a bot event",
+                }),
+              ),
           }),
         );
   }
@@ -239,12 +234,14 @@ export class BotSession {
   public waitForState(
     predicate: (state: BotSessionState) => boolean,
   ): Effect.Effect<BotSessionState, SoulFireOperationError> {
-    return Effect.scoped(Effect.gen({ self: this }, function* () {
-      if (this.#failure !== undefined) return yield* Effect.failCause(this.#failure);
-      const subscription = yield* PubSub.subscribe(this.eventsHub);
-      while (!predicate(this.#state)) yield* (yield* PubSub.take(subscription));
-      return this.#state;
-    }));
+    return Effect.scoped(
+      Effect.gen({ self: this }, function* () {
+        if (this.#failure !== undefined) return yield* Effect.failCause(this.#failure);
+        const subscription = yield* PubSub.subscribe(this.eventsHub);
+        while (!predicate(this.#state)) yield* yield* PubSub.take(subscription);
+        return this.#state;
+      }),
+    );
   }
 
   public once(
@@ -258,30 +255,45 @@ export class BotSession {
     return Scope.close(this.scope, Exit.void);
   }
 
-  private consume(
-    stream: BotEventStreamFactory,
-    options: BotSessionOptions,
-  ): Effect.Effect<void> {
+  private consume(stream: BotEventStreamFactory, options: BotSessionOptions): Effect.Effect<void> {
     return Effect.gen({ self: this }, function* () {
       let receivedEvent = false;
       let delay = DEFAULT_RECONNECT_DELAY_MS;
       while (true) {
-        const cursor = this.#state.epoch === undefined ? {} : {
-          afterSequence: this.#state.sequence, streamEpoch: this.#state.epoch,
-        };
-        const exit = yield* stream({ ...cursor, filter: options.filter ?? defaultFilter(), heartbeatIntervalSeconds: options.heartbeatIntervalSeconds ?? 15 }, {}).pipe(
-          Stream.runForEach((event) => Effect.gen({ self: this }, function* () {
-            this.#state = reduceBotSessionState(this.#state, event);
-            receivedEvent = true;
-            delay = DEFAULT_RECONNECT_DELAY_MS;
-            yield* Deferred.succeed(this.ready, undefined);
-            yield* PubSub.publish(this.eventsHub, Exit.succeed(event));
-          })),
+        const cursor =
+          this.#state.epoch === undefined
+            ? {}
+            : {
+                afterSequence: this.#state.sequence,
+                streamEpoch: this.#state.epoch,
+              };
+        const exit = yield* stream(
+          {
+            ...cursor,
+            filter: options.filter ?? defaultFilter(),
+            heartbeatIntervalSeconds: options.heartbeatIntervalSeconds ?? 15,
+          },
+          {},
+        ).pipe(
+          Stream.runForEach((event) =>
+            Effect.gen({ self: this }, function* () {
+              this.#state = reduceBotSessionState(this.#state, event);
+              receivedEvent = true;
+              delay = DEFAULT_RECONNECT_DELAY_MS;
+              yield* Deferred.succeed(this.ready, undefined);
+              yield* PubSub.publish(this.eventsHub, Exit.succeed(event));
+            }),
+          ),
           Effect.exit,
         );
         if (Exit.isFailure(exit)) {
           const failure = Cause.findErrorOption(exit.cause);
-          if (!receivedEvent || Option.isNone(failure) || failure.value._tag !== "SoulFireRpcError" || !failure.value.retryable) {
+          if (
+            !receivedEvent ||
+            Option.isNone(failure) ||
+            failure.value._tag !== "SoulFireRpcError" ||
+            !failure.value.retryable
+          ) {
             yield* Deferred.failCause(this.ready, exit.cause);
             this.#failure = exit.cause;
             yield* PubSub.publish(this.eventsHub, Exit.failCause(exit.cause));
@@ -318,16 +330,12 @@ export function emptyBotSessionState(): BotSessionState {
   };
 }
 
-export function reduceBotSessionState(
-  state: BotSessionState,
-  event: BotEvent,
-): BotSessionState {
+export function reduceBotSessionState(state: BotSessionState, event: BotEvent): BotSessionState {
   const envelope = event.envelope;
   const discontinuity =
     envelope !== undefined &&
     state.epoch !== undefined &&
-    (envelope.streamEpoch !== state.epoch ||
-      envelope.sequence !== state.sequence + 1n);
+    (envelope.streamEpoch !== state.epoch || envelope.sequence !== state.sequence + 1n);
   const current =
     discontinuity || event.event.case === "resyncRequired"
       ? {
@@ -425,8 +433,7 @@ export function reduceBotSessionState(
     resourcePacks,
     scoreboard,
     sequence: event.envelope?.sequence ?? current.sequence,
-    snapshotRevision:
-      event.envelope?.snapshotRevision ?? current.snapshotRevision,
+    snapshotRevision: event.envelope?.snapshotRevision ?? current.snapshotRevision,
     ...(event.envelope === undefined
       ? {}
       : {
@@ -523,29 +530,18 @@ function reducePlayerListState(
       create(PlayerListEntrySnapshotSchema, {
         ...previous,
         changedFields: entry.changedFields,
-        ...(changed.has("update_display_name")
-          ? { displayName: entry.displayName }
-          : {}),
-        ...(changed.has("update_game_mode")
-          ? { gameMode: entry.gameMode }
-          : {}),
+        ...(changed.has("update_display_name") ? { displayName: entry.displayName } : {}),
+        ...(changed.has("update_game_mode") ? { gameMode: entry.gameMode } : {}),
         ...(changed.has("update_hat") ? { showHat: entry.showHat } : {}),
-        ...(changed.has("update_latency")
-          ? { latencyMs: entry.latencyMs }
-          : {}),
-        ...(changed.has("update_list_order")
-          ? { listOrder: entry.listOrder }
-          : {}),
+        ...(changed.has("update_latency") ? { latencyMs: entry.latencyMs } : {}),
+        ...(changed.has("update_list_order") ? { listOrder: entry.listOrder } : {}),
         ...(changed.has("update_listed") ? { listed: entry.listed } : {}),
       }),
     );
   }
 }
 
-function reduceBossBarState(
-  state: Map<string, BotBossBarState>,
-  event: BotBossBarEvent,
-): void {
+function reduceBossBarState(state: Map<string, BotBossBarState>, event: BotBossBarEvent): void {
   if (event.kind === BossBarEventKind.BOSS_BAR_EVENT_REMOVE) {
     state.delete(event.bossBarId);
     return;
@@ -556,12 +552,8 @@ function reduceBossBarState(
   state.set(event.bossBarId, {
     ...previous,
     ...(event.color === undefined ? {} : { color: event.color }),
-    ...(event.createWorldFog === undefined
-      ? {}
-      : { createWorldFog: event.createWorldFog }),
-    ...(event.darkenScreen === undefined
-      ? {}
-      : { darkenScreen: event.darkenScreen }),
+    ...(event.createWorldFog === undefined ? {} : { createWorldFog: event.createWorldFog }),
+    ...(event.darkenScreen === undefined ? {} : { darkenScreen: event.darkenScreen }),
     ...(event.name === undefined ? {} : { name: event.name }),
     ...(event.overlay === undefined ? {} : { overlay: event.overlay }),
     ...(event.playMusic === undefined ? {} : { playMusic: event.playMusic }),
@@ -585,18 +577,10 @@ function reduceScoreboardState(
         const previous = objectives.get(objectiveName);
         objectives.set(objectiveName, {
           name: objectiveName,
-          ...(previous?.displayName === undefined
-            ? {}
-            : { displayName: previous.displayName }),
-          ...(previous?.renderType === undefined
-            ? {}
-            : { renderType: previous.renderType }),
-          ...(event.displayName === undefined
-            ? {}
-            : { displayName: event.displayName }),
-          ...(event.renderType === undefined
-            ? {}
-            : { renderType: event.renderType }),
+          ...(previous?.displayName === undefined ? {} : { displayName: previous.displayName }),
+          ...(previous?.renderType === undefined ? {} : { renderType: previous.renderType }),
+          ...(event.displayName === undefined ? {} : { displayName: event.displayName }),
+          ...(event.renderType === undefined ? {} : { renderType: event.renderType }),
         });
       }
       break;
@@ -625,18 +609,12 @@ function reduceScoreboardState(
       }
       break;
     case ScoreboardEventKind.SCOREBOARD_EVENT_SCORE_SET:
-      if (
-        objectiveName !== undefined &&
-        event.owner !== undefined &&
-        event.score !== undefined
-      ) {
+      if (objectiveName !== undefined && event.owner !== undefined && event.score !== undefined) {
         scores.set(scoreboardScoreKey(objectiveName, event.owner), {
           objectiveName,
           owner: event.owner,
           score: event.score,
-          ...(event.displayName === undefined
-            ? {}
-            : { displayName: event.displayName }),
+          ...(event.displayName === undefined ? {} : { displayName: event.displayName }),
         });
       }
       break;
@@ -685,9 +663,7 @@ function reduceScoreboardTeam(
   ) {
     players.clear();
     event.players.forEach((player) => players.add(player));
-  } else if (
-    event.kind === ScoreboardEventKind.SCOREBOARD_EVENT_TEAM_PLAYERS_ADD
-  ) {
+  } else if (event.kind === ScoreboardEventKind.SCOREBOARD_EVENT_TEAM_PLAYERS_ADD) {
     event.players.forEach((player) => players.add(player));
   } else {
     event.players.forEach((player) => players.delete(player));
@@ -698,13 +674,9 @@ function reduceScoreboardTeam(
     ...(previous?.allowFriendlyFire === undefined
       ? {}
       : { allowFriendlyFire: previous.allowFriendlyFire }),
-    ...(previous?.collisionRule === undefined
-      ? {}
-      : { collisionRule: previous.collisionRule }),
+    ...(previous?.collisionRule === undefined ? {} : { collisionRule: previous.collisionRule }),
     ...(previous?.color === undefined ? {} : { color: previous.color }),
-    ...(previous?.displayName === undefined
-      ? {}
-      : { displayName: previous.displayName }),
+    ...(previous?.displayName === undefined ? {} : { displayName: previous.displayName }),
     ...(previous?.nameTagVisibility === undefined
       ? {}
       : { nameTagVisibility: previous.nameTagVisibility }),
@@ -716,13 +688,9 @@ function reduceScoreboardTeam(
     ...(event.allowFriendlyFire === undefined
       ? {}
       : { allowFriendlyFire: event.allowFriendlyFire }),
-    ...(event.collisionRule === undefined
-      ? {}
-      : { collisionRule: event.collisionRule }),
+    ...(event.collisionRule === undefined ? {} : { collisionRule: event.collisionRule }),
     ...(event.color === undefined ? {} : { color: event.color }),
-    ...(event.displayName === undefined
-      ? {}
-      : { displayName: event.displayName }),
+    ...(event.displayName === undefined ? {} : { displayName: event.displayName }),
     ...(event.nameTagVisibility === undefined
       ? {}
       : { nameTagVisibility: event.nameTagVisibility }),
@@ -770,16 +738,12 @@ function mergePlayerState(
     ...(delta.health === undefined ? {} : { health: delta.health }),
     ...(delta.maxHealth === undefined ? {} : { maxHealth: delta.maxHealth }),
     ...(delta.foodLevel === undefined ? {} : { foodLevel: delta.foodLevel }),
-    ...(delta.saturationLevel === undefined
-      ? {}
-      : { saturationLevel: delta.saturationLevel }),
+    ...(delta.saturationLevel === undefined ? {} : { saturationLevel: delta.saturationLevel }),
     ...(delta.selectedHotbarSlot === undefined
       ? {}
       : { selectedHotbarSlot: delta.selectedHotbarSlot }),
     ...(delta.dimension === undefined ? {} : { dimension: delta.dimension }),
-    ...(delta.experienceLevel === undefined
-      ? {}
-      : { experienceLevel: delta.experienceLevel }),
+    ...(delta.experienceLevel === undefined ? {} : { experienceLevel: delta.experienceLevel }),
     ...(delta.experienceProgress === undefined
       ? {}
       : { experienceProgress: delta.experienceProgress }),

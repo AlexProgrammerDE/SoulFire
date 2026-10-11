@@ -31,10 +31,7 @@ export class SoulFireRegistry {
     options?: CallOptions,
   ): Effect.Effect<GetRegistryIdentityResponse, SoulFireOperationError> {
     return rpc("SoulFireRegistry.identity", (signal) =>
-      this.client.getRegistryIdentity(
-        this.scope(),
-        withSignal(options, signal),
-      ),
+      this.client.getRegistryIdentity(this.scope(), withSignal(options, signal)),
     );
   }
 
@@ -47,10 +44,7 @@ export class SoulFireRegistry {
     options?: CallOptions,
   ): Effect.Effect<ListRegistryEntriesResponse, SoulFireOperationError> {
     return rpc("SoulFireRegistry.entries", (signal) =>
-      this.client.listRegistryEntries(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.listRegistryEntries({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -59,10 +53,7 @@ export class SoulFireRegistry {
     options?: CallOptions,
   ): Effect.Effect<GetRegistryEntryResponse, SoulFireOperationError> {
     return rpc("SoulFireRegistry.entry", (signal) =>
-      this.client.getRegistryEntry(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.getRegistryEntry({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -71,10 +62,7 @@ export class SoulFireRegistry {
     options?: CallOptions,
   ): Effect.Effect<ListRegistryTagsResponse, SoulFireOperationError> {
     return rpc("SoulFireRegistry.tags", (signal) =>
-      this.client.listRegistryTags(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.listRegistryTags({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 

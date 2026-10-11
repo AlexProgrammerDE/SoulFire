@@ -20,17 +20,17 @@ interface DebugVector {
 
 export type SmokePathGoal =
   | Readonly<{
-    type: "position";
-    position: BeatGamePosition;
-    radius: number;
-  }>
+      type: "position";
+      position: BeatGamePosition;
+      radius: number;
+    }>
   | Readonly<{
-    type: "xz";
-    x: number;
-    z: number;
-    dimension: string;
-    radius: number;
-  }>;
+      type: "xz";
+      x: number;
+      z: number;
+      dimension: string;
+      radius: number;
+    }>;
 
 export interface SmokeActivePathTrace {
   readonly pathId: string;
@@ -67,12 +67,14 @@ export interface SmokeStuckDiagnosticsInput {
   readonly capturedAt: string;
   readonly currentAction?: string | undefined;
   readonly currentActionStartedAt?: string | undefined;
-  readonly activePath?: Readonly<{
-    readonly pathId: string;
-    readonly elapsedMs: number;
-    readonly displacementFromOrigin?: number | undefined;
-    readonly distanceToGoal?: number | undefined;
-  }> | undefined;
+  readonly activePath?:
+    | Readonly<{
+        readonly pathId: string;
+        readonly elapsedMs: number;
+        readonly displacementFromOrigin?: number | undefined;
+        readonly distanceToGoal?: number | undefined;
+      }>
+    | undefined;
   readonly activity: readonly unknown[];
 }
 
@@ -83,8 +85,7 @@ export interface SmokeStuckFinding {
   readonly evidence: Readonly<Record<string, unknown>>;
 }
 
-const COLLECT_BLOCKS_PROGRESS_TYPE =
-  "soulfire.v1.CollectBlocksTaskProgressDetail";
+const COLLECT_BLOCKS_PROGRESS_TYPE = "soulfire.v1.CollectBlocksTaskProgressDetail";
 const REPEATED_COLLECTION_WINDOW_MS = 5 * 60_000;
 
 const HOSTILE_ENTITY_TYPES = new Set([
@@ -121,15 +122,9 @@ const HOSTILE_ENTITY_TYPES = new Set([
   "minecraft:zombie_villager",
 ]);
 
-const FLUID_BLOCK_IDS = new Set([
-  "minecraft:bubble_column",
-  "minecraft:lava",
-  "minecraft:water",
-]);
+const FLUID_BLOCK_IDS = new Set(["minecraft:bubble_column", "minecraft:lava", "minecraft:water"]);
 
-export function buildSmokeSpatialDiagnostics(
-  input: SmokeSpatialDiagnosticsInput,
-) {
+export function buildSmokeSpatialDiagnostics(input: SmokeSpatialDiagnosticsInput) {
   const blocks = input.blocks
     .map((block) => ({
       ...block,
@@ -146,22 +141,19 @@ export function buildSmokeSpatialDiagnostics(
         z: entity.velocity.z - input.originVelocity.z,
       };
       const entityDistance = vectorLength(relativePosition);
-      const radialVelocity = entityDistance === 0
-        ? 0
-        : dot(relativePosition, relativeVelocity) / entityDistance;
+      const radialVelocity =
+        entityDistance === 0 ? 0 : dot(relativePosition, relativeVelocity) / entityDistance;
       return {
         ...entity,
-        category: entity.itemId !== undefined
-          ? "item"
-          : HOSTILE_ENTITY_TYPES.has(entity.entityType)
-          ? "hostile"
-          : "other",
+        category:
+          entity.itemId !== undefined
+            ? "item"
+            : HOSTILE_ENTITY_TYPES.has(entity.entityType)
+              ? "hostile"
+              : "other",
         offset: relativePosition,
         distance: entityDistance,
-        horizontalDistance: Math.hypot(
-          relativePosition.x,
-          relativePosition.z,
-        ),
+        horizontalDistance: Math.hypot(relativePosition.x, relativePosition.z),
         relativeVelocity,
         closingSpeed: Math.max(0, -radialVelocity),
       } as const;
@@ -169,12 +161,9 @@ export function buildSmokeSpatialDiagnostics(
     .sort(compareDistance);
   const loadedSurface = input.surface.filter((column) => column.loaded);
   const surfaceHeights = loadedSurface.flatMap((column) =>
-    column.surfaceY === undefined ? [] : [column.surfaceY]
+    column.surfaceY === undefined ? [] : [column.surfaceY],
   );
-  const durationMs = Math.max(
-    0,
-    Date.parse(input.completedAt) - Date.parse(input.startedAt),
-  );
+  const durationMs = Math.max(0, Date.parse(input.completedAt) - Date.parse(input.startedAt));
 
   return {
     capture: {
@@ -206,16 +195,9 @@ export function buildSmokeSpatialDiagnostics(
       radius: input.surfaceRadius,
       observed: input.surface.length,
       unloaded: input.surface.length - loadedSurface.length,
-      minimumY: surfaceHeights.length === 0
-        ? undefined
-        : Math.min(...surfaceHeights),
-      maximumY: surfaceHeights.length === 0
-        ? undefined
-        : Math.max(...surfaceHeights),
-      byBlockId: countsBy(
-        loadedSurface,
-        (column) => column.blockId ?? "unknown",
-      ),
+      minimumY: surfaceHeights.length === 0 ? undefined : Math.min(...surfaceHeights),
+      maximumY: surfaceHeights.length === 0 ? undefined : Math.max(...surfaceHeights),
+      byBlockId: countsBy(loadedSurface, (column) => column.blockId ?? "unknown"),
       columns: input.surface.map((column) => ({
         ...column,
         offset: {
@@ -233,27 +215,19 @@ export function buildSmokeActivePathDiagnostics(
   capturedAt: string,
 ) {
   const sameDimension = trace.origin.dimension === currentPosition.dimension;
-  const elapsedMs = Math.max(
-    0,
-    Date.parse(capturedAt) - Date.parse(trace.startedAt),
-  );
-  const goalDimension = trace.goal.type === "position"
-    ? trace.goal.position.dimension
-    : trace.goal.dimension;
-  const distanceToGoal = goalDimension !== currentPosition.dimension
-    ? undefined
-    : trace.goal.type === "position"
-    ? Math.max(
-      0,
-      distance(currentPosition, trace.goal.position) - trace.goal.radius,
-    )
-    : Math.max(
-      0,
-      Math.hypot(
-        trace.goal.x - currentPosition.x,
-        trace.goal.z - currentPosition.z,
-      ) - trace.goal.radius,
-    );
+  const elapsedMs = Math.max(0, Date.parse(capturedAt) - Date.parse(trace.startedAt));
+  const goalDimension =
+    trace.goal.type === "position" ? trace.goal.position.dimension : trace.goal.dimension;
+  const distanceToGoal =
+    goalDimension !== currentPosition.dimension
+      ? undefined
+      : trace.goal.type === "position"
+        ? Math.max(0, distance(currentPosition, trace.goal.position) - trace.goal.radius)
+        : Math.max(
+            0,
+            Math.hypot(trace.goal.x - currentPosition.x, trace.goal.z - currentPosition.z) -
+              trace.goal.radius,
+          );
 
   return {
     ...trace,
@@ -261,16 +235,12 @@ export function buildSmokeActivePathDiagnostics(
     capturedAt,
     elapsedMs,
     currentPosition,
-    displacementFromOrigin: sameDimension
-      ? distance(trace.origin, currentPosition)
-      : undefined,
+    displacementFromOrigin: sameDimension ? distance(trace.origin, currentPosition) : undefined,
     distanceToGoal,
   };
 }
 
-export function buildSmokeDecisionDiagnostics(
-  input: SmokeDecisionDiagnosticsInput,
-) {
+export function buildSmokeDecisionDiagnostics(input: SmokeDecisionDiagnosticsInput) {
   const { checkpoint, observation, strategy, nextIfReplanned } = input;
   const { planner } = checkpoint;
   const pendingRequirements = planner.requirements
@@ -280,15 +250,10 @@ export function buildSmokeDecisionDiagnostics(
       priority: requirement.priority,
       currentCount: requirement.currentCount,
       targetCount: requirement.targetCount,
-      missingCount: Math.max(
-        0,
-        requirement.targetCount - requirement.currentCount,
-      ),
+      missingCount: Math.max(0, requirement.targetCount - requirement.currentCount),
     }));
   const rememberedDeaths = [...checkpoint.memory.deathPositions]
-    .sort((left, right) =>
-      Date.parse(right.observedAt) - Date.parse(left.observedAt)
-    )
+    .sort((left, right) => Date.parse(right.observedAt) - Date.parse(left.observedAt))
     .map((entry) => ({
       key: entry.key,
       observedAt: entry.observedAt,
@@ -299,70 +264,62 @@ export function buildSmokeDecisionDiagnostics(
         dimension: entry.value.dimension,
       },
       inventoryCounts: entry.value.inventoryCounts ?? {},
-      inventoryItemCount: Object.values(
-        entry.value.inventoryCounts ?? {},
-      ).reduce((total, count) => total + Math.max(0, count), 0),
+      inventoryItemCount: Object.values(entry.value.inventoryCounts ?? {}).reduce(
+        (total, count) => total + Math.max(0, count),
+        0,
+      ),
     }));
   const rememberedRecoveryCandidate = rememberedDeaths.find(
     ({ inventoryItemCount }) => inventoryItemCount > 0,
   );
-  const recoveryCandidate = rememberedRecoveryCandidate === undefined
-    ? undefined
-    : {
-      ...rememberedRecoveryCandidate,
-      status: planner.currentAction === "recover-death"
-        ? "active" as const
-        : "deferred" as const,
-      sameDimension:
-        rememberedRecoveryCandidate.position.dimension
-          === observation.player.position.dimension,
-      distance: rememberedRecoveryCandidate.position.dimension
-          === observation.player.position.dimension
-        ? distance(
-          observation.player.position,
-          rememberedRecoveryCandidate.position,
-        )
-        : undefined,
-      horizontalDistance:
-        rememberedRecoveryCandidate.position.dimension
-            === observation.player.position.dimension
-          ? Math.hypot(
-            rememberedRecoveryCandidate.position.x
-              - observation.player.position.x,
-            rememberedRecoveryCandidate.position.z
-              - observation.player.position.z,
-          )
-          : undefined,
-      verticalDistance:
-        rememberedRecoveryCandidate.position.dimension
-            === observation.player.position.dimension
-          ? rememberedRecoveryCandidate.position.y
-            - observation.player.position.y
-          : undefined,
-      reason: explainRecoveryDisposition(
-        planner.currentAction,
-        rememberedRecoveryCandidate.position,
-        observation,
-        strategy,
-        nextIfReplanned,
-      ),
-    };
-  const activeAction = planner.currentAction === undefined
-    ? undefined
-    : {
-      action: planner.currentAction,
-      ...(planner.currentActionId === undefined
-        ? {}
-        : { actionId: planner.currentActionId }),
-      retryCount: planner.retryCount,
-      reason: explainCurrentAction(
-        planner.currentAction,
-        checkpoint,
-        observation,
-        strategy,
-        nextIfReplanned,
-      ),
-    };
+  const recoveryCandidate =
+    rememberedRecoveryCandidate === undefined
+      ? undefined
+      : {
+          ...rememberedRecoveryCandidate,
+          status:
+            planner.currentAction === "recover-death" ? ("active" as const) : ("deferred" as const),
+          sameDimension:
+            rememberedRecoveryCandidate.position.dimension ===
+            observation.player.position.dimension,
+          distance:
+            rememberedRecoveryCandidate.position.dimension === observation.player.position.dimension
+              ? distance(observation.player.position, rememberedRecoveryCandidate.position)
+              : undefined,
+          horizontalDistance:
+            rememberedRecoveryCandidate.position.dimension === observation.player.position.dimension
+              ? Math.hypot(
+                  rememberedRecoveryCandidate.position.x - observation.player.position.x,
+                  rememberedRecoveryCandidate.position.z - observation.player.position.z,
+                )
+              : undefined,
+          verticalDistance:
+            rememberedRecoveryCandidate.position.dimension === observation.player.position.dimension
+              ? rememberedRecoveryCandidate.position.y - observation.player.position.y
+              : undefined,
+          reason: explainRecoveryDisposition(
+            planner.currentAction,
+            rememberedRecoveryCandidate.position,
+            observation,
+            strategy,
+            nextIfReplanned,
+          ),
+        };
+  const activeAction =
+    planner.currentAction === undefined
+      ? undefined
+      : {
+          action: planner.currentAction,
+          ...(planner.currentActionId === undefined ? {} : { actionId: planner.currentActionId }),
+          retryCount: planner.retryCount,
+          reason: explainCurrentAction(
+            planner.currentAction,
+            checkpoint,
+            observation,
+            strategy,
+            nextIfReplanned,
+          ),
+        };
 
   return {
     phase: {
@@ -427,50 +384,41 @@ function explainRecoveryDisposition(
       observation.player.food
     } is at or below the eating threshold ${strategy.eatBelowFood}`;
   }
-  const nextAction = "action" in nextIfReplanned
-    ? nextIfReplanned.action
-    : nextIfReplanned.type;
+  const nextAction = "action" in nextIfReplanned ? nextIfReplanned.action : nextIfReplanned.type;
   return currentAction === undefined
     ? `Corpse recovery is remembered but a fresh replan currently chooses ${nextAction}`
     : `Corpse recovery is remembered while ${currentAction} runs; a fresh replan currently chooses ${nextAction}`;
 }
 
-export function buildSmokeStuckDiagnostics(
-  input: SmokeStuckDiagnosticsInput,
-) {
+export function buildSmokeStuckDiagnostics(input: SmokeStuckDiagnosticsInput) {
   const capturedAtMs = Date.parse(input.capturedAt);
   const activity = input.activity
     .flatMap(parseSmokeProgressActivity)
     .filter((entry) => entry.observedAtMs <= capturedAtMs)
     .sort((left, right) => left.observedAtMs - right.observedAtMs);
   const findings: SmokeStuckFinding[] = [];
-  const actionStarted = activity.findLast((entry) =>
-    entry.kind === "action-started"
-      && entry.action === input.currentAction
+  const actionStarted = activity.findLast(
+    (entry) => entry.kind === "action-started" && entry.action === input.currentAction,
   );
-  const actionStartedAt = actionStarted?.observedAt
-    ?? input.currentActionStartedAt;
-  const actionStartedAtMs = actionStartedAt === undefined
-    ? undefined
-    : Date.parse(actionStartedAt);
-  const actionAgeMs = actionStartedAtMs === undefined
-      || !Number.isFinite(actionStartedAtMs)
-    ? undefined
-    : Math.max(0, capturedAtMs - actionStartedAtMs);
-  const intentionalWait = input.currentAction === "survive:night-shelter"
-    ? activity.findLast((entry) =>
-      entry.kind === "intentional-wait"
-      && (
-        actionStartedAtMs === undefined
-        || entry.observedAtMs >= actionStartedAtMs
-      )
-    )
-    : undefined;
+  const actionStartedAt = actionStarted?.observedAt ?? input.currentActionStartedAt;
+  const actionStartedAtMs = actionStartedAt === undefined ? undefined : Date.parse(actionStartedAt);
+  const actionAgeMs =
+    actionStartedAtMs === undefined || !Number.isFinite(actionStartedAtMs)
+      ? undefined
+      : Math.max(0, capturedAtMs - actionStartedAtMs);
+  const intentionalWait =
+    input.currentAction === "survive:night-shelter"
+      ? activity.findLast(
+          (entry) =>
+            entry.kind === "intentional-wait" &&
+            (actionStartedAtMs === undefined || entry.observedAtMs >= actionStartedAtMs),
+        )
+      : undefined;
 
   if (
-    input.activePath !== undefined
-    && input.activePath.elapsedMs >= 10_000
-    && (input.activePath.displacementFromOrigin ?? 0) < 0.75
+    input.activePath !== undefined &&
+    input.activePath.elapsedMs >= 10_000 &&
+    (input.activePath.displacementFromOrigin ?? 0) < 0.75
   ) {
     findings.push({
       code: "path-no-displacement",
@@ -479,43 +427,36 @@ export function buildSmokeStuckDiagnostics(
       evidence: {
         pathId: input.activePath.pathId,
         elapsedMs: input.activePath.elapsedMs,
-        displacementFromOrigin:
-          input.activePath.displacementFromOrigin,
+        displacementFromOrigin: input.activePath.displacementFromOrigin,
         distanceToGoal: input.activePath.distanceToGoal,
       },
     });
   }
 
-  const latestTaskId = activity.findLast((entry) =>
-    entry.kind === "task-progress"
-      && (
-        actionStartedAtMs === undefined
-        || entry.observedAtMs >= actionStartedAtMs
-      )
+  const latestTaskId = activity.findLast(
+    (entry) =>
+      entry.kind === "task-progress" &&
+      (actionStartedAtMs === undefined || entry.observedAtMs >= actionStartedAtMs),
   )?.taskId;
-  const latestTaskProgress = latestTaskId === undefined
-    ? []
-    : activity.filter((entry) =>
-      entry.kind === "task-progress"
-        && entry.taskId === latestTaskId
-        && (
-          actionStartedAtMs === undefined
-          || entry.observedAtMs >= actionStartedAtMs
-        )
-    );
+  const latestTaskProgress =
+    latestTaskId === undefined
+      ? []
+      : activity.filter(
+          (entry) =>
+            entry.kind === "task-progress" &&
+            entry.taskId === latestTaskId &&
+            (actionStartedAtMs === undefined || entry.observedAtMs >= actionStartedAtMs),
+        );
   const firstTaskProgress = latestTaskProgress.at(0);
   const lastTaskProgress = latestTaskProgress.at(-1);
   if (
-    firstTaskProgress !== undefined
-    && lastTaskProgress !== undefined
-    && latestTaskProgress.length >= 2
-    && lastTaskProgress.observedAtMs - firstTaskProgress.observedAtMs >= 10_000
-    && (
-      lastTaskProgress.taskCurrent !== undefined
-      || lastTaskProgress.taskTotal !== undefined
-    )
-    && lastTaskProgress.taskCurrent === firstTaskProgress.taskCurrent
-    && lastTaskProgress.taskFraction === firstTaskProgress.taskFraction
+    firstTaskProgress !== undefined &&
+    lastTaskProgress !== undefined &&
+    latestTaskProgress.length >= 2 &&
+    lastTaskProgress.observedAtMs - firstTaskProgress.observedAtMs >= 10_000 &&
+    (lastTaskProgress.taskCurrent !== undefined || lastTaskProgress.taskTotal !== undefined) &&
+    lastTaskProgress.taskCurrent === firstTaskProgress.taskCurrent &&
+    lastTaskProgress.taskFraction === firstTaskProgress.taskFraction
   ) {
     findings.push({
       code: "task-progress-stalled",
@@ -523,8 +464,7 @@ export function buildSmokeStuckDiagnostics(
       summary: "The current task keeps reporting the same progress",
       evidence: {
         taskId: latestTaskId,
-        durationMs:
-          lastTaskProgress.observedAtMs - firstTaskProgress.observedAtMs,
+        durationMs: lastTaskProgress.observedAtMs - firstTaskProgress.observedAtMs,
         samples: latestTaskProgress.length,
         current: lastTaskProgress.taskCurrent,
         total: lastTaskProgress.taskTotal,
@@ -534,19 +474,13 @@ export function buildSmokeStuckDiagnostics(
     });
   }
 
-  const collectionAttempts = summarizeCollectionTaskAttempts(
-    activity,
-    capturedAtMs,
-  );
-  const repeatedCollectionTarget = mostRepeatedCollectionTarget(
-    collectionAttempts,
-  );
+  const collectionAttempts = summarizeCollectionTaskAttempts(activity, capturedAtMs);
+  const repeatedCollectionTarget = mostRepeatedCollectionTarget(collectionAttempts);
   if (repeatedCollectionTarget !== undefined) {
     findings.push({
       code: "repeated-collection-target",
       severity: "error",
-      summary:
-        "Multiple collection tasks keep retrying the same block without breaking it",
+      summary: "Multiple collection tasks keep retrying the same block without breaking it",
       evidence: {
         target: repeatedCollectionTarget.target,
         attempts: repeatedCollectionTarget.attempts,
@@ -556,16 +490,17 @@ export function buildSmokeStuckDiagnostics(
     });
   }
 
-  const actionFailures = activity.filter((entry) =>
-    entry.kind === "action-failed"
-      && entry.action === input.currentAction
-      && capturedAtMs - entry.observedAtMs <= 5 * 60_000
+  const actionFailures = activity.filter(
+    (entry) =>
+      entry.kind === "action-failed" &&
+      entry.action === input.currentAction &&
+      capturedAtMs - entry.observedAtMs <= 5 * 60_000,
   );
   const repeatedFailure = mostRepeatedDetail(actionFailures);
   if (
-    intentionalWait === undefined
-    && repeatedFailure !== undefined
-    && repeatedFailure.count >= 3
+    intentionalWait === undefined &&
+    repeatedFailure !== undefined &&
+    repeatedFailure.count >= 3
   ) {
     findings.push({
       code: "repeated-replan-reason",
@@ -580,9 +515,8 @@ export function buildSmokeStuckDiagnostics(
     });
   }
 
-  const pathFailures = activity.filter((entry) =>
-    entry.kind === "path-failed"
-      && capturedAtMs - entry.observedAtMs <= 2 * 60_000
+  const pathFailures = activity.filter(
+    (entry) => entry.kind === "path-failed" && capturedAtMs - entry.observedAtMs <= 2 * 60_000,
   );
   if (pathFailures.length >= 3) {
     findings.push({
@@ -597,29 +531,27 @@ export function buildSmokeStuckDiagnostics(
     });
   }
 
-  const lastProgress = activity.findLast((entry) =>
-    entry.kind === "task-progress"
-      || entry.kind === "path-completed"
-      || entry.kind === "primitive-completed"
-      || entry.kind === "action-succeeded"
-      || entry.kind === "intentional-wait"
+  const lastProgress = activity.findLast(
+    (entry) =>
+      entry.kind === "task-progress" ||
+      entry.kind === "path-completed" ||
+      entry.kind === "primitive-completed" ||
+      entry.kind === "action-succeeded" ||
+      entry.kind === "intentional-wait",
   );
-  const lastProgressAgeMs = lastProgress === undefined
-    ? undefined
-    : Math.max(0, capturedAtMs - lastProgress.observedAtMs);
-  const expectedQuietWindowMs = lastTaskProgress?.message === "Smelting"
-    ? 4 * 60_000
-    : input.currentAction === "survive:night-shelter"
-    ? 10 * 60_000
-    : 30_000;
+  const lastProgressAgeMs =
+    lastProgress === undefined ? undefined : Math.max(0, capturedAtMs - lastProgress.observedAtMs);
+  const expectedQuietWindowMs =
+    lastTaskProgress?.message === "Smelting"
+      ? 4 * 60_000
+      : input.currentAction === "survive:night-shelter"
+        ? 10 * 60_000
+        : 30_000;
   if (
-    input.currentAction !== undefined
-    && actionAgeMs !== undefined
-    && actionAgeMs >= expectedQuietWindowMs
-    && (
-      lastProgressAgeMs === undefined
-      || lastProgressAgeMs >= expectedQuietWindowMs
-    )
+    input.currentAction !== undefined &&
+    actionAgeMs !== undefined &&
+    actionAgeMs >= expectedQuietWindowMs &&
+    (lastProgressAgeMs === undefined || lastProgressAgeMs >= expectedQuietWindowMs)
   ) {
     findings.push({
       code: "no-recent-progress",
@@ -637,61 +569,59 @@ export function buildSmokeStuckDiagnostics(
   const status = findings.some(({ severity }) => severity === "error")
     ? "stuck"
     : findings.length > 0
-    ? "degraded"
-    : input.currentAction === undefined
-    ? "idle"
-    : "progressing";
+      ? "degraded"
+      : input.currentAction === undefined
+        ? "idle"
+        : "progressing";
 
   return {
     status,
     capturedAt: input.capturedAt,
-    action: input.currentAction === undefined
-      ? undefined
-      : {
-        name: input.currentAction,
-        startedAt: actionStartedAt,
-        ageMs: actionAgeMs,
-      },
+    action:
+      input.currentAction === undefined
+        ? undefined
+        : {
+            name: input.currentAction,
+            startedAt: actionStartedAt,
+            ageMs: actionAgeMs,
+          },
     activePath: input.activePath,
-    latestTask: lastTaskProgress === undefined
-      ? undefined
-      : {
-        taskId: lastTaskProgress.taskId,
-        observedAt: lastTaskProgress.observedAt,
-        current: lastTaskProgress.taskCurrent,
-        total: lastTaskProgress.taskTotal,
-        fraction: lastTaskProgress.taskFraction,
-        message: lastTaskProgress.message,
-        ...(lastTaskProgress.taskDetailType !== COLLECT_BLOCKS_PROGRESS_TYPE
-          ? {}
-          : {
-            collection: {
-              phase: lastTaskProgress.taskPhase,
-              activeTargets: lastTaskProgress.taskActiveTargets,
-              rejectedTargets: lastTaskProgress.taskRejectedTargets,
-              failedApproachTargets:
-                lastTaskProgress.taskFailedApproachTargets,
-              failedApproachPositions:
-                lastTaskProgress.taskFailedApproachPositions,
-              completedBreaks: lastTaskProgress.taskCompletedBreaks,
-              consecutiveStalledPaths:
-                lastTaskProgress.taskConsecutiveStalledPaths,
-              pathCurrentMovement:
-                lastTaskProgress.taskPathCurrentMovement,
-              pathTotalMovements:
-                lastTaskProgress.taskPathTotalMovements,
-            },
-          }),
-      },
+    latestTask:
+      lastTaskProgress === undefined
+        ? undefined
+        : {
+            taskId: lastTaskProgress.taskId,
+            observedAt: lastTaskProgress.observedAt,
+            current: lastTaskProgress.taskCurrent,
+            total: lastTaskProgress.taskTotal,
+            fraction: lastTaskProgress.taskFraction,
+            message: lastTaskProgress.message,
+            ...(lastTaskProgress.taskDetailType !== COLLECT_BLOCKS_PROGRESS_TYPE
+              ? {}
+              : {
+                  collection: {
+                    phase: lastTaskProgress.taskPhase,
+                    activeTargets: lastTaskProgress.taskActiveTargets,
+                    rejectedTargets: lastTaskProgress.taskRejectedTargets,
+                    failedApproachTargets: lastTaskProgress.taskFailedApproachTargets,
+                    failedApproachPositions: lastTaskProgress.taskFailedApproachPositions,
+                    completedBreaks: lastTaskProgress.taskCompletedBreaks,
+                    consecutiveStalledPaths: lastTaskProgress.taskConsecutiveStalledPaths,
+                    pathCurrentMovement: lastTaskProgress.taskPathCurrentMovement,
+                    pathTotalMovements: lastTaskProgress.taskPathTotalMovements,
+                  },
+                }),
+          },
     lastProgressAt: lastProgress?.observedAt,
     lastProgressAgeMs,
     expectedQuietWindowMs,
-    intentionalWait: intentionalWait === undefined
-      ? undefined
-      : {
-        observedAt: intentionalWait.observedAt,
-        message: intentionalWait.message,
-      },
+    intentionalWait:
+      intentionalWait === undefined
+        ? undefined
+        : {
+            observedAt: intentionalWait.observedAt,
+            message: intentionalWait.message,
+          },
     findings,
   } as const;
 }
@@ -753,45 +683,37 @@ export function summarizeSmokeSpatialDiagnostics(
   };
 }
 
-export function summarizeSmokeEnvironment(
-  environment: BotEnvironmentState | undefined,
-) {
+export function summarizeSmokeEnvironment(environment: BotEnvironmentState | undefined) {
   if (environment === undefined) {
     return undefined;
   }
   const gameTime = environment.gameTime;
-  const dayTime = gameTime === undefined
-    ? undefined
-    : Number((gameTime % 24_000n + 24_000n) % 24_000n);
-  const dayPhase = dayTime === undefined
-    ? undefined
-    : dayTime < 12_000
-    ? "day" as const
-    : dayTime < 13_000
-    ? "dusk" as const
-    : dayTime < 23_000
-    ? "night" as const
-    : "dawn" as const;
+  const dayTime =
+    gameTime === undefined ? undefined : Number(((gameTime % 24_000n) + 24_000n) % 24_000n);
+  const dayPhase =
+    dayTime === undefined
+      ? undefined
+      : dayTime < 12_000
+        ? ("day" as const)
+        : dayTime < 13_000
+          ? ("dusk" as const)
+          : dayTime < 23_000
+            ? ("night" as const)
+            : ("dawn" as const);
   return {
     ...(gameTime === undefined ? {} : { gameTime }),
     ...(dayTime === undefined
       ? {}
       : {
-        dayTime,
-        dayPhase,
-        isDay: dayPhase === "day",
-        isNight: dayPhase === "night",
-        isHostileNight: dayPhase === "night",
-      }),
-    ...(environment.raining === undefined
-      ? {}
-      : { raining: environment.raining }),
-    ...(environment.rainLevel === undefined
-      ? {}
-      : { rainLevel: environment.rainLevel }),
-    ...(environment.thunderLevel === undefined
-      ? {}
-      : { thunderLevel: environment.thunderLevel }),
+          dayTime,
+          dayPhase,
+          isDay: dayPhase === "day",
+          isNight: dayPhase === "night",
+          isHostileNight: dayPhase === "night",
+        }),
+    ...(environment.raining === undefined ? {} : { raining: environment.raining }),
+    ...(environment.rainLevel === undefined ? {} : { rainLevel: environment.rainLevel }),
+    ...(environment.thunderLevel === undefined ? {} : { thunderLevel: environment.thunderLevel }),
     clocks: [...environment.clocks.values()].map((clock) => ({
       clockId: clock.clockId,
       totalTicks: clock.totalTicks,
@@ -816,17 +738,15 @@ function explainCurrentAction(
     return observation.player.dead
       ? "The player is dead and must respawn before recovery can continue"
       : `The action is processing the newest eligible corpse; ${remembered} death location${
-        remembered === 1 ? " remains" : "s remain"
-      } in checkpoint memory`;
+          remembered === 1 ? " remains" : "s remain"
+        } in checkpoint memory`;
   }
   if (action === "survive:night-shelter") {
     return "The bot is deliberately sheltered while hostile-night travel would be unsafe";
   }
   if (action.startsWith("satisfy:")) {
     const key = action.slice("satisfy:".length);
-    const requirement = checkpoint.planner.requirements.find((candidate) =>
-      candidate.key === key
-    );
+    const requirement = checkpoint.planner.requirements.find((candidate) => candidate.key === key);
     if (requirement !== undefined) {
       return requirementReason(requirement);
     }
@@ -849,8 +769,8 @@ function explainDecision(
       return observation.player.dead
         ? "The player is dead and must respawn before continuing"
         : `The planner remembers ${checkpoint.memory.deathPositions.length} death location${
-          checkpoint.memory.deathPositions.length === 1 ? "" : "s"
-        } with potentially recoverable items`;
+            checkpoint.memory.deathPositions.length === 1 ? "" : "s"
+          } with potentially recoverable items`;
     case "eat":
       return `Food is ${observation.player.food}, at or below the configured eating threshold of ${strategy.eatBelowFood}, and edible food is available`;
     case "retreat":
@@ -879,10 +799,7 @@ function explainDecision(
 function requirementReason(
   requirement: BeatGameCheckpoint["planner"]["requirements"][number],
 ): string {
-  const missing = Math.max(
-    0,
-    requirement.targetCount - requirement.currentCount,
-  );
+  const missing = Math.max(0, requirement.targetCount - requirement.currentCount);
   return `${requirement.key} is the highest-priority actionable requirement: ${missing} missing (${requirement.currentCount}/${requirement.targetCount}, priority ${requirement.priority})`;
 }
 
@@ -927,9 +844,7 @@ interface SmokeCollectionTaskAttempt {
   readonly consecutiveStalledPaths: number;
 }
 
-function parseSmokeProgressActivity(
-  input: unknown,
-): readonly SmokeProgressActivity[] {
+function parseSmokeProgressActivity(input: unknown): readonly SmokeProgressActivity[] {
   if (!isRecord(input) || typeof input.observedAt !== "string") {
     return [];
   }
@@ -940,34 +855,36 @@ function parseSmokeProgressActivity(
   if (input.kind === "beat-game-event" && isRecord(input.event)) {
     const event = input.event;
     if (
-      event.type === "diagnostic"
-      && typeof event.message === "string"
-      && (
-        event.message === "Waiting in a sealed shelter until morning"
-        || event.message === "Waiting under existing cover until morning"
-      )
+      event.type === "diagnostic" &&
+      typeof event.message === "string" &&
+      (event.message === "Waiting in a sealed shelter until morning" ||
+        event.message === "Waiting under existing cover until morning")
     ) {
-      return [{
-        observedAt: input.observedAt,
-        observedAtMs,
-        kind: "intentional-wait",
-        message: event.message,
-      }];
+      return [
+        {
+          observedAt: input.observedAt,
+          observedAtMs,
+          kind: "intentional-wait",
+          message: event.message,
+        },
+      ];
     }
     if (
-      event.type !== "action-started"
-      && event.type !== "action-succeeded"
-      && event.type !== "action-failed"
+      event.type !== "action-started" &&
+      event.type !== "action-succeeded" &&
+      event.type !== "action-failed"
     ) {
       return [];
     }
-    return [{
-      observedAt: input.observedAt,
-      observedAtMs,
-      kind: event.type,
-      ...(typeof event.action === "string" ? { action: event.action } : {}),
-      ...(typeof event.detail === "string" ? { detail: event.detail } : {}),
-    }];
+    return [
+      {
+        observedAt: input.observedAt,
+        observedAtMs,
+        kind: event.type,
+        ...(typeof event.action === "string" ? { action: event.action } : {}),
+        ...(typeof event.detail === "string" ? { detail: event.detail } : {}),
+      },
+    ];
   }
   if (input.kind === "task-progress-observed" && isRecord(input.task)) {
     const task = input.task;
@@ -978,85 +895,78 @@ function parseSmokeProgressActivity(
     const failedApproaches = Array.isArray(detail?.failedApproaches)
       ? detail.failedApproaches.filter(isRecord)
       : [];
-    return [{
-      observedAt: input.observedAt,
-      observedAtMs,
-      kind: "task-progress",
-      ...(typeof task.taskId === "string" ? { taskId: task.taskId } : {}),
-      ...(current === undefined ? {} : { taskCurrent: current }),
-      ...(total === undefined ? {} : { taskTotal: total }),
-      ...(typeof progress?.fraction === "number"
-        ? { taskFraction: progress.fraction }
-        : {}),
-      ...(typeof progress?.message === "string"
-        ? { message: progress.message }
-        : {}),
-      ...(typeof progress?.detailType === "string"
-        ? { taskDetailType: progress.detailType }
-        : {}),
-      ...(typeof detail?.phase === "number"
-        ? { taskPhase: detail.phase }
-        : {}),
-      ...(detail === undefined
-        ? {}
-        : {
-          taskActiveTargets: blockPositionKeys(detail.activeTargets),
-          taskRejectedTargets: blockPositionKeys(detail.rejectedTargets),
-          taskFailedApproachTargets: blockPositionKeys(
-            failedApproaches.map((approach) => approach.target),
-          ),
-          taskFailedApproachPositions: blockPositionKeys(
-            failedApproaches.flatMap((approach) =>
-              Array.isArray(approach.playerPositions)
-                ? approach.playerPositions
-                : []
-            ),
-          ),
-          taskCompletedBreaks: Array.isArray(detail.completedBreaks)
-            ? detail.completedBreaks.length
-            : 0,
-          ...(typeof detail.consecutiveStalledPaths === "number"
-            ? {
-              taskConsecutiveStalledPaths:
-                detail.consecutiveStalledPaths,
-            }
-            : {}),
-          ...(typeof detail.pathCurrentMovement === "number"
-            ? { taskPathCurrentMovement: detail.pathCurrentMovement }
-            : {}),
-          ...(typeof detail.pathTotalMovements === "number"
-            ? { taskPathTotalMovements: detail.pathTotalMovements }
-            : {}),
-        }),
-    }];
+    return [
+      {
+        observedAt: input.observedAt,
+        observedAtMs,
+        kind: "task-progress",
+        ...(typeof task.taskId === "string" ? { taskId: task.taskId } : {}),
+        ...(current === undefined ? {} : { taskCurrent: current }),
+        ...(total === undefined ? {} : { taskTotal: total }),
+        ...(typeof progress?.fraction === "number" ? { taskFraction: progress.fraction } : {}),
+        ...(typeof progress?.message === "string" ? { message: progress.message } : {}),
+        ...(typeof progress?.detailType === "string"
+          ? { taskDetailType: progress.detailType }
+          : {}),
+        ...(typeof detail?.phase === "number" ? { taskPhase: detail.phase } : {}),
+        ...(detail === undefined
+          ? {}
+          : {
+              taskActiveTargets: blockPositionKeys(detail.activeTargets),
+              taskRejectedTargets: blockPositionKeys(detail.rejectedTargets),
+              taskFailedApproachTargets: blockPositionKeys(
+                failedApproaches.map((approach) => approach.target),
+              ),
+              taskFailedApproachPositions: blockPositionKeys(
+                failedApproaches.flatMap((approach) =>
+                  Array.isArray(approach.playerPositions) ? approach.playerPositions : [],
+                ),
+              ),
+              taskCompletedBreaks: Array.isArray(detail.completedBreaks)
+                ? detail.completedBreaks.length
+                : 0,
+              ...(typeof detail.consecutiveStalledPaths === "number"
+                ? {
+                    taskConsecutiveStalledPaths: detail.consecutiveStalledPaths,
+                  }
+                : {}),
+              ...(typeof detail.pathCurrentMovement === "number"
+                ? { taskPathCurrentMovement: detail.pathCurrentMovement }
+                : {}),
+              ...(typeof detail.pathTotalMovements === "number"
+                ? { taskPathTotalMovements: detail.pathTotalMovements }
+                : {}),
+            }),
+      },
+    ];
   }
-  if (
-    input.kind === "pathfind-completed"
-    || input.kind === "pathfind-xz-completed"
-  ) {
-    return [{
-      observedAt: input.observedAt,
-      observedAtMs,
-      kind: "path-completed",
-    }];
+  if (input.kind === "pathfind-completed" || input.kind === "pathfind-xz-completed") {
+    return [
+      {
+        observedAt: input.observedAt,
+        observedAtMs,
+        kind: "path-completed",
+      },
+    ];
   }
-  if (
-    input.kind === "pathfind-failed"
-    || input.kind === "pathfind-xz-failed"
-  ) {
-    return [{
-      observedAt: input.observedAt,
-      observedAtMs,
-      kind: "path-failed",
-      ...(typeof input.cause === "string" ? { detail: input.cause } : {}),
-    }];
+  if (input.kind === "pathfind-failed" || input.kind === "pathfind-xz-failed") {
+    return [
+      {
+        observedAt: input.observedAt,
+        observedAtMs,
+        kind: "path-failed",
+        ...(typeof input.cause === "string" ? { detail: input.cause } : {}),
+      },
+    ];
   }
   if (input.kind === "primitive-completed") {
-    return [{
-      observedAt: input.observedAt,
-      observedAtMs,
-      kind: "primitive-completed",
-    }];
+    return [
+      {
+        observedAt: input.observedAt,
+        observedAtMs,
+        kind: "primitive-completed",
+      },
+    ];
   }
   return [];
 }
@@ -1077,16 +987,14 @@ function blockPositionKeys(input: unknown): readonly string[] {
   }
   return input.flatMap((position) => {
     if (
-      !isRecord(position)
-      || typeof position.x !== "number"
-      || typeof position.y !== "number"
-      || typeof position.z !== "number"
+      !isRecord(position) ||
+      typeof position.x !== "number" ||
+      typeof position.y !== "number" ||
+      typeof position.z !== "number"
     ) {
       return [];
     }
-    const dimension = typeof position.dimension === "string"
-      ? position.dimension
-      : "unknown";
+    const dimension = typeof position.dimension === "string" ? position.dimension : "unknown";
     return [`${dimension}:${position.x},${position.y},${position.z}`];
   });
 }
@@ -1095,20 +1003,23 @@ function summarizeCollectionTaskAttempts(
   activity: readonly SmokeProgressActivity[],
   capturedAtMs: number,
 ): readonly SmokeCollectionTaskAttempt[] {
-  const attempts = new Map<string, {
-    latest: SmokeProgressActivity;
-    targets: Set<string>;
-    failedApproachPositions: Set<string>;
-    completedBreaks: number;
-    current: number;
-    consecutiveStalledPaths: number;
-  }>();
+  const attempts = new Map<
+    string,
+    {
+      latest: SmokeProgressActivity;
+      targets: Set<string>;
+      failedApproachPositions: Set<string>;
+      completedBreaks: number;
+      current: number;
+      consecutiveStalledPaths: number;
+    }
+  >();
   for (const entry of activity) {
     if (
-      entry.kind !== "task-progress"
-      || entry.taskId === undefined
-      || entry.taskDetailType !== COLLECT_BLOCKS_PROGRESS_TYPE
-      || capturedAtMs - entry.observedAtMs > REPEATED_COLLECTION_WINDOW_MS
+      entry.kind !== "task-progress" ||
+      entry.taskId === undefined ||
+      entry.taskDetailType !== COLLECT_BLOCKS_PROGRESS_TYPE ||
+      capturedAtMs - entry.observedAtMs > REPEATED_COLLECTION_WINDOW_MS
     ) {
       continue;
     }
@@ -1121,26 +1032,18 @@ function summarizeCollectionTaskAttempts(
       consecutiveStalledPaths: 0,
     };
     attempt.latest = entry;
-    for (
-      const target of [
-        ...(entry.taskActiveTargets ?? []),
-        ...(entry.taskRejectedTargets ?? []),
-        ...(entry.taskFailedApproachTargets ?? []),
-      ]
-    ) {
+    for (const target of [
+      ...(entry.taskActiveTargets ?? []),
+      ...(entry.taskRejectedTargets ?? []),
+      ...(entry.taskFailedApproachTargets ?? []),
+    ]) {
       attempt.targets.add(target);
     }
     for (const position of entry.taskFailedApproachPositions ?? []) {
       attempt.failedApproachPositions.add(position);
     }
-    attempt.completedBreaks = Math.max(
-      attempt.completedBreaks,
-      entry.taskCompletedBreaks ?? 0,
-    );
-    attempt.current = Math.max(
-      attempt.current,
-      Number(entry.taskCurrent ?? 0),
-    );
+    attempt.completedBreaks = Math.max(attempt.completedBreaks, entry.taskCompletedBreaks ?? 0);
+    attempt.current = Math.max(attempt.current, Number(entry.taskCurrent ?? 0));
     attempt.consecutiveStalledPaths = Math.max(
       attempt.consecutiveStalledPaths,
       entry.taskConsecutiveStalledPaths ?? 0,
@@ -1158,12 +1061,12 @@ function summarizeCollectionTaskAttempts(
   }));
 }
 
-function mostRepeatedCollectionTarget(
-  attempts: readonly SmokeCollectionTaskAttempt[],
-): Readonly<{
-  target: string;
-  attempts: readonly SmokeCollectionTaskAttempt[];
-}> | undefined {
+function mostRepeatedCollectionTarget(attempts: readonly SmokeCollectionTaskAttempt[]):
+  | Readonly<{
+      target: string;
+      attempts: readonly SmokeCollectionTaskAttempt[];
+    }>
+  | undefined {
   const attemptsByTarget = new Map<string, SmokeCollectionTaskAttempt[]>();
   for (const attempt of attempts) {
     if (attempt.completedBreaks > 0 || attempt.current > 0) {
@@ -1178,9 +1081,9 @@ function mostRepeatedCollectionTarget(
   return [...attemptsByTarget]
     .filter(([, matching]) => matching.length >= 3)
     .map(([target, matching]) => ({ target, attempts: matching }))
-    .sort((left, right) =>
-      right.attempts.length - left.attempts.length
-      || left.target.localeCompare(right.target)
+    .sort(
+      (left, right) =>
+        right.attempts.length - left.attempts.length || left.target.localeCompare(right.target),
     )
     .at(0);
 }
@@ -1196,9 +1099,7 @@ function mostRepeatedDetail(
   }
   return [...counts]
     .map(([detail, count]) => ({ detail, count }))
-    .sort((left, right) =>
-      right.count - left.count || left.detail.localeCompare(right.detail)
-    )
+    .sort((left, right) => right.count - left.count || left.detail.localeCompare(right.detail))
     .at(0);
 }
 
@@ -1217,9 +1118,7 @@ function countsBy<T>(
   }
   return [...counts]
     .map(([id, count]) => ({ id, count }))
-    .sort((left, right) =>
-      right.count - left.count || left.id.localeCompare(right.id)
-    );
+    .sort((left, right) => right.count - left.count || left.id.localeCompare(right.id));
 }
 
 function offset(
@@ -1237,11 +1136,7 @@ function distance(
   left: Readonly<{ x: number; y: number; z: number }>,
   right: Readonly<{ x: number; y: number; z: number }>,
 ): number {
-  return Math.hypot(
-    right.x - left.x,
-    right.y - left.y,
-    right.z - left.z,
-  );
+  return Math.hypot(right.x - left.x, right.y - left.y, right.z - left.z);
 }
 
 function vectorLength(vector: DebugVector): number {

@@ -34,10 +34,7 @@ type BotScoped<T extends DescMessage> = Omit<
   "$typeName" | "botId" | "instanceId"
 >;
 
-type PlayerRaycastRequest = Omit<
-  BotScoped<typeof RaycastRequestSchema>,
-  "direction" | "origin"
->;
+type PlayerRaycastRequest = Omit<BotScoped<typeof RaycastRequestSchema>, "direction" | "origin">;
 
 export class SoulFireWorld {
   public constructor(
@@ -46,15 +43,10 @@ export class SoulFireWorld {
     private readonly client: Client<typeof WorldService>,
   ) {}
 
-  public player(
-    options?: CallOptions,
-  ): Effect.Effect<PlayerSnapshot, SoulFireOperationError> {
+  public player(options?: CallOptions): Effect.Effect<PlayerSnapshot, SoulFireOperationError> {
     return Effect.gen({ self: this }, function* () {
       const response = yield* rpc("SoulFireWorld.player", (signal) =>
-        this.client.getPlayerSnapshot(
-          this.scope(),
-          withSignal(options, signal),
-        ),
+        this.client.getPlayerSnapshot(this.scope(), withSignal(options, signal)),
       );
       if (response.player === undefined) {
         return yield* Effect.fail(
@@ -73,10 +65,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<GetWorldBlockResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.block", (signal) =>
-      this.client.getWorldBlock(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.getWorldBlock({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -93,10 +82,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<QueryBlocksResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.queryBlocks", (signal) =>
-      this.client.queryBlocks(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.queryBlocks({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -105,10 +91,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<GetWorldEntityResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.entity", (signal) =>
-      this.client.getWorldEntity(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.getWorldEntity({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -122,10 +105,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<QueryEntitiesResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.queryEntities", (signal) =>
-      this.client.queryEntities(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.queryEntities({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -139,10 +119,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<RaycastResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.raycast", (signal) =>
-      this.client.raycast(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.raycast({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -154,10 +131,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<RaycastResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.raycastFromPlayer", (signal) =>
-      this.client.raycast(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.raycast({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -223,10 +197,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<CanSeeBlockResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.canSeeBlock", (signal) =>
-      this.client.canSeeBlock(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.canSeeBlock({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
@@ -239,10 +210,7 @@ export class SoulFireWorld {
     options?: CallOptions,
   ): Effect.Effect<EstimateDigTimeResponse, SoulFireOperationError> {
     return rpc("SoulFireWorld.estimateDigTime", (signal) =>
-      this.client.estimateDigTime(
-        { ...request, ...this.scope() },
-        withSignal(options, signal),
-      ),
+      this.client.estimateDigTime({ ...request, ...this.scope() }, withSignal(options, signal)),
     );
   }
 
