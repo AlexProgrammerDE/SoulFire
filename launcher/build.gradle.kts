@@ -1,6 +1,10 @@
+import com.soulfiremc.gradle.PrepareVulkanRuntime
+
 plugins {
   `sf-project-conventions`
 }
+
+val vulkanRuntime = rootProject.tasks.named<PrepareVulkanRuntime>("prepareVulkanRuntime")
 
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
@@ -64,7 +68,7 @@ dependencies {
   api("org.lwjgl:lwjgl-vulkan:3.4.3")
   runtimeOnly("org.lwjgl:lwjgl-vulkan:3.4.3:natives-macos")
   runtimeOnly("org.lwjgl:lwjgl-vulkan:3.4.3:natives-macos-arm64")
-  runtimeOnly(files(rootProject.tasks.named("prepareVulkanRuntime")).asFileTree.matching { include("soulfire-vulkan-*.jar") })
+  runtimeOnly(files(vulkanRuntime.flatMap { it.preparedJars }))
   api("org.lwjgl:lwjgl:3.4.3:unsafe")
   // Real native libraries are required for headless Vulkan and texture/font decoding.
   for (platform in listOf("linux", "linux-arm64", "windows", "windows-arm64", "macos", "macos-arm64")) {

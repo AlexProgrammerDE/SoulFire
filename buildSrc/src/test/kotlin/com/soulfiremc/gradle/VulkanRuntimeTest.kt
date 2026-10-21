@@ -37,14 +37,20 @@ class VulkanRuntimeTest {
       }
       def nativeRuntime = tasks.named('prepareVulkanRuntime')
       dependencies {
-        runtimeOnly(files(nativeRuntime).asFileTree.matching {
-          include 'soulfire-vulkan-*.jar'
-        })
+        runtimeOnly(files(nativeRuntime.flatMap { it.preparedJars }))
       }
       tasks.register('packageRuntime', Zip) {
         from(configurations.runtimeClasspath)
         destinationDirectory = layout.buildDirectory.dir('distribution')
         archiveFileName = 'runtime.zip'
+      }
+      tasks.register('packageResolvedRuntime', Zip) {
+        dependsOn(configurations.runtimeClasspath)
+        from(configurations.named('runtimeClasspath').map { classpath ->
+          classpath.files.findAll { file -> file.name.endsWith('.jar') }
+        })
+        destinationDirectory = layout.buildDirectory.dir('distribution')
+        archiveFileName = 'resolved.zip'
       }
       """.trimIndent()
     )
@@ -107,6 +113,19 @@ class VulkanRuntimeTest {
     }
     runner("packageRuntime", "-PvulkanPlatforms=windows-arm64", "-PvulkanRuntimeDirectory=prebuilt").build()
     assertEquals(listOf("soulfire-vulkan-windows-arm64.jar"), directory.resolve("build/vulkan-runtime").toFile().listFiles()!!.map { it.name })
+  }
+
+  @Test
+  fun `mapped runtime classpaths include packages after clean`() {
+    prebuilt(host)
+    runner("packageResolvedRuntime", "-PvulkanRuntimeDirectory=prebuilt").build()
+    ZipFile(directory.resolve("build/distribution/resolved.zip").toFile()).use {
+      assertEquals(listOf("soulfire-vulkan-$host.jar"), it.entries().asSequence().map(ZipEntry::getName).toList())
+    }
+    runner("clean", "packageResolvedRuntime", "--parallel", "-PvulkanRuntimeDirectory=prebuilt").build()
+    ZipFile(directory.resolve("build/distribution/resolved.zip").toFile()).use {
+      assertEquals(listOf("soulfire-vulkan-$host.jar"), it.entries().asSequence().map(ZipEntry::getName).toList())
+    }
   }
 
   @Test

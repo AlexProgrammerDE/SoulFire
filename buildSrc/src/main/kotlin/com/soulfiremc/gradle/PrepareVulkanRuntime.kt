@@ -3,9 +3,12 @@ package com.soulfiremc.gradle
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -24,6 +27,12 @@ abstract class PrepareVulkanRuntime : DefaultTask() {
 
   @get:OutputDirectory
   abstract val destination: DirectoryProperty
+
+  @get:Internal
+  val preparedJars: Provider<List<RegularFile>>
+    get() = platforms.zip(destination) { selected, directory ->
+      selected.map { directory.file("soulfire-vulkan-$it.jar") }
+    }
 
   @TaskAction
   fun prepare() {
