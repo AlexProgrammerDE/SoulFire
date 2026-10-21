@@ -67,9 +67,9 @@ final class RequestContextResponseInterceptorTest {
   }
 
   @Test
-  void keepsOperationsInlineWhenTheOriginalContextIsCurrent() {
+  void responsesInTheOriginalContextCannotOvertakeQueuedHeaders() throws Exception {
     var originalContext = context("/original");
-    var delegate = new RecordingServerCall(originalContext, 1);
+    var delegate = new RecordingServerCall(originalContext, 3);
     var interceptedCall = new AtomicReference<ServerCall<String, String>>();
 
     try (var ignored = originalContext.push()) {
@@ -81,12 +81,31 @@ final class RequestContextResponseInterceptorTest {
           return new ServerCall.Listener<>() {};
         }
       );
-      interceptedCall.get().sendMessage("response");
-      assertTrue(delegate.completed());
     }
-
-    assertEquals(List.of("message:response"), delegate.operations());
-    assertSame(originalContext, delegate.contexts().getFirst());
+    var loopBlocked = new CountDownLatch(1);
+    var releaseLoop = new CountDownLatch(1);
+    originalContext.eventLoop().execute(() -> {
+      loopBlocked.countDown();
+      try {
+        assertTrue(releaseLoop.await(5, TimeUnit.SECONDS));
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new AssertionError(e);
+      }
+    });
+    assertTrue(loopBlocked.await(5, TimeUnit.SECONDS));
+    try {
+      interceptedCall.get().sendHeaders(new Metadata());
+      try (var ignored = originalContext.push()) {
+        interceptedCall.get().sendMessage("response");
+        interceptedCall.get().close(Status.OK, new Metadata());
+      }
+    } finally {
+      releaseLoop.countDown();
+    }
+    assertTrue(delegate.await());
+    assertEquals(List.of("headers", "message:response", "close:OK"), delegate.operations());
+    delegate.contexts().forEach(context -> assertSame(originalContext, context));
   }
 
   private static ServiceRequestContext context(String path) {
@@ -143,10 +162,6 @@ final class RequestContextResponseInterceptorTest {
       operations.add(operation);
       contexts.add(currentContext);
       operationsLatch.countDown();
-    }
-
-    private boolean completed() {
-      return operationsLatch.getCount() == 0;
     }
 
     private boolean await() throws InterruptedException {

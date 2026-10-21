@@ -32,7 +32,8 @@ import io.grpc.Status;
 /// happens, for example, when one bot action replaces another and completes its
 /// future. Armeria cannot push the completed call's context while the replacing
 /// request's context is still current. Queueing the operation on the original
-/// context's event loop breaks that reentrant call chain.
+/// context's event loop breaks that reentrant call chain. Always queue operations
+/// so a response in the current context cannot overtake previously queued headers.
 public final class RequestContextResponseInterceptor implements ServerInterceptor {
   @Override
   public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
@@ -95,11 +96,7 @@ public final class RequestContextResponseInterceptor implements ServerIntercepto
     }
 
     private void execute(Runnable operation) {
-      if (ServiceRequestContext.currentOrNull() == context) {
-        operation.run();
-      } else {
-        context.eventLoop().execute(operation);
-      }
+      context.eventLoop().execute(operation);
     }
   }
 }
