@@ -65,14 +65,17 @@ export default {
       });
       yield* check(response.success, response.error ?? "The rename request was rejected");
       yield* eventually(
-        bot.inventoryState().pipe(
-          Effect.flatMap((state) =>
-            check(
-              state.slots.some((slot) => slot.slot === 2 && slot.displayName === DRAFT),
-              "The rename was accepted but no renamed anvil output arrived",
+        bot
+          .inventoryState()
+          .pipe(
+            Effect.flatMap((state) =>
+              check(
+                state.slots.some((slot) => slot.slot === 2 && slot.displayName === DRAFT) &&
+                  state.layout?.textInputs.some((input) => input.currentValue === DRAFT) === true,
+                "The rename was accepted but its native draft and output were not synchronized",
+              ),
             ),
           ),
-        ),
         "5 seconds",
       );
       yield* Effect.tryPromise({
@@ -128,14 +131,17 @@ export default {
           new CheckFailed({ message: `Native anvil input failed: ${String(cause)}` }),
       });
       yield* eventually(
-        bot.inventoryState().pipe(
-          Effect.flatMap((state) =>
-            check(
-              state.slots.some((slot) => slot.slot === 2 && slot.displayName === NAME),
-              "Rendering inventory icons moved the native anvil caret",
+        bot
+          .inventoryState()
+          .pipe(
+            Effect.flatMap((state) =>
+              check(
+                state.slots.some((slot) => slot.slot === 2 && slot.displayName === NAME) &&
+                  state.layout?.textInputs.some((input) => input.currentValue === NAME) === true,
+                "Rendering inventory icons moved the native anvil caret",
+              ),
             ),
           ),
-        ),
         "5 seconds",
       );
       // Wait for cancellation of the POV stream to release its control lease.

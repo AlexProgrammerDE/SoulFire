@@ -1521,13 +1521,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
     // Add text inputs for containers that support them
     if (menu instanceof AnvilMenu anvilMenu) {
-      var currentName = "";
       var inputItem = anvilMenu.getSlot(0).getItem();
-      if (!inputItem.isEmpty()) {
-        // Get the item's custom name if it has one, otherwise empty
-        if (inputItem.has(DataComponents.CUSTOM_NAME)) {
-          currentName = inputItem.getHoverName().getString();
-        }
+      var currentName = inputItem.has(DataComponents.CUSTOM_NAME) ? inputItem.getHoverName().getString() : "";
+      if (minecraft.gui.screen() instanceof AnvilScreen screen && screen.getMenu() == anvilMenu) {
+        currentName = ((AnvilScreenAccessor) screen).soulfire$getNameInput().getValue();
       }
 
       layoutBuilder.addTextInputs(ContainerTextInput.newBuilder()
