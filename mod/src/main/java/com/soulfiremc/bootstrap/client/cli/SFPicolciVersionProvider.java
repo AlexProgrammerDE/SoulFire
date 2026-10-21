@@ -23,7 +23,6 @@ import picocli.CommandLine;
 public class SFPicolciVersionProvider implements CommandLine.IVersionProvider {
   @Override
   public String[] getVersion() {
-    return new String[]{"SoulFire v%s (%s @ %s)"
-      .formatted(BuildData.VERSION, BuildData.BRANCH, BuildData.COMMIT_SHORT)};
+    return new String[]{BuildData.versionInfo()};
   }
 }

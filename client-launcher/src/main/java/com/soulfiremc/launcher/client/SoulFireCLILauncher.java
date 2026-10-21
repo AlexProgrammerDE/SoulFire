@@ -17,12 +17,19 @@
  */
 package com.soulfiremc.launcher.client;
 
+import com.soulfiremc.builddata.BuildData;
 import com.soulfiremc.launcher.SoulFireAbstractLauncher;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 public final class SoulFireCLILauncher {
   void main(String[] args) {
+    if (args.length > 0 && Arrays.stream(args).allMatch(arg -> arg.equals("--version") || arg.equals("-V"))) {
+      IO.println(BuildData.versionInfo());
+      return;
+    }
+
     var cliHomeDir = System.getProperty( "sf.cliHomeDir" );
 
     SoulFireAbstractLauncher.run(

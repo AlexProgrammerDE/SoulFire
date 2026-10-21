@@ -97,11 +97,15 @@ dependencies {
 
   // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
   implementation(projects.j8Launcher)
+
+  testImplementation(libs.junit)
+  testRuntimeOnly(libs.junit.launcher)
 }
 
 // Capture version at configuration time for configuration cache compatibility
 val projectVersionString = version.toString()
 val launcherPathPattern = "launcher" + File.separator + "build" + File.separator + "libs"
+val buildDataPathPattern = "build-data" + File.separator + "build" + File.separator + "libs"
 
 // Configuration for jars to shadow vs include as libs
 val shadowedJarsConfig: Configuration by configurations.creating {
@@ -125,10 +129,11 @@ tasks {
 
     // Capture pattern inside task configuration to avoid capturing script object
     val pathPattern = launcherPathPattern
+    val metadataPathPattern = buildDataPathPattern
     doLast {
       val dependencies = inputs.files.files
         .filter { it.name.endsWith(".jar") }
-        .filter { !it.toString().contains(pathPattern) }
+        .filter { !it.toString().contains(pathPattern) && !it.toString().contains(metadataPathPattern) }
         .joinToString("\n") { it.name }
       outputFile.get().asFile.writeText(dependencies)
     }
@@ -171,11 +176,11 @@ tasks {
     // Include content from main jar
     from(jarTask.map { it.outputs.files.map { file -> zipTree(file) } })
 
-    // Shade launcher jars (extract and include contents)
+    // Keep build metadata available before runtime libraries are extracted.
     from(configurations.runtimeClasspath.map { config ->
       config.files
         .filter { it.name.endsWith(".jar") }
-        .filter { it.toString().contains(launcherPathPattern) }
+        .filter { it.toString().contains(launcherPathPattern) || it.toString().contains(buildDataPathPattern) }
         .map { zipTree(it) }
     })
 
@@ -183,7 +188,7 @@ tasks {
     from(configurations.runtimeClasspath.map { config ->
       config.files
         .filter { it.name.endsWith(".jar") }
-        .filter { !it.toString().contains(launcherPathPattern) }
+        .filter { !it.toString().contains(launcherPathPattern) && !it.toString().contains(buildDataPathPattern) }
     }) {
       into("META-INF/lib")
     }
@@ -194,5 +199,11 @@ tasks {
   }
   build {
     dependsOn(uberJar)
+  }
+  test {
+    val cliJar = uberJar.flatMap { it.archiveFile }
+    dependsOn(uberJar)
+    inputs.file(cliJar)
+    systemProperty("sf.cli.testJar", cliJar.get().asFile.absolutePath)
   }
 }

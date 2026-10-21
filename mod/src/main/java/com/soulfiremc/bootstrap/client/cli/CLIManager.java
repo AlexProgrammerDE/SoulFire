@@ -61,7 +61,7 @@ public final class CLIManager {
     return input.replace("%", "%%");
   }
 
-  public void initCLI(String[] args) {
+  public int initCLI(String[] args) {
     var cliInstance = rpcClient.instanceStubBlocking()
       .listInstances(InstanceListRequest.newBuilder().build())
       .getInstancesList()
@@ -96,7 +96,7 @@ public final class CLIManager {
 
     registerOptions(commandLine.getCommandSpec());
 
-    commandLine.execute(args);
+    return commandLine.execute(args);
   }
 
   @SuppressWarnings("unchecked")

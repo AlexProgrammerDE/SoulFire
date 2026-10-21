@@ -51,4 +51,8 @@ public final class BuildData {
 
   private BuildData() {
   }
+
+  public static String versionInfo() {
+    return "SoulFire v%s (%s @ %s)".formatted(VERSION, BRANCH, COMMIT_SHORT);
+  }
 }

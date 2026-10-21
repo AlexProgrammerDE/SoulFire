@@ -50,7 +50,9 @@ public final class SoulFireCLIBootstrap extends SoulFireAbstractBootstrap {
 
     log.info("Starting CLI");
     var cliManager = new CLIManager(rpcClient);
-    cliManager.initCLI(args);
+    var exitCode = cliManager.initCLI(args);
+    cliManager.shutdownManager().shutdownSoftware(false);
+    System.exit(exitCode);
   }
 
   @Override
