@@ -1892,7 +1892,8 @@ public final class InventoryServiceImpl
       menu = player.containerMenu;
       layout = BotServiceImpl.buildContainerLayout(
         menu,
-        BotServiceImpl.getContainerTitle(menu, bot.minecraft())
+        BotServiceImpl.getContainerTitle(menu, bot.minecraft()),
+        bot.minecraft().level
       );
     }
   }

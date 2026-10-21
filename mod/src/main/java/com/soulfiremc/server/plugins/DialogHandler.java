@@ -25,6 +25,7 @@ import com.soulfiremc.server.api.metadata.MetadataKey;
 import com.soulfiremc.server.bot.BotConnection;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
+import net.minecraft.client.gui.screens.dialog.DialogScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.common.ClientboundClearDialogPacket;
 import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
@@ -69,6 +70,9 @@ public final class DialogHandler extends InternalPlugin {
    */
   @Nullable
   public static Holder<Dialog> getCurrentDialog(BotConnection connection) {
+    if (!(connection.minecraft().gui.screen() instanceof DialogScreen<?>)) {
+      return null;
+    }
     var dialogRef = connection.metadata().get(CURRENT_DIALOG);
     return dialogRef != null ? dialogRef.get() : null;
   }

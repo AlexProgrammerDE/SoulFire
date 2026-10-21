@@ -23,6 +23,7 @@ import com.google.protobuf.util.Timestamps;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.mod.mixin.soulfire.AnvilScreenAccessor;
+import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
@@ -48,9 +49,11 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.dialog.DialogScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -62,6 +65,7 @@ import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -436,7 +440,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   ) {
     var container = player.containerMenu;
     var responseBuilder = BotInventoryStateResponse.newBuilder()
-      .setLayout(buildContainerLayout(container, getContainerTitle(container, minecraft)))
+      .setLayout(buildContainerLayout(container, getContainerTitle(container, minecraft), minecraft.level))
       .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
 
     for (var slot : container.slots) {
@@ -1045,7 +1049,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
    * Builds a ContainerLayout describing the slot regions for the given menu.
    * This allows the frontend to render any container type dynamically.
    */
-  static ContainerLayout buildContainerLayout(AbstractContainerMenu menu, String title) {
+  static ContainerLayout buildContainerLayout(AbstractContainerMenu menu, String title, ClientLevel level) {
     var layoutBuilder = ContainerLayout.newBuilder()
       .setTitle(title)
       .setTotalSlots(menu.slots.size());
@@ -1436,6 +1440,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       playerInvStart = 3;
       hotbarStart = 30;
 
+    } else if (menu instanceof LecternMenu) {
+      // Lecterns expose their book through page controls, without player inventory slots.
+      playerInvStart = -1;
+      hotbarStart = -1;
+
     } else {
       // Generic fallback for unknown containers
       // Just show all container slots, then player inventory
@@ -1454,27 +1463,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       hotbarStart = playerInvStart + 27;
     }
 
-    // Add player inventory regions (common to all containers except pure player inventory)
-    if (!(menu instanceof InventoryMenu)) {
-      layoutBuilder.addRegions(SlotRegion.newBuilder()
-        .setId("player_inventory")
-        .setLabel("Inventory")
-        .setStartIndex(playerInvStart)
-        .setSlotCount(27)
-        .setColumns(9)
-        .setType(SlotRegionType.SLOT_REGION_NORMAL)
-        .build());
-
-      layoutBuilder.addRegions(SlotRegion.newBuilder()
-        .setId("player_hotbar")
-        .setLabel("Hotbar")
-        .setStartIndex(hotbarStart)
-        .setSlotCount(9)
-        .setColumns(9)
-        .setType(SlotRegionType.SLOT_REGION_HOTBAR)
-        .build());
-    } else {
-      // For player inventory, add main and hotbar
+    if (playerInvStart >= 0) {
       layoutBuilder.addRegions(SlotRegion.newBuilder()
         .setId("player_inventory")
         .setLabel("Inventory")
@@ -1498,7 +1487,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     layoutBuilder.setContainerType(getContainerTypeId(menu));
 
     // Add container buttons (for stonecutter, enchanting, loom, etc.)
-    for (var button : buildContainerButtons(menu)) {
+    for (var button : buildContainerButtons(menu, level)) {
       layoutBuilder.addButtons(button);
     }
 
@@ -1567,21 +1556,21 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
    * Different container types have different interactive buttons.
    * Note: Button details may be limited since some menu fields are private.
    */
-  private static List<ContainerButton> buildContainerButtons(AbstractContainerMenu menu) {
+  private static List<ContainerButton> buildContainerButtons(AbstractContainerMenu menu, ClientLevel level) {
     var buttons = new ArrayList<ContainerButton>();
 
     switch (menu) {
       case StonecutterMenu stonecutterMenu -> {
-        // Stonecutter: recipes are shown in the output slot when selected
-        var inputSlot = stonecutterMenu.getSlot(0);
-        if (!inputSlot.getItem().isEmpty()) {
-          for (int i = 0; i < 20; i++) {  // Max typical stonecutter recipes
-            buttons.add(ContainerButton.newBuilder()
-              .setButtonId(i)
-              .setLabel("Recipe " + (i + 1))
-              .setDisabled(false)
-              .build());
-          }
+        var recipes = stonecutterMenu.getVisibleRecipes().entries();
+        var context = SlotDisplayContext.fromLevel(level);
+        for (var i = 0; i < recipes.size(); i++) {
+          var result = recipes.get(i).recipe().optionDisplay().resolveForFirstStack(context);
+          buttons.add(ContainerButton.newBuilder()
+            .setButtonId(i)
+            .setLabel(result.getCount() + "x " + result.getHoverName().getString())
+            .setIconItemId(result.typeHolder().getRegisteredName())
+            .setSelected(i == stonecutterMenu.getSelectedRecipeIndex())
+            .build());
         }
       }
       case EnchantmentMenu enchantmentMenu -> {
@@ -1725,7 +1714,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         // Button 1 = previous page, Button 2 = next page, Button 3 = take book
         // Data slot 0 = current page
         var bookSlot = lecternMenu.getSlot(0);
-        var hasBook = !bookSlot.getItem().isEmpty();
+        var book = bookSlot.getItem();
+        var hasBook = !book.isEmpty();
+        var writtenContent = book.get(DataComponents.WRITTEN_BOOK_CONTENT);
+        var writableContent = book.get(DataComponents.WRITABLE_BOOK_CONTENT);
+        var pageCount = writtenContent != null ? writtenContent.pages().size()
+          : writableContent != null ? writableContent.pages().size() : 0;
         var currentPage = lecternMenu.getPage();
 
         buttons.add(ContainerButton.newBuilder()
@@ -1740,7 +1734,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           .setLabel("Next Page")
           .setDescription(hasBook ? "Go to next page" : "No book in lectern")
           .setIconItemId("minecraft:writable_book")
-          .setDisabled(!hasBook)  // Can't easily know max pages, let server reject
+          .setDisabled(!hasBook || currentPage >= pageCount - 1)
           .build());
         buttons.add(ContainerButton.newBuilder()
           .setButtonId(3)
@@ -1809,8 +1803,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       builder.setType(DialogType.DIALOG_TYPE_DIALOG_LIST);
     }
 
-    // Set a basic title from the class name if we can't access the actual title
-    builder.setTitle(dialog.getClass().getSimpleName().replace("Dialog", ""));
+    var common = dialog.common();
+    builder.setTitle(common.title().getString());
+    builder.setCanCloseWithEscape(common.canCloseWithEscape());
+    builder.setPause(common.pause());
 
     return builder.build();
   }
@@ -2098,7 +2094,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
         var container = player.containerMenu;
         var validClick = switch (container) {
-          case StonecutterMenu ignored -> buttonId >= 0 && buttonId < 100;
+          case StonecutterMenu stonecutterMenu -> buttonId >= 0 && buttonId < stonecutterMenu.getNumberOfVisibleRecipes();
           case EnchantmentMenu ignored -> buttonId >= 0 && buttonId < 3;
           case LoomMenu ignored -> buttonId >= 0 && buttonId < 100;
           case MerchantMenu merchantMenu -> buttonId >= 0 && buttonId < merchantMenu.getOffers().size();
@@ -2118,7 +2114,18 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         log.info("Clicking container button {} on container {} (type: {})", buttonId, container.containerId, container.getClass().getSimpleName());
         executeAction(
           activeBot,
-          () -> gameMode.handleInventoryButtonClick(container.containerId, buttonId));
+          () -> {
+            if (container instanceof MerchantMenu) {
+              if (!(minecraft.gui.screen() instanceof MerchantScreen screen) || screen.getMenu() != container) {
+                throw Status.FAILED_PRECONDITION.withDescription("Bot trading screen is not available").asRuntimeException();
+              }
+              var accessor = (MerchantScreenAccessor) screen;
+              accessor.soulfire$setSelectedTrade(buttonId);
+              accessor.soulfire$selectTrade();
+            } else {
+              gameMode.handleInventoryButtonClick(container.containerId, buttonId);
+            }
+          });
         return BotContainerButtonClickResponse.newBuilder()
           .setSuccess(true)
           .build();
@@ -2367,7 +2374,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       }
 
       var response = callInBotContext(activeBot, () -> {
-        DialogHandler.setCurrentDialog(activeBot, null);
+        executeAction(activeBot, () -> {
+          if (activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen) {
+            screen.onClose();
+          }
+          DialogHandler.setCurrentDialog(activeBot, null);
+        });
         return BotCloseDialogResponse.newBuilder()
           .setSuccess(true)
           .build();

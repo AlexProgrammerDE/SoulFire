@@ -58,6 +58,7 @@
     "headless.sound.MixinSoundManager",
     "soulfire.AbstractFurnaceMenuAccessor",
     "soulfire.AnvilScreenAccessor",
+    "soulfire.MerchantScreenAccessor",
     "soulfire.ClientRecipeBookAccessor",
     "soulfire.BlockStatePredictionHandlerAccessor",
     "soulfire.ClientLevelAccessor",
