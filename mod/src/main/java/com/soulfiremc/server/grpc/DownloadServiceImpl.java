@@ -23,9 +23,11 @@ import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.ReactorHttpHelper;
 import io.grpc.Status;
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import reactor.core.Disposables;
 
 import java.net.URI;
 import java.util.UUID;
@@ -45,7 +47,11 @@ public final class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServi
 
     try {
       var proxy = convertProxy(request::hasProxy, request::getProxy);
-      ReactorHttpHelper.createReactorClient(proxy, false)
+      var subscription = Disposables.swap();
+      if (responseObserver instanceof ServerCallStreamObserver<DownloadResponse> observer) {
+        observer.setOnCancelHandler(subscription::dispose);
+      }
+      subscription.update(ReactorHttpHelper.createReactorClient(proxy, false)
         .headers(h -> request.getHeadersList().forEach(header -> h.set(header.getKey(), header.getValue())))
         .get()
         .uri(URI.create(request.getUri()))
@@ -53,6 +59,7 @@ public final class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServi
           (res, content) ->
             content
               .asByteArray()
+              .defaultIfEmpty(new byte[0])
               .map(
                 responseBytes ->
                   DownloadResponse.newBuilder()
@@ -69,7 +76,7 @@ public final class DownloadServiceImpl extends DownloadServiceGrpc.DownloadServi
         }, t -> {
           log.error("Error downloading data", t);
           responseObserver.onError(Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException());
-        });
+        }));
     } catch (Throwable t) {
       log.error("Error downloading data", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
