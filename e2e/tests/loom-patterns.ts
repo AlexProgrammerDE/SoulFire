@@ -19,6 +19,12 @@ export default {
       yield* rcon("fill 718 64 -2 723 67 2 air");
       yield* rcon("setblock 721 64 0 loom");
       yield* placeBot(bot, { x: 720.5, y: 64, z: 0.5 }, -90);
+      yield* Effect.acquireRelease(
+        client
+          .instance(bot.instanceId)
+          .getOrCreateBot("E2ERegistryPeer", { readyTimeoutMs: 30_000 }),
+        (peer) => peer.stop().pipe(Effect.ignore),
+      );
       yield* bot.inventory.open({ x: 721, y: 64, z: 0 });
       yield* check(
         (yield* bot.inventoryState()).layout?.buttons.length === 0,
@@ -73,5 +79,5 @@ export default {
         ),
         "5 seconds",
       );
-    }).pipe(Effect.ensuring(bot.closeContainer().pipe(Effect.ignore))),
+    }).pipe(Effect.scoped, Effect.ensuring(bot.closeContainer().pipe(Effect.ignore))),
 } satisfies E2ETest;

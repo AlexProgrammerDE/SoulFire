@@ -81,6 +81,8 @@
     "soulfire.botfixes.MixinOptions",
     "soulfire.botfixes.MixinServerList",
     "soulfire.botfixes.MixinSharedRandomSources",
+    "soulfire.botfixes.MixinHolderComponents",
+    "soulfire.botfixes.MixinRegistryDataCollector",
     "soulfire.modfixes.MixinClientCommandInternals",
     "soulfire.modfixes.MixinClientNetworkingImpl",
     "soulfire.optimization.MixinClientPacketListener",
