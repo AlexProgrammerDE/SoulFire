@@ -614,6 +614,11 @@ public final class BotConnection {
     return current;
   }
 
+  /// The current transport is available during login and configuration, before the game listener exists.
+  public Optional<Channel> networkChannel() {
+    return networkChannelTracker.activeChannel();
+  }
+
   public void trackNetworkChannel(Channel channel) {
     networkChannelTracker.track(channel);
   }

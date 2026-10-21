@@ -23,8 +23,30 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NetworkChannelTrackerTest {
+  @Test
+  void keepsTheNewTransportWhenAnOlderChannelCloses() {
+    var tracker = new NetworkChannelTracker();
+    var oldChannel = new EmbeddedChannel();
+    var currentChannel = new EmbeddedChannel();
+    try {
+      assertTrue(tracker.activeChannel().isEmpty());
+      tracker.track(oldChannel);
+      assertSame(oldChannel, tracker.activeChannel().orElseThrow());
+      tracker.track(currentChannel);
+      oldChannel.close();
+      assertSame(currentChannel, tracker.activeChannel().orElseThrow());
+      currentChannel.close();
+      assertTrue(tracker.activeChannel().isEmpty());
+    } finally {
+      oldChannel.finishAndReleaseAll();
+      currentChannel.finishAndReleaseAll();
+    }
+  }
+
   @Test
   void closesTrackedChannels() throws Exception {
     var tracker = new NetworkChannelTracker();
@@ -35,6 +57,7 @@ class NetworkChannelTrackerTest {
 
     assertFalse(channel.isOpen());
     assertFalse(tracker.hasOpenChannels());
+    assertTrue(tracker.activeChannel().isEmpty());
   }
 
   @Test
@@ -47,5 +70,6 @@ class NetworkChannelTrackerTest {
 
     assertFalse(channel.isOpen());
     assertFalse(tracker.hasOpenChannels());
+    assertTrue(tracker.activeChannel().isEmpty());
   }
 }

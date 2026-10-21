@@ -21,24 +21,35 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /// Tracks every network channel created for a bot and closes late arrivals once shutdown begins.
 final class NetworkChannelTracker {
   private final Set<Channel> channels = ConcurrentHashMap.newKeySet();
+  private final AtomicReference<Channel> currentChannel = new AtomicReference<>();
   private final AtomicBoolean closing = new AtomicBoolean();
 
   public void track(Channel channel) {
     channels.add(channel);
-    channel.closeFuture().addListener(_ -> channels.remove(channel));
+    currentChannel.set(channel);
+    channel.closeFuture().addListener(_ -> {
+      channels.remove(channel);
+      currentChannel.compareAndSet(channel, null);
+    });
 
     if (closing.get()) {
       channel.close();
     }
+  }
+
+  public Optional<Channel> activeChannel() {
+    return Optional.ofNullable(currentChannel.get()).filter(Channel::isActive);
   }
 
   public void closeAll(Duration timeout) throws InterruptedException, TimeoutException {

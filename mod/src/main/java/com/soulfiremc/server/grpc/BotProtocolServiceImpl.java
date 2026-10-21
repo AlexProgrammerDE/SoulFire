@@ -20,7 +20,6 @@ package com.soulfiremc.server.grpc;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import com.soulfiremc.grpc.generated.*;
-import com.soulfiremc.mod.access.IConnectionChannel;
 import com.soulfiremc.mod.access.IProtocolInfoAccess;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
@@ -300,8 +299,9 @@ public final class BotProtocolServiceImpl extends BotProtocolServiceGrpc.BotProt
   }
 
   private static ActiveProtocols activeProtocols(BotConnection bot) {
-    var connection = requireMinecraftConnection(bot);
-    var channel = ((IConnectionChannel) connection).soulFire$getChannel();
+    var channel = bot.networkChannel().orElseThrow(() -> Status.FAILED_PRECONDITION
+      .withDescription("The bot network channel is not active")
+      .asRuntimeException());
     var decoder = channel.pipeline().get("decoder");
     var encoder = channel.pipeline().get("encoder");
     if (!(decoder instanceof IProtocolInfoAccess decoderAccess)
