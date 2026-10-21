@@ -114,6 +114,25 @@ abstract class GenerateLauncherAssets : DefaultTask() {
         }
         assets += remote(client, cache, "Minecraft font $hash", "assets/objects/$path", "asset", download)
       }
+      val sounds = JsonObject()
+      index.getAsJsonObject("objects").entrySet().filter {
+        it.key == "minecraft/sounds.json" || it.key.startsWith("minecraft/sounds/")
+      }.forEach { sounds.add(it.key, it.value) }
+      val soundDefinitions = sounds.getAsJsonObject("minecraft/sounds.json")
+      val soundHash = soundDefinitions["hash"].asString
+      val soundPath = "${soundHash.take(2)}/$soundHash"
+      assets += remote(client, cache, "Minecraft sound definitions", "assets/objects/$soundPath", "asset",
+        soundDefinitions.deepCopy().apply {
+          addProperty("url", "https://resources.download.minecraft.net/$soundPath")
+          addProperty("sha1", soundHash)
+        })
+      val soundIndexId = "soulfire-sounds-${minecraftVersion.get()}"
+      val soundIndexFile = output.resolve("META-INF/assets/$soundIndexId.json")
+      soundIndexFile.writeText(gson.toJson(JsonObject().apply { add("objects", sounds) }) + "\n")
+      assets += linkedMapOf(
+        "name" to "Minecraft sound index", "path" to "assets/indexes/$soundIndexId.json", "kind" to "asset",
+        "resource" to "META-INF/assets/$soundIndexId.json", "size" to soundIndexFile.length(), "sha256" to digest(soundIndexFile, "SHA-256")
+      )
       val indexId = "soulfire-fonts-${minecraftVersion.get()}"
       val indexFile = output.resolve("META-INF/assets/$indexId.json")
       indexFile.writeText(gson.toJson(JsonObject().apply { add("objects", fonts) }) + "\n")

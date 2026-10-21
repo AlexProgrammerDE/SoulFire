@@ -26,7 +26,7 @@ class PovWatchRequest(_message.Message):
     def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., session_id: _Optional[str] = ..., width: _Optional[int] = ..., height: _Optional[int] = ..., max_fps: _Optional[int] = ..., codecs: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class PovFrame(_message.Message):
-    __slots__ = ("sequence", "width", "height", "screen_open", "data", "timestamp_us", "key_frame", "codec", "cursor_shape", "target_bitrate", "input_token", "target_fps", "clipboard", "clipboard_sequence", "open_url")
+    __slots__ = ("sequence", "width", "height", "screen_open", "data", "timestamp_us", "key_frame", "codec", "cursor_shape", "target_bitrate", "input_token", "target_fps", "clipboard", "clipboard_sequence", "open_url", "audio", "audio_enabled", "audio_error")
     class CursorShape(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
         ARROW: _ClassVar[PovFrame.CursorShape]
@@ -60,6 +60,9 @@ class PovFrame(_message.Message):
     CLIPBOARD_FIELD_NUMBER: _ClassVar[int]
     CLIPBOARD_SEQUENCE_FIELD_NUMBER: _ClassVar[int]
     OPEN_URL_FIELD_NUMBER: _ClassVar[int]
+    AUDIO_FIELD_NUMBER: _ClassVar[int]
+    AUDIO_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    AUDIO_ERROR_FIELD_NUMBER: _ClassVar[int]
     sequence: int
     width: int
     height: int
@@ -75,10 +78,21 @@ class PovFrame(_message.Message):
     clipboard: str
     clipboard_sequence: int
     open_url: str
-    def __init__(self, sequence: _Optional[int] = ..., width: _Optional[int] = ..., height: _Optional[int] = ..., screen_open: bool = ..., data: _Optional[bytes] = ..., timestamp_us: _Optional[int] = ..., key_frame: bool = ..., codec: _Optional[str] = ..., cursor_shape: _Optional[_Union[PovFrame.CursorShape, str]] = ..., target_bitrate: _Optional[int] = ..., input_token: _Optional[str] = ..., target_fps: _Optional[int] = ..., clipboard: _Optional[str] = ..., clipboard_sequence: _Optional[int] = ..., open_url: _Optional[str] = ...) -> None: ...
+    audio: _containers.RepeatedCompositeFieldContainer[PovAudioPacket]
+    audio_enabled: bool
+    audio_error: str
+    def __init__(self, sequence: _Optional[int] = ..., width: _Optional[int] = ..., height: _Optional[int] = ..., screen_open: bool = ..., data: _Optional[bytes] = ..., timestamp_us: _Optional[int] = ..., key_frame: bool = ..., codec: _Optional[str] = ..., cursor_shape: _Optional[_Union[PovFrame.CursorShape, str]] = ..., target_bitrate: _Optional[int] = ..., input_token: _Optional[str] = ..., target_fps: _Optional[int] = ..., clipboard: _Optional[str] = ..., clipboard_sequence: _Optional[int] = ..., open_url: _Optional[str] = ..., audio: _Optional[_Iterable[_Union[PovAudioPacket, _Mapping]]] = ..., audio_enabled: bool = ..., audio_error: _Optional[str] = ...) -> None: ...
+
+class PovAudioPacket(_message.Message):
+    __slots__ = ("data", "timestamp_us")
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    TIMESTAMP_US_FIELD_NUMBER: _ClassVar[int]
+    data: bytes
+    timestamp_us: int
+    def __init__(self, data: _Optional[bytes] = ..., timestamp_us: _Optional[int] = ...) -> None: ...
 
 class PovInputRequest(_message.Message):
-    __slots__ = ("session_id", "sequence", "captured", "width", "height", "events", "escape", "request_key_frame", "feedback", "input_token", "clipboard", "read_clipboard", "max_fps")
+    __slots__ = ("session_id", "sequence", "captured", "width", "height", "events", "escape", "request_key_frame", "feedback", "input_token", "clipboard", "read_clipboard", "max_fps", "audio_enabled")
     SESSION_ID_FIELD_NUMBER: _ClassVar[int]
     SEQUENCE_FIELD_NUMBER: _ClassVar[int]
     CAPTURED_FIELD_NUMBER: _ClassVar[int]
@@ -92,6 +106,7 @@ class PovInputRequest(_message.Message):
     CLIPBOARD_FIELD_NUMBER: _ClassVar[int]
     READ_CLIPBOARD_FIELD_NUMBER: _ClassVar[int]
     MAX_FPS_FIELD_NUMBER: _ClassVar[int]
+    AUDIO_ENABLED_FIELD_NUMBER: _ClassVar[int]
     session_id: str
     sequence: int
     captured: bool
@@ -105,7 +120,8 @@ class PovInputRequest(_message.Message):
     clipboard: str
     read_clipboard: bool
     max_fps: int
-    def __init__(self, session_id: _Optional[str] = ..., sequence: _Optional[int] = ..., captured: bool = ..., width: _Optional[int] = ..., height: _Optional[int] = ..., events: _Optional[_Iterable[_Union[PovInputEvent, _Mapping]]] = ..., escape: bool = ..., request_key_frame: bool = ..., feedback: _Optional[_Union[PovStreamFeedback, _Mapping]] = ..., input_token: _Optional[str] = ..., clipboard: _Optional[str] = ..., read_clipboard: bool = ..., max_fps: _Optional[int] = ...) -> None: ...
+    audio_enabled: bool
+    def __init__(self, session_id: _Optional[str] = ..., sequence: _Optional[int] = ..., captured: bool = ..., width: _Optional[int] = ..., height: _Optional[int] = ..., events: _Optional[_Iterable[_Union[PovInputEvent, _Mapping]]] = ..., escape: bool = ..., request_key_frame: bool = ..., feedback: _Optional[_Union[PovStreamFeedback, _Mapping]] = ..., input_token: _Optional[str] = ..., clipboard: _Optional[str] = ..., read_clipboard: bool = ..., max_fps: _Optional[int] = ..., audio_enabled: bool = ...) -> None: ...
 
 class PovStreamFeedback(_message.Message):
     __slots__ = ("received_sequence", "delivery_delay_ms", "decoder_queue_size", "decoder_recoveries")

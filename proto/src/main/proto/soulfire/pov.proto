@@ -51,6 +51,16 @@ message PovFrame {
   optional string clipboard = 15;
   uint64 clipboard_sequence = 16;
   optional string open_url = 17;
+  // Independent 20 ms, 48 kHz stereo Opus packets. Empty unless audio is enabled.
+  repeated PovAudioPacket audio = 18;
+  // Presence advertises audio support to clients connected to older servers.
+  optional bool audio_enabled = 19;
+  // Audio failure leaves video and input usable.
+  string audio_error = 20;
+}
+message PovAudioPacket {
+  bytes data = 1;
+  uint64 timestamp_us = 2;
 }
 message PovInputRequest {
   string session_id = 1;
@@ -69,6 +79,8 @@ message PovInputRequest {
   optional string clipboard = 11;
   bool read_clipboard = 12;
   uint32 max_fps = 13;
+  // Explicit opt-in; mute releases this bot's audio device and decoded resources.
+  bool audio_enabled = 14;
 }
 // Client-relative delivery delay avoids requiring synchronized clocks.
 message PovStreamFeedback {

@@ -90,6 +90,7 @@ public final class SoulFireBootstrap {
         }
       }
       System.setProperty("sf.assetIndex", manifest.assetIndex());
+      System.setProperty("sf.soundIndex", baseDirectory.resolve("assets/indexes/soulfire-sounds-" + manifest.minecraftVersion() + ".json").toString());
       System.setProperty("java.class.path", runtime.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator)));
       var urls = new ArrayList<URL>();
       for (var file : runtime) {

@@ -17,16 +17,34 @@
  */
 package com.soulfiremc.mod.mixin.headless.sound;
 
+import com.soulfiremc.server.renderer.PovAudioContext;
+import com.soulfiremc.server.renderer.PovAudioExecutor;
 import net.minecraft.client.sounds.SoundEngineExecutor;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SoundEngineExecutor.class)
-public class MixinSoundEngineExecutor {
-  @Inject(method = "run", at = @At("HEAD"), cancellable = true)
-  private void run(CallbackInfo ci) {
-    ci.cancel();
+public class MixinSoundEngineExecutor implements PovAudioExecutor {
+  @Unique
+  private PovAudioContext soulfire$audioContext;
+
+  @Override
+  public void soulfire$setAudioContext(PovAudioContext context) {
+    soulfire$audioContext = context;
+  }
+
+  @Redirect(method = "createThread", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V"))
+  private void startAudioThread(Thread thread) {
+    if (soulfire$audioContext != null) thread.start();
+  }
+
+  @Inject(method = "wrapRunnable", at = @At("HEAD"), cancellable = true)
+  private void bindAudioContext(Runnable task, CallbackInfoReturnable<Runnable> cir) {
+    var context = soulfire$audioContext;
+    cir.setReturnValue(context == null ? () -> {} : () -> context.run(task));
   }
 }

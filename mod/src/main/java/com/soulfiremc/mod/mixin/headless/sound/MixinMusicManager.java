@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.mod.mixin.headless.sound;
 
+import com.soulfiremc.mod.mixin.soulfire.SoundManagerAccessor;
+import com.soulfiremc.server.renderer.PovAudioCapture;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.MusicManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,7 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinMusicManager {
   @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
   private void tickHook(CallbackInfo ci) {
-    ci.cancel();
+    var engine = ((SoundManagerAccessor) Minecraft.getInstance().getSoundManager()).soulfire$getSoundEngine();
+    if (!((PovAudioCapture) engine).soulfire$isAudioEnabled()) ci.cancel();
   }
 
 }

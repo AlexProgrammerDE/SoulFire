@@ -30,6 +30,7 @@ import com.mojang.blaze3d.platform.FramerateLimitTracker;
 import com.mojang.blaze3d.platform.TextInputManager;
 import com.soulfiremc.mod.access.IMinecraft;
 import com.soulfiremc.mod.access.ITextureManager;
+import com.soulfiremc.mod.mixin.soulfire.SoundManagerAccessor;
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.mod.util.SFModHelpers;
 import com.soulfiremc.server.InstanceManager;
@@ -105,6 +106,7 @@ import net.minecraft.client.resources.MapTextureManager;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.telemetry.ClientTelemetryManager;
 import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.Holder;
@@ -112,6 +114,7 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.gizmos.SimpleGizmoCollector;
 import net.minecraft.network.PacketProcessor;
 import net.minecraft.server.network.EventLoopGroupHolder;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiling.ContinuousProfiler;
 import net.minecraft.world.phys.Vec3;
@@ -360,6 +363,12 @@ public final class BotConnection {
     minecraft.keyboardHandler = new KeyboardHandler(minecraft);
     minecraft.narrator = new GameNarrator(minecraft);
     minecraft.tutorial = new Tutorial(minecraft, minecraft.options);
+    var soundManager = SFModHelpers.deepCopy(minecraft.getSoundManager());
+    var soundAccess = (SoundManagerAccessor) soundManager;
+    soundAccess.soulfire$setSoundEngine(new SoundEngine(soundManager, minecraft.options,
+      ResourceProvider.fromMap(soundAccess.soulfire$getSoundCache())));
+    minecraft.soundManager = soundManager;
+    shutdownHooks.add(soundManager::destroy);
     minecraft.musicManager = new MusicManager(minecraft);
     minecraft.telemetryManager = new ClientTelemetryManager(
       minecraft,

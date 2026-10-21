@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file soulfire/pov.proto.
  */
 export const file_soulfire_pov: GenFile = /*@__PURE__*/
-  fileDesc("ChJzb3VsZmlyZS9wb3YucHJvdG8SC3NvdWxmaXJlLnYxIooBCg9Qb3ZXYXRjaFJlcXVlc3QSEwoLaW5zdGFuY2VfaWQYASABKAkSDgoGYm90X2lkGAIgASgJEhIKCnNlc3Npb25faWQYAyABKAkSDQoFd2lkdGgYBCABKAUSDgoGaGVpZ2h0GAUgASgFEg8KB21heF9mcHMYBiABKA0SDgoGY29kZWNzGAcgAygJIpMECghQb3ZGcmFtZRIQCghzZXF1ZW5jZRgDIAEoBBINCgV3aWR0aBgEIAEoBRIOCgZoZWlnaHQYBSABKAUSEwoLc2NyZWVuX29wZW4YBiABKAgSDAoEZGF0YRgHIAEoDBIUCgx0aW1lc3RhbXBfdXMYCCABKAQSEQoJa2V5X2ZyYW1lGAkgASgIEg0KBWNvZGVjGAogASgJEjcKDGN1cnNvcl9zaGFwZRgLIAEoDjIhLnNvdWxmaXJlLnYxLlBvdkZyYW1lLkN1cnNvclNoYXBlEhYKDnRhcmdldF9iaXRyYXRlGAwgASgNEhMKC2lucHV0X3Rva2VuGA0gASgJEhIKCnRhcmdldF9mcHMYDiABKA0SFgoJY2xpcGJvYXJkGA8gASgJSACIAQESGgoSY2xpcGJvYXJkX3NlcXVlbmNlGBAgASgEEhUKCG9wZW5fdXJsGBEgASgJSAGIAQEifQoLQ3Vyc29yU2hhcGUSCQoFQVJST1cQABIICgRURVhUEAESDQoJQ1JPU1NIQUlSEAISCwoHUE9JTlRFUhADEg0KCVJFU0laRV9OUxAEEg0KCVJFU0laRV9FVxAFEg4KClJFU0laRV9BTEwQBhIPCgtOT1RfQUxMT1dFRBAHQgwKCl9jbGlwYm9hcmRCCwoJX29wZW5fdXJsSgQIARACSgQIAhADUgVpbWFnZVIJbWltZV90eXBlItUCCg9Qb3ZJbnB1dFJlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCRIQCghzZXF1ZW5jZRgCIAEoBBIQCghjYXB0dXJlZBgDIAEoCBINCgV3aWR0aBgEIAEoBRIOCgZoZWlnaHQYBSABKAUSKgoGZXZlbnRzGAYgAygLMhouc291bGZpcmUudjEuUG92SW5wdXRFdmVudBIOCgZlc2NhcGUYByABKAgSGQoRcmVxdWVzdF9rZXlfZnJhbWUYCCABKAgSMAoIZmVlZGJhY2sYCSABKAsyHi5zb3VsZmlyZS52MS5Qb3ZTdHJlYW1GZWVkYmFjaxITCgtpbnB1dF90b2tlbhgKIAEoCRIWCgljbGlwYm9hcmQYCyABKAlIAIgBARIWCg5yZWFkX2NsaXBib2FyZBgMIAEoCBIPCgdtYXhfZnBzGA0gASgNQgwKCl9jbGlwYm9hcmQigQEKEVBvdlN0cmVhbUZlZWRiYWNrEhkKEXJlY2VpdmVkX3NlcXVlbmNlGAEgASgEEhkKEWRlbGl2ZXJ5X2RlbGF5X21zGAIgASgBEhoKEmRlY29kZXJfcXVldWVfc2l6ZRgDIAEoDRIaChJkZWNvZGVyX3JlY292ZXJpZXMYBCABKA0iEgoQUG92SW5wdXRSZXNwb25zZSLZAQoNUG92SW5wdXRFdmVudBItCgRraW5kGAEgASgOMh8uc291bGZpcmUudjEuUG92SW5wdXRFdmVudC5LaW5kEgwKBGNvZGUYAiABKAUSDgoGYWN0aW9uGAMgASgFEhEKCW1vZGlmaWVycxgEIAEoBRIJCgF4GAUgASgBEgkKAXkYBiABKAESEAoIcmVsYXRpdmUYByABKAgiQAoES2luZBIHCgNLRVkQABINCglDSEFSQUNURVIQARIKCgZCVVRUT04QAhIICgRNT1ZFEAMSCgoGU0NST0xMEAQykgEKClBvdlNlcnZpY2USPgoFV2F0Y2gSHC5zb3VsZmlyZS52MS5Qb3ZXYXRjaFJlcXVlc3QaFS5zb3VsZmlyZS52MS5Qb3ZGcmFtZTABEkQKBUlucHV0Ehwuc291bGZpcmUudjEuUG92SW5wdXRSZXF1ZXN0Gh0uc291bGZpcmUudjEuUG92SW5wdXRSZXNwb25zZUIhCh1jb20uc291bGZpcmVtYy5ncnBjLmdlbmVyYXRlZFABYgZwcm90bzM");
+  fileDesc("ChJzb3VsZmlyZS9wb3YucHJvdG8SC3NvdWxmaXJlLnYxIooBCg9Qb3ZXYXRjaFJlcXVlc3QSEwoLaW5zdGFuY2VfaWQYASABKAkSDgoGYm90X2lkGAIgASgJEhIKCnNlc3Npb25faWQYAyABKAkSDQoFd2lkdGgYBCABKAUSDgoGaGVpZ2h0GAUgASgFEg8KB21heF9mcHMYBiABKA0SDgoGY29kZWNzGAcgAygJIoIFCghQb3ZGcmFtZRIQCghzZXF1ZW5jZRgDIAEoBBINCgV3aWR0aBgEIAEoBRIOCgZoZWlnaHQYBSABKAUSEwoLc2NyZWVuX29wZW4YBiABKAgSDAoEZGF0YRgHIAEoDBIUCgx0aW1lc3RhbXBfdXMYCCABKAQSEQoJa2V5X2ZyYW1lGAkgASgIEg0KBWNvZGVjGAogASgJEjcKDGN1cnNvcl9zaGFwZRgLIAEoDjIhLnNvdWxmaXJlLnYxLlBvdkZyYW1lLkN1cnNvclNoYXBlEhYKDnRhcmdldF9iaXRyYXRlGAwgASgNEhMKC2lucHV0X3Rva2VuGA0gASgJEhIKCnRhcmdldF9mcHMYDiABKA0SFgoJY2xpcGJvYXJkGA8gASgJSACIAQESGgoSY2xpcGJvYXJkX3NlcXVlbmNlGBAgASgEEhUKCG9wZW5fdXJsGBEgASgJSAGIAQESKgoFYXVkaW8YEiADKAsyGy5zb3VsZmlyZS52MS5Qb3ZBdWRpb1BhY2tldBIaCg1hdWRpb19lbmFibGVkGBMgASgISAKIAQESEwoLYXVkaW9fZXJyb3IYFCABKAkifQoLQ3Vyc29yU2hhcGUSCQoFQVJST1cQABIICgRURVhUEAESDQoJQ1JPU1NIQUlSEAISCwoHUE9JTlRFUhADEg0KCVJFU0laRV9OUxAEEg0KCVJFU0laRV9FVxAFEg4KClJFU0laRV9BTEwQBhIPCgtOT1RfQUxMT1dFRBAHQgwKCl9jbGlwYm9hcmRCCwoJX29wZW5fdXJsQhAKDl9hdWRpb19lbmFibGVkSgQIARACSgQIAhADUgVpbWFnZVIJbWltZV90eXBlIjQKDlBvdkF1ZGlvUGFja2V0EgwKBGRhdGEYASABKAwSFAoMdGltZXN0YW1wX3VzGAIgASgEIuwCCg9Qb3ZJbnB1dFJlcXVlc3QSEgoKc2Vzc2lvbl9pZBgBIAEoCRIQCghzZXF1ZW5jZRgCIAEoBBIQCghjYXB0dXJlZBgDIAEoCBINCgV3aWR0aBgEIAEoBRIOCgZoZWlnaHQYBSABKAUSKgoGZXZlbnRzGAYgAygLMhouc291bGZpcmUudjEuUG92SW5wdXRFdmVudBIOCgZlc2NhcGUYByABKAgSGQoRcmVxdWVzdF9rZXlfZnJhbWUYCCABKAgSMAoIZmVlZGJhY2sYCSABKAsyHi5zb3VsZmlyZS52MS5Qb3ZTdHJlYW1GZWVkYmFjaxITCgtpbnB1dF90b2tlbhgKIAEoCRIWCgljbGlwYm9hcmQYCyABKAlIAIgBARIWCg5yZWFkX2NsaXBib2FyZBgMIAEoCBIPCgdtYXhfZnBzGA0gASgNEhUKDWF1ZGlvX2VuYWJsZWQYDiABKAhCDAoKX2NsaXBib2FyZCKBAQoRUG92U3RyZWFtRmVlZGJhY2sSGQoRcmVjZWl2ZWRfc2VxdWVuY2UYASABKAQSGQoRZGVsaXZlcnlfZGVsYXlfbXMYAiABKAESGgoSZGVjb2Rlcl9xdWV1ZV9zaXplGAMgASgNEhoKEmRlY29kZXJfcmVjb3ZlcmllcxgEIAEoDSISChBQb3ZJbnB1dFJlc3BvbnNlItkBCg1Qb3ZJbnB1dEV2ZW50Ei0KBGtpbmQYASABKA4yHy5zb3VsZmlyZS52MS5Qb3ZJbnB1dEV2ZW50LktpbmQSDAoEY29kZRgCIAEoBRIOCgZhY3Rpb24YAyABKAUSEQoJbW9kaWZpZXJzGAQgASgFEgkKAXgYBSABKAESCQoBeRgGIAEoARIQCghyZWxhdGl2ZRgHIAEoCCJACgRLaW5kEgcKA0tFWRAAEg0KCUNIQVJBQ1RFUhABEgoKBkJVVFRPThACEggKBE1PVkUQAxIKCgZTQ1JPTEwQBDKSAQoKUG92U2VydmljZRI+CgVXYXRjaBIcLnNvdWxmaXJlLnYxLlBvdldhdGNoUmVxdWVzdBoVLnNvdWxmaXJlLnYxLlBvdkZyYW1lMAESRAoFSW5wdXQSHC5zb3VsZmlyZS52MS5Qb3ZJbnB1dFJlcXVlc3QaHS5zb3VsZmlyZS52MS5Qb3ZJbnB1dFJlc3BvbnNlQiEKHWNvbS5zb3VsZmlyZW1jLmdycGMuZ2VuZXJhdGVkUAFiBnByb3RvMw");
 
 /**
  * @generated from message soulfire.v1.PovWatchRequest
@@ -146,6 +146,27 @@ export type PovFrame = Message<"soulfire.v1.PovFrame"> & {
    * @generated from field: optional string open_url = 17;
    */
   openUrl?: string | undefined;
+
+  /**
+   * Independent 20 ms, 48 kHz stereo Opus packets. Empty unless audio is enabled.
+   *
+   * @generated from field: repeated soulfire.v1.PovAudioPacket audio = 18;
+   */
+  audio: PovAudioPacket[];
+
+  /**
+   * Presence advertises audio support to clients connected to older servers.
+   *
+   * @generated from field: optional bool audio_enabled = 19;
+   */
+  audioEnabled?: boolean | undefined;
+
+  /**
+   * Audio failure leaves video and input usable.
+   *
+   * @generated from field: string audio_error = 20;
+   */
+  audioError: string;
 };
 
 /**
@@ -205,6 +226,28 @@ export enum PovFrame_CursorShape {
  */
 export const PovFrame_CursorShapeSchema: GenEnum<PovFrame_CursorShape> = /*@__PURE__*/
   enumDesc(file_soulfire_pov, 1, 0);
+
+/**
+ * @generated from message soulfire.v1.PovAudioPacket
+ */
+export type PovAudioPacket = Message<"soulfire.v1.PovAudioPacket"> & {
+  /**
+   * @generated from field: bytes data = 1;
+   */
+  data: Uint8Array;
+
+  /**
+   * @generated from field: uint64 timestamp_us = 2;
+   */
+  timestampUs: bigint;
+};
+
+/**
+ * Describes the message soulfire.v1.PovAudioPacket.
+ * Use `create(PovAudioPacketSchema)` to create a new message.
+ */
+export const PovAudioPacketSchema: GenMessage<PovAudioPacket> = /*@__PURE__*/
+  messageDesc(file_soulfire_pov, 2);
 
 /**
  * @generated from message soulfire.v1.PovInputRequest
@@ -280,6 +323,13 @@ export type PovInputRequest = Message<"soulfire.v1.PovInputRequest"> & {
    * @generated from field: uint32 max_fps = 13;
    */
   maxFps: number;
+
+  /**
+   * Explicit opt-in; mute releases this bot's audio device and decoded resources.
+   *
+   * @generated from field: bool audio_enabled = 14;
+   */
+  audioEnabled: boolean;
 };
 
 /**
@@ -287,7 +337,7 @@ export type PovInputRequest = Message<"soulfire.v1.PovInputRequest"> & {
  * Use `create(PovInputRequestSchema)` to create a new message.
  */
 export const PovInputRequestSchema: GenMessage<PovInputRequest> = /*@__PURE__*/
-  messageDesc(file_soulfire_pov, 2);
+  messageDesc(file_soulfire_pov, 3);
 
 /**
  * Client-relative delivery delay avoids requiring synchronized clocks.
@@ -321,7 +371,7 @@ export type PovStreamFeedback = Message<"soulfire.v1.PovStreamFeedback"> & {
  * Use `create(PovStreamFeedbackSchema)` to create a new message.
  */
 export const PovStreamFeedbackSchema: GenMessage<PovStreamFeedback> = /*@__PURE__*/
-  messageDesc(file_soulfire_pov, 3);
+  messageDesc(file_soulfire_pov, 4);
 
 /**
  * @generated from message soulfire.v1.PovInputResponse
@@ -334,7 +384,7 @@ export type PovInputResponse = Message<"soulfire.v1.PovInputResponse"> & {
  * Use `create(PovInputResponseSchema)` to create a new message.
  */
 export const PovInputResponseSchema: GenMessage<PovInputResponse> = /*@__PURE__*/
-  messageDesc(file_soulfire_pov, 4);
+  messageDesc(file_soulfire_pov, 5);
 
 /**
  * @generated from message soulfire.v1.PovInputEvent
@@ -387,7 +437,7 @@ export type PovInputEvent = Message<"soulfire.v1.PovInputEvent"> & {
  * Use `create(PovInputEventSchema)` to create a new message.
  */
 export const PovInputEventSchema: GenMessage<PovInputEvent> = /*@__PURE__*/
-  messageDesc(file_soulfire_pov, 5);
+  messageDesc(file_soulfire_pov, 6);
 
 /**
  * @generated from enum soulfire.v1.PovInputEvent.Kind
@@ -423,7 +473,7 @@ export enum PovInputEvent_Kind {
  * Describes the enum soulfire.v1.PovInputEvent.Kind.
  */
 export const PovInputEvent_KindSchema: GenEnum<PovInputEvent_Kind> = /*@__PURE__*/
-  enumDesc(file_soulfire_pov, 5, 0);
+  enumDesc(file_soulfire_pov, 6, 0);
 
 /**
  * An exclusive, authenticated interactive view. Input heartbeats are required

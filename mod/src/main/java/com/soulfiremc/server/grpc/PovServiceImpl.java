@@ -37,6 +37,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
 import com.soulfiremc.server.renderer.AdaptivePovQuality;
+import com.soulfiremc.server.renderer.PovAudioStream;
 import com.soulfiremc.server.renderer.PovClientActions;
 import com.soulfiremc.server.renderer.PovVideoEncoder;
 import com.soulfiremc.server.renderer.VulkanRenderer;
@@ -149,6 +150,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
           session.clipboard.set(new ClipboardUpdate(request.getSequence(), session.bot.minecraft().keyboardHandler.getClipboard()));
         }
       }).get(5, TimeUnit.SECONDS);
+      session.audioEnabled = request.getAudioEnabled();
       session.inputSequence = request.getSequence();
       session.width = even(request.getWidth());
       session.height = even(request.getHeight());
@@ -271,6 +273,8 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private final AtomicBoolean keyFrameRequested = new AtomicBoolean(true);
     private final long startedAt = System.nanoTime();
     private PovVideoEncoder encoder;
+    private final PovAudioStream audio = new PovAudioStream();
+    private volatile boolean audioEnabled;
     private boolean previousScreenOpen;
     private PovFrame.CursorShape previousCursor = PovFrame.CursorShape.ARROW;
     private long previousTimestamp;
@@ -332,7 +336,8 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
           };
           var timestamp = (started - startedAt) / 1000;
           var captured = new Captured(image, readback.pipelined() ? previousScreenOpen : minecraft.gui.screen() != null,
-            readback.pipelined() ? previousCursor : cursorShape, readback.pipelined() ? previousTimestamp : timestamp);
+            readback.pipelined() ? previousCursor : cursorShape, readback.pipelined() ? previousTimestamp : timestamp,
+            audio.capture(minecraft, audioEnabled, (System.nanoTime() - startedAt) / 1000));
           previousScreenOpen = minecraft.gui.screen() != null;
           previousCursor = cursorShape;
           previousTimestamp = timestamp;
@@ -356,6 +361,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
             encoder.bitrate(adaptation.bitrate());
             var encoded = encoder.encode(image.pixels(), frame.timestampUs, keyFrameRequested.getAndSet(false));
             var builder = PovFrame.newBuilder()
+              .addAllAudio(frame.audio.packets()).setAudioEnabled(frame.audio.enabled()).setAudioError(frame.audio.error())
               .setTargetFps(adaptation.fps()).setInputToken(inputToken).setData(ByteString.copyFrom(encoded.data())).setTimestampUs(encoded.timestampUs())
               .setKeyFrame(encoded.keyFrame()).setCodec(encoded.codec())
               .setWidth(image.width()).setHeight(image.height()).setScreenOpen(frame.screenOpen)
@@ -388,7 +394,8 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       bot.minecraft().execute(() -> {
         bot.povInput().capture(false);
         bot.minecraft().keyboardHandler.setClipboard("");
-        if (!rendering.get()) readback.close();
+        try { audio.close(); }
+        finally { if (!rendering.get()) readback.close(); }
       });
       try { leases.release(bot.accountProfileId(), owner, token); }
       catch (BotControlLeaseManager.InvalidLeaseException ignored) { /* Expired leases already release ownership. */ }
@@ -397,5 +404,5 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
 
   private record ClipboardUpdate(long sequence, String text) {}
 
-  private record Captured(VulkanRenderer.RgbaFrame image, boolean screenOpen, PovFrame.CursorShape cursorShape, long timestampUs) {}
+  private record Captured(VulkanRenderer.RgbaFrame image, boolean screenOpen, PovFrame.CursorShape cursorShape, long timestampUs, PovAudioStream.Batch audio) {}
 }
