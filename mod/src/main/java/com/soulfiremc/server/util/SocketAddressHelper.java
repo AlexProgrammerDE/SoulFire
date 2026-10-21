@@ -45,7 +45,13 @@ public final class SocketAddressHelper {
 
   public static String serialize(SocketAddress address) {
     return switch (address) {
-      case InetSocketAddress inet -> "inet://%s:%d".formatted(inet.getHostString(), inet.getPort());
+      case InetSocketAddress inet -> {
+        var host = inet.getHostString();
+        if (host.contains(":") && !host.startsWith("[")) {
+          host = "[" + host + "]";
+        }
+        yield "inet://%s:%d".formatted(host, inet.getPort());
+      }
       case UnixDomainSocketAddress unix -> "unix://%s".formatted(unix.getPath());
       default -> throw new IllegalArgumentException("Unsupported address type: " + address.getClass().getName());
     };
