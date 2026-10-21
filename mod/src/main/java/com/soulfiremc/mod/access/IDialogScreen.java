@@ -25,8 +25,7 @@ import net.minecraft.server.dialog.action.Action;
 import java.util.List;
 import java.util.Map;
 
-public interface IDialogScreen {
-  String soulfire$getScreenId();
+public interface IDialogScreen extends IScreenIdentity {
   Dialog soulfire$getDialog();
   Map<String, InputBinding> soulfire$getInputs();
   List<ActionButton> soulfire$getActions();

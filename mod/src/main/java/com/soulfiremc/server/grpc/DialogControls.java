@@ -26,6 +26,8 @@ import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.dialog.DialogScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.server.dialog.input.BooleanInput;
@@ -33,6 +35,7 @@ import net.minecraft.server.dialog.input.InputControl;
 import net.minecraft.server.dialog.input.NumberRangeInput;
 import net.minecraft.server.dialog.input.SingleOptionInput;
 import net.minecraft.server.dialog.input.TextInput;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +46,17 @@ import java.util.concurrent.atomic.AtomicReference;
 final class DialogControls {
   private DialogControls() {}
 
-  static ClientActions act(DialogScreen<?> screen, Map<String, String> values, int index) {
+  static boolean supports(@Nullable Screen screen) {
+    return screen instanceof DialogScreen<?> || screen instanceof ConfirmLinkScreen;
+  }
+
+  static ClientActions act(@Nullable Screen screen, Map<String, String> values, int index) {
+    if (screen instanceof ConfirmLinkScreen link) return LinkConfirmationDialog.act(link, values, index);
+    if (screen instanceof DialogScreen<?> dialog) return actDialog(dialog, values, index);
+    throw Status.FAILED_PRECONDITION.withDescription("No dialog is currently displayed").asRuntimeException();
+  }
+
+  private static ClientActions actDialog(DialogScreen<?> screen, Map<String, String> values, int index) {
     var controls = (IDialogScreen) screen;
     var actions = controls.soulfire$getActions();
     if (index < -1 || index >= actions.size()) throw invalid("Invalid dialog button index");
@@ -61,9 +74,7 @@ final class DialogControls {
     }
     // Validate every value before modifying any native widget.
     updates.forEach(Runnable::run);
-    var clipboard = new AtomicReference<String>();
-    var url = new AtomicReference<String>();
-    ScopedValue.where(PovClientActions.CURRENT, new PovClientActions(clipboard::set, url::set)).run(() -> {
+    return captureClientActions(() -> {
       if (index == -1) {
         screen.onClose();
       } else {
@@ -72,6 +83,12 @@ final class DialogControls {
         screen.runAction(actions.get(index).action().flatMap(action -> action.createAction(getters)));
       }
     });
+  }
+
+  static ClientActions captureClientActions(Runnable action) {
+    var clipboard = new AtomicReference<String>();
+    var url = new AtomicReference<String>();
+    ScopedValue.where(PovClientActions.CURRENT, new PovClientActions(clipboard::set, url::set)).run(action);
     return new ClientActions(Optional.ofNullable(clipboard.get()), Optional.ofNullable(url.get()));
   }
 

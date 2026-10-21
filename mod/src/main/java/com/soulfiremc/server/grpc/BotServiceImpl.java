@@ -51,7 +51,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.dialog.DialogScreen;
+import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
@@ -2214,6 +2214,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       if (activeBot != null) {
         var dialog = callInBotContext(activeBot, () -> activeBot.minecraft().submit(() -> {
+          if (activeBot.minecraft().gui.screen() instanceof ConfirmLinkScreen link) return LinkConfirmationDialog.describe(link);
           var holder = DialogHandler.getCurrentDialog(activeBot);
           return holder == null ? null : DialogStateMapper.describe(holder,
             (IDialogScreen) activeBot.minecraft().gui.screen(), activeBot.minecraft().level);
@@ -2249,10 +2250,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var result = new AtomicReference<DialogControls.ClientActions>();
       executeAction(activeBot, () -> {
-        if (!(activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen)) {
-          throw Status.FAILED_PRECONDITION.withDescription("No dialog is currently displayed").asRuntimeException();
-        }
-        result.set(DialogControls.act(screen, request.getInputValuesMap(), request.hasButtonIndex() ? request.getButtonIndex() : 0));
+        result.set(DialogControls.act(activeBot.minecraft().gui.screen(), request.getInputValuesMap(), request.hasButtonIndex() ? request.getButtonIndex() : 0));
       });
       var builder = BotSubmitDialogResponse.newBuilder().setSuccess(true);
       result.get().clipboard().ifPresent(builder::setClipboard);
@@ -2287,10 +2285,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var result = new AtomicReference<DialogControls.ClientActions>();
       executeAction(activeBot, () -> {
-        if (!(activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen)) {
-          throw Status.FAILED_PRECONDITION.withDescription("No dialog is currently displayed").asRuntimeException();
-        }
-        result.set(DialogControls.act(screen, Map.of(), request.getButtonIndex()));
+        result.set(DialogControls.act(activeBot.minecraft().gui.screen(), Map.of(), request.getButtonIndex()));
       });
       var builder = BotClickDialogButtonResponse.newBuilder().setSuccess(true);
       result.get().clipboard().ifPresent(builder::setClipboard);
@@ -2325,9 +2320,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var result = new AtomicReference<DialogControls.ClientActions>();
       executeAction(activeBot, () -> {
-        if (activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen) {
-          result.set(DialogControls.act(screen, Map.of(), -1));
-        }
+        var screen = activeBot.minecraft().gui.screen();
+        if (DialogControls.supports(screen)) result.set(DialogControls.act(screen, Map.of(), -1));
       });
       var builder = BotCloseDialogResponse.newBuilder().setSuccess(true);
       if (result.get() != null) {

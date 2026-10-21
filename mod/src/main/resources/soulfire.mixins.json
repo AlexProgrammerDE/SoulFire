@@ -45,6 +45,7 @@
     "headless.rendering.MixinBookSignScreen",
     "headless.rendering.MixinChatScreen",
     "headless.rendering.MixinClientLevel",
+    "headless.rendering.MixinConfirmLinkScreen",
     "headless.rendering.MixinGuiRenderer",
     "headless.rendering.MixinLevelLoadTrackerWaitingForPlayerChunk",
     "headless.rendering.MixinMouseHandler",
