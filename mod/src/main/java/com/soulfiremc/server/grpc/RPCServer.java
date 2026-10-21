@@ -42,13 +42,12 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -200,7 +199,7 @@ public final class RPCServer {
         .service("/openapi", new RedirectService("/openapi.json"))
         .service("/openapi.json", openApiService)
         .service("/mcp", mcpService.getTransportProvider().httpService())
-        .serviceUnder("/webdav/", new RewriteBlocker(TomcatService.of(newWebDAVContext(soulFireServer))))
+        .serviceUnder("/webdav/", new RewriteBlocker(newWebDAVService(soulFireServer)))
         .serviceUnder("/docs", DocService.builder()
           .exampleHeaders(HttpHeaders.of(HttpHeaderNames.AUTHORIZATION, "Bearer <jwt>"))
           .build())
@@ -216,22 +215,22 @@ public final class RPCServer {
     }
   }
 
-  @SneakyThrows
-  Tomcat newWebDAVContext(SoulFireServer soulFireServer) {
-    var tomcat = new Tomcat();
-    tomcat.setBaseDir(Files.createTempDirectory("soulfire-webdav-").toAbsolutePath().toString());
-
-    var ctx = tomcat.addContext("", soulFireServer.getObjectStoragePath().toAbsolutePath().toString());
-
-    var webdavServlet = Tomcat.addServlet(ctx, "webdav", new SFWebDavServlet(soulFireServer));
-    webdavServlet.addInitParameter("readonly", "false");
-    webdavServlet.addInitParameter("listings", "true");
-
-    ctx.addServletMappingDecoded("/webdav/*", "webdav");
-
-    tomcat.start();
-
-    return tomcat;
+  static TomcatService newWebDAVService(SoulFireServer soulFireServer) {
+    return TomcatService.builder(soulFireServer.getObjectStoragePath())
+      .configurator(tomcat -> {
+        var host = tomcat.findServices()[0].getContainer().findChildren()[0];
+        var context = (Context) host.findChild("");
+        // Object storage needs a programmatic servlet context without web.xml or JSP deployment.
+        for (var listener : context.findLifecycleListeners()) {
+          context.removeLifecycleListener(listener);
+        }
+        context.addLifecycleListener(new Tomcat.FixContextListener());
+        var webdavServlet = Tomcat.addServlet(context, "webdav", new SFWebDavServlet(soulFireServer));
+        webdavServlet.addInitParameter("readonly", "false");
+        webdavServlet.addInitParameter("listings", "true");
+        context.addServletMappingDecoded("/webdav/*", "webdav");
+      })
+      .build();
   }
 
   public void start() throws IOException {

@@ -22,15 +22,16 @@ import com.linecorp.armeria.common.HttpResponse;
 import com.linecorp.armeria.server.HttpService;
 import com.linecorp.armeria.server.ServiceRequestContext;
 import com.linecorp.armeria.server.ServiceRequestContextWrapper;
-import lombok.RequiredArgsConstructor;
+import com.linecorp.armeria.server.SimpleDecoratingHttpService;
 
-@RequiredArgsConstructor
-public class RewriteBlocker implements HttpService {
-  private final HttpService delegate;
+public final class RewriteBlocker extends SimpleDecoratingHttpService {
+  public RewriteBlocker(HttpService delegate) {
+    super(delegate);
+  }
 
   @Override
   public HttpResponse serve(ServiceRequestContext ctx, HttpRequest req) throws Exception {
-    return delegate.serve(new ServiceRequestContextWrapper(ctx) {
+    return unwrap().serve(new ServiceRequestContextWrapper(ctx) {
       @Override
       public String mappedPath() {
         return this.path();
