@@ -24,13 +24,17 @@ import com.google.protobuf.Value;
 import com.soulfiremc.grpc.generated.ActivateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptResponse;
+import com.soulfiremc.grpc.generated.DeactivateScriptRequest;
 import com.soulfiremc.grpc.generated.DryRunScriptRequest;
+import com.soulfiremc.grpc.generated.GetScriptRequest;
+import com.soulfiremc.grpc.generated.GetScriptResponse;
 import com.soulfiremc.grpc.generated.ScriptEdge;
 import com.soulfiremc.grpc.generated.ScriptEvent;
 import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.grpc.generated.ScriptQuotas;
 import com.soulfiremc.grpc.generated.UpdateScriptRequest;
 import com.soulfiremc.server.InstanceManager;
+import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.script.AbstractScriptNode;
@@ -43,6 +47,7 @@ import com.soulfiremc.server.script.nodes.NodeRegistry;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.structs.GsonInstance;
+import com.soulfiremc.shared.SFLogAppender;
 import io.grpc.Context;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -69,6 +74,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -145,6 +151,59 @@ final class ScriptExecutionServiceTest {
   private void awaitCompletion() throws InterruptedException {
     assertTrue(terminal.await(5, TimeUnit.SECONDS));
     assertNull(error.get());
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"debug", "info", "warn", "error"})
+  void automaticallyStartedScriptsStreamEventsAndRetainScopedLogs(String level) throws InterruptedException {
+    var scheduler = new SoulFireScheduler(runnable -> runnable);
+    var instance = mock(InstanceManager.class);
+    when(instance.scheduler()).thenReturn(scheduler);
+    when(server.getInstance(UUID.fromString(instanceId))).thenReturn(Optional.of(instance));
+    var scriptId = saveScript("action.print", "trigger.on_interval");
+    var logEvents = new CopyOnWriteArrayList<SFLogAppender.SFLogEvent>();
+    Consumer<SFLogAppender.SFLogEvent> consumer = entry -> {
+      if (UUID.fromString(scriptId).equals(entry.scriptId())) {
+        logEvents.add(entry);
+      }
+    };
+    SFLogAppender.INSTANCE.start();
+    SFLogAppender.INSTANCE.logConsumers().add(consumer);
+    var logReceived = new CountDownLatch(1);
+    doAnswer(call -> {
+      ScriptEvent event = call.getArgument(0);
+      events.add(event);
+      if (event.hasScriptLog()) {
+        logReceived.countDown();
+      }
+      return null;
+    }).when(observer).onNext(any());
+    try {
+      var update = UpdateScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId)
+        .setPaused(false).setUpdateNodes(true)
+        .addNodes(ScriptNode.newBuilder().setId(triggerId).setType("trigger.on_interval")
+          .putData("intervalMs", Value.newBuilder().setNumberValue(50).build()))
+        .addNodes(ScriptNode.newBuilder().setId(actionId).setType("action.print")
+          .putData("message", Value.newBuilder().setStringValue("monitoring").build())
+          .putData("level", Value.newBuilder().setStringValue(level).build()))
+        .build();
+      rpcContext.run(() -> service.updateScript(update, mock()));
+      var activation = ActivateScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).build();
+      rpcContext.run(() -> service.activateScript(activation, observer));
+
+      assertTrue(logReceived.await(5, TimeUnit.SECONDS));
+      assertTrue(events.stream().anyMatch(ScriptEvent::hasScriptStarted));
+      assertFalse(logEvents.isEmpty());
+      assertEquals(UUID.fromString(instanceId), logEvents.getFirst().instanceId());
+      assertEquals(level.toUpperCase(java.util.Locale.ROOT), logEvents.getFirst().level());
+    } finally {
+      rpcContext.run(() -> service.deactivateScript(DeactivateScriptRequest.newBuilder()
+        .setInstanceId(instanceId).setScriptId(scriptId).build(), mock()));
+      SFLogAppender.INSTANCE.logConsumers().remove(consumer);
+      scheduler.shutdown();
+    }
+    verify(observer, times(1)).onCompleted();
+    assertEquals(1, events.stream().filter(ScriptEvent::hasScriptCompleted).count());
   }
 
   @ParameterizedTest

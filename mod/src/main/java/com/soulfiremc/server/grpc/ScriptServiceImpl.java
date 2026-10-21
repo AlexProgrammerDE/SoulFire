@@ -35,6 +35,7 @@ import com.soulfiremc.server.script.PortDefinition;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.structs.GsonInstance;
+import com.soulfiremc.shared.SFLogAppender;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
@@ -43,14 +44,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import org.apache.logging.log4j.CloseableThreadContext;
 import org.jooq.impl.DSL;
+import org.slf4j.event.Level;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -100,7 +102,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     String activeNodeId,
     long activationCount,
     ReactiveScriptContext context,
-    AtomicReference<ServerCallStreamObserver<ScriptEvent>> observerRef
+    ScriptEventSubscribers subscribers
   ) {}
 
   // ============================================================================
@@ -117,7 +119,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Build the script graph from the record
       var graph = buildScriptGraph(record);
 
-
       // Get the instance manager
       var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
       if (instanceManager == null) {
@@ -125,8 +126,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         return;
       }
 
-      // Create internal event listener (no stream, just logging)
-      var eventListener = createInternalEventListener(scriptId);
+      var subscribers = new ScriptEventSubscribers();
+      var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
 
       // Parse quotas from the database record
       var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
@@ -142,7 +143,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         null,
         1,
         context,
-        null
+        subscribers
       );
       var existing = activeScripts.putIfAbsent(scriptId, activationState);
       if (existing != null) {
@@ -177,26 +178,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     // Cancel the context if it exists
     if (activationState.context() != null) {
       activationState.context().cancel();
-    }
-
-    // If there's a client observer, send completion event
-    var observerRef = activationState.observerRef();
-    if (observerRef != null) {
-      var observer = observerRef.get();
-      if (observer != null && !observer.isCancelled()) {
-        try {
-          observer.onNext(ScriptEvent.newBuilder()
-            .setScriptCompleted(ScriptCompleted.newBuilder()
-              .setScriptId(scriptId.toString())
-              .setSuccess(true)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-              .build())
-            .build());
-          observer.onCompleted();
-        } catch (Exception e) {
-          log.debug("Error completing script stream on stop", e);
-        }
-      }
     }
 
     log.info("Stopped script {}", scriptId);
@@ -244,43 +225,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       log.info("Started {} non-paused scripts on server startup", scripts.size());
     });
-  }
-
-  /// Creates an internal event listener that just logs events (no streaming to client).
-  private ScriptEventListener createInternalEventListener(UUID scriptId) {
-    return new ScriptEventListener() {
-      @Override
-      public void onNodeStarted(String nodeId) {
-        log.debug("[Script {}] Node started: {}", scriptId, nodeId);
-      }
-
-      @Override
-      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-        log.debug("[Script {}] Node completed: {}", scriptId, nodeId);
-      }
-
-      @Override
-      public void onNodeError(String nodeId, String error) {
-        log.warn("[Script {}] Node error {}: {}", scriptId, nodeId, error);
-      }
-
-      @Override
-      public void onScriptCompleted(boolean success) {
-        activeScripts.remove(scriptId);
-        log.debug("[Script {}] Execution chain completed: {}", scriptId, success ? "success" : "failure");
-      }
-
-      @Override
-      public void onScriptCancelled() {
-        activeScripts.remove(scriptId);
-        log.debug("[Script {}] Execution cancelled", scriptId);
-      }
-
-      @Override
-      public void onLog(String level, String message) {
-        log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
-      }
-    };
   }
 
   // ============================================================================
@@ -584,26 +528,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
 
-      // Set up cancellation handler - client disconnect does NOT stop the script
-      // (scripts run independently of client connections in the pause-based model)
-      serverObserver.setOnCancelHandler(() -> {
-        // Null out the observer in the AtomicReference but keep the script running
-        var currentState = activeScripts.get(scriptId);
-        if (currentState != null && currentState.observerRef() != null) {
-          currentState.observerRef().set(null);
-        }
-        log.info("Client disconnected from script {} stream (script keeps running)", scriptId);
-      });
-
-      // Check if script is already running
       var existingState = activeScripts.get(scriptId);
       if (existingState != null) {
-        // Script is already running, update the AtomicReference so the existing
-        // event listener sends future events to the new observer
-        if (existingState.observerRef() != null) {
-          existingState.observerRef().set(serverObserver);
-        }
-        // Update activation count (record is immutable, so create new state with same observerRef)
+        existingState.subscribers().add(serverObserver);
+        // Update activation count (record is immutable, so create new state with same subscribers)
         activeScripts.put(scriptId, new ScriptActivationState(
           existingState.scriptId(),
           existingState.instanceId(),
@@ -611,10 +539,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           existingState.activeNodeId(),
           existingState.activationCount() + 1,
           existingState.context(),
-          existingState.observerRef()
+          existingState.subscribers()
         ));
 
-        sendScriptStarted(serverObserver, scriptId);
+        sendScriptStarted(existingState.subscribers(), serverObserver, scriptId);
 
         log.info("Client attached to already-running script {}", scriptId);
         return;
@@ -623,12 +551,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Script is not running, start it
       var graph = activation.graph();
 
-      // Create AtomicReference for the observer so the event listener always
-      // sees the latest observer, even after client disconnect/reconnect
-      var observerRef = new AtomicReference<>(serverObserver);
-
-      // Create event listener that streams events to the client
-      var eventListener = createStreamingEventListener(scriptId, observerRef);
+      var subscribers = new ScriptEventSubscribers();
+      subscribers.add(serverObserver);
+      var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
 
       // Parse quotas from the database record
       var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
@@ -648,11 +573,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         null,
         1,
         context,
-        observerRef
+        subscribers
       );
       activeScripts.put(scriptId, activationState);
 
-      sendScriptStarted(serverObserver, scriptId);
+      sendScriptStarted(subscribers, serverObserver, scriptId);
 
       log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
         graph.findTriggerNodes().size(), graph.dataEdges().size());
@@ -1459,41 +1384,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     return element.toString();
   }
 
-  private void sendScriptStarted(ServerCallStreamObserver<ScriptEvent> observer, UUID scriptId) {
+  private void sendScriptStarted(ScriptEventSubscribers subscribers, ServerCallStreamObserver<ScriptEvent> observer, UUID scriptId) {
     var event = ScriptEvent.newBuilder()
       .setScriptStarted(ScriptStarted.newBuilder()
         .setScriptId(scriptId.toString())
         .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
         .build())
       .build();
-    sendToObserver(observer, event);
+    subscribers.sendTo(observer, event);
   }
 
-  /// Sends an event to the observer if it's present and not cancelled.
-  private void sendToObserver(AtomicReference<ServerCallStreamObserver<ScriptEvent>> observerRef, ScriptEvent event) {
-    var observer = observerRef.get();
-    if (observer != null) {
-      sendToObserver(observer, event);
-    }
-  }
-
-  private void sendToObserver(ServerCallStreamObserver<ScriptEvent> observer, ScriptEvent event) {
-    synchronized (observer) {
-      if (!observer.isCancelled()) {
-        try {
-          observer.onNext(event);
-        } catch (Exception e) {
-          log.debug("Error sending script event", e);
-        }
-      }
-    }
-  }
-
-  private ScriptEventListener createStreamingEventListener(UUID scriptId, AtomicReference<ServerCallStreamObserver<ScriptEvent>> observerRef) {
+  private ScriptEventListener createStreamingEventListener(UUID instanceId, UUID scriptId, ScriptEventSubscribers subscribers) {
     return new ScriptEventListener() {
       @Override
       public void onNodeStarted(String nodeId) {
-        sendToObserver(observerRef, ScriptEvent.newBuilder()
+        subscribers.send(() -> ScriptEvent.newBuilder()
           .setNodeStarted(NodeStarted.newBuilder()
             .setNodeId(nodeId)
             .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
@@ -1508,19 +1413,20 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-        var builder = NodeCompleted.newBuilder()
-          .setNodeId(nodeId)
-          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-          .setExecutionTimeNanos(executionTimeNanos);
-        for (var entry : outputs.entrySet()) {
-          builder.putOutputs(entry.getKey(), nodeValueToProtoValue(entry.getValue()));
-        }
-        sendToObserver(observerRef, ScriptEvent.newBuilder().setNodeCompleted(builder.build()).build());
+        subscribers.send(() -> {
+          var builder = NodeCompleted.newBuilder()
+            .setNodeId(nodeId)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+            .setExecutionTimeNanos(executionTimeNanos);
+          outputs.forEach((key, value) -> builder.putOutputs(key, nodeValueToProtoValue(value)));
+          return ScriptEvent.newBuilder().setNodeCompleted(builder.build()).build();
+        });
       }
 
       @Override
       public void onNodeError(String nodeId, String error) {
-        sendToObserver(observerRef, ScriptEvent.newBuilder()
+        logScriptMessage(instanceId, scriptId, "error", error);
+        subscribers.send(() -> ScriptEvent.newBuilder()
           .setNodeError(NodeError.newBuilder()
             .setNodeId(nodeId)
             .setErrorMessage(error)
@@ -1531,47 +1437,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onScriptCompleted(boolean success) {
-        var observer = observerRef.get();
-        if (observer != null && !observer.isCancelled()) {
-          try {
-            observer.onNext(ScriptEvent.newBuilder()
-              .setScriptCompleted(ScriptCompleted.newBuilder()
-                .setScriptId(scriptId.toString())
-                .setSuccess(success)
-                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-                .build())
-              .build());
-            observer.onCompleted();
-          } catch (Exception e) {
-            log.debug("Error sending script completed event", e);
-          }
-        }
+        subscribers.complete(ScriptEvent.newBuilder()
+          .setScriptCompleted(ScriptCompleted.newBuilder().setScriptId(scriptId.toString()).setSuccess(success)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())))
+          .build());
       }
 
       @Override
       public void onScriptCancelled() {
-        activeScripts.remove(scriptId);
-        var observer = observerRef.get();
-        if (observer != null && !observer.isCancelled()) {
-          try {
-            observer.onNext(ScriptEvent.newBuilder()
-              .setScriptCompleted(ScriptCompleted.newBuilder()
-                .setScriptId(scriptId.toString())
-                .setSuccess(false)
-                .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-                .build())
-              .build());
-            observer.onCompleted();
-          } catch (Exception e) {
-            log.debug("Error sending script cancelled event", e);
-          }
-        }
+        onScriptCompleted(false);
       }
 
       @Override
       public void onLog(String level, String message) {
-        log.info("[Script {}] [{}] {}", scriptId, level.toUpperCase(), message);
-        sendToObserver(observerRef, ScriptEvent.newBuilder()
+        logScriptMessage(instanceId, scriptId, level, message);
+        subscribers.send(() -> ScriptEvent.newBuilder()
           .setScriptLog(ScriptLog.newBuilder()
             .setLevel(level)
             .setMessage(message)
@@ -1582,7 +1462,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       @Override
       public void onExecutionStats(long nodeCount, long maxCount) {
-        sendToObserver(observerRef, ScriptEvent.newBuilder()
+        subscribers.send(() -> ScriptEvent.newBuilder()
           .setExecutionStats(ExecutionStats.newBuilder()
             .setNodeCount(nodeCount)
             .setMaxCount(maxCount)
@@ -1590,6 +1470,25 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .build());
       }
     };
+  }
+
+  private void logScriptMessage(UUID instanceId, UUID scriptId, String level, String message) {
+    var logLevel = switch (level.toLowerCase(Locale.ROOT)) {
+      case "trace" -> Level.TRACE;
+      case "debug" -> Level.DEBUG;
+      case "warn", "warning" -> Level.WARN;
+      case "error", "fatal" -> Level.ERROR;
+      default -> Level.INFO;
+    };
+    // Script output remains available to monitoring clients independently of server verbosity.
+    SFLogAppender.INSTANCE.publishLogEvent(new SFLogAppender.SFLogEvent(
+      UUID.randomUUID().toString(), message, System.currentTimeMillis(), logLevel.name(),
+      ScriptServiceImpl.class.getName(), instanceId, null, scriptId, null, null));
+    try (var ignored = CloseableThreadContext.put(SFLogAppender.SF_INSTANCE_ID, instanceId.toString())
+      .put(SFLogAppender.SF_SCRIPT_ID, scriptId.toString())
+      .put(SFLogAppender.SF_SKIP_PUBLISHING, "true")) {
+      log.atLevel(logLevel).log("[Script {}] {}", scriptId, message);
+    }
   }
 
   private Value objectToProtoValue(Object value) {
