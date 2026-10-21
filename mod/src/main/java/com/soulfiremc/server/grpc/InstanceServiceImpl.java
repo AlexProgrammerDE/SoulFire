@@ -55,7 +55,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   @Override
   public void getOrCreateInstance(InstanceGetOrCreateRequest request, StreamObserver<InstanceGetOrCreateResponse> responseObserver) {
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
-    var name = SdkProvisioning.requireName(request.getName());
+    var name = InstanceNameValidation.requireName(request.getName());
     var server = request.hasServer() ? SdkProvisioning.requireServer(request.getServer()) : null;
     InstanceGetOrCreateResponse response;
     synchronized (provisioningLock) {
@@ -145,8 +145,9 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   public void createInstance(InstanceCreateRequest request, StreamObserver<InstanceCreateResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_INSTANCE));
 
+    var name = InstanceNameValidation.requireName(request.getFriendlyName());
     try {
-      var id = soulFireServer.createInstance(request.getFriendlyName(), ServerRPCConstants.USER_CONTEXT_KEY.get());
+      var id = soulFireServer.createInstance(name, ServerRPCConstants.USER_CONTEXT_KEY.get());
       responseObserver.onNext(InstanceCreateResponse.newBuilder().setId(id.toString()).build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
@@ -293,9 +294,9 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
 
         var updateStep = switch (request.getMetaCase()) {
-          case FRIENDLY_NAME -> ctx.update(Tables.INSTANCES).set(Tables.INSTANCES.FRIENDLY_NAME, request.getFriendlyName());
+          case FRIENDLY_NAME -> ctx.update(Tables.INSTANCES).set(Tables.INSTANCES.FRIENDLY_NAME, InstanceNameValidation.requireName(request.getFriendlyName()));
           case ICON -> ctx.update(Tables.INSTANCES).set(Tables.INSTANCES.ICON, request.getIcon());
-          case META_NOT_SET -> throw new IllegalStateException("Unknown meta type");
+          case META_NOT_SET -> throw Status.INVALID_ARGUMENT.withDescription("Choose an instance metadata field to update.").asRuntimeException();
         };
 
         updateStep
