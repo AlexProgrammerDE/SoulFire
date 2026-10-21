@@ -59,10 +59,15 @@ public final class ReactiveScriptContext {
   /// @param eventListener listener for script execution events
   @VisibleForTesting
   public ReactiveScriptContext(ScriptEventListener eventListener) {
+    this(eventListener, ScriptQuotasConfig.DEFAULTS);
+  }
+
+  /// Creates an isolated dry-run context with the saved script's resource limits.
+  public ReactiveScriptContext(ScriptEventListener eventListener, ScriptQuotasConfig quotas) {
     this.instance = null;
     this.reactorScheduler = Schedulers.parallel();
     this.eventListener = eventListener;
-    this.quotas = ScriptQuotasConfig.DEFAULTS;
+    this.quotas = quotas;
   }
 
   public SoulFireScheduler scheduler() {

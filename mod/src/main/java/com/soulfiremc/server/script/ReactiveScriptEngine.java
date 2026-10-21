@@ -137,7 +137,7 @@ public final class ReactiveScriptEngine {
     ReactiveScriptContext context,
     Map<String, NodeValue> eventInputs
   ) {
-    return executeFromTriggerInternal(graph, triggerNodeId, context, eventInputs, false);
+    return executeFromTriggerInternal(graph, triggerNodeId, context, eventInputs, false, false);
   }
 
   /// Executes a script starting from a specific trigger node, synchronously on the calling thread.
@@ -155,7 +155,17 @@ public final class ReactiveScriptEngine {
     ReactiveScriptContext context,
     Map<String, NodeValue> eventInputs
   ) {
-    return executeFromTriggerInternal(graph, triggerNodeId, context, eventInputs, true);
+    return executeFromTriggerInternal(graph, triggerNodeId, context, eventInputs, true, false);
+  }
+
+  /// Executes a saved trigger with explicit mock values overriding its generated outputs.
+  public Mono<Void> executeDryRun(
+    ScriptGraph graph,
+    String triggerNodeId,
+    ReactiveScriptContext context,
+    Map<String, NodeValue> mockInputs
+  ) {
+    return executeFromTriggerInternal(graph, triggerNodeId, context, mockInputs, false, true);
   }
 
   /// Internal implementation for trigger execution.
@@ -171,7 +181,8 @@ public final class ReactiveScriptEngine {
     String triggerNodeId,
     ReactiveScriptContext context,
     Map<String, NodeValue> eventInputs,
-    boolean tickSynchronous
+    boolean tickSynchronous,
+    boolean overrideTriggerOutputs
   ) {
     // Build per-invocation reactor scheduler with bot context if available.
     // This ensures bot context is bound on all async threads,
@@ -239,6 +250,14 @@ public final class ReactiveScriptEngine {
       run.markDataNodeTriggered(triggerNodeId);
 
       return Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs))
+        .map(outputs -> {
+          if (!overrideTriggerOutputs || eventInputs.isEmpty()) {
+            return outputs;
+          }
+          var mocked = new HashMap<>(outputs);
+          mocked.putAll(eventInputs);
+          return mocked;
+        })
         .doOnNext(outputs -> {
           if (log.isDebugEnabled()) {
             log.debug("Trigger {} outputs: {}", nodeDesc, outputs.entrySet().stream()

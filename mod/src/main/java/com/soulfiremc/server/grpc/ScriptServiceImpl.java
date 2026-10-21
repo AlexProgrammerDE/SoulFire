@@ -118,6 +118,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Build the script graph from the record
       var graph = buildScriptGraph(record);
 
+
       // Get the instance manager
       var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
       if (instanceManager == null) {
@@ -1641,6 +1642,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       // Bot references are serialized as their account name
       return Value.newBuilder().setStringValue(bot1.accountName()).build();
     }
+    if (value instanceof NodeValue.Vector3(var vector)) {
+      return objectToProtoValue(Map.of("x", vector.x, "y", vector.y, "z", vector.z));
+    }
+    if (value instanceof NodeValue.ValueList || value instanceof NodeValue.ValueSet) {
+      var list = ListValue.newBuilder();
+      value.asList().forEach(item -> list.addValues(nodeValueToProtoValue(item)));
+      return Value.newBuilder().setListValue(list).build();
+    }
     return Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
   }
 
@@ -1814,76 +1823,131 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
       var graph = buildScriptGraph(record);
 
+      if (!graph.findTriggerNodes().contains(triggerNodeId)) {
+        throw Status.INVALID_ARGUMENT.withDescription("Select a trigger node from the saved script").asRuntimeException();
+      }
       // Build mock inputs from proto values
       var mockInputs = new HashMap<String, NodeValue>();
       for (var entry : request.getMockInputsMap().entrySet()) {
         mockInputs.put(entry.getKey(), protoValueToNodeValue(entry.getValue()));
       }
 
-      // Create a simple event listener that streams events directly to the client
-      var eventListener = new ScriptEventListener() {
-        private void send(ScriptEvent event) {
-          try {
-            responseObserver.onNext(event);
-          } catch (Exception _) {
-            // Client disconnected
+      var observer = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+      class DryRunListener implements ScriptEventListener {
+        private boolean closed;
+        private boolean failed;
+        private boolean executionFinished;
+        private boolean statsReceived;
+
+        private synchronized void send(ScriptEvent event) {
+          if (!closed && !observer.isCancelled()) {
+            observer.onNext(event);
           }
+        }
+
+        private synchronized void completeIfReady() {
+          if (closed || !executionFinished || !statsReceived || observer.isCancelled()) {
+            return;
+          }
+          send(ScriptEvent.newBuilder().setScriptCompleted(ScriptCompleted.newBuilder()
+            .setScriptId(scriptId.toString()).setSuccess(!failed)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))).build());
+          closed = true;
+          observer.onCompleted();
+        }
+
+        synchronized void finish() {
+          executionFinished = true;
+          completeIfReady();
+        }
+
+        synchronized void fail(Throwable error) {
+          if (!closed && !observer.isCancelled()) {
+            closed = true;
+            log.error("Error in dry run execution", error);
+            observer.onError(Status.INTERNAL.withDescription(error.getMessage()).withCause(error).asRuntimeException());
+          }
+        }
+
+        synchronized void close() {
+          closed = true;
         }
 
         @Override
         public void onNodeStarted(String nodeId) {
           send(ScriptEvent.newBuilder()
-            .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId).build())
+            .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId)
+              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
             .build());
         }
 
         @Override
         public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-          send(ScriptEvent.newBuilder()
-            .setNodeCompleted(NodeCompleted.newBuilder().setNodeId(nodeId).build())
-            .build());
+          onNodeCompleted(nodeId, outputs, 0);
         }
 
         @Override
-        public void onNodeError(String nodeId, String error) {
+        public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
+          var completed = NodeCompleted.newBuilder().setNodeId(nodeId)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+            .setExecutionTimeNanos(executionTimeNanos);
+          outputs.forEach((key, value) -> completed.putOutputs(key, nodeValueToProtoValue(value)));
+          send(ScriptEvent.newBuilder().setNodeCompleted(completed).build());
+        }
+
+        @Override
+        public synchronized void onNodeError(String nodeId, String error) {
+          failed = true;
           send(ScriptEvent.newBuilder()
-            .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error).build())
+            .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
+              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
             .build());
         }
 
         @Override
         public void onLog(String level, String message) {
           send(ScriptEvent.newBuilder()
-            .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message).build())
+            .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message)
+              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
             .build());
         }
 
         @Override
-        public void onScriptCompleted(boolean success) {
-          send(ScriptEvent.newBuilder()
-            .setScriptCompleted(ScriptCompleted.newBuilder().setSuccess(success).build())
-            .build());
+        public synchronized void onScriptCompleted(boolean success) {
+          failed |= !success;
         }
 
         @Override
         public void onScriptCancelled() {}
-      };
+
+        @Override
+        public synchronized void onExecutionStats(long nodeCount, long maxCount) {
+          send(ScriptEvent.newBuilder().setExecutionStats(ExecutionStats.newBuilder()
+            .setNodeCount(nodeCount).setMaxCount(maxCount)).build());
+          statsReceived = true;
+          completeIfReady();
+        }
+      }
+      var eventListener = new DryRunListener();
 
       // Execute using dry-run context (no InstanceManager)
-      var context = new ReactiveScriptContext(eventListener);
+      var context = new ReactiveScriptContext(eventListener, ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson())));
       var engine = new ReactiveScriptEngine();
-
-      engine.executeFromTriggerSync(graph, triggerNodeId, context, mockInputs)
-        .doFinally(_ -> responseObserver.onCompleted())
-        .subscribe(
-          _ -> {},
-          e -> {
-            log.error("Error in dry run execution", e);
-            responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
-          }
-        );
+      observer.setOnCancelHandler(() -> {
+        eventListener.close();
+        context.cancel();
+      });
+      if (observer.isCancelled()) {
+        eventListener.close();
+        context.cancel();
+        return;
+      }
+      context.setExecution(engine.executeDryRun(graph, triggerNodeId, context, mockInputs)
+        .subscribe(_ -> {}, eventListener::fail, eventListener::finish));
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (ScriptGraphValidationException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Exception e) {
       log.error("Error in dry run", e);
       throw Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
@@ -1896,7 +1960,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       case NUMBER_VALUE -> NodeValue.ofNumber(value.getNumberValue());
       case STRING_VALUE -> NodeValue.ofString(value.getStringValue());
       case BOOL_VALUE -> NodeValue.ofBoolean(value.getBoolValue());
-      default -> NodeValue.ofString(value.toString());
+      case LIST_VALUE -> NodeValue.ofList(value.getListValue().getValuesList().stream()
+        .map(ScriptServiceImpl::protoValueToNodeValue).toList());
+      case STRUCT_VALUE -> {
+        var fields = new HashMap<String, NodeValue>();
+        value.getStructValue().getFieldsMap().forEach((key, field) -> fields.put(key, protoValueToNodeValue(field)));
+        yield NodeValue.of(fields);
+      }
+      case NULL_VALUE, KIND_NOT_SET -> NodeValue.ofNull();
     };
   }
 

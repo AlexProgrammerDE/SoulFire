@@ -1,0 +1,276 @@
+/*
+ * SoulFire
+ * Copyright (C) 2026  AlexProgrammerDE
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package com.soulfiremc.server.grpc;
+
+import com.google.protobuf.ListValue;
+import com.google.protobuf.NullValue;
+import com.google.protobuf.Struct;
+import com.google.protobuf.Value;
+import com.soulfiremc.grpc.generated.CreateScriptRequest;
+import com.soulfiremc.grpc.generated.CreateScriptResponse;
+import com.soulfiremc.grpc.generated.DryRunScriptRequest;
+import com.soulfiremc.grpc.generated.ScriptEdge;
+import com.soulfiremc.grpc.generated.ScriptEvent;
+import com.soulfiremc.grpc.generated.ScriptNode;
+import com.soulfiremc.grpc.generated.ScriptQuotas;
+import com.soulfiremc.grpc.generated.UpdateScriptRequest;
+import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.generated.Tables;
+import com.soulfiremc.server.script.AbstractScriptNode;
+import com.soulfiremc.server.script.CategoryRegistry;
+import com.soulfiremc.server.script.NodeMetadata;
+import com.soulfiremc.server.script.NodeRuntime;
+import com.soulfiremc.server.script.NodeValue;
+import com.soulfiremc.server.script.PortDefinition;
+import com.soulfiremc.server.script.nodes.NodeRegistry;
+import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
+import com.soulfiremc.server.user.SoulFireUser;
+import com.soulfiremc.server.util.structs.GsonInstance;
+import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ServerCallStreamObserver;
+import io.grpc.stub.StreamObserver;
+import net.minecraft.world.phys.Vec3;
+import org.flywaydb.core.Flyway;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.sqlite.SQLiteDataSource;
+import reactor.core.publisher.Mono;
+
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+final class ScriptDryRunTest {
+  private final SoulFireServer server = mock();
+  private final ScriptServiceImpl service = new ScriptServiceImpl(server);
+  private final Context rpcContext = Context.current().withValue(ServerRPCConstants.USER_CONTEXT_KEY, mock(SoulFireUser.class));
+  private final String instanceId = UUID.randomUUID().toString();
+  private final String triggerId = UUID.randomUUID().toString();
+  private final String actionId = UUID.randomUUID().toString();
+  private final ServerCallStreamObserver<ScriptEvent> observer = mock();
+  private final List<ScriptEvent> events = new CopyOnWriteArrayList<>();
+  private final AtomicReference<Runnable> cancel = new AtomicReference<>();
+  private final AtomicReference<Throwable> error = new AtomicReference<>();
+  private final CountDownLatch terminal = new CountDownLatch(1);
+
+  @BeforeEach
+  void setUp(@TempDir Path directory) {
+    var source = new SQLiteDataSource();
+    source.setUrl("jdbc:sqlite:" + directory.resolve("scripts.sqlite"));
+    Flyway.configure().dataSource(source).locations("classpath:db/migration").load().migrate();
+    when(server.dsl()).thenReturn(DSL.using(source, SQLDialect.SQLITE));
+    var ownerId = UUID.randomUUID().toString();
+    server.dsl().execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+      ownerId, "owner", "owner@example.com", "ADMIN");
+    server.dsl().insertInto(Tables.INSTANCES)
+      .set(Tables.INSTANCES.ID, instanceId).set(Tables.INSTANCES.FRIENDLY_NAME, "scripts")
+      .set(Tables.INSTANCES.OWNER_ID, ownerId).set(Tables.INSTANCES.ICON, "pickaxe")
+      .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(InstanceSettingsImpl.Stem.EMPTY.serializeToTree())).execute();
+    doAnswer(call -> { cancel.set(call.getArgument(0)); return null; }).when(observer).setOnCancelHandler(any());
+    doAnswer(call -> { events.add(call.getArgument(0)); return null; }).when(observer).onNext(any());
+    doAnswer(_ -> { terminal.countDown(); return null; }).when(observer).onCompleted();
+    doAnswer(call -> { error.set(call.getArgument(0)); terminal.countDown(); return null; }).when(observer).onError(any());
+  }
+
+  private String saveScript(String actionType) {
+    return saveScript(actionType, "trigger.on_chat");
+  }
+
+  private String saveScript(String actionType, String triggerType) {
+    var response = new AtomicReference<CreateScriptResponse>();
+    StreamObserver<CreateScriptResponse> created = mock();
+    doAnswer(call -> { response.set(call.getArgument(0)); return null; }).when(created).onNext(any());
+    var request = CreateScriptRequest.newBuilder().setInstanceId(instanceId).setName("dry run").setPaused(true)
+      .addNodes(ScriptNode.newBuilder().setId(triggerId).setType(triggerType))
+      .addNodes(ScriptNode.newBuilder().setId(actionId).setType(actionType))
+      .addEdges(ScriptEdge.newBuilder().setId(UUID.randomUUID().toString())
+        .setSource(triggerId).setSourceHandle("out").setTarget(actionId).setTargetHandle("in"))
+      .build();
+    rpcContext.run(() -> service.createScript(request, created));
+    return response.get().getScript().getId();
+  }
+
+  private DryRunScriptRequest.Builder request(String scriptId) {
+    return DryRunScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).setTriggerNodeId(triggerId);
+  }
+
+  private void run(DryRunScriptRequest request) {
+    rpcContext.run(() -> service.dryRunScript(request, observer));
+  }
+
+  private void awaitCompletion() throws InterruptedException {
+    assertTrue(terminal.await(5, TimeUnit.SECONDS));
+    assertNull(error.get());
+  }
+
+  @Test
+  void preservesStructuredMocksOutputsAndTerminalOrdering() throws InterruptedException {
+    var scriptId = saveScript("action.print");
+    var nested = Value.newBuilder().setStructValue(Struct.newBuilder().putFields("values",
+      Value.newBuilder().setListValue(ListValue.newBuilder()
+        .addValues(Value.newBuilder().setNullValue(NullValue.NULL_VALUE))
+        .addValues(Value.newBuilder().setBoolValue(true))
+        .addValues(Value.newBuilder().setNumberValue(2.5))).build())).build();
+    run(request(scriptId).putMockInputs("message", nested).build());
+    awaitCompletion();
+    var completed = events.stream().filter(ScriptEvent::hasNodeCompleted).map(ScriptEvent::getNodeCompleted)
+      .filter(event -> event.getNodeId().equals(triggerId)).findFirst().orElseThrow();
+    assertEquals(nested, completed.getOutputsOrThrow("message"));
+    assertTrue(completed.hasTimestamp());
+    assertTrue(events.stream().filter(ScriptEvent::hasNodeStarted).allMatch(event -> event.getNodeStarted().hasTimestamp()));
+    var last = events.getLast().getScriptCompleted();
+    assertTrue(last.getSuccess());
+    assertEquals(scriptId, last.getScriptId());
+    assertTrue(last.hasTimestamp());
+    assertTrue(events.get(events.size() - 2).hasExecutionStats());
+    verify(observer, times(1)).onCompleted();
+    verify(observer, never()).onError(any());
+  }
+
+  @Test
+  void rejectsMissingAndNonTriggerNodes() {
+    var scriptId = saveScript("action.print");
+    for (var id : List.of(UUID.randomUUID().toString(), actionId)) {
+      var failure = assertThrows(StatusRuntimeException.class, () -> run(request(scriptId).setTriggerNodeId(id).build()));
+      assertEquals(Status.Code.INVALID_ARGUMENT, failure.getStatus().getCode());
+    }
+    assertTrue(events.isEmpty());
+  }
+
+  @Test
+  void mocksOverrideGeneratedTriggerOutputs() throws InterruptedException {
+    var scriptId = saveScript("action.print", "trigger.on_script_init");
+    run(request(scriptId).putMockInputs("timestamp", Value.newBuilder().setNumberValue(42).build()).build());
+    awaitCompletion();
+    var trigger = events.stream().filter(ScriptEvent::hasNodeCompleted).map(ScriptEvent::getNodeCompleted)
+      .filter(event -> event.getNodeId().equals(triggerId)).findFirst().orElseThrow();
+    assertEquals(42, trigger.getOutputsOrThrow("timestamp").getNumberValue());
+  }
+
+  @Test
+  void honorsSavedQuotasAndKeepsTheScriptPaused() throws InterruptedException {
+    var scriptId = saveScript("action.print");
+    rpcContext.run(() -> service.updateScript(UpdateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).setUpdateQuotas(true)
+      .setQuotas(ScriptQuotas.newBuilder().setMaxExecutionCount(0)).build(), mock()));
+    run(request(scriptId).build());
+    awaitCompletion();
+    assertTrue(events.stream().anyMatch(ScriptEvent::hasNodeError));
+    assertFalse(events.getLast().getScriptCompleted().getSuccess());
+    assertEquals(0, events.stream().filter(ScriptEvent::hasExecutionStats).findFirst().orElseThrow().getExecutionStats().getMaxCount());
+    assertTrue(server.dsl().selectFrom(Tables.SCRIPTS).where(Tables.SCRIPTS.ID.eq(scriptId)).fetchSingle().getPaused());
+  }
+
+  @Test
+  void rejectsInvalidGraphs() {
+    var scriptId = saveScript("unknown.node");
+    var failure = assertThrows(StatusRuntimeException.class, () -> run(request(scriptId).build()));
+    assertEquals(Status.Code.INVALID_ARGUMENT, failure.getStatus().getCode());
+  }
+
+  private String registerAction(Supplier<Mono<Map<String, NodeValue>>> execution) {
+    var type = "test.dry_run_" + UUID.randomUUID();
+    NodeRegistry.register(NodeMetadata.builder().type(type).displayName("test").category(CategoryRegistry.ACTIONS)
+      .addInputs(PortDefinition.execIn()).addOutputs(PortDefinition.execOut()).build(),
+      () -> new AbstractScriptNode() {
+        @Override
+        public Mono<Map<String, NodeValue>> executeReactive(NodeRuntime runtime, Map<String, NodeValue> inputs) {
+          return execution.get();
+        }
+      });
+    return type;
+  }
+
+  @Test
+  void nodeErrorsProduceFailedCompletionWithoutDoubleTermination() throws InterruptedException {
+    var type = registerAction(() -> Mono.error(new IllegalStateException()));
+    run(request(saveScript(type)).build());
+    awaitCompletion();
+    assertTrue(events.stream().anyMatch(ScriptEvent::hasNodeError));
+    assertFalse(events.getLast().getScriptCompleted().getSuccess());
+    verify(observer, times(1)).onCompleted();
+    verify(observer, never()).onError(any());
+  }
+
+  @Test
+  void disconnectDisposesExecutionAndDoesNotCompleteTheCancelledStream() throws InterruptedException {
+    var started = new CountDownLatch(1);
+    var cancelled = new CountDownLatch(1);
+    var type = registerAction(() -> Mono.defer(() -> {
+      started.countDown();
+      return Mono.<Map<String, NodeValue>>never().doOnCancel(cancelled::countDown);
+    }));
+    run(request(saveScript(type)).build());
+    assertTrue(started.await(5, TimeUnit.SECONDS));
+    cancel.get().run();
+    assertTrue(cancelled.await(5, TimeUnit.SECONDS));
+    verify(observer, never()).onCompleted();
+    verify(observer, never()).onError(any());
+  }
+
+  @Test
+  void cancellationDuringHandlerRegistrationDoesNotStartExecution() {
+    var started = new CountDownLatch(1);
+    var type = registerAction(() -> { started.countDown(); return Mono.empty(); });
+    var scriptId = saveScript(type);
+    doAnswer(call -> { ((Runnable) call.getArgument(0)).run(); return null; }).when(observer).setOnCancelHandler(any());
+    run(request(scriptId).build());
+    assertEquals(1, started.getCount());
+    assertTrue(events.isEmpty());
+    verify(observer, never()).onCompleted();
+  }
+
+  @Test
+  void serializesVectorAndCollectionOutputs() throws InterruptedException {
+    var type = registerAction(() -> Mono.just(Map.of(
+      "vector", NodeValue.ofVector3(new Vec3(1, 2, 3)),
+      "collection", NodeValue.ofSet(List.of(NodeValue.ofNumber(4), NodeValue.ofNumber(4), NodeValue.ofNumber(5)))
+    )));
+    run(request(saveScript(type)).build());
+    awaitCompletion();
+    var outputs = events.stream().filter(ScriptEvent::hasNodeCompleted).map(ScriptEvent::getNodeCompleted)
+      .filter(event -> event.getNodeId().equals(actionId)).findFirst().orElseThrow().getOutputsMap();
+    assertEquals(3, outputs.get("vector").getStructValue().getFieldsCount());
+    assertEquals(2, outputs.get("vector").getStructValue().getFieldsOrThrow("y").getNumberValue());
+    assertEquals(List.of(4.0, 5.0), outputs.get("collection").getListValue().getValuesList().stream().map(Value::getNumberValue).toList());
+  }
+}
