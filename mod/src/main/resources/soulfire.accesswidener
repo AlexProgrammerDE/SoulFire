@@ -30,6 +30,7 @@ accessible field net/minecraft/client/Minecraft particleEngine Lnet/minecraft/cl
 accessible field net/minecraft/client/Minecraft mapTextureManager Lnet/minecraft/client/resources/MapTextureManager;
 accessible field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gui;
 accessible field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options;
+accessible field net/minecraft/client/Minecraft hotbarManager Lnet/minecraft/client/HotbarManager;
 accessible field net/minecraft/client/Minecraft mouseHandler Lnet/minecraft/client/MouseHandler;
 accessible field net/minecraft/client/Minecraft keyboardHandler Lnet/minecraft/client/KeyboardHandler;
 accessible field net/minecraft/client/Minecraft proxy Ljava/net/Proxy;
@@ -71,6 +72,7 @@ mutable field net/minecraft/client/Minecraft particleEngine Lnet/minecraft/clien
 mutable field net/minecraft/client/Minecraft mapTextureManager Lnet/minecraft/client/resources/MapTextureManager;
 mutable field net/minecraft/client/Minecraft gui Lnet/minecraft/client/gui/Gui;
 mutable field net/minecraft/client/Minecraft options Lnet/minecraft/client/Options;
+mutable field net/minecraft/client/Minecraft hotbarManager Lnet/minecraft/client/HotbarManager;
 mutable field net/minecraft/client/Minecraft mouseHandler Lnet/minecraft/client/MouseHandler;
 mutable field net/minecraft/client/Minecraft keyboardHandler Lnet/minecraft/client/KeyboardHandler;
 mutable field net/minecraft/client/Minecraft proxy Ljava/net/Proxy;

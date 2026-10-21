@@ -46,6 +46,7 @@ import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFHelpers;
+import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.SFLogAppender;
@@ -381,10 +382,12 @@ public final class InstanceManager {
     return botStateManager.shutdown()
       .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
       .thenRunAsync(() -> {
-        try {
-          SFHelpers.deleteDirectory(getInstanceObjectStoragePath());
-        } catch (IOException e) {
-          log.error("Error while deleting instance storage", e);
+        for (var path : List.of(getInstanceObjectStoragePath(), getInstanceClientDataPath())) {
+          try {
+            SFHelpers.deleteDirectory(path);
+          } catch (IOException e) {
+            log.error("Error while deleting instance storage {}", path, e);
+          }
         }
       }, soulFireServer.scheduler());
   }
@@ -424,6 +427,10 @@ public final class InstanceManager {
         .set(Tables.INSTANCE_AUDIT_LOGS.VERSION, 0L)
         .execute();
     }));
+  }
+
+  public Path getInstanceClientDataPath() {
+    return SFPathConstants.baseDirectory().resolve("client-data").resolve("instance-" + id);
   }
 
   public Path getInstanceObjectStoragePath() {

@@ -67,6 +67,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.HotbarManager;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
@@ -120,8 +121,11 @@ import net.minecraft.util.profiling.ContinuousProfiler;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Modifier;
 import java.net.Proxy;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -257,6 +261,7 @@ public final class BotConnection {
     newInstance.userPropertiesFuture = fetchUserProperties(userApiService);
     newInstance.profileFuture = CompletableFuture.completedFuture(null);
     initializeBotOptions(newInstance);
+    initializeBotHotbars(newInstance);
     initializeBotTextureManager(newInstance);
     var friendsService = authSession.friendsService();
     newInstance.profileKeyPairManager =
@@ -314,6 +319,16 @@ public final class BotConnection {
         return UserApiService.OFFLINE_PROPERTIES;
       }
     }, Util.nonCriticalIoPool());
+  }
+
+  private void initializeBotHotbars(Minecraft minecraft) {
+    var directory = instanceManager.getInstanceClientDataPath().resolve(accountProfileId.toString());
+    try {
+      Files.createDirectories(directory);
+    } catch (IOException e) {
+      throw new UncheckedIOException("Failed to create bot client data directory", e);
+    }
+    minecraft.hotbarManager = new HotbarManager(directory, minecraft.getFixerUpper());
   }
 
   private static void initializeBotOptions(Minecraft minecraft) {
