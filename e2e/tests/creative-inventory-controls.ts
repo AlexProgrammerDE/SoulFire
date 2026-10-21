@@ -138,21 +138,24 @@ export default {
         (state) => state.carriedItem === undefined,
         "Dropping the remaining cursor stack failed",
       );
+      const droppedStarCount = rcon(
+        `execute as @e[type=item,x=1776,y=62,z=-8,dx=32,dy=8,dz=16,nbt={Item:{id:"minecraft:nether_star"}}] run data get entity @s Item.count`,
+      ).pipe(
+        Effect.map((data) =>
+          [...data.matchAll(/data: (\d+)/g)].reduce((sum, match) => sum + Number(match[1]), 0),
+        ),
+      );
       yield* eventually(
-        rcon(
-          `execute as @e[type=item,x=1776,y=62,z=-8,dx=32,dy=8,dz=16,nbt={Item:{id:"minecraft:nether_star"}}] run data get entity @s Item.count`,
-        ).pipe(
-          Effect.flatMap((data) =>
-            check(
-              [...data.matchAll(/data: (\d+)/g)].reduce(
-                (sum, match) => sum + Number(match[1]),
-                0,
-              ) === 64,
-              "Vanilla did not retain the dropped creative cursor stack",
-            ),
+        droppedStarCount.pipe(
+          Effect.flatMap((count) =>
+            check(count === 64, "Vanilla did not retain the dropped creative cursor stack"),
           ),
         ),
         "5 seconds",
+      );
+      // Remove the verified drops before the pickup delay expires during later actions.
+      yield* rcon(
+        'kill @e[type=item,x=1776,y=62,z=-8,dx=32,dy=8,dz=16,nbt={Item:{id:"minecraft:nether_star"}}]',
       );
       yield* bot.clickInventory(0, ClickType.MIDDLE_CLICK);
       yield* bot.clickInventory(46);
@@ -231,6 +234,22 @@ export default {
           "5 seconds",
         );
       yield* bot.clickInventory(9);
+      yield* bot.clickInventory(-999, ClickType.RIGHT_CLICK);
+      yield* stateCheck(
+        (state) => state.carriedItem?.count === 15,
+        "Drop One discarded the whole cursor stack on the creative inventory tab",
+      );
+      yield* eventually(
+        droppedStarCount.pipe(
+          Effect.flatMap((count) =>
+            check(
+              count === 1,
+              "Vanilla did not receive exactly one item from the creative inventory tab",
+            ),
+          ),
+        ),
+        "5 seconds",
+      );
       yield* bot.clickInventory(46);
       yield* stateCheck(
         (state) => !state.carriedItem && !state.slots.some((slot) => slot.slot === 9),

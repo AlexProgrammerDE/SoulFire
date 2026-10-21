@@ -23,6 +23,7 @@ import io.grpc.Status;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CrafterScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.CrafterMenu;
 
@@ -50,6 +51,16 @@ final class ContainerClicks {
       }
       if (slot != null && (slot.x < 0 || slot.y < 0)) {
         throw Status.INVALID_ARGUMENT.withDescription("Creative inventory slot is hidden").asRuntimeException();
+      }
+      // The native inventory tab treats either outside pickup button as a full-stack throw.
+      if (slotId == -999 && input == ContainerInput.PICKUP && button == 1 && screen.isInventoryOpen()) {
+        var carried = menu.getCarried();
+        if (!carried.isEmpty() && player.canDropItems()) {
+          var dropped = carried.split(1);
+          player.drop(dropped, true, Prediction.PREDICTED);
+          gameMode.handleCreativeModeItemDrop(dropped);
+        }
+        return;
       }
       var access = (CreativeModeInventoryScreenAccessor) screen;
       var outside = access.soulfire$hasClickedOutside();
