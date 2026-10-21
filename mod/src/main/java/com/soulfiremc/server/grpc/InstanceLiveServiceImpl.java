@@ -23,14 +23,17 @@ import com.soulfiremc.server.user.PermissionContext;
 import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /// Multiplexes the complete per-bot event contract onto one instance stream.
 ///
@@ -38,9 +41,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /// sequencing, backpressure, and cleanup behavior. One public gRPC stream can
 /// therefore observe a fleet without maintaining a second event mapper.
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class InstanceLiveServiceImpl extends InstanceLiveServiceGrpc.InstanceLiveServiceImplBase {
   private final SoulFireServer soulFireServer;
+  private final BotLiveServiceImpl botLiveService;
+
+  public InstanceLiveServiceImpl(SoulFireServer soulFireServer) {
+    this(soulFireServer, new BotLiveServiceImpl(soulFireServer));
+  }
 
   @Override
   public void watchInstanceEvents(
@@ -58,42 +66,80 @@ public final class InstanceLiveServiceImpl extends InstanceLiveServiceGrpc.Insta
         .asRuntimeException());
     var parent = (ServerCallStreamObserver<InstanceEvent>) responseObserver;
     var closed = new AtomicBoolean(false);
-    var children = new CopyOnWriteArrayList<MultiplexingObserver>();
+    var children = new ConcurrentHashMap<UUID, MultiplexingObserver>();
+    var unsubscribe = new AtomicReference<Runnable>(() -> {});
     var selectedBotIds = parseBotIds(request.getFilter().getBotIdsList());
     var botFilter = botFilter(request.getFilter());
     var legacyEnvelope = !request.getFilter().hasBotEvents();
-    var botLiveService = new BotLiveServiceImpl(soulFireServer);
 
-    for (var entry : instance.settingsSource().accounts().entrySet()) {
-      var botId = entry.getKey();
-      if (!selectedBotIds.isEmpty() && !selectedBotIds.contains(botId)) {
-        continue;
+    Runnable cleanup = () -> {
+      synchronized (children) {
+        if (closed.compareAndSet(false, true)) {
+          unsubscribe.get().run();
+          children.values().forEach(MultiplexingObserver::cancel);
+          children.clear();
+        }
       }
-      var child = new MultiplexingObserver(
-        parent,
-        botId,
-        entry.getValue().lastKnownName(),
-        legacyEnvelope
-      );
-      children.add(child);
-      botLiveService.watchBotEvents(
-        WatchBotEventsRequest.newBuilder()
-          .setInstanceId(request.getInstanceId())
-          .setBotId(botId.toString())
-          .setFilter(botFilter)
-          .build(),
-        child
-      );
+    };
+    Consumer<UUID> addBot = botId -> {
+      if (closed.get() || parent.isCancelled()
+        || (!selectedBotIds.isEmpty() && !selectedBotIds.contains(botId))) {
+        return;
+      }
+      var previous = children.get(botId);
+      if (previous != null && !previous.isCancelled()) {
+        return;
+      }
+      var account = instance.settingsSource().accounts().get(botId);
+      if (account == null) {
+        return;
+      }
+      var child = new MultiplexingObserver(parent, botId, account.lastKnownName(), legacyEnvelope);
+      children.put(botId, child);
+      try {
+        botLiveService.watchBotEvents(
+          WatchBotEventsRequest.newBuilder()
+            .setInstanceId(request.getInstanceId())
+            .setBotId(botId.toString())
+            .setFilter(botFilter)
+            .build(),
+          child);
+      } catch (Throwable t) {
+        children.remove(botId, child);
+        child.cancel();
+        throw t;
+      }
+    };
+
+    parent.setOnReadyHandler(() -> children.values().forEach(MultiplexingObserver::notifyReady));
+    parent.setOnCancelHandler(cleanup);
+    synchronized (children) {
+      if (closed.get() || parent.isCancelled()) {
+        return;
+      }
+      unsubscribe.set(instance.botStateManager().addStatusListener(event -> {
+        synchronized (children) {
+          if (closed.get()) {
+            return;
+          }
+          if (event.removedBotId() != null) {
+            var child = children.remove(event.removedBotId());
+            if (child != null) {
+              child.cancel();
+            }
+          } else if (event.status() != null) {
+            addBot.accept(UUID.fromString(event.status().getProfileId()));
+          }
+        }
+      }));
+      try {
+        // Listen before taking the snapshot so account changes cannot fall between them.
+        instance.settingsSource().accounts().keySet().forEach(addBot);
+      } catch (Throwable t) {
+        cleanup.run();
+        throw t;
+      }
     }
-
-    parent.setOnReadyHandler(() ->
-      children.forEach(MultiplexingObserver::notifyReady));
-    parent.setOnCancelHandler(() -> {
-      if (closed.compareAndSet(false, true)) {
-        children.forEach(MultiplexingObserver::cancel);
-        children.clear();
-      }
-    });
   }
 
   private static Set<UUID> parseBotIds(List<String> botIds) {
@@ -178,8 +224,11 @@ public final class InstanceLiveServiceImpl extends InstanceLiveServiceGrpc.Insta
     }
 
     @Override
-    public void setOnCancelHandler(Runnable handler) {
+    public synchronized void setOnCancelHandler(Runnable handler) {
       cancelHandler = handler;
+      if (cancelled.get()) {
+        handler.run();
+      }
     }
 
     @Override
@@ -219,9 +268,14 @@ public final class InstanceLiveServiceImpl extends InstanceLiveServiceGrpc.Insta
     }
 
     private void cancel() {
-      if (cancelled.compareAndSet(false, true)) {
-        cancelHandler.run();
+      final Runnable handler;
+      synchronized (this) {
+        if (!cancelled.compareAndSet(false, true)) {
+          return;
+        }
+        handler = cancelHandler;
       }
+      handler.run();
     }
   }
 }
