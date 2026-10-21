@@ -17,16 +17,26 @@
  */
 package com.soulfiremc.mod.mixin.headless.sound;
 
+import com.mojang.blaze3d.audio.DeviceList;
+import com.mojang.blaze3d.audio.DeviceTracker;
+import com.mojang.blaze3d.audio.PollingDeviceTracker;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SoundEngine.class)
 public class MixinSoundEngine {
+  @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/Library;createDeviceTracker()Lcom/mojang/blaze3d/audio/DeviceTracker;"))
+  private DeviceTracker createDeviceTracker() {
+    // Sound ticks are disabled, so this tracker stays empty without loading host audio drivers.
+    return new PollingDeviceTracker(DeviceList.EMPTY);
+  }
+
   // TODO: handle sound differently from rendering?
   @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
   private void tickHook(CallbackInfo ci) {
