@@ -55,6 +55,9 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
   public void createUser(UserCreateRequest request, StreamObserver<UserCreateResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_USER));
 
+    UserProfileValidation.requireUsername(request.getUsername());
+    UserProfileValidation.requireEmail(request.getEmail());
+
     try {
       var userId = UUID.randomUUID();
       var now = LocalDateTime.now(ZoneOffset.UTC);
@@ -203,6 +206,9 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
   @Override
   public void updateUser(UpdateUserRequest request, StreamObserver<UpdateUserResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_USER));
+
+    UserProfileValidation.requireUsername(request.getUsername());
+    UserProfileValidation.requireEmail(request.getEmail());
 
     try {
       var userId = UUID.fromString(request.getId());

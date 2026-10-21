@@ -156,6 +156,8 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
   public void updateSelfUsername(UpdateSelfUsernameRequest request, StreamObserver<UpdateSelfUsernameResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SELF_USERNAME));
 
+    UserProfileValidation.requireUsername(request.getUsername());
+
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
       soulFireServer.dsl().transaction(cfg -> {
@@ -181,6 +183,8 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
   @Override
   public void updateSelfEmail(UpdateSelfEmailRequest request, StreamObserver<UpdateSelfEmailResponse> responseObserver) {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.UPDATE_SELF_EMAIL));
+
+    UserProfileValidation.requireEmail(request.getEmail());
 
     try {
       var userId = ServerRPCConstants.USER_CONTEXT_KEY.get().getUniqueId();
