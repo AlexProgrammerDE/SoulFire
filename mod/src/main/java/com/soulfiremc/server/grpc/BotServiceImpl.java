@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import com.google.protobuf.util.Timestamps;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.mod.mixin.soulfire.AnvilScreenAccessor;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
@@ -48,6 +49,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -2204,7 +2206,14 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             throw Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available").asRuntimeException();
           }
 
-          executeAction(activeBot, () -> anvilMenu.setItemName(text));
+          executeAction(activeBot, () -> {
+            if (!(minecraft.gui.screen() instanceof AnvilScreen screen) || screen.getMenu() != anvilMenu) {
+              throw Status.FAILED_PRECONDITION.withDescription("Bot anvil screen is not available").asRuntimeException();
+            }
+
+            // Keep the screen's text and its rename packet responder in sync.
+            ((AnvilScreenAccessor) screen).soulfire$getNameInput().setValue(text);
+          });
           return BotSetContainerTextResponse.newBuilder()
             .setSuccess(true)
             .build();

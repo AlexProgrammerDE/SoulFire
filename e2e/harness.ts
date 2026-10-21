@@ -7,7 +7,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { create } from "@bufbuild/protobuf";
 import { ValueSchema } from "@bufbuild/protobuf/wkt";
-import type { SoulFireBot, SoulFireOperationError } from "@soulfiremc/sdk";
+import type { SoulFireBot, SoulFireClient, SoulFireOperationError } from "@soulfiremc/sdk";
 import { SoulFire } from "@soulfiremc/sdk/node";
 import { Console, Data, Duration, Effect, Schedule } from "effect";
 
@@ -289,7 +289,7 @@ export const startSoulFire = Effect.fn("startSoulFire")(function* (
     }),
   );
   yield* Console.log(`[soulfire] ${BOT_NAME} online in ${seconds(joined)}`);
-  return bot;
+  return { bot, client: soulfire };
 });
 
 // ---- what tests use --------------------------------------------------------------------------
@@ -298,6 +298,7 @@ export type Pos = { x: number; y: number; z: number };
 
 export interface TestContext {
   bot: SoulFireBot;
+  client: SoulFireClient;
 }
 
 /** A test: `run` builds its scene with `rcon`, drives the bot, and fails when a check fails. */

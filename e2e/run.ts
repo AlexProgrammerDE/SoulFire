@@ -64,7 +64,7 @@ const program = Effect.gen(function* () {
     ),
   );
 
-  const [setUp, bot] = yield* Effect.timed(
+  const [setUp, context] = yield* Effect.timed(
     Effect.gen(function* () {
       const minecraft = yield* startMinecraft({ fresh: flags.fresh });
       return yield* startSoulFire(jar, minecraft, path.join(runDir, "soulfire.log"));
@@ -74,7 +74,7 @@ const program = Effect.gen(function* () {
 
   let failed = 0;
   for (const test of selected) {
-    const [took, result] = yield* Effect.timed(Effect.result(test.run({ bot })));
+    const [took, result] = yield* Effect.timed(Effect.result(test.run(context)));
     if (Result.isSuccess(result)) {
       yield* Console.log(`  ok    ${test.name} (${seconds(took)})`);
     } else {
