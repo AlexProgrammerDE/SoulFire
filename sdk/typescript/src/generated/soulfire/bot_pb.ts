@@ -1874,14 +1874,14 @@ export const ContainerButtonSchema: GenMessage<ContainerButton> = /*@__PURE__*/
 
 /**
  * Text input field in a container menu.
- * Currently only used by the anvil for item renaming.
+ * Supports anvil item names and creative inventory searches.
  *
  * @generated from message soulfire.v1.ContainerTextInput
  */
 export type ContainerTextInput = Message<"soulfire.v1.ContainerTextInput"> & {
   /**
    * Field identifier for the SetContainerText RPC.
-   * Currently supported: "item_name" (anvil rename)
+   * Supports "item_name" for anvil names and "search" for creative inventory.
    *
    * @generated from field: string id = 1;
    */
@@ -2320,7 +2320,7 @@ export const BotContainerButtonClickResponseSchema: GenMessage<BotContainerButto
 
 /**
  * Request to set text in a container text input field.
- * Currently only supports anvil item renaming.
+ * Supports anvil item names and creative inventory searches.
  *
  * @generated from message soulfire.v1.BotSetContainerTextRequest
  */
@@ -2341,7 +2341,7 @@ export type BotSetContainerTextRequest = Message<"soulfire.v1.BotSetContainerTex
 
   /**
    * Which field to set the text for.
-   * Currently supported: "item_name" (anvil rename)
+   * Supports "item_name" for anvil names and "search" for creative inventory.
    *
    * @generated from field: string field_id = 3;
    */
@@ -2349,7 +2349,7 @@ export type BotSetContainerTextRequest = Message<"soulfire.v1.BotSetContainerTex
 
   /**
    * The text value to set.
-   * For anvil: max 50 characters for the item name.
+   * Minecraft limits both supported fields to 50 characters.
    *
    * @generated from field: string text = 4;
    */
@@ -4647,7 +4647,7 @@ export const BotService: GenService<{
   },
   /**
    * Sets text in a container's text input field.
-   * Currently only supports anvil item renaming (field_id: "item_name").
+   * Supports "item_name" for anvil names and "search" for creative inventory.
    * The action is queued and executed on the next game tick.
    * Requires CONTROL_BOT_ACTIONS permission.
    *

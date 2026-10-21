@@ -57,6 +57,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.gui.screens.inventory.CrafterScreen;
+import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -1062,6 +1063,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
    * This allows the frontend to render any container type dynamically.
    */
   static ContainerLayout buildContainerLayout(AbstractContainerMenu menu, String title, Minecraft minecraft) {
+    if (menu instanceof CreativeModeInventoryScreen.ItemPickerMenu
+      && minecraft.gui.screen() instanceof CreativeModeInventoryScreen screen && screen.getMenu() == menu) {
+      return CreativeInventoryControls.layout(screen);
+    }
     var layoutBuilder = ContainerLayout.newBuilder()
       .setTitle(title)
       .setTotalSlots(menu.slots.size());
@@ -1826,6 +1831,9 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           clickType = ContainerInput.THROW;
         }
         case SWAP_HOTBAR -> {
+          if (request.getHotbarSlot() < 0 || request.getHotbarSlot() > 8) {
+            throw Status.INVALID_ARGUMENT.withDescription("Invalid hotbar slot index").asRuntimeException();
+          }
           mouseButton = request.getHotbarSlot(); // 0-8 for hotbar slots
           clickType = ContainerInput.SWAP;
         }
@@ -1851,23 +1859,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
         }
 
-        var containerId = player.containerMenu.containerId;
-        executeAction(
-          activeBot,
-          () -> {
-            if (player.containerMenu instanceof CrafterMenu container) {
-              if (!(minecraft.gui.screen() instanceof CrafterScreen screen) || screen.getMenu() != container) {
-                throw Status.FAILED_PRECONDITION.withDescription("Bot crafter screen is not available").asRuntimeException();
-              }
-              if (slotId != -999 && (slotId < 0 || slotId >= container.slots.size())) {
-                throw Status.INVALID_ARGUMENT.withDescription("Invalid crafter slot index").asRuntimeException();
-              }
-              var slot = slotId == -999 ? null : container.getSlot(slotId);
-              ((CrafterScreenAccessor) screen).soulfire$clickSlot(slot, slotId, mouseButton, clickType);
-            } else {
-              gameMode.handleContainerInput(containerId, slotId, mouseButton, clickType, player);
-            }
-          });
+        executeAction(activeBot, () -> ContainerClicks.click(minecraft, slotId, mouseButton, clickType));
 
         return BotInventoryClickResponse.newBuilder()
           .setSuccess(true)
@@ -2064,6 +2056,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
     }
     var menu = player.containerMenu;
+    if (menu instanceof CreativeModeInventoryScreen.ItemPickerMenu) {
+      if (!(minecraft.gui.screen() instanceof CreativeModeInventoryScreen screen) || screen.getMenu() != menu) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot creative inventory screen is not available").asRuntimeException();
+      }
+      return CreativeInventoryControls.activate(screen, id);
+    }
     if (menu instanceof BeaconMenu) {
       if (!(minecraft.gui.screen() instanceof BeaconScreen screen) || screen.getMenu() != menu) {
         throw Status.FAILED_PRECONDITION.withDescription("Bot beacon screen is not available").asRuntimeException();
@@ -2168,6 +2166,15 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         }
 
         var container = player.containerMenu;
+        if (container instanceof CreativeModeInventoryScreen.ItemPickerMenu && "search".equals(fieldId)) {
+          executeAction(activeBot, () -> {
+            if (!(minecraft.gui.screen() instanceof CreativeModeInventoryScreen screen) || screen.getMenu() != container) {
+              throw Status.FAILED_PRECONDITION.withDescription("Bot creative inventory screen is not available").asRuntimeException();
+            }
+            CreativeInventoryControls.search(screen, text);
+          });
+          return BotSetContainerTextResponse.newBuilder().setSuccess(true).build();
+        }
         if (container instanceof AnvilMenu anvilMenu && "item_name".equals(fieldId)) {
           if (minecraft.getConnection() == null) {
             throw Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available").asRuntimeException();

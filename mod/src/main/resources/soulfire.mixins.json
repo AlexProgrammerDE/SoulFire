@@ -74,6 +74,8 @@
     "soulfire.MultilineTextFieldAccessor",
     "soulfire.MerchantScreenAccessor",
     "soulfire.CrafterScreenAccessor",
+    "soulfire.CreativeModeInventoryScreenAccessor",
+    "soulfire.CreativeModeInventoryScreenAccessor$Menu",
     "soulfire.BeaconScreenAccessor",
     "soulfire.BeaconPowerButtonAccessor",
     "soulfire.MixinDialogScreen",

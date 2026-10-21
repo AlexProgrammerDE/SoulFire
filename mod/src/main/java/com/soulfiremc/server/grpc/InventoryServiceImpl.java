@@ -1713,13 +1713,7 @@ public final class InventoryServiceImpl
     int button,
     ContainerInput input
   ) {
-    context.gameMode.handleContainerInput(
-      context.menu.containerId,
-      slot,
-      button,
-      input,
-      context.player
-    );
+    ContainerClicks.click(context.bot.minecraft(), slot, button, input);
   }
 
   private static Slot requireSlot(
