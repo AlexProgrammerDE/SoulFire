@@ -33,6 +33,7 @@ import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -147,6 +148,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       var id = soulFireServer.createInstance(request.getFriendlyName(), ServerRPCConstants.USER_CONTEXT_KEY.get());
       responseObserver.onNext(InstanceCreateResponse.newBuilder().setId(id.toString()).build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error creating instance", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -167,6 +170,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       optionalDeletion.get().join();
       responseObserver.onNext(InstanceDeleteResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error deleting instance", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -201,6 +206,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .toList())
         .build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error listing instance", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -262,6 +269,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .build())
         .build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error getting instance info", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -297,6 +306,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceUpdateMetaResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error updating instance meta", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -340,6 +351,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceUpdateConfigResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error updating instance config", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -379,6 +392,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceUpdateConfigEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error updating instance config entry", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -414,6 +429,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceAddAccountResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error adding instance account", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -458,6 +475,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       instance.botStateManager().syncConfiguredAccounts();
       responseObserver.onNext(InstanceRemoveAccountResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error removing instance account", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -495,6 +514,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceUpdateAccountResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error updating instance account", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -532,6 +553,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceAddAccountsBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error adding instance accounts batch", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -578,6 +601,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       instance.botStateManager().syncConfiguredAccounts();
       responseObserver.onNext(InstanceRemoveAccountsBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error removing instance accounts batch", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -613,6 +638,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceAddProxyResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error adding instance proxy", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -652,6 +679,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceRemoveProxyResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error removing instance proxy", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -691,6 +720,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceUpdateProxyResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error updating instance proxy", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -728,6 +759,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceAddProxiesBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error adding instance proxies batch", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -766,6 +799,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceRemoveProxiesBatchResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error removing instance proxies batch", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -819,6 +854,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error getting audit logs", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -849,6 +886,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(account.persistentMetadata()))
         .build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error getting account metadata", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -908,6 +947,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       responseObserver.onNext(SetAccountMetadataEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error setting account metadata entry", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -964,6 +1005,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       responseObserver.onNext(DeleteAccountMetadataEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error deleting account metadata entry", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -988,6 +1031,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(settings.persistentMetadata()))
         .build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error getting instance metadata", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -1034,6 +1079,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       responseObserver.onNext(SetInstanceMetadataEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error setting instance metadata entry", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -1077,6 +1124,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       responseObserver.onNext(DeleteInstanceMetadataEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
     } catch (Throwable t) {
       log.error("Error deleting instance metadata entry", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
