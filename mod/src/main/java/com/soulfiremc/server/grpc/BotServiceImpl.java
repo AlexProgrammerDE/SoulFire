@@ -24,6 +24,7 @@ import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.mod.access.IDialogScreen;
 import com.soulfiremc.mod.mixin.soulfire.AnvilScreenAccessor;
+import com.soulfiremc.mod.mixin.soulfire.CrafterScreenAccessor;
 import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
@@ -53,6 +54,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.dialog.DialogScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.client.gui.screens.inventory.CrafterScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -61,9 +63,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.LightLayer;
@@ -1441,6 +1445,26 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       playerInvStart = 3;
       hotbarStart = 30;
 
+    } else if (menu instanceof CrafterMenu) {
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("crafting_input")
+        .setLabel("Crafting Grid")
+        .setStartIndex(0)
+        .setSlotCount(9)
+        .setColumns(3)
+        .setType(SlotRegionType.SLOT_REGION_NORMAL)
+        .build());
+      layoutBuilder.addRegions(SlotRegion.newBuilder()
+        .setId("recipe_preview")
+        .setLabel("Recipe Preview")
+        .setStartIndex(45)
+        .setSlotCount(1)
+        .setColumns(1)
+        .setType(SlotRegionType.SLOT_REGION_DISPLAY)
+        .build());
+      playerInvStart = 9;
+      hotbarStart = 36;
+
     } else if (menu instanceof LecternMenu) {
       // Lecterns expose their book through page controls, without player inventory slots.
       playerInvStart = -1;
@@ -1605,13 +1629,16 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             .build());
         }
       }
-      case LoomMenu ignored -> {
-        // Loom: banner patterns
-        for (int i = 0; i < 40; i++) {  // Max banner patterns
+      case LoomMenu loomMenu -> {
+        var patterns = loomMenu.getSelectablePatterns();
+        var color = loomMenu.getSlot(1).getItem().getOrDefault(DataComponents.DYE, DyeColor.WHITE);
+        for (var i = 0; i < patterns.size(); i++) {
+          var pattern = patterns.get(i).value();
           buttons.add(ContainerButton.newBuilder()
             .setButtonId(i)
-            .setLabel("Pattern " + (i + 1))
-            .setDisabled(false)
+            .setLabel(Component.translatable(pattern.translationKey() + "." + color.getName()).getString())
+            .setIconItemId(loomMenu.getSlot(0).getItem().typeHolder().getRegisteredName())
+            .setSelected(i == loomMenu.getSelectedBannerPatternIndex())
             .build());
         }
       }
@@ -1698,15 +1725,15 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           .setDisabled(!hasPayment)
           .build());
       }
-      case CrafterMenu ignored -> {
-        // Crafter: 9 slot toggle buttons (button ID = slot index)
-        // Clicking toggles whether the slot is disabled
-        for (int i = 0; i < 9; i++) {
+      case CrafterMenu crafterMenu -> {
+        for (var i = 0; i < 9; i++) {
+          var disabled = crafterMenu.isSlotDisabled(i);
           buttons.add(ContainerButton.newBuilder()
             .setButtonId(i)
-            .setLabel("Toggle Slot " + (i + 1))
-            .setDescription("Enable/disable crafter slot")
-            .setDisabled(false)
+            .setLabel((disabled ? "Enable Slot " : "Disable Slot ") + (i + 1))
+            .setDescription(disabled ? "Slot is disabled" : "Slot is enabled")
+            .setSelected(disabled)
+            .setDisabled(crafterMenu.getSlot(i).hasItem() || !crafterMenu.getCarried().isEmpty())
             .build());
         }
       }
@@ -1874,7 +1901,20 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         var containerId = player.containerMenu.containerId;
         executeAction(
           activeBot,
-          () -> gameMode.handleContainerInput(containerId, slotId, mouseButton, clickType, player));
+          () -> {
+            if (player.containerMenu instanceof CrafterMenu container) {
+              if (!(minecraft.gui.screen() instanceof CrafterScreen screen) || screen.getMenu() != container) {
+                throw Status.FAILED_PRECONDITION.withDescription("Bot crafter screen is not available").asRuntimeException();
+              }
+              if (slotId != -999 && (slotId < 0 || slotId >= container.slots.size())) {
+                throw Status.INVALID_ARGUMENT.withDescription("Invalid crafter slot index").asRuntimeException();
+              }
+              var slot = slotId == -999 ? null : container.getSlot(slotId);
+              ((CrafterScreenAccessor) screen).soulfire$clickSlot(slot, slotId, mouseButton, clickType);
+            } else {
+              gameMode.handleContainerInput(containerId, slotId, mouseButton, clickType, player);
+            }
+          });
 
         return BotInventoryClickResponse.newBuilder()
           .setSuccess(true)
@@ -2064,10 +2104,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         var validClick = switch (container) {
           case StonecutterMenu stonecutterMenu -> buttonId >= 0 && buttonId < stonecutterMenu.getNumberOfVisibleRecipes();
           case EnchantmentMenu ignored -> buttonId >= 0 && buttonId < 3;
-          case LoomMenu ignored -> buttonId >= 0 && buttonId < 100;
+          case LoomMenu loomMenu -> buttonId >= 0 && buttonId < loomMenu.getSelectablePatterns().size();
           case MerchantMenu merchantMenu -> buttonId >= 0 && buttonId < merchantMenu.getOffers().size();
           case BeaconMenu ignored -> true;
-          case CrafterMenu ignored -> buttonId >= 0 && buttonId < 9;
+          case CrafterMenu crafterMenu -> buttonId >= 0 && buttonId < 9
+            && !crafterMenu.getSlot(buttonId).hasItem() && crafterMenu.getCarried().isEmpty() && !player.isSpectator();
           case LecternMenu ignored -> buttonId >= 1 && buttonId <= 3;
           default -> true;
         };
@@ -2083,7 +2124,15 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         executeAction(
           activeBot,
           () -> {
-            if (container instanceof MerchantMenu) {
+            if (player.containerMenu != container) {
+              throw Status.ABORTED.withDescription("Bot container changed before the action executed").asRuntimeException();
+            }
+            if (container instanceof CrafterMenu crafterMenu) {
+              if (!(minecraft.gui.screen() instanceof CrafterScreen screen) || screen.getMenu() != container) {
+                throw Status.FAILED_PRECONDITION.withDescription("Bot crafter screen is not available").asRuntimeException();
+              }
+              ((CrafterScreenAccessor) screen).soulfire$updateSlotState(buttonId, crafterMenu.isSlotDisabled(buttonId));
+            } else if (container instanceof MerchantMenu) {
               if (!(minecraft.gui.screen() instanceof MerchantScreen screen) || screen.getMenu() != container) {
                 throw Status.FAILED_PRECONDITION.withDescription("Bot trading screen is not available").asRuntimeException();
               }

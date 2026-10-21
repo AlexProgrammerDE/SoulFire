@@ -59,6 +59,7 @@
     "soulfire.AbstractFurnaceMenuAccessor",
     "soulfire.AnvilScreenAccessor",
     "soulfire.MerchantScreenAccessor",
+    "soulfire.CrafterScreenAccessor",
     "soulfire.MixinDialogScreen",
     "soulfire.MixinDialogControlSet",
     "soulfire.ClientRecipeBookAccessor",
