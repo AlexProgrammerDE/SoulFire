@@ -117,12 +117,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         removeLockNull(currentLock.path);
       }
     }
-    var collectionLocksIterator = collectionLocks.iterator();
-    while (collectionLocksIterator.hasNext()) {
-      var currentLock = collectionLocksIterator.next();
+    for (var currentLock : collectionLocks) {
       if (currentLock.hasExpired()) {
-        collectionLocksIterator.remove();
-        removeLockNull(currentLock.path);
+        removeCollectionLock(currentLock);
       }
     }
   }
@@ -789,11 +786,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
         // Checking if a child resource of this collection is
         // already locked
         List<String> lockPaths = new ArrayList<>();
-        var collectionLocksIterator = collectionLocks.iterator();
-        while (collectionLocksIterator.hasNext()) {
-          var currentLock = collectionLocksIterator.next();
+        for (var currentLock : collectionLocks) {
           if (currentLock.hasExpired()) {
-            collectionLocksIterator.remove();
+            removeCollectionLock(currentLock);
             continue;
           }
           if (currentLock.path.startsWith(lock.path) && (currentLock.isExclusive() || lock.isExclusive())) {
@@ -903,12 +898,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
 
             lockNullResources.computeIfAbsent(parentPath, _ -> new CopyOnWriteArrayList<>()).add(lock.path);
           }
-
-          // Add the Lock-Token header as by RFC 2518 8.10.1
-          // - only do this for newly created locks
-          resp.addHeader("Lock-Token", "<opaquelocktoken:" + lockToken + ">");
         }
       }
+      resp.addHeader("Lock-Token", "<opaquelocktoken:" + lockToken + ">");
     }
 
     if (lockRequestType == LOCK_REFRESH) {
@@ -1008,11 +1000,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Checking inheritable collection locks
-    var collectionLocksList = collectionLocks.iterator();
-    while (collectionLocksList.hasNext()) {
-      lock = collectionLocksList.next();
-      if (path.equals(lock.path)) {
-        var tokenList = lock.tokens.iterator();
+    for (var collectionLock : collectionLocks) {
+      if (path.equals(collectionLock.path)) {
+        var tokenList = collectionLock.tokens.iterator();
         while (tokenList.hasNext()) {
           var token = tokenList.next();
           if (lockTokenHeader.contains(token)) {
@@ -1020,10 +1010,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
             break;
           }
         }
-        if (lock.tokens.isEmpty()) {
-          collectionLocksList.remove();
-          // Removing any lock-null resource which would be present
-          removeLockNull(path);
+        if (collectionLock.tokens.isEmpty()) {
+          removeCollectionLock(collectionLock);
         }
       }
     }
@@ -1074,14 +1062,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Checking inheritable collection locks
-    var collectionLockList = collectionLocks.iterator();
-    while (collectionLockList.hasNext()) {
-      lock = collectionLockList.next();
-      if (lock.hasExpired()) {
-        collectionLockList.remove();
-      } else if (path.startsWith(lock.path)) {
+    for (var collectionLock : collectionLocks) {
+      if (collectionLock.hasExpired()) {
+        removeCollectionLock(collectionLock);
+      } else if (path.startsWith(collectionLock.path)) {
         var tokenMatch = false;
-        for (var token : lock.tokens) {
+        for (var token : collectionLock.tokens) {
           if (ifHeader.contains(token)) {
             tokenMatch = true;
             break;
@@ -1794,6 +1780,12 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     return methodsAllowed.toString();
+  }
+
+  private void removeCollectionLock(LockInfo lock) {
+    if (collectionLocks.remove(lock)) {
+      removeLockNull(lock.path);
+    }
   }
 
   private void removeLockNull(String path) {
