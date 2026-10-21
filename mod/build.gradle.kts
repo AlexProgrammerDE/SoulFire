@@ -43,11 +43,17 @@ private class JavaAgentArgumentProvider(
 
 val mockitoAgent = configurations.create("mockitoAgent")
 
+val vulkanRuntimeDependencies = configurations.dependencyScope("vulkanRuntimeDependencies")
+val vulkanRuntime = configurations.resolvable("vulkanRuntime") {
+  extendsFrom(vulkanRuntimeDependencies.get())
+}
+
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
   minecraft("com.mojang:minecraft:26.3")
-  runtimeOnly(files(rootProject.tasks.named("prepareVulkanRuntime")).asFileTree.matching { include("soulfire-vulkan-*.jar") })
+  add(vulkanRuntimeDependencies.name, projects.vulkanRuntime)
+  runtimeOnly(files(vulkanRuntime))
   implementation("net.fabricmc:fabric-loader:0.19.5")
 
   // Bundle the encoder and its native runtime for headless hosts without FFmpeg packages.

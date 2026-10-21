@@ -28,6 +28,8 @@ An explicit `org.lwjgl.vulkan.libname` override retains LWJGL's normal behavior 
 
 ## Build for the current host
 
+The `:vulkan-runtime` subproject owns the native sources, build script, Dockerfile, and generated packages.
+The mod and launchers consume its outgoing artifacts through project dependencies.
 Gradle builds the host runtime before it packages either launcher. Linux builds require Docker and use the Debian 12 builder image.
 Windows builds require the MSYS2 tools listed in `.github/workflows/vulkan-runtime.yml`.
 macOS builds require the Homebrew tools and Python environment listed in that workflow.
@@ -38,8 +40,8 @@ Run these commands from the repository root:
 ./gradlew :dedicated-launcher:uberJar
 ```
 
-To build only the native package, run `./gradlew :prepareVulkanRuntime`.
-Gradle places the package in `build/vulkan-runtime` and skips native compilation when its inputs and output stay unchanged.
+To build only the native package, run `./gradlew :vulkan-runtime:assemble`.
+Gradle places the package in `vulkan-runtime/build/runtime` and skips native compilation when its inputs and output stay unchanged.
 The first build downloads and compiles the native sources. Later builds reuse the native build directory.
 
 Normal builds include only the host runtime. Jenkins on Linux therefore produces JARs with the Linux CPU fallback.
@@ -63,9 +65,10 @@ Those jobs download the packages into `build/vulkan-prebuilt` and run:
 ./gradlew build -PvulkanPlatforms=all -PvulkanRuntimeDirectory=build/vulkan-prebuilt
 ```
 
-Gradle checks each selected package before it stages the packages in `build/vulkan-runtime`.
+Gradle checks each selected package before it stages the packages in `vulkan-runtime/build/runtime`.
 Missing packages or packages without the platform manifest stop the build.
-The input directory must differ from `build/vulkan-runtime`, which Gradle manages as an output.
+The input directory must differ from `vulkan-runtime/build/runtime`, which Gradle manages as an output.
+Relative input directory paths start at the repository root.
 Use `vulkanPlatforms` with a comma-separated platform list to select a subset from the input directory.
 No Maven repository or artifact hosting service is required.
 

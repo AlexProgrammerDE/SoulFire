@@ -34,6 +34,7 @@ develocity {
 
 include(
   "build-data",
+  "vulkan-runtime",
   "proto",
   "mod",
   "launcher",

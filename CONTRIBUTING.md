@@ -56,37 +56,36 @@ Keep work on the branch selected for your contribution.
 | `launcher/` | Shared bootstrap and dependency loading |
 | `client-launcher/`, `dedicated-launcher/` | CLI and dedicated server entry points and packaged JARs |
 | `j8-launcher/` | Compatibility entry points that report unsupported Java versions |
+| `vulkan-runtime/` | Native Vulkan loader, CPU rendering driver, and runtime packages |
 | `build-data/`, `buildSrc/`, `gradle/` | Build resources, Gradle conventions, and dependency configuration |
 | `e2e/` | Scenarios against a vanilla Minecraft server |
 | `docs/`, `scripts/`, `config/` | Technical references, development tools, and IDE configuration |
 
 ## Build and run SoulFire
 
-Launcher JARs require packaged Vulkan runtimes in `build/vulkan-runtime/`.
-The default build requires all six supported platforms, as the release build does.
+Gradle builds the host Vulkan runtime through the `:vulkan-runtime` subproject before it packages launcher JARs.
+Release builds require all six supported platforms.
 Read [native runtime packaging](docs/vulkan-runtime.md) for platform details and build instructions.
 
-For a local Linux x86-64 build, run:
+On Linux, install Docker, then run:
 
 ```bash
-docker build -t soulfire-vulkan-builder -f build-data/vulkan/Dockerfile .
-docker run --rm -v "$PWD:/work" soulfire-vulkan-builder
-./gradlew build -PvulkanPlatforms=linux-x86_64
+./gradlew build
 ```
 
-On Linux ARM64, use `-PvulkanPlatforms=linux-arm64`.
-This property selects required runtime packages. It does not create them.
-Use the full platform set for release artifacts.
+Gradle selects the host platform automatically.
+Use `./gradlew :vulkan-runtime:assemble` to build only the native package.
+The package appears in `vulkan-runtime/build/runtime/`.
 
 The packaged JARs appear in `client-launcher/build/libs/` and `dedicated-launcher/build/libs/`.
-After you prepare the native runtime, run either development entry point:
+To run either development entry point, use:
 
 ```bash
 ./gradlew :client-launcher:runSFCLI
 ./gradlew :dedicated-launcher:runSFDedicated
 ```
 
-For a dedicated JAR only, use `./gradlew :dedicated-launcher:uberJar` with your local platform property.
+For a dedicated JAR only, use `./gradlew :dedicated-launcher:uberJar`.
 For the Fabric-ready mod, use `./gradlew :mod:remapJar`.
 To inspect Minecraft sources, run `./gradlew genSources` and open the generated sources through your IDE.
 

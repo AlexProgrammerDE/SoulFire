@@ -230,7 +230,7 @@ def copy_licenses(stage, system, mesa, loader):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--jobs", type=int, default=min(os.cpu_count() or 2, 12))
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "build/vulkan-runtime")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "build/runtime")
     args = parser.parse_args()
     system = {"Linux": "linux", "Darwin": "macos", "Windows": "windows"}[
         platform.system()
@@ -243,7 +243,7 @@ def main():
         "ARM64": "arm64",
     }[platform.machine()]
     target = f"{system}-{arch}"
-    work = ROOT / "build" / "vulkan-work" / target
+    work = ROOT / "build" / "work" / target
     stage = work / "runtime"
     work.mkdir(parents=True, exist_ok=True)
     glslang, mesa, loader, headers = [source(name, work) for name in SOURCES]
@@ -353,7 +353,7 @@ def main():
     run(
         "cmake",
         "-S",
-        ROOT / "build-data/vulkan",
+        ROOT / "src/main/c",
         "-B",
         work / "smoke-build",
         "-G",

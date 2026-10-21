@@ -28,6 +28,10 @@ abstract class BuildVulkanRuntime : DefaultTask() {
   @get:PathSensitive(PathSensitivity.RELATIVE)
   abstract val nativeSources: DirectoryProperty
 
+  @get:InputFile
+  @get:PathSensitive(PathSensitivity.RELATIVE)
+  abstract val dockerfile: RegularFileProperty
+
   @get:Internal
   abstract val sourceRoot: DirectoryProperty
 
@@ -55,12 +59,12 @@ abstract class BuildVulkanRuntime : DefaultTask() {
     val root = sourceRoot.get().asFile
     val output = runtimeJar.get().asFile.parentFile
     if (useDocker.get()) {
-      val dockerfile = nativeSources.file("Dockerfile").get().asFile
+      val dockerfile = dockerfile.get().asFile
       val digest = MessageDigest.getInstance("SHA-256").digest(dockerfile.readBytes())
         .joinToString("") { "%02x".format(it) }.take(12)
       val image = "soulfire-vulkan-builder:$digest"
       execOperations.exec {
-        commandLine("docker", "build", "-t", image, "-f", dockerfile, nativeSources.get().asFile)
+        commandLine("docker", "build", "-t", image, "-f", dockerfile, root)
       }
       fun id(flag: String): String {
         val buffer = ByteArrayOutputStream()

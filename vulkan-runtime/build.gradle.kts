@@ -1,0 +1,3 @@
+plugins {
+  `sf-vulkan-runtime`
+}

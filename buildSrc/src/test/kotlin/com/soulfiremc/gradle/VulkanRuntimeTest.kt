@@ -26,18 +26,21 @@ class VulkanRuntimeTest {
 
   @BeforeEach
   fun fixture() {
-    directory.resolve("settings.gradle").writeText("rootProject.name = 'native-fixture'\n")
+    directory.resolve("settings.gradle").writeText("rootProject.name = 'native-fixture'\ninclude 'vulkan-runtime'\n")
     directory.resolve("gradle.properties").writeText("org.gradle.jvmargs=-Xmx512m\n")
     directory.resolve("build.gradle").writeText(
       """
       plugins {
         id 'base'
         id 'java-library'
-        id 'sf-vulkan-runtime'
       }
-      def nativeRuntime = tasks.named('prepareVulkanRuntime')
+      def nativeDependencies = configurations.dependencyScope('vulkanRuntimeDependencies')
+      def nativeRuntime = configurations.resolvable('vulkanRuntime') {
+        extendsFrom(nativeDependencies.get())
+      }
       dependencies {
-        runtimeOnly(files(nativeRuntime.flatMap { it.preparedJars }))
+        add(nativeDependencies.name, project(':vulkan-runtime'))
+        runtimeOnly(files(nativeRuntime))
       }
       tasks.register('packageRuntime', Zip) {
         from(configurations.runtimeClasspath)
@@ -54,8 +57,11 @@ class VulkanRuntimeTest {
       }
       """.trimIndent()
     )
-    directory.resolve("build-data/vulkan").createDirectories().resolve("Dockerfile").writeText("FROM debian:bookworm-slim\n")
-    directory.resolve("scripts").createDirectories().resolve("build-vulkan-runtime.py").writeText(
+    val nativeProject = directory.resolve("vulkan-runtime").createDirectories()
+    nativeProject.resolve("build.gradle").writeText("plugins { id 'sf-vulkan-runtime' }\n")
+    nativeProject.resolve("Dockerfile").writeText("FROM debian:bookworm-slim\n")
+    nativeProject.resolve("src/main/c").createDirectories().resolve("smoke.c").writeText("int main(void) { return 0; }\n")
+    nativeProject.resolve("scripts").createDirectories().resolve("build-vulkan-runtime.py").writeText(
       """
       import argparse
       from pathlib import Path
@@ -88,31 +94,32 @@ class VulkanRuntimeTest {
   @Test
   fun `packaging builds its runtime and tracks changes and clean`() {
     val first = runner("packageRuntime").build()
-    assertEquals(TaskOutcome.SUCCESS, first.task(":buildVulkanRuntime")?.outcome)
+    assertEquals(TaskOutcome.SUCCESS, first.task(":vulkan-runtime:buildVulkanRuntime")?.outcome)
+    assertNull(first.task(":buildVulkanRuntime"))
     ZipFile(directory.resolve("build/distribution/runtime.zip").toFile()).use {
       assertEquals(listOf("soulfire-vulkan-$host.jar"), it.entries().asSequence().map(ZipEntry::getName).toList())
     }
     val second = runner("packageRuntime").build()
-    assertEquals(TaskOutcome.UP_TO_DATE, second.task(":buildVulkanRuntime")?.outcome)
-    assertEquals(TaskOutcome.UP_TO_DATE, second.task(":prepareVulkanRuntime")?.outcome)
+    assertEquals(TaskOutcome.UP_TO_DATE, second.task(":vulkan-runtime:buildVulkanRuntime")?.outcome)
+    assertEquals(TaskOutcome.UP_TO_DATE, second.task(":vulkan-runtime:prepareVulkanRuntime")?.outcome)
 
-    directory.resolve("scripts/build-vulkan-runtime.py").toFile().appendText("\n# Changed native inputs\n")
-    assertEquals(TaskOutcome.SUCCESS, runner("packageRuntime").build().task(":buildVulkanRuntime")?.outcome)
+    directory.resolve("vulkan-runtime/scripts/build-vulkan-runtime.py").toFile().appendText("\n# Changed native inputs\n")
+    assertEquals(TaskOutcome.SUCCESS, runner("packageRuntime").build().task(":vulkan-runtime:buildVulkanRuntime")?.outcome)
     val clean = runner("clean", "packageRuntime", "--parallel").build()
-    assertEquals(TaskOutcome.SUCCESS, clean.task(":buildVulkanRuntime")?.outcome)
-    assertTrue(directory.resolve("build/vulkan-runtime/soulfire-vulkan-$host.jar").toFile().isFile)
+    assertEquals(TaskOutcome.SUCCESS, clean.task(":vulkan-runtime:buildVulkanRuntime")?.outcome)
+    assertTrue(directory.resolve("vulkan-runtime/build/runtime/soulfire-vulkan-$host.jar").toFile().isFile)
   }
 
   @Test
   fun `all platform packaging uses supplied packages and removes unselected outputs`() {
     VulkanPlatforms.all.forEach { prebuilt(it) }
     val result = runner("packageRuntime", "-PvulkanPlatforms=all", "-PvulkanRuntimeDirectory=prebuilt").build()
-    assertNull(result.task(":buildVulkanRuntime"))
+    assertNull(result.task(":vulkan-runtime:buildVulkanRuntime"))
     ZipFile(directory.resolve("build/distribution/runtime.zip").toFile()).use {
       assertEquals(VulkanPlatforms.all.map { platform -> "soulfire-vulkan-$platform.jar" }.toSet(), it.entries().asSequence().map(ZipEntry::getName).toSet())
     }
     runner("packageRuntime", "-PvulkanPlatforms=windows-arm64", "-PvulkanRuntimeDirectory=prebuilt").build()
-    assertEquals(listOf("soulfire-vulkan-windows-arm64.jar"), directory.resolve("build/vulkan-runtime").toFile().listFiles()!!.map { it.name })
+    assertEquals(listOf("soulfire-vulkan-windows-arm64.jar"), directory.resolve("vulkan-runtime/build/runtime").toFile().listFiles()!!.map { it.name })
   }
 
   @Test
@@ -132,7 +139,7 @@ class VulkanRuntimeTest {
   fun `a missing release platform stops packaging`() {
     prebuilt(host)
     val result = runner("packageRuntime", "-PvulkanPlatforms=all", "-PvulkanRuntimeDirectory=prebuilt").buildAndFail()
-    assertEquals(TaskOutcome.FAILED, result.task(":prepareVulkanRuntime")?.outcome)
+    assertEquals(TaskOutcome.FAILED, result.task(":vulkan-runtime:prepareVulkanRuntime")?.outcome)
     assertFalse(directory.resolve("build/distribution/runtime.zip").toFile().exists())
   }
 
@@ -140,8 +147,17 @@ class VulkanRuntimeTest {
   fun `a package with a mismatched manifest stops packaging`() {
     prebuilt(host, valid = false)
     val result = runner("packageRuntime", "-PvulkanRuntimeDirectory=prebuilt").buildAndFail()
-    assertEquals(TaskOutcome.FAILED, result.task(":prepareVulkanRuntime")?.outcome)
-    assertTrue(directory.resolve("build/vulkan-runtime").toFile().listFiles().isNullOrEmpty())
+    assertEquals(TaskOutcome.FAILED, result.task(":vulkan-runtime:prepareVulkanRuntime")?.outcome)
+    assertTrue(directory.resolve("vulkan-runtime/build/runtime").toFile().listFiles().isNullOrEmpty())
+  }
+
+  @Test
+  fun `the native subproject assembles independently`() {
+    val result = runner(":vulkan-runtime:assemble").build()
+    assertEquals(TaskOutcome.SUCCESS, result.task(":vulkan-runtime:buildVulkanRuntime")?.outcome)
+    assertEquals(TaskOutcome.SUCCESS, result.task(":vulkan-runtime:prepareVulkanRuntime")?.outcome)
+    assertNull(result.task(":packageRuntime"))
+    assertTrue(directory.resolve("vulkan-runtime/build/runtime/soulfire-vulkan-$host.jar").toFile().isFile)
   }
 
   @ParameterizedTest

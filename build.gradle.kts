@@ -1,6 +1,5 @@
 plugins {
     base
-    `sf-vulkan-runtime`
 }
 
 tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
