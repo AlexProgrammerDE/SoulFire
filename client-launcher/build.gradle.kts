@@ -149,7 +149,6 @@ tasks {
     }
   }
   val uberJar = register<Jar>("uberJar") {
-    dependsOn(":launcher:verifyVulkanRuntime")
     val jarTask = jar
     dependsOn(jarTask)
 

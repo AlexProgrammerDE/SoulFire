@@ -47,7 +47,7 @@ dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
   minecraft("com.mojang:minecraft:26.3")
-  runtimeOnly(fileTree(rootProject.layout.buildDirectory.dir("vulkan-runtime")) { include("soulfire-vulkan-*.jar") })
+  runtimeOnly(files(rootProject.tasks.named("prepareVulkanRuntime")).asFileTree.matching { include("soulfire-vulkan-*.jar") })
   implementation("net.fabricmc:fabric-loader:0.19.5")
 
   // Bundle the encoder and its native runtime for headless hosts without FFmpeg packages.

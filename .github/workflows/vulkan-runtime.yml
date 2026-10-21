@@ -24,17 +24,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Set up JDK 25
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          java-version: '25'
+          distribution: temurin
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         id: cache
         with:
           path: build/vulkan-runtime
-          key: vulkan-${{ matrix.platform }}-${{ hashFiles('scripts/build-vulkan-runtime.py', 'build-data/vulkan/**') }}
+          key: vulkan-${{ matrix.platform }}-${{ hashFiles('scripts/build-vulkan-runtime.py', 'build-data/vulkan/**', 'buildSrc/src/main/kotlin/com/soulfiremc/gradle/*Vulkan*.kt', 'buildSrc/src/main/kotlin/sf-vulkan-runtime.gradle.kts') }}
       - name: Build Linux runtime
         if: steps.cache.outputs.cache-hit != 'true' && matrix.os == 'linux'
-        run: |
-          docker build -t soulfire-vulkan-builder -f build-data/vulkan/Dockerfile .
-          docker run --rm -v "$PWD:/work" soulfire-vulkan-builder --jobs 3
-          sudo chown -R "$(id -u):$(id -g)" build/vulkan-runtime
+        run: ./gradlew :prepareVulkanRuntime -PvulkanBuildJobs=3
       - name: Set up Windows build tools
         if: steps.cache.outputs.cache-hit != 'true' && matrix.os == 'windows'
         uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2
@@ -55,7 +59,7 @@ jobs:
       - name: Build Windows runtime
         if: steps.cache.outputs.cache-hit != 'true' && matrix.os == 'windows'
         shell: msys2 {0}
-        run: python scripts/build-vulkan-runtime.py --jobs 3
+        run: ./gradlew :prepareVulkanRuntime -PvulkanBuildJobs=3
       - name: Build macOS runtime
         if: steps.cache.outputs.cache-hit != 'true' && matrix.os == 'macos'
         run: |
@@ -63,7 +67,7 @@ jobs:
           python3 -m venv build/native-tools
           build/native-tools/bin/pip install mako==1.3.10 packaging==25.0 pyyaml==6.0.3 meson==1.9.2
           export PATH="$PWD/build/native-tools/bin:$(brew --prefix llvm)/bin:$(brew --prefix bison)/bin:$(brew --prefix flex)/bin:$PATH"
-          python3 scripts/build-vulkan-runtime.py --jobs 3
+          ./gradlew :prepareVulkanRuntime -PvulkanBuildJobs=3
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: vulkan-${{ matrix.platform }}

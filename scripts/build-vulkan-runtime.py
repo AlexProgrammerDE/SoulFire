@@ -230,6 +230,7 @@ def copy_licenses(stage, system, mesa, loader):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--jobs", type=int, default=min(os.cpu_count() or 2, 12))
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "build/vulkan-runtime")
     args = parser.parse_args()
     system = {"Linux": "linux", "Darwin": "macos", "Windows": "windows"}[
         platform.system()
@@ -392,7 +393,7 @@ def main():
     (stage / "runtime.properties").write_text(
         "".join(f"{key}={value}\n" for key, value in manifest.items())
     )
-    destination = ROOT / "build/vulkan-runtime" / f"soulfire-vulkan-{target}.jar"
+    destination = args.output_dir / f"soulfire-vulkan-{target}.jar"
     destination.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(
         destination, "w", zipfile.ZIP_DEFLATED, compresslevel=9
