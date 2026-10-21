@@ -21,6 +21,7 @@ import com.google.protobuf.ListValue;
 import com.google.protobuf.NullValue;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
+import com.soulfiremc.grpc.generated.ActivateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptResponse;
 import com.soulfiremc.grpc.generated.DryRunScriptRequest;
@@ -29,6 +30,7 @@ import com.soulfiremc.grpc.generated.ScriptEvent;
 import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.grpc.generated.ScriptQuotas;
 import com.soulfiremc.grpc.generated.UpdateScriptRequest;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.script.AbstractScriptNode;
@@ -53,12 +55,15 @@ import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.sqlite.SQLiteDataSource;
 import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -79,7 +84,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-final class ScriptDryRunTest {
+final class ScriptExecutionServiceTest {
   private final SoulFireServer server = mock();
   private final ScriptServiceImpl service = new ScriptServiceImpl(server);
   private final Context rpcContext = Context.current().withValue(ServerRPCConstants.USER_CONTEXT_KEY, mock(SoulFireUser.class));
@@ -140,6 +145,22 @@ final class ScriptDryRunTest {
   private void awaitCompletion() throws InterruptedException {
     assertTrue(terminal.await(5, TimeUnit.SECONDS));
     assertNull(error.get());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void rejectedActivationPreservesThePausedFlag(boolean missingInstance) {
+    var scriptId = saveScript(missingInstance ? "action.print" : "unknown.node");
+    when(server.getInstance(UUID.fromString(instanceId))).thenReturn(
+      missingInstance ? Optional.empty() : Optional.of(mock(InstanceManager.class)));
+    var request = ActivateScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).build();
+
+    var failure = assertThrows(StatusRuntimeException.class,
+      () -> rpcContext.run(() -> service.activateScript(request, observer)));
+
+    assertEquals(missingInstance ? Status.Code.NOT_FOUND : Status.Code.INVALID_ARGUMENT, failure.getStatus().getCode());
+    assertTrue(server.dsl().selectFrom(Tables.SCRIPTS).where(Tables.SCRIPTS.ID.eq(scriptId)).fetchSingle().getPaused());
+    verify(observer, never()).onNext(any());
   }
 
   @Test

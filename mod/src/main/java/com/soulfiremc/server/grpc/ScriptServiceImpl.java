@@ -22,7 +22,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.*;
 import com.google.protobuf.util.JsonFormat;
 import com.google.protobuf.util.Timestamps;
-import com.linecorp.armeria.server.ServiceRequestContext;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.grpc.generated.PortType;
 import com.soulfiremc.grpc.generated.ScriptNode;
@@ -555,8 +554,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
     try {
-      // Load and unpause the script in the database
-      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+      record ValidatedActivation(ScriptsRecord record, ScriptGraph graph) {}
+      var instanceManager = soulFireServer.getInstance(instanceId)
+        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
+
+      // Validate before persisting the resumed state so rejected scripts stay paused.
+      var activation = soulFireServer.dsl().transactionResult(cfg -> {
         var ctx = DSL.using(cfg);
         var record = ctx.selectFrom(Tables.SCRIPTS)
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
@@ -565,6 +568,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
+        var graph = ConstantFolding.fold(buildScriptGraph(record));
         // Set paused=false to persist the resumed state
         if (record.getPaused()) {
           ctx.update(Tables.SCRIPTS)
@@ -574,8 +578,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             .execute();
           record.setPaused(false);
         }
-        return record;
+        return new ValidatedActivation(record, graph);
       });
+      var scriptRecord = activation.record();
 
       var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
 
@@ -609,21 +614,14 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           existingState.observerRef()
         ));
 
-        // Send script started event once the stream is ready
-        // (Armeria requires headers to be sent before messages, which happens after this method returns)
-        sendScriptStartedWhenReady(serverObserver, scriptId);
+        sendScriptStarted(serverObserver, scriptId);
 
         log.info("Client attached to already-running script {}", scriptId);
         return;
       }
 
       // Script is not running, start it
-      // Build the script graph from the record and apply constant folding
-      var graph = ConstantFolding.fold(buildScriptGraph(scriptRecord));
-
-      // Get the instance manager
-      var instanceManager = soulFireServer.getInstance(instanceId)
-        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
+      var graph = activation.graph();
 
       // Create AtomicReference for the observer so the event listener always
       // sees the latest observer, even after client disconnect/reconnect
@@ -654,9 +652,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       );
       activeScripts.put(scriptId, activationState);
 
-      // Send script started event once the stream is ready
-      // (Armeria requires headers to be sent before messages, which happens after this method returns)
-      sendScriptStartedWhenReady(serverObserver, scriptId);
+      sendScriptStarted(serverObserver, scriptId);
 
       log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
         graph.findTriggerNodes().size(), graph.dataEdges().size());
@@ -1463,37 +1459,32 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     return element.toString();
   }
 
-  /// Defers sending the ScriptStarted event until the stream is ready.
-  /// Armeria requires response headers to be sent before any messages,
-  /// which only happens after the RPC handler method returns.
-  private void sendScriptStartedWhenReady(ServerCallStreamObserver<ScriptEvent> observer, UUID scriptId) {
+  private void sendScriptStarted(ServerCallStreamObserver<ScriptEvent> observer, UUID scriptId) {
     var event = ScriptEvent.newBuilder()
       .setScriptStarted(ScriptStarted.newBuilder()
         .setScriptId(scriptId.toString())
         .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
         .build())
       .build();
-    var context = ServiceRequestContext.current();
-    context.eventLoop().execute(() -> {
-      if (observer.isCancelled()) {
-        return;
-      }
-      try {
-        observer.onNext(event);
-      } catch (Exception e) {
-        log.debug("Error sending script started event", e);
-      }
-    });
+    sendToObserver(observer, event);
   }
 
   /// Sends an event to the observer if it's present and not cancelled.
   private void sendToObserver(AtomicReference<ServerCallStreamObserver<ScriptEvent>> observerRef, ScriptEvent event) {
     var observer = observerRef.get();
-    if (observer != null && !observer.isCancelled()) {
-      try {
-        observer.onNext(event);
-      } catch (Exception e) {
-        log.debug("Error sending script event", e);
+    if (observer != null) {
+      sendToObserver(observer, event);
+    }
+  }
+
+  private void sendToObserver(ServerCallStreamObserver<ScriptEvent> observer, ScriptEvent event) {
+    synchronized (observer) {
+      if (!observer.isCancelled()) {
+        try {
+          observer.onNext(event);
+        } catch (Exception e) {
+          log.debug("Error sending script event", e);
+        }
       }
     }
   }
