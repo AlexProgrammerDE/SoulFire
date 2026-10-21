@@ -22,6 +22,7 @@ import com.google.gson.JsonParser;
 import com.google.protobuf.util.Timestamps;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
+import com.soulfiremc.mod.access.IDialogScreen;
 import com.soulfiremc.mod.mixin.soulfire.AnvilScreenAccessor;
 import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
 import com.soulfiremc.server.SoulFireServer;
@@ -60,7 +61,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.server.dialog.*;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.inventory.ContainerInput;
@@ -84,6 +84,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -1778,39 +1779,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     };
   }
 
-  /**
-   * Converts a Minecraft Dialog to the proto ServerDialog format.
-   * This is a simplified conversion that captures the essential dialog information.
-   */
-  private static ServerDialog convertDialogToProto(Holder<Dialog> dialogHolder) {
-    var dialog = dialogHolder.value();
-    var builder = ServerDialog.newBuilder();
-
-    // Set dialog ID from the holder key if available
-    dialogHolder.unwrapKey().ifPresent(key ->
-      builder.setId(key.identifier().toString()));
-
-    // Set dialog type based on the concrete class
-    if (dialog instanceof NoticeDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_NOTICE);
-    } else if (dialog instanceof ConfirmationDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_CONFIRMATION);
-    } else if (dialog instanceof MultiActionDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_MULTI_ACTION);
-    } else if (dialog instanceof ServerLinksDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_SERVER_LINKS);
-    } else if (dialog instanceof DialogListDialog) {
-      builder.setType(DialogType.DIALOG_TYPE_DIALOG_LIST);
-    }
-
-    var common = dialog.common();
-    builder.setTitle(common.title().getString());
-    builder.setCanCloseWithEscape(common.canCloseWithEscape());
-    builder.setPause(common.pause());
-
-    return builder.build();
-  }
-
 
   /**
    * Gets the display title for a container menu.
@@ -2257,10 +2225,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var responseBuilder = BotGetDialogResponse.newBuilder();
 
       if (activeBot != null) {
-        var dialogHolder = callInBotContext(activeBot, () -> DialogHandler.getCurrentDialog(activeBot));
-        if (dialogHolder != null) {
-          responseBuilder.setDialog(convertDialogToProto(dialogHolder));
-        }
+        var dialog = callInBotContext(activeBot, () -> activeBot.minecraft().submit(() -> {
+          var holder = DialogHandler.getCurrentDialog(activeBot);
+          return holder == null ? null : DialogStateMapper.describe(holder,
+            (IDialogScreen) activeBot.minecraft().gui.screen(), activeBot.minecraft().level);
+        }).get(10, TimeUnit.SECONDS));
+        if (dialog != null) responseBuilder.setDialog(dialog);
       }
 
       responseObserver.onNext(responseBuilder.build());
@@ -2289,21 +2259,17 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var response = callInBotContext(activeBot, () -> {
-        var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
-        if (dialogHolder == null) {
-          return BotSubmitDialogResponse.newBuilder()
-            .setSuccess(false)
-            .setError("No dialog is currently displayed")
-            .build();
+      var result = new AtomicReference<DialogControls.ClientActions>();
+      executeAction(activeBot, () -> {
+        if (!(activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen)) {
+          throw Status.FAILED_PRECONDITION.withDescription("No dialog is currently displayed").asRuntimeException();
         }
-
-        log.info("Dialog submit requested with {} input values - clearing dialog state", request.getInputValuesCount());
-        DialogHandler.setCurrentDialog(activeBot, null);
-        return BotSubmitDialogResponse.newBuilder()
-          .setSuccess(true)
-          .build();
+        result.set(DialogControls.act(screen, request.getInputValuesMap(), request.hasButtonIndex() ? request.getButtonIndex() : 0));
       });
+      var builder = BotSubmitDialogResponse.newBuilder().setSuccess(true);
+      result.get().clipboard().ifPresent(builder::setClipboard);
+      result.get().openUrl().ifPresent(builder::setOpenUrl);
+      var response = builder.build();
 
       responseObserver.onNext(response);
       responseObserver.onCompleted();
@@ -2331,21 +2297,17 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var response = callInBotContext(activeBot, () -> {
-        var dialogHolder = DialogHandler.getCurrentDialog(activeBot);
-        if (dialogHolder == null) {
-          return BotClickDialogButtonResponse.newBuilder()
-            .setSuccess(false)
-            .setError("No dialog is currently displayed")
-            .build();
+      var result = new AtomicReference<DialogControls.ClientActions>();
+      executeAction(activeBot, () -> {
+        if (!(activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen)) {
+          throw Status.FAILED_PRECONDITION.withDescription("No dialog is currently displayed").asRuntimeException();
         }
-
-        log.info("Dialog button click requested (button index: {}) - clearing dialog state", request.getButtonIndex());
-        DialogHandler.setCurrentDialog(activeBot, null);
-        return BotClickDialogButtonResponse.newBuilder()
-          .setSuccess(true)
-          .build();
+        result.set(DialogControls.act(screen, Map.of(), request.getButtonIndex()));
       });
+      var builder = BotClickDialogButtonResponse.newBuilder().setSuccess(true);
+      result.get().clipboard().ifPresent(builder::setClipboard);
+      result.get().openUrl().ifPresent(builder::setOpenUrl);
+      var response = builder.build();
 
       responseObserver.onNext(response);
       responseObserver.onCompleted();
@@ -2373,17 +2335,18 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var response = callInBotContext(activeBot, () -> {
-        executeAction(activeBot, () -> {
-          if (activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen) {
-            screen.onClose();
-          }
-          DialogHandler.setCurrentDialog(activeBot, null);
-        });
-        return BotCloseDialogResponse.newBuilder()
-          .setSuccess(true)
-          .build();
+      var result = new AtomicReference<DialogControls.ClientActions>();
+      executeAction(activeBot, () -> {
+        if (activeBot.minecraft().gui.screen() instanceof DialogScreen<?> screen) {
+          result.set(DialogControls.act(screen, Map.of(), -1));
+        }
       });
+      var builder = BotCloseDialogResponse.newBuilder().setSuccess(true);
+      if (result.get() != null) {
+        result.get().clipboard().ifPresent(builder::setClipboard);
+        result.get().openUrl().ifPresent(builder::setOpenUrl);
+      }
+      var response = builder.build();
 
       responseObserver.onNext(response);
       responseObserver.onCompleted();

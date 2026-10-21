@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.plugins;
 
+import com.soulfiremc.mod.access.IDialogScreen;
 import com.soulfiremc.server.api.InternalPlugin;
 import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
@@ -70,11 +71,13 @@ public final class DialogHandler extends InternalPlugin {
    */
   @Nullable
   public static Holder<Dialog> getCurrentDialog(BotConnection connection) {
-    if (!(connection.minecraft().gui.screen() instanceof DialogScreen<?>)) {
+    if (!(connection.minecraft().gui.screen() instanceof DialogScreen<?> screen)) {
       return null;
     }
     var dialogRef = connection.metadata().get(CURRENT_DIALOG);
-    return dialogRef != null ? dialogRef.get() : null;
+    var current = dialogRef != null ? dialogRef.get() : null;
+    var dialog = ((IDialogScreen) screen).soulfire$getDialog();
+    return current != null && current.value() == dialog ? current : Holder.direct(dialog);
   }
 
   /**

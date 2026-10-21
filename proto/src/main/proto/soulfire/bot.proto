@@ -1536,7 +1536,7 @@ message ServerDialog {
   // For CONFIRMATION type: the "no" button.
   optional DialogButton no = 12;
 
-  // For MULTI_ACTION type: list of action buttons.
+  // Action buttons in RPC index order, including generated entries and exit actions.
   repeated DialogButton actions = 13;
 
   // For MULTI_ACTION and DIALOG_LIST: number of button columns.
@@ -1549,6 +1549,9 @@ message ServerDialog {
   // For SERVER_LINKS and DIALOG_LIST: button width.
   // Default: 150.
   int32 button_width = 16 [(google.api.field_behavior) = REQUIRED];
+
+  // Identity of the native screen. Stable across polls, changes when replaced.
+  string screen_id = 17 [(google.api.field_behavior) = REQUIRED];
 }
 
 // Request to get the currently displayed dialog (if any).
@@ -1578,7 +1581,11 @@ message BotSubmitDialogRequest {
 
   // Map of input key to value for each input field.
   // Keys must match the `key` field of DialogInput elements.
+  // Booleans use true/false, options use their IDs, and ranges use numeric text.
   map<string, string> input_values = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // Action index, defaulting to the first action. Use -1 to dismiss.
+  optional int32 button_index = 4;
 }
 
 // Response for dialog submission.
@@ -1589,6 +1596,12 @@ message BotSubmitDialogResponse {
   // Error message if success is false.
   // Possible errors: "No dialog is currently displayed"
   optional string error = 2;
+
+  // Client-side clipboard update produced by the action.
+  optional string clipboard = 3;
+
+  // HTTP(S) URL to open after native confirmation, when applicable.
+  optional string open_url = 4;
 }
 
 // Request to click a button in the current dialog.
@@ -1615,6 +1628,12 @@ message BotClickDialogButtonResponse {
   // Error message if success is false.
   // Possible errors: "No dialog is currently displayed"
   optional string error = 2;
+
+  // Client-side clipboard update produced by the action.
+  optional string clipboard = 3;
+
+  // HTTP(S) URL to open after native confirmation, when applicable.
+  optional string open_url = 4;
 }
 
 // Request to close/dismiss the current dialog.
@@ -1633,6 +1652,12 @@ message BotCloseDialogResponse {
 
   // Error message if success is false.
   optional string error = 2;
+
+  // Client-side clipboard update produced by the action.
+  optional string clipboard = 3;
+
+  // HTTP(S) URL to open after native confirmation, when applicable.
+  optional string open_url = 4;
 }
 
 // ============================================================================

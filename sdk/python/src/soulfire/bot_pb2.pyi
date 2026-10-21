@@ -1147,7 +1147,7 @@ class DialogButton(_message.Message):
     def __init__(self, label: _Optional[str] = ..., tooltip: _Optional[str] = ..., width: _Optional[int] = ..., action: _Optional[_Union[DialogAction, _Mapping]] = ...) -> None: ...
 
 class ServerDialog(_message.Message):
-    __slots__ = ("id", "type", "title", "external_title", "body", "inputs", "can_close_with_escape", "pause", "after_action", "action", "yes", "no", "actions", "columns", "exit_action", "button_width")
+    __slots__ = ("id", "type", "title", "external_title", "body", "inputs", "can_close_with_escape", "pause", "after_action", "action", "yes", "no", "actions", "columns", "exit_action", "button_width", "screen_id")
     ID_FIELD_NUMBER: _ClassVar[int]
     TYPE_FIELD_NUMBER: _ClassVar[int]
     TITLE_FIELD_NUMBER: _ClassVar[int]
@@ -1164,6 +1164,7 @@ class ServerDialog(_message.Message):
     COLUMNS_FIELD_NUMBER: _ClassVar[int]
     EXIT_ACTION_FIELD_NUMBER: _ClassVar[int]
     BUTTON_WIDTH_FIELD_NUMBER: _ClassVar[int]
+    SCREEN_ID_FIELD_NUMBER: _ClassVar[int]
     id: str
     type: DialogType
     title: str
@@ -1180,7 +1181,8 @@ class ServerDialog(_message.Message):
     columns: int
     exit_action: DialogButton
     button_width: int
-    def __init__(self, id: _Optional[str] = ..., type: _Optional[_Union[DialogType, str]] = ..., title: _Optional[str] = ..., external_title: _Optional[str] = ..., body: _Optional[_Iterable[_Union[DialogBodyElement, _Mapping]]] = ..., inputs: _Optional[_Iterable[_Union[DialogInput, _Mapping]]] = ..., can_close_with_escape: bool = ..., pause: bool = ..., after_action: _Optional[_Union[DialogAfterAction, str]] = ..., action: _Optional[_Union[DialogButton, _Mapping]] = ..., yes: _Optional[_Union[DialogButton, _Mapping]] = ..., no: _Optional[_Union[DialogButton, _Mapping]] = ..., actions: _Optional[_Iterable[_Union[DialogButton, _Mapping]]] = ..., columns: _Optional[int] = ..., exit_action: _Optional[_Union[DialogButton, _Mapping]] = ..., button_width: _Optional[int] = ...) -> None: ...
+    screen_id: str
+    def __init__(self, id: _Optional[str] = ..., type: _Optional[_Union[DialogType, str]] = ..., title: _Optional[str] = ..., external_title: _Optional[str] = ..., body: _Optional[_Iterable[_Union[DialogBodyElement, _Mapping]]] = ..., inputs: _Optional[_Iterable[_Union[DialogInput, _Mapping]]] = ..., can_close_with_escape: bool = ..., pause: bool = ..., after_action: _Optional[_Union[DialogAfterAction, str]] = ..., action: _Optional[_Union[DialogButton, _Mapping]] = ..., yes: _Optional[_Union[DialogButton, _Mapping]] = ..., no: _Optional[_Union[DialogButton, _Mapping]] = ..., actions: _Optional[_Iterable[_Union[DialogButton, _Mapping]]] = ..., columns: _Optional[int] = ..., exit_action: _Optional[_Union[DialogButton, _Mapping]] = ..., button_width: _Optional[int] = ..., screen_id: _Optional[str] = ...) -> None: ...
 
 class BotGetDialogRequest(_message.Message):
     __slots__ = ("instance_id", "bot_id")
@@ -1197,7 +1199,7 @@ class BotGetDialogResponse(_message.Message):
     def __init__(self, dialog: _Optional[_Union[ServerDialog, _Mapping]] = ...) -> None: ...
 
 class BotSubmitDialogRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id", "input_values")
+    __slots__ = ("instance_id", "bot_id", "input_values", "button_index")
     class InputValuesEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -1208,18 +1210,24 @@ class BotSubmitDialogRequest(_message.Message):
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
     INPUT_VALUES_FIELD_NUMBER: _ClassVar[int]
+    BUTTON_INDEX_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
     input_values: _containers.ScalarMap[str, str]
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., input_values: _Optional[_Mapping[str, str]] = ...) -> None: ...
+    button_index: int
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., input_values: _Optional[_Mapping[str, str]] = ..., button_index: _Optional[int] = ...) -> None: ...
 
 class BotSubmitDialogResponse(_message.Message):
-    __slots__ = ("success", "error")
+    __slots__ = ("success", "error", "clipboard", "open_url")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
+    CLIPBOARD_FIELD_NUMBER: _ClassVar[int]
+    OPEN_URL_FIELD_NUMBER: _ClassVar[int]
     success: bool
     error: str
-    def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
+    clipboard: str
+    open_url: str
+    def __init__(self, success: bool = ..., error: _Optional[str] = ..., clipboard: _Optional[str] = ..., open_url: _Optional[str] = ...) -> None: ...
 
 class BotClickDialogButtonRequest(_message.Message):
     __slots__ = ("instance_id", "bot_id", "button_index")
@@ -1232,12 +1240,16 @@ class BotClickDialogButtonRequest(_message.Message):
     def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., button_index: _Optional[int] = ...) -> None: ...
 
 class BotClickDialogButtonResponse(_message.Message):
-    __slots__ = ("success", "error")
+    __slots__ = ("success", "error", "clipboard", "open_url")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
+    CLIPBOARD_FIELD_NUMBER: _ClassVar[int]
+    OPEN_URL_FIELD_NUMBER: _ClassVar[int]
     success: bool
     error: str
-    def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
+    clipboard: str
+    open_url: str
+    def __init__(self, success: bool = ..., error: _Optional[str] = ..., clipboard: _Optional[str] = ..., open_url: _Optional[str] = ...) -> None: ...
 
 class BotCloseDialogRequest(_message.Message):
     __slots__ = ("instance_id", "bot_id")
@@ -1248,9 +1260,13 @@ class BotCloseDialogRequest(_message.Message):
     def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ...) -> None: ...
 
 class BotCloseDialogResponse(_message.Message):
-    __slots__ = ("success", "error")
+    __slots__ = ("success", "error", "clipboard", "open_url")
     SUCCESS_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
+    CLIPBOARD_FIELD_NUMBER: _ClassVar[int]
+    OPEN_URL_FIELD_NUMBER: _ClassVar[int]
     success: bool
     error: str
-    def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
+    clipboard: str
+    open_url: str
+    def __init__(self, success: bool = ..., error: _Optional[str] = ..., clipboard: _Optional[str] = ..., open_url: _Optional[str] = ...) -> None: ...
