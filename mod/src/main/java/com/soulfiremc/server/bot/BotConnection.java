@@ -155,6 +155,7 @@ public final class BotConnection {
   private final PovFrameTasks povFrameTasks = new PovFrameTasks();
   private final PovInputController povInput = new PovInputController(this);
   private final ControlState controlState = new ControlState();
+  private final CreativeInventoryState creativeInventoryState = new CreativeInventoryState();
   private final BotControlAPI botControl = new BotControlAPI();
   private final NavigationWorldState navigationWorldState =
     new NavigationWorldState();
