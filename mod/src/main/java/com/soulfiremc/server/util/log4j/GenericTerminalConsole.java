@@ -20,6 +20,7 @@ package com.soulfiremc.server.util.log4j;
 import com.soulfiremc.server.util.structs.ShutdownManager;
 import lombok.RequiredArgsConstructor;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import net.minecrell.terminalconsole.TerminalConsoleAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,6 +71,39 @@ public final class GenericTerminalConsole extends SimpleTerminalConsole {
   @Override
   protected void runCommand(String command) {
     commandExecutor.execute(command);
+  }
+
+  @Override
+  public void start() {
+    var terminal = TerminalConsoleAppender.getTerminal();
+    if (terminal == null) {
+      super.start();
+      return;
+    }
+
+    var reader = buildReader(LineReaderBuilder.builder().terminal(terminal));
+    TerminalConsoleAppender.setReader(reader);
+    try {
+      readCommands(reader);
+    } finally {
+      TerminalConsoleAppender.setReader(null);
+    }
+  }
+
+  void readCommands(LineReader reader) {
+    try {
+      while (isRunning()) {
+        var line = reader.readLine("> ");
+        if (line == null) {
+          return;
+        }
+        processInput(line);
+      }
+    } catch (EndOfFileException _) {
+      // Detach closed input while the server continues accepting API requests.
+    } catch (UserInterruptException _) {
+      shutdown();
+    }
   }
 
   @Override
