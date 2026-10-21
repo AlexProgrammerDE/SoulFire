@@ -13,7 +13,8 @@ import {
 } from "../harness.ts";
 
 const DRAFT = "Anvil QA sword";
-const NAME = `X${DRAFT}`;
+const ICON_NAME = `X${DRAFT}`;
+const NAME = `Y${DRAFT}`;
 const ANVIL = { x: 301, y: 64, z: 0 };
 
 export default {
@@ -85,12 +86,25 @@ export default {
           const pov = client.service(PovService);
           const service = client.service(BotService);
           const scope = { instanceId: bot.instanceId, botId: bot.id };
+          let resizing = false;
           try {
             for await (const frame of pov.watch(
               { ...scope, sessionId, width: 640, height: 480, maxFps: 15 },
               { signal: AbortSignal.any([abort.signal, AbortSignal.timeout(15_000)]) },
             )) {
               if (!frame.screenOpen) continue;
+              if (resizing) {
+                if (frame.width !== 320 || frame.height !== 240) continue;
+                await pov.input({
+                  sessionId,
+                  sequence: 4n,
+                  captured: true,
+                  width: 320,
+                  height: 240,
+                  events: [{ kind: PovInputEvent_Kind.CHARACTER, code: "Y".charCodeAt(0) }],
+                });
+                return;
+              }
               await pov.input({
                 sessionId,
                 sequence: 1n,
@@ -113,14 +127,23 @@ export default {
                 height: 480,
                 events: [{ kind: PovInputEvent_Kind.CHARACTER, code: "X".charCodeAt(0) }],
               });
+              const edited = await service.getInventoryState(scope);
+              if (!edited.layout?.textInputs.some((input) => input.currentValue === ICON_NAME))
+                throw new Error("Rendering inventory icons moved the native anvil caret");
               await pov.input({
                 sessionId,
                 sequence: 3n,
-                captured: false,
-                width: 640,
-                height: 480,
+                captured: true,
+                width: 320,
+                height: 240,
+                events: [
+                  { kind: PovInputEvent_Kind.KEY, code: 268, action: 1 },
+                  { kind: PovInputEvent_Kind.KEY, code: 268, action: 0 },
+                  { kind: PovInputEvent_Kind.KEY, code: 262, modifiers: 1, action: 1 },
+                  { kind: PovInputEvent_Kind.KEY, code: 262, modifiers: 1, action: 0 },
+                ],
               });
-              return;
+              resizing = true;
             }
             throw new Error("The native anvil screen never appeared");
           } finally {
@@ -138,7 +161,7 @@ export default {
               check(
                 state.slots.some((slot) => slot.slot === 2 && slot.displayName === NAME) &&
                   state.layout?.textInputs.some((input) => input.currentValue === NAME) === true,
-                "Rendering inventory icons moved the native anvil caret",
+                "Resizing POV lost the native anvil selection",
               ),
             ),
           ),

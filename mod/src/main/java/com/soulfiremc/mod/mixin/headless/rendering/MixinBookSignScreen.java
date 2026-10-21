@@ -19,7 +19,7 @@ package com.soulfiremc.mod.mixin.headless.rendering;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.soulfiremc.mod.mixin.soulfire.EditBoxAccessor;
+import com.soulfiremc.mod.util.EditBoxSelection;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.BookSignScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,10 +39,8 @@ public abstract class MixinBookSignScreen {
       return;
     }
     titleValue = previous.getValue();
-    var cursor = previous.getCursorPosition();
-    var highlight = ((EditBoxAccessor) previous).soulfire$getHighlightPosition();
+    var selection = EditBoxSelection.capture(previous);
     original.call();
-    titleBox.setCursorPosition(cursor);
-    titleBox.setHighlightPos(highlight);
+    selection.restore(titleBox);
   }
 }
