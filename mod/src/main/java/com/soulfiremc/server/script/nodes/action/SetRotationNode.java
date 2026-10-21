@@ -50,21 +50,11 @@ public final class SetRotationNode extends AbstractScriptNode {
     var yaw = getFloatInput(inputs, "yaw", 0.0f);
     var pitch = getFloatInput(inputs, "pitch", 0.0f);
 
-    // Clamp pitch to valid range
-    pitch = Math.max(-90f, Math.min(90f, pitch));
-
-    // Normalize yaw to -180 to 180 range
-    while (yaw > 180f) {
-      yaw -= 360f;
-    }
-    while (yaw < -180f) {
-      yaw += 360f;
+    if (!Float.isFinite(yaw) || !Float.isFinite(pitch)) {
+      throw new IllegalArgumentException("Yaw and pitch must be finite");
     }
 
-    var finalYaw = yaw;
-    var finalPitch = pitch;
-
-    runOnTickThread(runtime, bot, () -> bot.rotationControl().lookTo(finalYaw, finalPitch));
+    runOnTickThread(runtime, bot, () -> bot.rotationControl().lookTo(yaw, pitch));
 
     return completedEmptyMono();
   }

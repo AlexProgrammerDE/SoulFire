@@ -2528,19 +2528,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var yaw = request.getYaw();
       var pitch = request.getPitch();
 
-      // Clamp pitch to valid range
-      pitch = Math.max(-90f, Math.min(90f, pitch));
-
-      // Normalize yaw to -180 to 180 range
-      while (yaw > 180f) {
-        yaw -= 360f;
+      if (!Float.isFinite(yaw) || !Float.isFinite(pitch)) {
+        throw Status.INVALID_ARGUMENT
+          .withDescription("Yaw and pitch must be finite")
+          .asRuntimeException();
       }
-      while (yaw < -180f) {
-        yaw += 360f;
-      }
-
-      final float finalYaw = yaw;
-      final float finalPitch = pitch;
 
       var response = callInBotContext(activeBot, () -> {
         var player = activeBot.minecraft().player;
@@ -2554,7 +2546,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         executeAction(
           activeBot,
           Set.of(ControlResource.ROTATION),
-          () -> activeBot.rotationControl().lookTo(finalYaw, finalPitch));
+          () -> activeBot.rotationControl().lookTo(yaw, pitch));
         return BotSetRotationResponse.newBuilder()
           .setSuccess(true)
           .build();
