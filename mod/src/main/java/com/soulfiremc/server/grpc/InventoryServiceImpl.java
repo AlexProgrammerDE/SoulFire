@@ -1893,7 +1893,7 @@ public final class InventoryServiceImpl
       layout = BotServiceImpl.buildContainerLayout(
         menu,
         BotServiceImpl.getContainerTitle(menu, bot.minecraft()),
-        bot.minecraft().level
+        bot.minecraft()
       );
     }
   }

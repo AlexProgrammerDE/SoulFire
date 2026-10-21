@@ -18,7 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.test.utils.TestBootstrap;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
@@ -45,7 +45,7 @@ final class ContainerLayoutTest {
   @Test
   void lecternRegionsStayWithinTheActualMenuSlots() {
     var menu = new LecternMenu(1);
-    var layout = BotServiceImpl.buildContainerLayout(menu, "", mock(ClientLevel.class));
+    var layout = BotServiceImpl.buildContainerLayout(menu, "", mock(Minecraft.class));
 
     assertTrue(layout.getRegionsList().stream().allMatch(region ->
       region.getStartIndex() >= 0 && region.getStartIndex() + region.getSlotCount() <= menu.slots.size()));
@@ -58,12 +58,12 @@ final class ContainerLayoutTest {
     book.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(List.of(
       Filterable.passThrough("first"), Filterable.passThrough("second"))));
     menu.getSlot(0).set(book);
-    var level = mock(ClientLevel.class);
-    var firstPage = BotServiceImpl.buildContainerLayout(menu, "", level);
+    var minecraft = mock(Minecraft.class);
+    var firstPage = BotServiceImpl.buildContainerLayout(menu, "", minecraft);
     assertFalse(firstPage.getButtonsList().stream().filter(button -> button.getButtonId() == 2).findFirst().orElseThrow().getDisabled());
 
     menu.setData(0, 1);
-    var lastPage = BotServiceImpl.buildContainerLayout(menu, "", level);
+    var lastPage = BotServiceImpl.buildContainerLayout(menu, "", minecraft);
     assertTrue(lastPage.getButtonsList().stream().filter(button -> button.getButtonId() == 2).findFirst().orElseThrow().getDisabled());
   }
 }

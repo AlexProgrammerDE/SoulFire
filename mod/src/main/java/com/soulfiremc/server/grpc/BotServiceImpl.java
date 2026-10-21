@@ -54,6 +54,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.dialog.DialogScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
+import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.gui.screens.inventory.CrafterScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
@@ -63,6 +64,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.*;
@@ -70,6 +72,7 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -445,7 +448,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   ) {
     var container = player.containerMenu;
     var responseBuilder = BotInventoryStateResponse.newBuilder()
-      .setLayout(buildContainerLayout(container, getContainerTitle(container, minecraft), minecraft.level))
+      .setLayout(buildContainerLayout(container, getContainerTitle(container, minecraft), minecraft))
       .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
 
     for (var slot : container.slots) {
@@ -1054,7 +1057,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
    * Builds a ContainerLayout describing the slot regions for the given menu.
    * This allows the frontend to render any container type dynamically.
    */
-  static ContainerLayout buildContainerLayout(AbstractContainerMenu menu, String title, ClientLevel level) {
+  static ContainerLayout buildContainerLayout(AbstractContainerMenu menu, String title, Minecraft minecraft) {
     var layoutBuilder = ContainerLayout.newBuilder()
       .setTitle(title)
       .setTotalSlots(menu.slots.size());
@@ -1512,7 +1515,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     layoutBuilder.setContainerType(getContainerTypeId(menu));
 
     // Add container buttons (for stonecutter, enchanting, loom, etc.)
-    for (var button : buildContainerButtons(menu, level)) {
+    for (var button : buildContainerButtons(menu, minecraft)) {
       layoutBuilder.addButtons(button);
     }
 
@@ -1581,7 +1584,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
    * Different container types have different interactive buttons.
    * Note: Button details may be limited since some menu fields are private.
    */
-  private static List<ContainerButton> buildContainerButtons(AbstractContainerMenu menu, ClientLevel level) {
+  private static List<ContainerButton> buildContainerButtons(AbstractContainerMenu menu, Minecraft minecraft) {
+    var level = minecraft.level;
     var buttons = new ArrayList<ContainerButton>();
 
     switch (menu) {
@@ -1599,30 +1603,26 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         }
       }
       case EnchantmentMenu enchantmentMenu -> {
-        // Enchanting table: 3 enchantment slots
-        // Slot 0 = item to enchant, Slot 1 = lapis lazuli
-        var itemSlot = enchantmentMenu.getSlot(0);
-        var lapisSlot = enchantmentMenu.getSlot(1);
-        var hasItem = !itemSlot.getItem().isEmpty();
-        var lapisCount = lapisSlot.getItem().isEmpty() ? 0 : lapisSlot.getItem().getCount();
-
-        // Enchantment costs increase per slot: 1, 2, 3 lapis and levels
-        int[] lapisCosts = {1, 2, 3};
-        int[] levelCosts = {1, 2, 3}; // Minimum levels shown, actual varies
-
-        for (int i = 0; i < 3; i++) {
-          var needsLapis = lapisCosts[i];
-          var disabled = !hasItem || lapisCount < needsLapis;
-          var description = "Requires %d lapis, %d+ levels".formatted(needsLapis, levelCosts[i]);
-          if (!hasItem) {
-            description = "Insert item to enchant";
-          } else if (lapisCount < needsLapis) {
-            description = "Need %d more lapis lazuli".formatted(needsLapis - lapisCount);
+        var player = minecraft.player;
+        var hasItem = enchantmentMenu.getSlot(0).hasItem();
+        var currency = enchantmentMenu.getGoldCount();
+        var creative = player.hasInfiniteMaterials();
+        for (var i = 0; i < enchantmentMenu.costs.length; i++) {
+          var requiredLevel = enchantmentMenu.costs[i];
+          var cost = i + 1;
+          var available = hasItem && requiredLevel > 0;
+          var disabled = !available || !creative && (currency < cost || player.experienceLevel < Math.max(requiredLevel, cost));
+          var label = Component.literal("Enchant Slot " + (i + 1));
+          var clue = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(enchantmentMenu.enchantClue[i]);
+          if (available && enchantmentMenu.levelClue[i] >= 0 && clue.isPresent()) {
+            label = Enchantment.getFullname(clue.get(), enchantmentMenu.levelClue[i]).copy();
           }
-
+          var description = !available ? "No enchantment available"
+            : creative ? "No experience or lapis required in creative mode"
+            : "Requires level %d and %d lapis; costs %d levels".formatted(requiredLevel, cost, cost);
           buttons.add(ContainerButton.newBuilder()
             .setButtonId(i)
-            .setLabel("Enchant Slot " + (i + 1))
+            .setLabel(label.getString())
             .setDescription(description)
             .setIconItemId("minecraft:enchanted_book")
             .setDisabled(disabled)
@@ -1666,64 +1666,16 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         }
       }
       case BeaconMenu beaconMenu -> {
-        // Beacon effects are unlocked based on pyramid levels:
-        // Level 1: Speed, Haste
-        // Level 2: Resistance, Jump Boost
-        // Level 3: Strength
-        // Level 4: Secondary effects (Regeneration or amplified primary)
-        // Payment slot must have a valid item to confirm
-
-        var beaconLevel = beaconMenu.getLevels();
-        var hasPayment = !beaconMenu.getSlot(0).getItem().isEmpty();
-
-        // Get actual MobEffect registry to iterate and find effects by name
-        var mobEffectRegistry = BuiltInRegistries.MOB_EFFECT;
-
-        // Primary effects with their required levels
-        record BeaconEffectDef(String effectName, String displayName, int requiredLevel, boolean isPrimary) {
-        }
-        var effects = new BeaconEffectDef[]{
-          new BeaconEffectDef("speed", "Speed", 1, true),
-          new BeaconEffectDef("haste", "Haste", 1, true),
-          new BeaconEffectDef("resistance", "Resistance", 2, true),
-          new BeaconEffectDef("jump_boost", "Jump Boost", 2, true),
-          new BeaconEffectDef("strength", "Strength", 3, true),
-          new BeaconEffectDef("regeneration", "Regeneration", 4, false),
-      };
-
-        // Iterate through registry to find effects by name and get their IDs
-        for (var entry : mobEffectRegistry.entrySet()) {
-          var key = entry.getKey();
-          var effectName = key.identifier().getPath(); // e.g., "speed", "haste"
-
-          for (var effectDef : effects) {
-            if (effectName.equals(effectDef.effectName)) {
-              var effectRegistryId = mobEffectRegistry.getId(entry.getValue());
-              var disabled = beaconLevel < effectDef.requiredLevel;
-
-              log.debug("Beacon effect {} has registry ID {}", effectDef.effectName, effectRegistryId);
-
-              buttons.add(ContainerButton.newBuilder()
-                .setButtonId(effectRegistryId)
-                .setLabel(effectDef.displayName)
-                .setDescription("Level " + effectDef.requiredLevel + "+ (" + (effectDef.isPrimary ? "Primary" : "Secondary") + ")"
-                  + (disabled ? " - Requires more beacon levels" : ""))
-                .setIconItemId("minecraft:potion")
-                .setDisabled(disabled)
-                .build());
-              break;
-            }
+        if (minecraft.gui.screen() instanceof BeaconScreen screen && screen.getMenu() == beaconMenu) {
+          for (var control : BeaconControls.describe(screen)) {
+            buttons.add(ContainerButton.newBuilder()
+              .setButtonId(control.id())
+              .setLabel(control.label().getString())
+              .setSelected(control.selected())
+              .setDisabled(!control.button().active)
+              .build());
           }
         }
-
-        // Confirm button - disabled if no payment item
-        buttons.add(ContainerButton.newBuilder()
-          .setButtonId(-1)
-          .setLabel("Confirm")
-          .setDescription(hasPayment ? "Apply beacon effects" : "Insert payment item (iron/gold/emerald/diamond/netherite ingot)")
-          .setIconItemId("minecraft:beacon")
-          .setDisabled(!hasPayment)
-          .build());
       }
       case CrafterMenu crafterMenu -> {
         for (var i = 0; i < 9; i++) {
@@ -2090,63 +2042,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var buttonId = request.getButtonId();
-
-      var response = callInBotContext(activeBot, () -> {
-        var minecraft = activeBot.minecraft();
-        var player = minecraft.player;
-        var gameMode = minecraft.gameMode;
-        if (player == null || gameMode == null) {
-          throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
-        }
-
-        var container = player.containerMenu;
-        var validClick = switch (container) {
-          case StonecutterMenu stonecutterMenu -> buttonId >= 0 && buttonId < stonecutterMenu.getNumberOfVisibleRecipes();
-          case EnchantmentMenu ignored -> buttonId >= 0 && buttonId < 3;
-          case LoomMenu loomMenu -> buttonId >= 0 && buttonId < loomMenu.getSelectablePatterns().size();
-          case MerchantMenu merchantMenu -> buttonId >= 0 && buttonId < merchantMenu.getOffers().size();
-          case BeaconMenu ignored -> true;
-          case CrafterMenu crafterMenu -> buttonId >= 0 && buttonId < 9
-            && !crafterMenu.getSlot(buttonId).hasItem() && crafterMenu.getCarried().isEmpty() && !player.isSpectator();
-          case LecternMenu ignored -> buttonId >= 1 && buttonId <= 3;
-          default -> true;
-        };
-
-        if (!validClick) {
-          return BotContainerButtonClickResponse.newBuilder()
-            .setSuccess(false)
-            .setError("Invalid button ID for this container type")
-            .build();
-        }
-
-        log.info("Clicking container button {} on container {} (type: {})", buttonId, container.containerId, container.getClass().getSimpleName());
-        executeAction(
-          activeBot,
-          () -> {
-            if (player.containerMenu != container) {
-              throw Status.ABORTED.withDescription("Bot container changed before the action executed").asRuntimeException();
-            }
-            if (container instanceof CrafterMenu crafterMenu) {
-              if (!(minecraft.gui.screen() instanceof CrafterScreen screen) || screen.getMenu() != container) {
-                throw Status.FAILED_PRECONDITION.withDescription("Bot crafter screen is not available").asRuntimeException();
-              }
-              ((CrafterScreenAccessor) screen).soulfire$updateSlotState(buttonId, crafterMenu.isSlotDisabled(buttonId));
-            } else if (container instanceof MerchantMenu) {
-              if (!(minecraft.gui.screen() instanceof MerchantScreen screen) || screen.getMenu() != container) {
-                throw Status.FAILED_PRECONDITION.withDescription("Bot trading screen is not available").asRuntimeException();
-              }
-              var accessor = (MerchantScreenAccessor) screen;
-              accessor.soulfire$setSelectedTrade(buttonId);
-              accessor.soulfire$selectTrade();
-            } else {
-              gameMode.handleInventoryButtonClick(container.containerId, buttonId);
-            }
-          });
-        return BotContainerButtonClickResponse.newBuilder()
-          .setSuccess(true)
-          .build();
-      });
+      var success = new AtomicReference<Boolean>();
+      executeAction(activeBot, () -> success.set(activateContainerButton(activeBot.minecraft(), request.getButtonId())));
+      var response = BotContainerButtonClickResponse.newBuilder()
+        .setSuccess(success.get())
+        .build();
 
       responseObserver.onNext(response);
       responseObserver.onCompleted();
@@ -2154,6 +2054,48 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       log.error("Error clicking container button", t);
       throw toGrpcError(t);
     }
+  }
+
+  private static boolean activateContainerButton(Minecraft minecraft, int id) {
+    var player = minecraft.player;
+    var gameMode = minecraft.gameMode;
+    if (player == null || gameMode == null) {
+      throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
+    }
+    var menu = player.containerMenu;
+    if (menu instanceof BeaconMenu) {
+      if (!(minecraft.gui.screen() instanceof BeaconScreen screen) || screen.getMenu() != menu) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot beacon screen is not available").asRuntimeException();
+      }
+      return BeaconControls.activate(screen, id);
+    }
+    if (menu instanceof CrafterMenu crafterMenu) {
+      if (id < 0 || id >= 9 || crafterMenu.getSlot(id).hasItem() || !crafterMenu.getCarried().isEmpty() || player.isSpectator()) return false;
+      if (!(minecraft.gui.screen() instanceof CrafterScreen screen) || screen.getMenu() != menu) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot crafter screen is not available").asRuntimeException();
+      }
+      ((CrafterScreenAccessor) screen).soulfire$updateSlotState(id, crafterMenu.isSlotDisabled(id));
+      return true;
+    }
+    if (menu instanceof MerchantMenu merchantMenu) {
+      if (id < 0 || id >= merchantMenu.getOffers().size()) return false;
+      if (!(minecraft.gui.screen() instanceof MerchantScreen screen) || screen.getMenu() != menu) {
+        throw Status.FAILED_PRECONDITION.withDescription("Bot trading screen is not available").asRuntimeException();
+      }
+      var access = (MerchantScreenAccessor) screen;
+      access.soulfire$setSelectedTrade(id);
+      access.soulfire$selectTrade();
+      return true;
+    }
+    var valid = switch (menu) {
+      case StonecutterMenu stonecutter -> id >= 0 && id < stonecutter.getNumberOfVisibleRecipes();
+      case LoomMenu loom -> id >= 0 && id < loom.getSelectablePatterns().size();
+      case EnchantmentMenu enchanting -> id >= 0 && id < enchanting.costs.length && enchanting.clickMenuButton(player, id);
+      case LecternMenu ignored -> id >= 1 && id <= 3;
+      default -> false;
+    };
+    if (valid) gameMode.handleInventoryButtonClick(menu.containerId, id);
+    return valid;
   }
 
   @Override
@@ -2181,7 +2123,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
         }
 
-        return buildInventoryStatePublic(minecraft, player, true);
+        return minecraft.submit(() -> buildInventoryStatePublic(minecraft, player, true)).get(60, TimeUnit.SECONDS);
       });
 
       responseObserver.onNext(response);

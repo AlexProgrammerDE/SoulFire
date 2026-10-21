@@ -60,6 +60,8 @@
     "soulfire.AnvilScreenAccessor",
     "soulfire.MerchantScreenAccessor",
     "soulfire.CrafterScreenAccessor",
+    "soulfire.BeaconScreenAccessor",
+    "soulfire.BeaconPowerButtonAccessor",
     "soulfire.MixinDialogScreen",
     "soulfire.MixinDialogControlSet",
     "soulfire.ClientRecipeBookAccessor",
