@@ -14,6 +14,7 @@ import {
 
 const PAGE = "Book page before signing";
 const SECOND_PAGE = "Second page before signing";
+const EDITED_SECOND_PAGE = `X${SECOND_PAGE.slice(1)}`;
 const TITLE = "Book QA";
 const text = (value: string) =>
   Array.from(value, (character) => ({ kind: Kind.CHARACTER, code: character.codePointAt(0)! }));
@@ -68,20 +69,23 @@ export default {
                   ...text(PAGE),
                   ...key(267),
                   ...text(SECOND_PAGE),
-                  ...key(258, 1),
-                  ...key(258, 1),
-                  ...key(257),
+                  ...key(268, 2),
+                  ...key(262, 1),
                 ]);
-                signOpened = frame.sequence;
-                phase = 1;
-              } else if (phase === 1 && frame.sequence >= signOpened + 2n) {
-                await input([...text(TITLE), ...key(268), ...key(262, 1)]);
                 await input([], 320, 240);
+                phase = 1;
+              } else if (phase === 1 && frame.width === 320 && frame.height === 240) {
+                await input([...text("X"), ...key(258, 1), ...key(258, 1), ...key(257)], 320, 240);
+                signOpened = frame.sequence;
                 phase = 2;
-              } else if (phase === 2 && frame.width === 320 && frame.height === 240) {
-                await input([...text("X"), ...key(257)], 320, 240);
+              } else if (phase === 2 && frame.sequence >= signOpened + 2n) {
+                await input([...text(TITLE), ...key(268), ...key(262, 1)], 320, 240);
+                await input([]);
                 phase = 3;
-              } else if (phase === 3 && !frame.screenOpen) {
+              } else if (phase === 3 && frame.width === 640 && frame.height === 480) {
+                await input([...text("X"), ...key(257)]);
+                phase = 4;
+              } else if (phase === 4 && !frame.screenOpen) {
                 return;
               }
             }
@@ -100,7 +104,7 @@ export default {
               book.includes("minecraft:written_book") &&
                 book.includes(`X${TITLE.slice(1)}`) &&
                 book.includes(PAGE) &&
-                book.includes(SECOND_PAGE),
+                book.includes(EDITED_SECOND_PAGE),
               `POV resize lost the book title, selection, or pages: ${book}`,
             ),
           ),
