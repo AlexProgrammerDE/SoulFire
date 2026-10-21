@@ -15,6 +15,7 @@ import java.nio.file.Path
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 
@@ -33,14 +34,13 @@ class VulkanRuntimeTest {
       plugins {
         id 'base'
         id 'java-library'
+        id 'maven-publish'
+        id 'sf-vulkan-runtime-consumer'
       }
-      def nativeDependencies = configurations.dependencyScope('vulkanRuntimeDependencies')
-      def nativeRuntime = configurations.resolvable('vulkanRuntime') {
-        extendsFrom(nativeDependencies.get())
-      }
-      dependencies {
-        add(nativeDependencies.name, project(':vulkan-runtime'))
-        runtimeOnly(files(nativeRuntime))
+      group = 'fixture'
+      version = '1.0'
+      publishing {
+        publications { mavenJava(MavenPublication) { from components.java } }
       }
       tasks.register('packageRuntime', Zip) {
         from(configurations.runtimeClasspath)
@@ -133,6 +133,33 @@ class VulkanRuntimeTest {
     ZipFile(directory.resolve("build/distribution/resolved.zip").toFile()).use {
       assertEquals(listOf("soulfire-vulkan-$host.jar"), it.entries().asSequence().map(ZipEntry::getName).toList())
     }
+  }
+
+  @Test
+  fun `downstream tests store and reuse their runtime configuration`() {
+    directory.resolve("settings.gradle").toFile().appendText("include 'launcher', 'client'\n")
+    val launcher = directory.resolve("launcher").createDirectories()
+    launcher.resolve("build.gradle").writeText(directory.resolve("build.gradle").toFile().readText())
+    directory.resolve("build.gradle").writeText("plugins { id 'base' }\n")
+    directory.resolve("client").createDirectories().resolve("build.gradle").writeText(
+      """
+      plugins { id 'java-library'; id 'sf-vulkan-runtime-consumer' }
+      dependencies { implementation project(':launcher') }
+      """.trimIndent()
+    )
+    prebuilt(host)
+    val first = runner(":client:test", "--parallel", "--configure-on-demand", "-PvulkanRuntimeDirectory=prebuilt").build()
+    assertEquals(TaskOutcome.SUCCESS, first.task(":vulkan-runtime:prepareVulkanRuntime")?.outcome)
+    val second = runner(":client:test", "--parallel", "--configure-on-demand", "-PvulkanRuntimeDirectory=prebuilt").build()
+    assertEquals(TaskOutcome.UP_TO_DATE, second.task(":vulkan-runtime:prepareVulkanRuntime")?.outcome)
+  }
+
+  @Test
+  fun `bundled native packages do not become Maven dependencies`() {
+    runner("generatePomFileForMavenJavaPublication").build()
+    val pom = DocumentBuilderFactory.newDefaultInstance().newDocumentBuilder()
+      .parse(directory.resolve("build/publications/mavenJava/pom-default.xml").toFile())
+    assertEquals(0, pom.getElementsByTagName("dependency").length)
   }
 
   @Test

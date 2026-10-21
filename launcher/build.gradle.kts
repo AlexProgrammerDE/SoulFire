@@ -1,10 +1,6 @@
 plugins {
+  `sf-vulkan-runtime-consumer`
   `sf-project-conventions`
-}
-
-val vulkanRuntimeDependencies = configurations.dependencyScope("vulkanRuntimeDependencies")
-val vulkanRuntime = configurations.resolvable("vulkanRuntime") {
-  extendsFrom(vulkanRuntimeDependencies.get())
 }
 
 dependencies {
@@ -69,9 +65,6 @@ dependencies {
   api("org.lwjgl:lwjgl-vulkan:3.4.3")
   runtimeOnly("org.lwjgl:lwjgl-vulkan:3.4.3:natives-macos")
   runtimeOnly("org.lwjgl:lwjgl-vulkan:3.4.3:natives-macos-arm64")
-  // Native packages are bundled locally and have no separate Maven publication.
-  add(vulkanRuntimeDependencies.name, projects.vulkanRuntime)
-  runtimeOnly(files(vulkanRuntime))
   api("org.lwjgl:lwjgl:3.4.3:unsafe")
   // Real native libraries are required for headless Vulkan and texture/font decoding.
   for (platform in listOf("linux", "linux-arm64", "windows", "windows-arm64", "macos", "macos-arm64")) {

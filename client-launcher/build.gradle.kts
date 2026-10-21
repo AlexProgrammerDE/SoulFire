@@ -1,4 +1,5 @@
 plugins {
+  `sf-vulkan-runtime-consumer`
   `sf-project-conventions`
 }
 

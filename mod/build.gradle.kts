@@ -4,6 +4,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.process.CommandLineArgumentProvider
 
 plugins {
+  `sf-vulkan-runtime-consumer`
   `sf-special-publish-conventions`
   id("net.fabricmc.fabric-loom")
   alias(libs.plugins.jmh)
@@ -43,17 +44,10 @@ private class JavaAgentArgumentProvider(
 
 val mockitoAgent = configurations.create("mockitoAgent")
 
-val vulkanRuntimeDependencies = configurations.dependencyScope("vulkanRuntimeDependencies")
-val vulkanRuntime = configurations.resolvable("vulkanRuntime") {
-  extendsFrom(vulkanRuntimeDependencies.get())
-}
-
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
   minecraft("com.mojang:minecraft:26.3")
-  add(vulkanRuntimeDependencies.name, projects.vulkanRuntime)
-  runtimeOnly(files(vulkanRuntime))
   implementation("net.fabricmc:fabric-loader:0.19.5")
 
   // Bundle the encoder and its native runtime for headless hosts without FFmpeg packages.
