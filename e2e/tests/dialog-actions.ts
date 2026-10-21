@@ -123,6 +123,29 @@ export default {
       );
       yield* check(submitted.success, "The prompt input values were rejected");
       yield* expectScore(17);
+      yield* rcon(`give ${BOT_NAME} stone`);
+      yield* eventually(
+        rpc(() => service.getInventoryState(scope)).pipe(
+          Effect.flatMap((inventory) =>
+            check(
+              inventory.slots.some(
+                (slot) => slot.itemId === "minecraft:stone" && !!slot.iconBase64?.length,
+              ),
+              "The inventory did not render its item icon",
+            ),
+          ),
+        ),
+        "5 seconds",
+      );
+      const afterIcon = (yield* rpc(() => service.getDialog(scope))).dialog;
+      yield* check(
+        afterIcon?.screenId === dialog?.screenId &&
+          afterIcon?.inputs.some(
+            (input) => input.input.case === "text" && input.input.value.initial === "17",
+          ) === true,
+        "Rendering an inventory icon reset the native dialog draft",
+      );
+
       for (const [buttonIndex, value] of [
         [1, 23],
         [2, 31],

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import { PovService, PovInputEvent_Kind } from "@soulfiremc/sdk/generated/soulfire/pov_pb";
 import { BotService } from "@soulfiremc/sdk/generated/soulfire/bot_pb";
 import { Effect } from "effect";
 import {
@@ -10,7 +12,8 @@ import {
   rcon,
 } from "../harness.ts";
 
-const NAME = "Anvil QA sword";
+const DRAFT = "Anvil QA sword";
+const NAME = `X${DRAFT}`;
 const ANVIL = { x: 301, y: 64, z: 0 };
 
 export default {
@@ -56,7 +59,7 @@ export default {
             instanceId: bot.instanceId,
             botId: bot.id,
             fieldId: "item_name",
-            text: NAME,
+            text: DRAFT,
           }),
         catch: (cause) => new CheckFailed({ message: `Rename request failed: ${String(cause)}` }),
       });
@@ -65,14 +68,78 @@ export default {
         bot.inventoryState().pipe(
           Effect.flatMap((state) =>
             check(
-              state.slots.some((slot) => slot.slot === 2 && slot.displayName === NAME),
+              state.slots.some((slot) => slot.slot === 2 && slot.displayName === DRAFT),
               "The rename was accepted but no renamed anvil output arrived",
             ),
           ),
         ),
         "5 seconds",
       );
-      yield* bot.transferInventorySlot(2);
+      yield* Effect.tryPromise({
+        try: async () => {
+          const abort = new AbortController();
+          const sessionId = randomUUID();
+          const pov = client.service(PovService);
+          const service = client.service(BotService);
+          const scope = { instanceId: bot.instanceId, botId: bot.id };
+          try {
+            for await (const frame of pov.watch(
+              { ...scope, sessionId, width: 640, height: 480, maxFps: 15 },
+              { signal: AbortSignal.any([abort.signal, AbortSignal.timeout(15_000)]) },
+            )) {
+              if (!frame.screenOpen) continue;
+              await pov.input({
+                sessionId,
+                sequence: 1n,
+                captured: true,
+                width: 640,
+                height: 480,
+                events: [
+                  { kind: PovInputEvent_Kind.KEY, code: 268, action: 1 },
+                  { kind: PovInputEvent_Kind.KEY, code: 268, action: 0 },
+                ],
+              });
+              const inventory = await service.getInventoryState(scope);
+              if (!inventory.slots.some((slot) => !!slot.iconBase64?.length))
+                throw new Error("Inventory capture produced no item icons");
+              await pov.input({
+                sessionId,
+                sequence: 2n,
+                captured: true,
+                width: 640,
+                height: 480,
+                events: [{ kind: PovInputEvent_Kind.CHARACTER, code: "X".charCodeAt(0) }],
+              });
+              await pov.input({
+                sessionId,
+                sequence: 3n,
+                captured: false,
+                width: 640,
+                height: 480,
+              });
+              return;
+            }
+            throw new Error("The native anvil screen never appeared");
+          } finally {
+            abort.abort();
+          }
+        },
+        catch: (cause) =>
+          new CheckFailed({ message: `Native anvil input failed: ${String(cause)}` }),
+      });
+      yield* eventually(
+        bot.inventoryState().pipe(
+          Effect.flatMap((state) =>
+            check(
+              state.slots.some((slot) => slot.slot === 2 && slot.displayName === NAME),
+              "Rendering inventory icons moved the native anvil caret",
+            ),
+          ),
+        ),
+        "5 seconds",
+      );
+      // Wait for cancellation of the POV stream to release its control lease.
+      yield* eventually(bot.transferInventorySlot(2), "5 seconds");
       yield* eventually(
         rcon(`data get entity ${BOT_NAME} Inventory`).pipe(
           Effect.flatMap((inventory) =>

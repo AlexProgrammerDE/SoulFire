@@ -211,7 +211,7 @@ public final class VulkanRenderer {
         var oldHeight = window.getHeight();
         var oldScale = window.getGuiScale();
         try {
-          resize(minecraft, width, height);
+          resizeWindow(minecraft, width, height);
           window.setGuiScale(scale);
           var renderer = minecraft.gameRenderer;
           var renderState = renderer.gameRenderState();
@@ -231,7 +231,7 @@ public final class VulkanRenderer {
             renderState.shouldRenderLevel = previousShouldRenderLevel;
           }
         } finally {
-          resize(minecraft, oldWidth, oldHeight);
+          resizeWindow(minecraft, oldWidth, oldHeight);
           window.setGuiScale(oldScale);
         }
       });
@@ -260,14 +260,21 @@ public final class VulkanRenderer {
   }
 
   public static void resize(Minecraft minecraft, int width, int height) {
+    if (!resizeWindow(minecraft, width, height)) return;
+    var window = minecraft.getWindow();
+    var screen = minecraft.gui.screen();
+    if (screen != null) screen.resize(window.getGuiScaledWidth(), window.getGuiScaledHeight());
+  }
+
+  /// Offscreen item captures change render dimensions without rebuilding the active screen.
+  private static boolean resizeWindow(Minecraft minecraft, int width, int height) {
     if (width < 1 || height < 1) throw new IllegalArgumentException("Image dimensions must be positive");
     var window = minecraft.getWindow();
-    if (window.getWidth() == width && window.getHeight() == height) return;
+    if (window.getWidth() == width && window.getHeight() == height) return false;
     window.setWidth(width);
     window.setHeight(height);
     window.setGuiScale(window.calculateScale(minecraft.options.guiScale().get(), minecraft.isEnforceUnicode()));
-    var screen = minecraft.gui.screen();
-    if (screen != null) screen.resize(window.getGuiScaledWidth(), window.getGuiScaledHeight());
+    return true;
   }
 
   private static void finishFrame(Minecraft minecraft) {
