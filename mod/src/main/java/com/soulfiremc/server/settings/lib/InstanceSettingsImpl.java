@@ -67,7 +67,7 @@ public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mapped
                      Map<String, Map<String, JsonElement>> persistentMetadata) implements SettingsSource.Stem<SettingsSource.Instance> {
     public static final Stem EMPTY = new Stem(Map.of(), List.of(), List.of(), Map.of());
     private static final Gson PROFILE_GSON =
-      GsonInstance.GSON.newBuilder()
+      GsonInstance.CONFIG_GSON.newBuilder()
         .registerTypeAdapter(MinecraftAccount.class, new MinecraftAccountAdapter())
         .registerTypeAdapter(SocketAddress.class, SocketAddressHelper.TYPE_ADAPTER)
         .create();
@@ -129,7 +129,7 @@ public record InstanceSettingsImpl(Stem stem, Map<UUID, MinecraftAccount> mapped
       }
 
       private Gson createGson(AuthType authType) {
-        return GsonInstance.GSON.newBuilder()
+        return GsonInstance.CONFIG_GSON.newBuilder()
           .registerTypeAdapter(AccountData.class, new AccountDataAdapter(authType))
           .create();
       }

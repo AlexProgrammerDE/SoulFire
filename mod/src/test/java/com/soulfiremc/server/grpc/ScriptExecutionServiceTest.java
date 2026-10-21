@@ -115,7 +115,7 @@ final class ScriptExecutionServiceTest {
     server.dsl().insertInto(Tables.INSTANCES)
       .set(Tables.INSTANCES.ID, instanceId).set(Tables.INSTANCES.FRIENDLY_NAME, "scripts")
       .set(Tables.INSTANCES.OWNER_ID, ownerId).set(Tables.INSTANCES.ICON, "pickaxe")
-      .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(InstanceSettingsImpl.Stem.EMPTY.serializeToTree())).execute();
+      .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(InstanceSettingsImpl.Stem.EMPTY.serializeToTree())).execute();
     doAnswer(call -> { cancel.set(call.getArgument(0)); return null; }).when(observer).setOnCancelHandler(any());
     doAnswer(call -> { events.add(call.getArgument(0)); return null; }).when(observer).onNext(any());
     doAnswer(_ -> { terminal.countDown(); return null; }).when(observer).onCompleted();

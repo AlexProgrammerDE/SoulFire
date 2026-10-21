@@ -30,6 +30,8 @@ import java.util.ServiceLoader;
 
 public final class GsonInstance {
   public static final Gson GSON;
+  /// Preserves explicit null values in settings and persistent metadata.
+  public static final Gson CONFIG_GSON;
   private static final TypeAdapter<Key> RESOURCE_KEY_ADAPTER =
     new TypeAdapter<>() {
       @Override
@@ -54,6 +56,7 @@ public final class GsonInstance {
     }
 
     GSON = builder.create();
+    CONFIG_GSON = GSON.newBuilder().serializeNulls().create();
   }
 
   private GsonInstance() {

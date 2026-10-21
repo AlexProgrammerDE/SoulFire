@@ -130,7 +130,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   }
 
   private String serializeSettings(InstanceSettingsImpl.Stem stem) {
-    return GsonInstance.GSON.toJson(stem.serializeToTree());
+    return GsonInstance.CONFIG_GSON.toJson(stem.serializeToTree());
   }
 
   private void refreshRuntimeSettings(UUID instanceId) {

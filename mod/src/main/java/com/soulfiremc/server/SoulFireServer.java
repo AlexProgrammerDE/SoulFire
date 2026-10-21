@@ -225,7 +225,7 @@ public final class SoulFireServer {
     if (record == null) {
       dsl().insertInto(Tables.SERVER_CONFIG)
         .set(Tables.SERVER_CONFIG.ID, 1L)
-        .set(Tables.SERVER_CONFIG.SETTINGS, GsonInstance.GSON.toJson(ServerSettingsImpl.Stem.EMPTY.serializeToTree()))
+        .set(Tables.SERVER_CONFIG.SETTINGS, GsonInstance.CONFIG_GSON.toJson(ServerSettingsImpl.Stem.EMPTY.serializeToTree()))
         .set(Tables.SERVER_CONFIG.VERSION, 0L)
         .execute();
       return new ServerSettingsImpl(ServerSettingsImpl.Stem.EMPTY);
@@ -324,7 +324,7 @@ public final class SoulFireServer {
       .set(Tables.INSTANCES.FRIENDLY_NAME, friendlyName)
       .set(Tables.INSTANCES.ICON, InstanceConstants.randomInstanceIcon())
       .set(Tables.INSTANCES.OWNER_ID, owner.getUniqueId().toString())
-      .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(settings.serializeToTree()))
+      .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(settings.serializeToTree()))
       .set(Tables.INSTANCES.CREATED_AT, now)
       .set(Tables.INSTANCES.UPDATED_AT, now)
       .set(Tables.INSTANCES.VERSION, 0L)

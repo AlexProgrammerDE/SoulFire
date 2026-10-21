@@ -84,7 +84,7 @@ final class InstanceServiceErrorTest {
       .set(Tables.INSTANCES.FRIENDLY_NAME, "farm")
       .set(Tables.INSTANCES.OWNER_ID, ownerId)
       .set(Tables.INSTANCES.ICON, "pickaxe")
-      .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(InstanceSettingsImpl.Stem.EMPTY.serializeToTree()))
+      .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(InstanceSettingsImpl.Stem.EMPTY.serializeToTree()))
       .execute();
     var request = InstanceRemoveProxyRequest.newBuilder().setId(instanceId).setIndex(0).build();
     var error = assertThrows(StatusRuntimeException.class,

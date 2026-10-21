@@ -80,7 +80,7 @@ final class InstanceProvisioningTest {
         .set(Tables.INSTANCES.FRIENDLY_NAME, invocation.<String>getArgument(0))
         .set(Tables.INSTANCES.OWNER_ID, ownerId.toString())
         .set(Tables.INSTANCES.ICON, "pickaxe")
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(settings.serializeToTree()))
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(settings.serializeToTree()))
         .set(Tables.INSTANCES.CREATED_AT, LocalDateTime.now())
         .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now())
         .set(Tables.INSTANCES.VERSION, 0L).execute();

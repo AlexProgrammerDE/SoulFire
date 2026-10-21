@@ -70,7 +70,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
 
     try {
       var newStem = ServerSettingsImpl.Stem.fromProto(request.getConfig());
-      var settingsJson = GsonInstance.GSON.toJson(newStem.serializeToTree());
+      var settingsJson = GsonInstance.CONFIG_GSON.toJson(newStem.serializeToTree());
 
       soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -120,7 +120,7 @@ public final class ServerServiceImpl extends ServerServiceGrpc.ServerServiceImpl
           SettingsSource.Stem.valueToJsonElement(request.getValue())
         );
         var updatedStem = currentConfig.withSettings(newSettings);
-        var settingsJson = GsonInstance.GSON.toJson(updatedStem.serializeToTree());
+        var settingsJson = GsonInstance.CONFIG_GSON.toJson(updatedStem.serializeToTree());
 
         if (existing == null) {
           ctx.insertInto(Tables.SERVER_CONFIG)

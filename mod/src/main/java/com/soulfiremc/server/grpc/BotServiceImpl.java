@@ -549,7 +549,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           .toList());
 
         ctx.update(Tables.INSTANCES)
-          .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(newSettings.serializeToTree()))
+          .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(newSettings.serializeToTree()))
           .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
           .execute();

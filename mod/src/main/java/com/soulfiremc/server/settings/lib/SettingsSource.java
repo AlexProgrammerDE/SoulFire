@@ -170,7 +170,7 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
               .setKey(innerEntry.getKey())
               .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
                 try {
-                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                  JsonFormat.parser().merge(GsonInstance.CONFIG_GSON.toJson(innerEntry.getValue()), valueProto);
                 } catch (InvalidProtocolBufferException e) {
                   throw new RuntimeException(e);
                 }
@@ -191,7 +191,7 @@ public sealed interface SettingsSource<S extends SettingsSource.SourceType> perm
               .setKey(innerEntry.getKey())
               .setValue(SFHelpers.make(Value.newBuilder(), valueProto -> {
                 try {
-                  JsonFormat.parser().merge(GsonInstance.GSON.toJson(innerEntry.getValue()), valueProto);
+                  JsonFormat.parser().merge(GsonInstance.CONFIG_GSON.toJson(innerEntry.getValue()), valueProto);
                 } catch (InvalidProtocolBufferException e) {
                   throw new RuntimeException(e);
                 }

@@ -51,7 +51,7 @@ public record ServerSettingsImpl(Stem stem) implements ServerSettingsSource {
     }
 
     public JsonObject serializeToTree() {
-      return GsonInstance.GSON.toJsonTree(this).getAsJsonObject();
+      return GsonInstance.CONFIG_GSON.toJsonTree(this).getAsJsonObject();
     }
 
     public ServerConfig toProto() {

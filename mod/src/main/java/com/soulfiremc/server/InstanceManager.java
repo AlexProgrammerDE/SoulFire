@@ -199,7 +199,7 @@ public final class InstanceManager {
       var updatedStem = currentSettings.withSettings(updatedSettings);
 
       ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(updatedStem.serializeToTree()))
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(updatedStem.serializeToTree()))
         .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
@@ -234,7 +234,7 @@ public final class InstanceManager {
         .toList());
 
       ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(updatedStem.serializeToTree()))
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(updatedStem.serializeToTree()))
         .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
@@ -304,7 +304,7 @@ public final class InstanceManager {
       }
 
       ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(currentSettings.serializeToTree()))
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(currentSettings.serializeToTree()))
         .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
@@ -353,7 +353,7 @@ public final class InstanceManager {
         .toList();
 
       ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(currentSettings.withAccounts(newAccounts).serializeToTree()))
+        .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(currentSettings.withAccounts(newAccounts).serializeToTree()))
         .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
@@ -396,7 +396,7 @@ public final class InstanceManager {
           .findFirst()
           .orElseThrow(() -> new IllegalStateException("Account was removed during authentication"));
         ctx.update(Tables.INSTANCES)
-          .set(Tables.INSTANCES.SETTINGS, GsonInstance.GSON.toJson(currentSettings.withAccounts(accounts).serializeToTree()))
+          .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(currentSettings.withAccounts(accounts).serializeToTree()))
           .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
           .where(Tables.INSTANCES.ID.eq(id.toString()))
           .execute();
