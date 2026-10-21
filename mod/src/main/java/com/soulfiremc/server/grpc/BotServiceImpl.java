@@ -662,6 +662,15 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             .setAddress(SocketAddressHelper.serialize(proxy.address())));
         }
         botInfoResponseBuilder.setConnection(connectionInfo);
+        var movement = activeBot.controlState();
+        botInfoResponseBuilder.setMovementState(BotMovementState.newBuilder()
+          .setForward(movement.up())
+          .setBackward(movement.down())
+          .setLeft(movement.left())
+          .setRight(movement.right())
+          .setJump(movement.jump())
+          .setSneak(movement.shift())
+          .setSprint(movement.sprint()));
 
         var liveState = callInBotContext(activeBot, () -> {
           var minecraft = activeBot.minecraft();

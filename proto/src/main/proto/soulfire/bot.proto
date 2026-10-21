@@ -338,6 +338,9 @@ message BotInfoResponse {
   // Actual connection metadata, including during login before player data is available.
   // Absent when there is no active connection, or when returned by an older server.
   optional BotConnectionInfo connection = 4;
+  // Persistent movement inputs for the current connection.
+  // Absent when the bot has no active connection.
+  BotMovementState movement_state = 5;
 }
 
 // Request to update a single configuration entry for a specific bot.
@@ -1039,6 +1042,17 @@ message BotSetHotbarSlotResponse {
 // Movement Control Messages
 // Control bot movement (WASD, jump, sneak, sprint)
 // ============================================================================
+
+// Persistent movement inputs held by the bot's current connection.
+message BotMovementState {
+  bool forward = 1 [(google.api.field_behavior) = REQUIRED];
+  bool backward = 2 [(google.api.field_behavior) = REQUIRED];
+  bool left = 3 [(google.api.field_behavior) = REQUIRED];
+  bool right = 4 [(google.api.field_behavior) = REQUIRED];
+  bool jump = 5 [(google.api.field_behavior) = REQUIRED];
+  bool sneak = 6 [(google.api.field_behavior) = REQUIRED];
+  bool sprint = 7 [(google.api.field_behavior) = REQUIRED];
+}
 
 // Request to update the bot's movement state.
 // Each field is optional to allow partial updates - only specified fields are changed.

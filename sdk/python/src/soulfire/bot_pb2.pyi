@@ -325,14 +325,16 @@ class BotConnectionInfo(_message.Message):
     def __init__(self, proxy: _Optional[_Union[BotProxyInfo, _Mapping]] = ...) -> None: ...
 
 class BotInfoResponse(_message.Message):
-    __slots__ = ("live_state", "status", "connection")
+    __slots__ = ("live_state", "status", "connection", "movement_state")
     LIVE_STATE_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     CONNECTION_FIELD_NUMBER: _ClassVar[int]
+    MOVEMENT_STATE_FIELD_NUMBER: _ClassVar[int]
     live_state: BotLiveState
     status: BotStatus
     connection: BotConnectionInfo
-    def __init__(self, live_state: _Optional[_Union[BotLiveState, _Mapping]] = ..., status: _Optional[_Union[BotStatus, _Mapping]] = ..., connection: _Optional[_Union[BotConnectionInfo, _Mapping]] = ...) -> None: ...
+    movement_state: BotMovementState
+    def __init__(self, live_state: _Optional[_Union[BotLiveState, _Mapping]] = ..., status: _Optional[_Union[BotStatus, _Mapping]] = ..., connection: _Optional[_Union[BotConnectionInfo, _Mapping]] = ..., movement_state: _Optional[_Union[BotMovementState, _Mapping]] = ...) -> None: ...
 
 class BotUpdateConfigEntryRequest(_message.Message):
     __slots__ = ("instance_id", "bot_id", "namespace", "key", "value")
@@ -849,6 +851,24 @@ class BotSetHotbarSlotResponse(_message.Message):
     success: bool
     error: str
     def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
+
+class BotMovementState(_message.Message):
+    __slots__ = ("forward", "backward", "left", "right", "jump", "sneak", "sprint")
+    FORWARD_FIELD_NUMBER: _ClassVar[int]
+    BACKWARD_FIELD_NUMBER: _ClassVar[int]
+    LEFT_FIELD_NUMBER: _ClassVar[int]
+    RIGHT_FIELD_NUMBER: _ClassVar[int]
+    JUMP_FIELD_NUMBER: _ClassVar[int]
+    SNEAK_FIELD_NUMBER: _ClassVar[int]
+    SPRINT_FIELD_NUMBER: _ClassVar[int]
+    forward: bool
+    backward: bool
+    left: bool
+    right: bool
+    jump: bool
+    sneak: bool
+    sprint: bool
+    def __init__(self, forward: bool = ..., backward: bool = ..., left: bool = ..., right: bool = ..., jump: bool = ..., sneak: bool = ..., sprint: bool = ...) -> None: ...
 
 class BotSetMovementStateRequest(_message.Message):
     __slots__ = ("instance_id", "bot_id", "forward", "backward", "left", "right", "jump", "sneak", "sprint")
