@@ -22,10 +22,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.GpuFence;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.soulfiremc.mod.mixin.headless.rendering.WindowAccessor;
 import com.soulfiremc.mod.util.SFConstants;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -50,7 +53,7 @@ public final class VulkanRenderer {
   private static VulkanRenderSession session;
   private static long lastTextureTickNanos = System.nanoTime();
   private static final ScopedValue<Options> REQUEST = ScopedValue.newInstance();
-  private static final ScopedValue<Boolean> INTERACTIVE = ScopedValue.newInstance();
+  private static final ScopedValue<Viewport> INTERACTIVE_VIEWPORT = ScopedValue.newInstance();
   private static final ScopedValue<Boolean> CAPTURE = ScopedValue.newInstance();
 
   private VulkanRenderer() {}
@@ -106,13 +109,14 @@ public final class VulkanRenderer {
   }
 
   /// Draws one live frame without waiting for all chunk compilation to settle.
-  public static RgbaFrame renderInteractive(Minecraft minecraft, int width, int height, LiveReadback readback) {
-    if (!minecraft.isSameThread()) return onGameThread(minecraft, () -> renderInteractive(minecraft, width, height, readback));
+  public static RgbaFrame renderInteractive(Minecraft minecraft, int width, int height,
+                                            int viewportWidth, int viewportHeight, LiveReadback readback) {
+    if (!minecraft.isSameThread()) return onGameThread(minecraft, () -> renderInteractive(minecraft, width, height, viewportWidth, viewportHeight, readback));
     var options = Options.defaults(minecraft.player, width, height, minecraft.options.fov().get(),
       minecraft.options.getEffectiveRenderDistance() * 16);
     DEVICE_LOCK.lock();
     try {
-      return ScopedValue.where(INTERACTIVE, true).where(CAPTURE, true).where(REQUEST, options)
+      return ScopedValue.where(INTERACTIVE_VIEWPORT, new Viewport(viewportWidth, viewportHeight)).where(CAPTURE, true).where(REQUEST, options)
         .call(() -> renderWorld(minecraft, options, readback::capture));
     } finally {
       DEVICE_LOCK.unlock();
@@ -141,6 +145,9 @@ public final class VulkanRenderer {
     var window = minecraft.getWindow();
     var oldWidth = window.getWidth();
     var oldHeight = window.getHeight();
+    var oldScale = window.getGuiScale();
+    var oldGuiWidth = window.getGuiScaledWidth();
+    var oldGuiHeight = window.getGuiScaledHeight();
     var oldDistance = minecraft.options.renderDistance().get();
     var renderer = minecraft.gameRenderer;
     var delta = minecraft.getDeltaTracker() == null ? DeltaTracker.ONE : minecraft.getDeltaTracker();
@@ -150,7 +157,7 @@ public final class VulkanRenderer {
       renderer.mainCamera().setLevel(minecraft.level);
       renderer.mainCamera().setEntity(minecraft.player);
       minecraft.level.update();
-      if (!INTERACTIVE.orElse(false)) renderer.mainCamera().attributeProbe().tick(minecraft.level, options.eyePos());
+      if (!INTERACTIVE_VIEWPORT.isBound()) renderer.mainCamera().attributeProbe().tick(minecraft.level, options.eyePos());
       renderer.lightmapRenderStateExtractor.needsUpdate = true;
       // Finish visibility updates and all requested geometry before returning an image.
       var deadline = System.nanoTime() + 30_000_000_000L;
@@ -162,7 +169,7 @@ public final class VulkanRenderer {
         RenderSystem.executePendingTasks();
         renderer.render();
         finishFrame(minecraft);
-        if (INTERACTIVE.orElse(false)) {
+        if (INTERACTIVE_VIEWPORT.isBound()) {
           break;
         }
         var graph = minecraft.levelRenderer.sectionOcclusionGraph();
@@ -182,14 +189,14 @@ public final class VulkanRenderer {
       return capture.apply(renderer.mainRenderTarget());
     } finally {
       minecraft.options.renderDistance().set(oldDistance);
-      if (!INTERACTIVE.orElse(false)) resize(minecraft, oldWidth, oldHeight);
+      if (!INTERACTIVE_VIEWPORT.isBound()) resize(minecraft, oldWidth, oldHeight, oldScale, oldGuiWidth, oldGuiHeight);
     }
   }
 
   /// Applies RPC camera overrides without moving or rotating the bot entity.
   public static void configureCamera(net.minecraft.client.Camera camera) {
     // Live gameplay must retain vanilla position, eye-height and sprint FOV interpolation.
-    if (!REQUEST.isBound() || INTERACTIVE.orElse(false)) return;
+    if (!REQUEST.isBound() || INTERACTIVE_VIEWPORT.isBound()) return;
     var options = REQUEST.get();
     camera.setPosition(options.eyePos().x, options.eyePos().y, options.eyePos().z);
     camera.setRotation(options.yRot(), options.xRot());
@@ -259,22 +266,83 @@ public final class VulkanRenderer {
     }
   }
 
+  /// Draw the GUI in the viewer's layout while the world target may be smaller.
+  public static void withGuiViewport(Runnable draw) {
+    if (!INTERACTIVE_VIEWPORT.isBound()) {
+      draw.run();
+      return;
+    }
+    var viewport = INTERACTIVE_VIEWPORT.get();
+    var state = Minecraft.getInstance().gameRenderer.gameRenderState().windowRenderState;
+    var width = state.width;
+    var height = state.height;
+    try {
+      state.width = viewport.width();
+      state.height = viewport.height();
+      draw.run();
+    } finally {
+      state.width = width;
+      state.height = height;
+    }
+  }
+
+  /// Match GUI clipping to the actual target rather than the reference viewport.
+  public static boolean renderGuiScissor(ScreenRectangle rectangle, RenderPass pass) {
+    if (!INTERACTIVE_VIEWPORT.isBound()) return false;
+    var renderer = Minecraft.getInstance().gameRenderer;
+    var target = renderer.mainRenderTarget();
+    var state = renderer.gameRenderState().windowRenderState;
+    var scaleX = (double) target.width / state.width * state.guiScale;
+    var scaleY = (double) target.height / state.height * state.guiScale;
+    var left = rectangle.left() * scaleX;
+    var top = rectangle.top() * scaleY;
+    var right = Math.min(rectangle.right() * scaleX, target.width);
+    var bottom = Math.min(rectangle.bottom() * scaleY, target.height);
+    pass.enableScissor((int) left, target.height - (int) bottom, Math.max(0, (int) (right - left)), Math.max(0, (int) (bottom - top)));
+    return true;
+  }
+
   public static void resize(Minecraft minecraft, int width, int height) {
-    if (!resizeWindow(minecraft, width, height)) return;
     var window = minecraft.getWindow();
+    var viewport = INTERACTIVE_VIEWPORT.isBound() ? INTERACTIVE_VIEWPORT.get() : new Viewport(width, height);
+    var previousWidth = window.getWidth();
+    var previousHeight = window.getHeight();
+    int guiScale;
+    try {
+      // Native integer GUI scales are chosen from the requested viewport, independently
+      // of adaptive encoding dimensions. Only the GUI projection is downscaled.
+      window.setWidth(viewport.width());
+      window.setHeight(viewport.height());
+      guiScale = window.calculateScale(minecraft.options.guiScale().get(), minecraft.isEnforceUnicode());
+    } finally {
+      window.setWidth(previousWidth);
+      window.setHeight(previousHeight);
+    }
+    resize(minecraft, width, height, guiScale,
+      (int) Math.ceil((double) viewport.width() / guiScale), (int) Math.ceil((double) viewport.height() / guiScale));
+  }
+
+  private static void resize(Minecraft minecraft, int width, int height, int guiScale, int guiWidth, int guiHeight) {
+    var window = minecraft.getWindow();
+    var previousGuiWidth = window.getGuiScaledWidth();
+    var previousGuiHeight = window.getGuiScaledHeight();
+    resizeWindow(minecraft, width, height);
+    window.setGuiScale(guiScale);
+    var accessor = (WindowAccessor) (Object) window;
+    accessor.soulfire$setGuiScaledWidth(guiWidth);
+    accessor.soulfire$setGuiScaledHeight(guiHeight);
     var screen = minecraft.gui.screen();
-    if (screen != null) screen.resize(window.getGuiScaledWidth(), window.getGuiScaledHeight());
+    if (screen != null && (previousGuiWidth != guiWidth || previousGuiHeight != guiHeight)) {
+      screen.resize(guiWidth, guiHeight);
+    }
   }
 
   /// Offscreen item captures change render dimensions without rebuilding the active screen.
-  private static boolean resizeWindow(Minecraft minecraft, int width, int height) {
+  private static void resizeWindow(Minecraft minecraft, int width, int height) {
     if (width < 1 || height < 1) throw new IllegalArgumentException("Image dimensions must be positive");
     var window = minecraft.getWindow();
-    if (window.getWidth() == width && window.getHeight() == height) return false;
     window.setWidth(width);
     window.setHeight(height);
-    window.setGuiScale(window.calculateScale(minecraft.options.guiScale().get(), minecraft.isEnforceUnicode()));
-    return true;
   }
 
   private static void finishFrame(Minecraft minecraft) {
@@ -366,6 +434,8 @@ public final class VulkanRenderer {
       return image;
     }
   }
+
+  private record Viewport(int width, int height) {}
 
   public record Trace(long totalNanos, String device) {}
   public record Result(BufferedImage image, @Nullable Trace debugTrace) {}

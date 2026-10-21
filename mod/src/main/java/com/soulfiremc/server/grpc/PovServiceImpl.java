@@ -323,7 +323,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
           var minecraft = bot.minecraft();
           // A respawn or dimension transfer temporarily removes the world and player.
           if (minecraft.player == null || minecraft.level == null) return null;
-          var image = VulkanRenderer.renderInteractive(minecraft, adaptation.width(), adaptation.height(), readback);
+          var image = VulkanRenderer.renderInteractive(minecraft, adaptation.width(), adaptation.height(), targetWidth, targetHeight, readback);
           var cursorShape = switch (minecraft.getWindow().currentCursor.toString()) {
             case "ibeam" -> PovFrame.CursorShape.TEXT;
             case "crosshair" -> PovFrame.CursorShape.CROSSHAIR;
