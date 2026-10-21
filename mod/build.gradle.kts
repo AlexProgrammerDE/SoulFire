@@ -1,3 +1,4 @@
+import java.nio.file.Files
 import java.time.Duration
 import org.gradle.api.file.FileCollection
 import org.gradle.process.CommandLineArgumentProvider
@@ -224,6 +225,15 @@ tasks.jar {
   archiveClassifier.set("raw")
 }
 
+val testModsDirectory = layout.buildDirectory.dir("test-mods")
+val prepareTestModsDirectory = tasks.register("prepareTestModsDirectory") {
+  val directory = testModsDirectory
+  outputs.dir(directory)
+  doLast {
+    Files.createDirectories(directory.get().asFile.toPath())
+  }
+}
+
 configurations {
   testRuntimeClasspath {
     exclude(group = "net.fabricmc", module = "fabric-log4j-util")
@@ -232,7 +242,9 @@ configurations {
 
 tasks {
   test {
+    dependsOn(prepareTestModsDirectory)
     useJUnitPlatform()
+    systemProperty("fabric.modsFolder", testModsDirectory.get().asFile.absolutePath)
     systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
     systemProperty("sf.pov.test.hardware", providers.gradleProperty("povHardwareTest").orElse("false").get())
     systemProperty("fabric.debug.disableModIds", "viafabricplus,viafabricplus-api,viafabricplus-visuals,viafabricplus-bedrock")
