@@ -65,7 +65,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.FramerateLimiter;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.KeyboardHandler;
@@ -545,11 +544,12 @@ public final class BotConnection {
           try {
             minecraft.gameThread = Thread.currentThread();
             minecraft.packetProcessor.runningThread = minecraft.gameThread;
+            var frameLimiter = new HeadlessFrameLimiter();
             while (minecraft.running && !isDisconnected && !Thread.currentThread().isInterrupted()) {
               minecraft.runTick(true);
 
-              // renderFrame is cancelled in headless mode, so the vanilla frame limiter never runs
-              FramerateLimiter.limitDisplayFPS(minecraft.getFramerateLimitTracker().getFramerateLimit());
+              // Headless rendering skips the vanilla limiter; pace each bot independently.
+              frameLimiter.limitDisplayFPS(minecraft.getFramerateLimitTracker().getFramerateLimit());
             }
           } catch (Throwable t) {
             var conciseConnectionError = conciseConnectionError(t);
