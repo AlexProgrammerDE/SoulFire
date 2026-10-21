@@ -3,96 +3,39 @@ plugins {
   `sf-project-conventions`
 }
 
-dependencies {
-  libs.bundles.bom.get().forEach { api(platform(it)) }
-
-  api(projects.buildData)
-
-  api(libs.bundles.classtransform)
-  api(libs.reflect)
-
-  api(libs.bundles.log4j)
-  api(libs.jline)
-  api(libs.jansi)
-  api(libs.terminalconsoleappender)
-  api(libs.disruptor)
-
-  api("org.ow2.asm:asm:9.10.1")
-  api("org.ow2.asm:asm-analysis:9.10.1")
-  api("org.ow2.asm:asm-commons:9.10.1")
-  api("org.ow2.asm:asm-tree:9.10.1")
-  api("org.ow2.asm:asm-util:9.10.1")
-  api("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
-  api("net.fabricmc:fabric-loader:0.19.5")
-  api("net.fabricmc:mapping-io:0.9.1")
-
-  api("at.yawk.lz4:lz4-java:1.12.0")
-  api("com.azure:azure-json:1.5.1")
-  api("com.github.oshi:oshi-core:7.6.1")
-  api("com.google.code.gson:gson:2.14.0")
-  api("com.google.guava:failureaccess:1.0.3")
-  api("com.google.guava:guava:33.7.1-jre")
-  api("com.ibm.icu:icu4j:78.3")
-  api("com.microsoft.azure:msal4j:1.26.0")
-  api("com.mojang:authlib:10.0.77")
-  api("com.mojang:blocklist:1.0.10")
-  api("com.mojang:brigadier:1.3.11")
-  api("com.mojang:datafixerupper:10.0.21")
-  api("com.mojang:jtracy:1.14.38")
-  api("com.mojang:logging:1.7.12")
-  api("com.mojang:patchy:2.2.10")
-  api("com.mojang:text2speech:1.19.12")
-  api("commons-codec:commons-codec:1.22.1")
-  api("commons-io:commons-io:2.22.0")
-  api("it.unimi.dsi:fastutil:8.5.19")
-  api("net.java.dev.jna:jna-platform:5.19.1")
-  api("net.java.dev.jna:jna:5.19.1")
-  api("net.sf.jopt-simple:jopt-simple:5.0.4")
-  api("org.apache.commons:commons-compress:1.28.0")
-  api("org.apache.commons:commons-lang3:3.20.0")
-  api("org.jcraft:jorbis:0.0.17")
-  api("org.joml:joml:1.10.9")
-  api("org.jspecify:jspecify:1.0.1")
-  api("org.lwjgl:lwjgl-freetype:3.4.3")
-  api("org.lwjgl:lwjgl-sdl:3.4.3")
-  api("org.lwjgl:lwjgl-jemalloc:3.4.3")
-  api("org.lwjgl:lwjgl-openal:3.4.3")
-  api("org.lwjgl:lwjgl-opengl:3.4.3")
-  api("org.lwjgl:lwjgl-shaderc:3.4.3")
-  api("org.lwjgl:lwjgl-spvc:3.4.3")
-  api("org.lwjgl:lwjgl-stb:3.4.3")
-  api("org.lwjgl:lwjgl-vma:3.4.3")
-  api("org.lwjgl:lwjgl-vulkan:3.4.3")
-  runtimeOnly("org.lwjgl:lwjgl-vulkan:3.4.3:natives-macos")
-  runtimeOnly("org.lwjgl:lwjgl-vulkan:3.4.3:natives-macos-arm64")
-  api("org.lwjgl:lwjgl:3.4.3:unsafe")
-  // Real native libraries are required for headless Vulkan and texture/font decoding.
-  for (platform in listOf("linux", "linux-arm64", "windows", "windows-arm64", "macos", "macos-arm64")) {
-    for (module in listOf("lwjgl", "lwjgl-freetype", "lwjgl-sdl", "lwjgl-jemalloc", "lwjgl-openal", "lwjgl-shaderc", "lwjgl-spvc", "lwjgl-stb", "lwjgl-vma")) {
-      runtimeOnly("org.lwjgl:$module:3.4.3:natives-$platform")
-    }
-  }
-  api("org.slf4j:slf4j-api:2.0.20")
-
-  api("io.github.llamalad7:mixinextras-fabric:0.5.5")
-  api("org.checkerframework:checker-qual:4.2.3")
-
-  // Newest netty
-  api("io.netty:netty-all:4.2.18.Final")
+val runtimeAssets = configurations.resolvable("runtimeAssets") {
+  extendsFrom(configurations.runtimeClasspath.get())
 }
 
-val modProjectName = ":mod"
-evaluationDependsOn(modProjectName)
-afterEvaluate {
-  val modJarConfiguration = project(modProjectName).configurations.named("mod-jar")
-
-  tasks.named<Jar>("jar") {
-    from({
-      modJarConfiguration.get().artifacts.files
-    }) {
-      into("META-INF/jars")
-    }
-
-    dependsOn(modJarConfiguration)
+dependencies {
+  implementation(project(path = ":mod", configuration = "launcherRuntimeElements")) {
+    // Loom's merged client is local to :mod; the manifest pins Mojang's client JAR instead.
+    exclude(group = "net.minecraft")
+    exclude(group = "net.fabricmc", module = "dev-launch-injector")
+    exclude(group = "net.fabricmc", module = "fabric-log4j-util")
   }
+  implementation(libs.bundles.classtransform)
+  implementation(libs.reflect)
+  implementation(libs.guava)
+}
+
+val launcherArtifactName = tasks.jar.flatMap { it.archiveFileName }
+val launcherCoordinate = "$group:$name:$version"
+
+val generateLauncherAssets = tasks.register<com.soulfiremc.gradle.GenerateLauncherAssets>("generateLauncherAssets") {
+  minecraftVersion.set(providers.gradleProperty("minecraft_version"))
+  libraries.from(runtimeAssets)
+  libraries.from(tasks.jar)
+  coordinates.set(runtimeAssets.zip(launcherArtifactName) { configuration, artifactName ->
+    configuration.resolvedConfiguration.resolvedArtifacts.associate { artifact ->
+      val id = artifact.moduleVersion.id
+      artifact.file.name to listOfNotNull(id.group, id.name, id.version, artifact.classifier).joinToString(":")
+    } + (artifactName to launcherCoordinate)
+  })
+  metadataDirectory.set(rootProject.layout.projectDirectory.dir(".gradle/launcher-assets"))
+  outputDirectory.set(layout.buildDirectory.dir("generated/launcher-assets"))
+}
+
+val launcherAssetsElements = configurations.consumable("launcherAssetsElements") {
+  outgoing.artifact(generateLauncherAssets.flatMap { it.outputDirectory })
 }

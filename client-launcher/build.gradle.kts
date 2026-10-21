@@ -1,6 +1,5 @@
 plugins {
-  `sf-vulkan-runtime-consumer`
-  `sf-project-conventions`
+  `sf-launcher-distribution`
 }
 
 base {
@@ -18,7 +17,7 @@ tasks.register("runSFCLI", JavaExec::class) {
   }
 
   mainClass = projectMainClass
-  classpath = sourceSets["main"].runtimeClasspath
+  classpath = files(tasks.named("uberJar"))
 
   val argsMutable = mutableListOf(
     "--enable-native-access=ALL-UNNAMED", // Needed for JavaExec
@@ -55,7 +54,7 @@ tasks.register("printSFCLIFlags", JavaExec::class) {
   }
 
   mainClass = projectMainClass
-  classpath = sourceSets["main"].runtimeClasspath
+  classpath = files(tasks.named("uberJar"))
   args = listOf(
     "--generate-flags"
   )
@@ -90,120 +89,19 @@ tasks.register("printSFCLIFlags", JavaExec::class) {
   outputs.upToDateWhen { false }
 }
 
+launcherDistribution {
+  mainClass.set(projectMainClass)
+}
+
 dependencies {
-  libs.bundles.bom.get().forEach { api(platform(it)) }
-
-  api(projects.launcher)
-
-  // The java 8 launcher takes care of notifying the user if they are using an unsupported java version
-  implementation(projects.j8Launcher)
-
+  implementation(projects.buildData)
   testImplementation(libs.junit)
   testRuntimeOnly(libs.junit.launcher)
 }
 
-// Capture version at configuration time for configuration cache compatibility
-val projectVersionString = version.toString()
-val launcherPathPattern = "launcher" + File.separator + "build" + File.separator + "libs"
-val buildDataPathPattern = "build-data" + File.separator + "build" + File.separator + "libs"
-
-// Configuration for jars to shadow vs include as libs
-val shadowedJarsConfig: Configuration by configurations.creating {
-  isCanBeConsumed = false
-  isCanBeResolved = true
-  extendsFrom(configurations.runtimeClasspath.get())
-}
-
-val libJarsConfig: Configuration by configurations.creating {
-  isCanBeConsumed = false
-  isCanBeResolved = true
-  extendsFrom(configurations.runtimeClasspath.get())
-}
-
-tasks {
-  val generateDependencyList = register("generateDependencyList") {
-    inputs.files(configurations.runtimeClasspath)
-
-    val outputFile = layout.buildDirectory.file("dependency-list.txt")
-    outputs.file(outputFile)
-
-    // Capture pattern inside task configuration to avoid capturing script object
-    val pathPattern = launcherPathPattern
-    val metadataPathPattern = buildDataPathPattern
-    doLast {
-      val dependencies = inputs.files.files
-        .filter { it.name.endsWith(".jar") }
-        .filter { !it.toString().contains(pathPattern) && !it.toString().contains(metadataPathPattern) }
-        .joinToString("\n") { it.name }
-      outputFile.get().asFile.writeText(dependencies)
-    }
-  }
-  jar {
-    archiveClassifier = "unshaded"
-
-    manifest {
-      attributes["Main-Class"] = projectMainClass
-      attributes["Name"] = "SoulFire"
-      attributes["Specification-Title"] = "SoulFire"
-      attributes["Specification-Version"] = projectVersionString
-      attributes["Specification-Vendor"] = "AlexProgrammerDE"
-      attributes["Implementation-Title"] = "SoulFire"
-      attributes["Implementation-Version"] = projectVersionString
-      attributes["Implementation-Vendor"] = "AlexProgrammerDE"
-      attributes["Multi-Release"] = "true"
-      attributes["Enable-Native-Access"] = "ALL-UNNAMED"
-    }
-  }
-  val uberJar = register<Jar>("uberJar") {
-    val jarTask = jar
-    dependsOn(jarTask)
-
-    manifest {
-      attributes["Main-Class"] = projectMainClass
-      attributes["Name"] = "SoulFire"
-      attributes["Specification-Title"] = "SoulFire"
-      attributes["Specification-Version"] = projectVersionString
-      attributes["Specification-Vendor"] = "AlexProgrammerDE"
-      attributes["Implementation-Title"] = "SoulFire"
-      attributes["Implementation-Version"] = projectVersionString
-      attributes["Implementation-Vendor"] = "AlexProgrammerDE"
-      attributes["Multi-Release"] = "true"
-      attributes["Enable-Native-Access"] = "ALL-UNNAMED"
-    }
-
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    // Include content from main jar
-    from(jarTask.map { it.outputs.files.map { file -> zipTree(file) } })
-
-    // Keep build metadata available before runtime libraries are extracted.
-    from(configurations.runtimeClasspath.map { config ->
-      config.files
-        .filter { it.name.endsWith(".jar") }
-        .filter { it.toString().contains(launcherPathPattern) || it.toString().contains(buildDataPathPattern) }
-        .map { zipTree(it) }
-    })
-
-    // Include other jars as libraries
-    from(configurations.runtimeClasspath.map { config ->
-      config.files
-        .filter { it.name.endsWith(".jar") }
-        .filter { !it.toString().contains(launcherPathPattern) && !it.toString().contains(buildDataPathPattern) }
-    }) {
-      into("META-INF/lib")
-    }
-
-    from(generateDependencyList.map { it.outputs.files }) {
-      into("META-INF")
-    }
-  }
-  build {
-    dependsOn(uberJar)
-  }
-  test {
-    val cliJar = uberJar.flatMap { it.archiveFile }
-    dependsOn(uberJar)
-    inputs.file(cliJar)
-    systemProperty("sf.cli.testJar", cliJar.get().asFile.absolutePath)
-  }
+tasks.test {
+  val cliJar = tasks.named<Jar>("uberJar").flatMap { it.archiveFile }
+  dependsOn(cliJar)
+  inputs.file(cliJar)
+  systemProperty("sf.cli.testJar", cliJar.get().asFile.absolutePath)
 }

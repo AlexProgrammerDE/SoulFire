@@ -4,7 +4,7 @@ plugins {
 
 spotless {
   java {
-    target("**/com/soulfiremc/**")
+    target("src/**/java/com/soulfiremc/**/*.java")
 
     trimTrailingWhitespace()
     leadingTabsToSpaces(2)

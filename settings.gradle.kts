@@ -37,6 +37,7 @@ include(
   "vulkan-runtime",
   "proto",
   "mod",
+  "bootstrap",
   "launcher",
   "j8-launcher",
   "client-launcher",

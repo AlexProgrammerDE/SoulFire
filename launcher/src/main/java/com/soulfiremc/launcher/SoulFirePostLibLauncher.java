@@ -17,7 +17,6 @@
  */
 package com.soulfiremc.launcher;
 
-import com.soulfiremc.builddata.BuildData;
 import lombok.SneakyThrows;
 import net.fabricmc.loader.impl.launch.knot.KnotClient;
 import net.fabricmc.loader.impl.util.SystemProperties;
@@ -30,10 +29,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class SoulFirePostLibLauncher {
@@ -58,15 +57,8 @@ public final class SoulFirePostLibLauncher {
         });
     }
 
-    var fileName = "mod-%s.jar".formatted(BuildData.VERSION);
-    try (var filePath = SoulFireAbstractLauncher.class.getResourceAsStream("/META-INF/jars/" + fileName)) {
-      var fileBytes = Objects.requireNonNull(filePath, "Managed mod file not found: %s".formatted(fileName)).readAllBytes();
-      var targetPath = modsPath.resolve("managed-" + fileName);
-      Files.write(targetPath, fileBytes);
-      System.out.printf("Copied managed mod: %s%n", targetPath);
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to copy managed mod: " + fileName, e);
-    }
+    var source = Path.of(System.getProperty("sf.managedMod"));
+    Files.copy(source, modsPath.resolve("managed-" + source.getFileName()), StandardCopyOption.REPLACE_EXISTING);
   }
 
   @SuppressWarnings("unused")
@@ -82,9 +74,11 @@ public final class SoulFirePostLibLauncher {
 
       injectEarlyMixins();
       setupManagedMods(basePath);
-      SFMinecraftDownloader.loadAndInjectMinecraftJar(basePath);
+      System.setProperty(SystemProperties.GAME_MAPPING_NAMESPACE, "official");
+      System.setProperty(SystemProperties.GAME_JAR_PATH_CLIENT, System.getProperty("sf.minecraftJar"));
+      System.setProperty(SystemProperties.RUNTIME_MAPPING_NAMESPACE, "official");
 
-      var assetIndex = SFMinecraftDownloader.prepareFontAssets(basePath);
+      var assetIndex = System.getProperty("sf.assetIndex");
       KnotClient.main(new String[]{
         "--graphicsBackend", "VULKAN",
         "--username", "SoulFire",
@@ -112,7 +106,7 @@ public final class SoulFirePostLibLauncher {
   }
 
   private static void injectEarlyMixins() {
-    var classProvider = new CustomClassProvider(List.of(SoulFireAbstractLauncher.class.getClassLoader()));
+    var classProvider = new CustomClassProvider(List.of(SoulFirePostLibLauncher.class.getClassLoader()));
     var transformerManager = new TransformerManager(classProvider);
     transformerManager.addTransformerPreprocessor(new MixinsTranslator());
     transformerManager.addTransformer("com.soulfiremc.launcher.mixin.*");

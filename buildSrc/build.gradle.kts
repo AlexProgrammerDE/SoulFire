@@ -24,6 +24,7 @@ dependencies {
   implementation("net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin:5.1.1")
   implementation("org.openrewrite:plugin:7.39.0")
   implementation("org.ow2.asm:asm:9.10.1")
+  implementation(libs.gson)
 
   testImplementation(gradleTestKit())
   testImplementation(libs.junit)

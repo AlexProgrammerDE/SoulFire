@@ -9,7 +9,6 @@ plugins {
   id("net.fabricmc.fabric-loom")
   alias(libs.plugins.jmh)
   alias(libs.plugins.jooq.codegen)
-  id("com.gradleup.shadow")
 }
 
 private class FabricSystemLibrariesArgumentProvider(
@@ -47,7 +46,7 @@ val mockitoAgent = configurations.create("mockitoAgent")
 dependencies {
   libs.bundles.bom.get().forEach { api(platform(it)) }
 
-  minecraft("com.mojang:minecraft:26.3")
+  minecraft("com.mojang:minecraft:${property("minecraft_version")}")
   implementation("net.fabricmc:fabric-loader:0.19.5")
 
   // Bundle the encoder and its native runtime for headless hosts without FFmpeg packages.
@@ -185,44 +184,20 @@ loom {
   }
 }
 
-tasks.shadowJar {
-  exclude("soulfire-vulkan/**")
-  val mainOutputDirectories = sourceSets.main.get().output.files.map { it.toPath().toAbsolutePath().normalize() }
-
-  dependsOn(tasks.jar)
-  from(zipTree(tasks.jar.flatMap { it.archiveFile }))
-  from(rootProject.layout.projectDirectory.file("LICENSE"))
-  eachFile {
-    val sourcePath = file.toPath().toAbsolutePath().normalize()
-    if (mainOutputDirectories.any(sourcePath::startsWith)) {
-      exclude()
-    }
-  }
-
+// Application dependencies are resolved into the launch manifest instead of shaded.
+// Keep Fabric's included mod JARs and their metadata intact.
+tasks.jar {
   archiveClassifier.set("")
-  destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs"))
-  filesMatching("META-INF/services/**") {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-  }
-  mergeServiceFiles()
-  dependencies {
-    // The launcher supplies matching LWJGL bindings and native libraries.
-    exclude(dependency("org.lwjgl:.*:.*"))
-    exclude(dependency("io.github.llamalad7:mixinextras-fabric:.*"))
-    exclude(dependency("net.fabricmc:dev-launch-injector:.*"))
-    exclude(dependency("net.fabricmc:fabric-loader:.*"))
-    exclude(dependency("net.fabricmc:fabric-log4j-util:.*"))
-    exclude(dependency("net.fabricmc:sponge-mixin:.*"))
-    exclude(dependency("org.ow2.asm:asm:.*"))
-    exclude(dependency("org.ow2.asm:asm-analysis:.*"))
-    exclude(dependency("org.ow2.asm:asm-commons:.*"))
-    exclude(dependency("org.ow2.asm:asm-tree:.*"))
-    exclude(dependency("org.ow2.asm:asm-util:.*"))
-  }
 }
 
-tasks.jar {
-  archiveClassifier.set("raw")
+val launcherRuntimeElements = configurations.consumable("launcherRuntimeElements") {
+  extendsFrom(configurations.runtimeClasspath.get())
+  attributes {
+    attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage.JAVA_RUNTIME))
+    attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category.LIBRARY))
+    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements.JAR))
+  }
+  outgoing.artifact(tasks.jar)
 }
 
 val testModsDirectory = layout.buildDirectory.dir("test-mods")
@@ -266,19 +241,10 @@ tasks {
   }
 }
 
-configurations.create("mod-jar")
-
-artifacts {
-  add("mod-jar", tasks.shadowJar.flatMap { it.archiveFile }) {
-    builtBy(tasks.shadowJar)
-  }
-}
 
 publishing {
-  publications {
-    getByName<MavenPublication>("mavenJava") {
-      artifact(tasks.shadowJar)
-    }
+  publications.named<MavenPublication>("mavenJava") {
+    artifact(tasks.jar)
   }
 }
 

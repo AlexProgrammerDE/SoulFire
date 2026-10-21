@@ -18,7 +18,7 @@
 package com.soulfiremc.launcher.client;
 
 import com.soulfiremc.builddata.BuildData;
-import com.soulfiremc.launcher.SoulFireAbstractLauncher;
+import com.soulfiremc.launcher.bootstrap.SoulFireBootstrap;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ public final class SoulFireCLILauncher {
 
     var cliHomeDir = System.getProperty( "sf.cliHomeDir" );
 
-    SoulFireAbstractLauncher.run(
+    SoulFireBootstrap.run(
       cliHomeDir != null ? Path.of( cliHomeDir ) : Path.of( System.getProperty( "user.home" ) ).resolve( ".soulfire" ),
       "com.soulfiremc.bootstrap.client.SoulFireCLIBootstrap",
       args

@@ -17,13 +17,13 @@
  */
 package com.soulfiremc.launcher.dedicated;
 
-import com.soulfiremc.launcher.SoulFireAbstractLauncher;
+import com.soulfiremc.launcher.bootstrap.SoulFireBootstrap;
 
 import java.nio.file.Path;
 
 public final class SoulFireDedicatedLauncher {
   void main(String[] args) {
-    SoulFireAbstractLauncher.run(
+    SoulFireBootstrap.run(
       Path.of( System.getProperty( "user.dir" ) ),
       "com.soulfiremc.bootstrap.dedicated.SoulFireDedicatedBootstrap",
       args
