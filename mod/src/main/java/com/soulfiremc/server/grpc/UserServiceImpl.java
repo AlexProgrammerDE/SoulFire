@@ -56,11 +56,12 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_USER));
 
     try {
+      var userId = UUID.randomUUID();
       var now = LocalDateTime.now(ZoneOffset.UTC);
       soulFireServer.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
         ctx.insertInto(Tables.USERS)
-          .set(Tables.USERS.ID, UUID.randomUUID().toString())
+          .set(Tables.USERS.ID, userId.toString())
           .set(Tables.USERS.USERNAME, request.getUsername())
           .set(Tables.USERS.EMAIL, request.getEmail())
           .set(Tables.USERS.ROLE, (switch (request.getRole()) {
@@ -74,7 +75,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
           .execute();
       });
 
-      responseObserver.onNext(UserCreateResponse.newBuilder().build());
+      responseObserver.onNext(UserCreateResponse.newBuilder().setId(userId.toString()).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error creating user", t);
