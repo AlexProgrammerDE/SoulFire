@@ -202,16 +202,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return false;
     }
 
-    var allowedPaths = new ArrayList<String>();
-    soulFireServer.instances().values()
-      .forEach(instanceManager -> {
-        if (user.hasPermission(PermissionContext.instance(
-          InstancePermission.ACCESS_OBJECT_STORAGE, instanceManager.id()))) {
-          allowedPaths.add("/instance-" + instanceManager.id());
-        }
-      });
-
-    return allowedPaths.stream().noneMatch(path::startsWith);
+    return soulFireServer.instances().values().stream().noneMatch(instance ->
+      isSameOrDescendant(path, "/instance-" + instance.id())
+        && user.hasPermission(PermissionContext.instance(InstancePermission.ACCESS_OBJECT_STORAGE, instance.id())));
   }
 
   @Override
@@ -767,7 +760,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       }
     }
 
-    var path = getRelativePath(req);
+    var path = normalizeLockPath(getRelativePath(req));
 
     lock.path = path;
 
@@ -791,7 +784,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
             removeCollectionLock(currentLock);
             continue;
           }
-          if (currentLock.path.startsWith(lock.path) && (currentLock.isExclusive() || lock.isExclusive())) {
+          if (isSameOrDescendant(currentLock.path, lock.path) && (currentLock.isExclusive() || lock.isExclusive())) {
             // A child collection of this collection is locked
             lockPaths.add(currentLock.path);
           }
@@ -801,7 +794,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
             resourceLocks.remove(currentLock.path);
             continue;
           }
-          if (currentLock.path.startsWith(lock.path) && (currentLock.isExclusive() || lock.isExclusive())) {
+          if (isSameOrDescendant(currentLock.path, lock.path) && (currentLock.isExclusive() || lock.isExclusive())) {
             // A child resource of this collection is locked
             lockPaths.add(currentLock.path);
           }
@@ -970,7 +963,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return;
     }
 
-    var path = getRelativePath(req);
+    var path = normalizeLockPath(getRelativePath(req));
 
     var lockTokenHeader = req.getHeader("Lock-Token");
     if (lockTokenHeader == null) {
@@ -1038,7 +1031,8 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     return isLocked(path, ifHeader + lockTokenHeader);
   }
 
-  private boolean isLocked(String path, String ifHeader) {
+  private boolean isLocked(String requestedPath, String ifHeader) {
+    var path = normalizeLockPath(requestedPath);
 
     // Checking resource locks
 
@@ -1065,7 +1059,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     for (var collectionLock : collectionLocks) {
       if (collectionLock.hasExpired()) {
         removeCollectionLock(collectionLock);
-      } else if (path.startsWith(collectionLock.path)) {
+      } else if (isSameOrDescendant(path, collectionLock.path)) {
         var tokenMatch = false;
         for (var token : collectionLock.tokens) {
           if (ifHeader.contains(token)) {
@@ -1161,7 +1155,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     // Check src / dest are not sub-dirs of each other
-    if (destinationPath.startsWith(path) && destinationPath.charAt(path.length()) == '/' || path.startsWith(destinationPath) && path.charAt(destinationPath.length()) == '/') {
+    if (isSameOrDescendant(destinationPath, path) || isSameOrDescendant(path, destinationPath)) {
       resp.sendError(WebdavStatus.SC_FORBIDDEN);
       return false;
     }
@@ -1715,7 +1709,9 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     generatedXML.writeElement("D", "response", XMLWriter.CLOSING);
   }
 
-  private boolean generateLockDiscovery(String path, XMLWriter generatedXML) {
+  private boolean generateLockDiscovery(String requestedPath, XMLWriter generatedXML) {
+    var path = normalizeLockPath(requestedPath);
+
     var resourceLock = resourceLocks.get(path);
 
     var wroteStart = false;
@@ -1727,7 +1723,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     for (var currentLock : collectionLocks) {
-      if (path.startsWith(currentLock.path)) {
+      if (isSameOrDescendant(path, currentLock.path)) {
         if (!wroteStart) {
           wroteStart = true;
           generatedXML.writeElement("D", "lockdiscovery", XMLWriter.OPENING);
@@ -1780,6 +1776,14 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     }
 
     return methodsAllowed.toString();
+  }
+
+  private static boolean isSameOrDescendant(String path, String directory) {
+    return path.equals(directory) || path.startsWith(directory.endsWith("/") ? directory : directory + "/");
+  }
+
+  private static String normalizeLockPath(String path) {
+    return path.length() > 1 && path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
   }
 
   private void removeCollectionLock(LockInfo lock) {
