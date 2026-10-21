@@ -175,6 +175,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onNext(UpdateSelfUsernameResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
+      UserProfileValidation.rethrowConflict(t);
       log.error("Error updating self username", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
@@ -203,6 +204,7 @@ public final class ClientServiceImpl extends ClientServiceGrpc.ClientServiceImpl
       responseObserver.onNext(UpdateSelfEmailResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
+      UserProfileValidation.rethrowConflict(t);
       log.error("Error updating self email", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }

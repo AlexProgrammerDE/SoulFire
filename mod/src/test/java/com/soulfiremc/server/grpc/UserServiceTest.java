@@ -36,15 +36,20 @@ import io.grpc.stub.StreamObserver;
 import org.flywaydb.core.Flyway;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.sqlite.SQLiteDataSource;
+import org.sqlite.SQLiteErrorCode;
+import org.sqlite.SQLiteException;
 
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -132,6 +137,39 @@ final class UserServiceTest {
   }
 
   @Test
+  void conflictingProfilesNeverChangeStoredUsers() {
+    var otherId = UUID.randomUUID();
+    dsl.execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+      otherId.toString(), "other-user", "other@example.com", "USER");
+    var before = dsl.selectFrom(Tables.USERS).orderBy(Tables.USERS.ID).fetch().intoMaps();
+    assertAll(
+      () -> assertConflict(context, () -> service.createUser(UserCreateRequest.newBuilder()
+        .setUsername("other-user").setEmail("new@example.com").setRole(UserRole.USER).build(), mock())),
+      () -> assertConflict(context, () -> service.createUser(UserCreateRequest.newBuilder()
+        .setUsername("new-user").setEmail("other@example.com").setRole(UserRole.USER).build(), mock())),
+      () -> assertConflict(context, () -> service.updateUser(UpdateUserRequest.newBuilder().setId(existingId.toString())
+        .setUsername("other-user").setEmail("updated@example.com").setRole(UserRole.ADMIN).build(), mock())),
+      () -> assertConflict(context, () -> service.updateUser(UpdateUserRequest.newBuilder().setId(existingId.toString())
+        .setUsername("updated-user").setEmail("other@example.com").setRole(UserRole.ADMIN).build(), mock())),
+      () -> assertConflict(selfContext, () -> clientService.updateSelfUsername(UpdateSelfUsernameRequest.newBuilder()
+        .setUsername("other-user").build(), mock())),
+      () -> assertConflict(selfContext, () -> clientService.updateSelfEmail(UpdateSelfEmailRequest.newBuilder()
+        .setEmail("other@example.com").build(), mock())),
+      () -> assertEquals(before, dsl.selectFrom(Tables.USERS).orderBy(Tables.USERS.ID).fetch().intoMaps()));
+  }
+
+  @Test
+  void savingTheCurrentUsernameAndEmailDoesNotConflict() {
+    context.run(() -> service.updateUser(UpdateUserRequest.newBuilder().setId(existingId.toString())
+      .setUsername("existing-user").setEmail("existing@example.com").setRole(UserRole.USER).build(), mock()));
+    selfContext.run(() -> clientService.updateSelfUsername(UpdateSelfUsernameRequest.newBuilder().setUsername("existing-user").build(), mock()));
+    selfContext.run(() -> clientService.updateSelfEmail(UpdateSelfEmailRequest.newBuilder().setEmail("existing@example.com").build(), mock()));
+    var stored = dsl.selectFrom(Tables.USERS).where(Tables.USERS.ID.eq(existingId.toString())).fetchSingle();
+    assertEquals("existing-user", stored.getUsername());
+    assertEquals("existing@example.com", stored.getEmail());
+  }
+
+  @Test
   void validBoundaryUsernamesAndEmailAliasesCanBeSaved() {
     for (var username : List.of("a-b", "a".repeat(32))) {
       context.run(() -> service.createUser(UserCreateRequest.newBuilder().setUsername(username)
@@ -145,12 +183,35 @@ final class UserServiceTest {
     assertEquals(3, dsl.fetchCount(Tables.USERS));
   }
 
+  @ParameterizedTest
+  @MethodSource("databaseFailures")
+  void onlyUniqueDatabaseFailuresBecomeConflicts(SQLException cause, Status.Code expected) {
+    when(server.dsl()).thenThrow(new DataAccessException("Database mutation failed", cause));
+    var error = assertThrows(StatusRuntimeException.class, () -> context.run(() -> service.createUser(UserCreateRequest.newBuilder()
+      .setUsername("new-user").setEmail("new@example.com").setRole(UserRole.USER).build(), mock())));
+    assertEquals(expected, error.getStatus().getCode());
+  }
+
+  private static Stream<Arguments> databaseFailures() {
+    return Stream.of(
+      Arguments.of(new SQLException("Duplicate entry", "23000", 1062), Status.Code.ALREADY_EXISTS),
+      Arguments.of(new SQLException("Unique constraint", "23505"), Status.Code.ALREADY_EXISTS),
+      Arguments.of(new SQLException("Missing value", "23000", 1048), Status.Code.INTERNAL),
+      Arguments.of(new SQLException("Connection failure", "08006", 1062), Status.Code.INTERNAL),
+      Arguments.of(new SQLiteException("Missing value", SQLiteErrorCode.SQLITE_CONSTRAINT_NOTNULL), Status.Code.INTERNAL));
+  }
+
   private static Stream<String> invalidUsernames() {
     return Stream.of("", "ab", "-user", "user-", "Upper", "white space", "under_score", "müller", "a".repeat(33));
   }
 
   private static Stream<String> invalidEmails() {
     return Stream.of("", "invalid", "user@", "@example.com", "user @example.com", "user@example.com trailing", "a".repeat(256) + "@example.com");
+  }
+
+  private static void assertConflict(Context context, Runnable action) {
+    var error = assertThrows(StatusRuntimeException.class, () -> context.run(action));
+    assertEquals(Status.Code.ALREADY_EXISTS, error.getStatus().getCode());
   }
 
   private static void assertInvalid(Context context, Runnable action) {

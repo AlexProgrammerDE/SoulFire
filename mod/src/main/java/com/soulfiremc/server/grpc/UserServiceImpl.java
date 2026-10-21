@@ -81,6 +81,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onNext(UserCreateResponse.newBuilder().setId(userId.toString()).build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
+      UserProfileValidation.rethrowConflict(t);
       log.error("Error creating user", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
@@ -235,6 +236,7 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       responseObserver.onNext(UpdateUserResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
+      UserProfileValidation.rethrowConflict(t);
       log.error("Error updating user", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }

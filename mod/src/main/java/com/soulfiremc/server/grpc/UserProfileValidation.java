@@ -19,7 +19,11 @@ package com.soulfiremc.server.grpc;
 
 import io.grpc.Status;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.jooq.exception.DataAccessException;
+import org.sqlite.SQLiteErrorCode;
+import org.sqlite.SQLiteException;
 
+import java.sql.SQLException;
 import java.util.regex.Pattern;
 
 final class UserProfileValidation {
@@ -39,4 +43,20 @@ final class UserProfileValidation {
       throw Status.INVALID_ARGUMENT.withDescription("Enter a valid email address with at most 255 characters.").asRuntimeException();
     }
   }
+
+  static void rethrowConflict(Throwable failure) {
+    if (!(failure instanceof DataAccessException exception)) {
+      return;
+    }
+    var duplicate = switch (exception.getCause(SQLException.class)) {
+      case SQLiteException sqlite -> sqlite.getResultCode() == SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE;
+      case SQLException sql -> "23505".equals(sql.getSQLState())
+        || ("23000".equals(sql.getSQLState()) && sql.getErrorCode() == 1062);
+      case null -> false;
+    };
+    if (duplicate) {
+      throw Status.ALREADY_EXISTS.withDescription("Username or email is already in use.").asRuntimeException();
+    }
+  }
+
 }
