@@ -55,6 +55,19 @@ message InstanceCreateResponse {
   string id = 1 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
 }
 
+// Creates an independent copy of an instance profile, owned by the caller.
+message InstanceDuplicateRequest {
+  // The source instance UUID.
+  string id = 1 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
+  // The name for the new instance.
+  string friendly_name = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message InstanceDuplicateResponse {
+  // The UUID of the new instance.
+  string id = 1 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
+}
+
 // Finds an instance owned by the caller by its exact name, or creates it.
 // Concurrent calls reuse the same instance. Existing configuration is preserved.
 message InstanceGetOrCreateRequest {
@@ -577,6 +590,25 @@ service InstanceService {
       permissions: "CREATE_INSTANCE"
       scope: "instance"
       side_effects: "Creates a new instance with no desired bots."
+    };
+  }
+
+  // Copies the source configuration and icon into a new instance in one write.
+  // Includes accounts, proxies, and persistent metadata. Bots start stopped.
+  // Does not copy permissions, files, scripts, audit logs, or runtime state.
+  // Requires: CREATE_INSTANCE globally and READ_INSTANCE on the source.
+  // Errors: INVALID_ARGUMENT for invalid input, NOT_FOUND for a missing source.
+  rpc DuplicateInstance (InstanceDuplicateRequest) returns (InstanceDuplicateResponse) {
+    option (google.api.http) = {
+      post: "/v1/instances/{id}:duplicate"
+      body: "*"
+    };
+    option (soulfire.v1.api_method) = {
+      display_name: "Duplicate instance"
+      permissions: "CREATE_INSTANCE"
+      permissions: "READ_INSTANCE"
+      scope: "instance"
+      side_effects: "Creates an independent instance profile with all bots stopped."
     };
   }
 

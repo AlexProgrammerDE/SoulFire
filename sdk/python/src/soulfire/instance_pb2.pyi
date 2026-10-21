@@ -59,6 +59,20 @@ class InstanceCreateResponse(_message.Message):
     id: str
     def __init__(self, id: _Optional[str] = ...) -> None: ...
 
+class InstanceDuplicateRequest(_message.Message):
+    __slots__ = ("id", "friendly_name")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    FRIENDLY_NAME_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    friendly_name: str
+    def __init__(self, id: _Optional[str] = ..., friendly_name: _Optional[str] = ...) -> None: ...
+
+class InstanceDuplicateResponse(_message.Message):
+    __slots__ = ("id",)
+    ID_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    def __init__(self, id: _Optional[str] = ...) -> None: ...
+
 class InstanceGetOrCreateRequest(_message.Message):
     __slots__ = ("name", "server")
     NAME_FIELD_NUMBER: _ClassVar[int]

@@ -317,12 +317,16 @@ public final class SoulFireServer {
   }
 
   public UUID createInstance(String friendlyName, SoulFireUser owner, InstanceSettingsImpl.Stem settings) {
+    return createInstance(friendlyName, owner, settings, InstanceConstants.randomInstanceIcon());
+  }
+
+  public UUID createInstance(String friendlyName, SoulFireUser owner, InstanceSettingsImpl.Stem settings, String icon) {
     var now = LocalDateTime.now(ZoneOffset.UTC);
     var id = UUID.randomUUID();
     dsl().insertInto(Tables.INSTANCES)
       .set(Tables.INSTANCES.ID, id.toString())
       .set(Tables.INSTANCES.FRIENDLY_NAME, friendlyName)
-      .set(Tables.INSTANCES.ICON, InstanceConstants.randomInstanceIcon())
+      .set(Tables.INSTANCES.ICON, icon)
       .set(Tables.INSTANCES.OWNER_ID, owner.getUniqueId().toString())
       .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(settings.serializeToTree()))
       .set(Tables.INSTANCES.CREATED_AT, now)

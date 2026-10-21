@@ -159,6 +159,36 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   }
 
   @Override
+  public void duplicateInstance(InstanceDuplicateRequest request, StreamObserver<InstanceDuplicateResponse> responseObserver) {
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    user.hasPermissionOrThrow(PermissionContext.global(GlobalPermission.CREATE_INSTANCE));
+    UUID sourceId;
+    try {
+      sourceId = UUID.fromString(request.getId());
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription("Source instance ID must be a UUID.").withCause(e).asRuntimeException();
+    }
+    user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, sourceId));
+    var name = InstanceNameValidation.requireName(request.getFriendlyName());
+
+    try {
+      var source = soulFireServer.dsl().selectFrom(Tables.INSTANCES)
+        .where(Tables.INSTANCES.ID.eq(sourceId.toString())).fetchOne();
+      if (source == null) {
+        throw Status.NOT_FOUND.withDescription("Source instance '%s' not found".formatted(sourceId)).asRuntimeException();
+      }
+      var id = soulFireServer.createInstance(name, user, parseSettings(source.getSettings()), source.getIcon());
+      responseObserver.onNext(InstanceDuplicateResponse.newBuilder().setId(id.toString()).build());
+      responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (Throwable t) {
+      log.error("Error duplicating instance", t);
+      throw Status.INTERNAL.withDescription("Failed to duplicate instance.").withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
   public void deleteInstance(InstanceDeleteRequest request, StreamObserver<InstanceDeleteResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.DELETE_INSTANCE, instanceId));

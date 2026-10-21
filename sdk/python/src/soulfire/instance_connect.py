@@ -18,7 +18,7 @@ from connectrpc.protocol import ProtocolType
 from connectrpc.server import ConnectASGIApplication, ConnectWSGIApplication, Endpoint, EndpointSync
 from pyqwest import Client, SyncClient
 
-from .instance_pb2 import DeleteAccountMetadataEntryRequest, DeleteAccountMetadataEntryResponse, DeleteInstanceMetadataEntryRequest, DeleteInstanceMetadataEntryResponse, GetAccountMetadataRequest, GetAccountMetadataResponse, GetInstanceMetadataRequest, GetInstanceMetadataResponse, InstanceAddAccountRequest, InstanceAddAccountResponse, InstanceAddAccountsBatchRequest, InstanceAddAccountsBatchResponse, InstanceAddProxiesBatchRequest, InstanceAddProxiesBatchResponse, InstanceAddProxyRequest, InstanceAddProxyResponse, InstanceAuditLogRequest, InstanceAuditLogResponse, InstanceCreateRequest, InstanceCreateResponse, InstanceDeleteRequest, InstanceDeleteResponse, InstanceGetOrCreateBotRequest, InstanceGetOrCreateBotResponse, InstanceGetOrCreateRequest, InstanceGetOrCreateResponse, InstanceInfoRequest, InstanceInfoResponse, InstanceListRequest, InstanceListResponse, InstanceRemoveAccountRequest, InstanceRemoveAccountResponse, InstanceRemoveAccountsBatchRequest, InstanceRemoveAccountsBatchResponse, InstanceRemoveProxiesBatchRequest, InstanceRemoveProxiesBatchResponse, InstanceRemoveProxyRequest, InstanceRemoveProxyResponse, InstanceUpdateAccountRequest, InstanceUpdateAccountResponse, InstanceUpdateConfigEntryRequest, InstanceUpdateConfigEntryResponse, InstanceUpdateConfigRequest, InstanceUpdateConfigResponse, InstanceUpdateMetaRequest, InstanceUpdateMetaResponse, InstanceUpdateProxyRequest, InstanceUpdateProxyResponse, SetAccountMetadataEntryRequest, SetAccountMetadataEntryResponse, SetInstanceMetadataEntryRequest, SetInstanceMetadataEntryResponse
+from .instance_pb2 import DeleteAccountMetadataEntryRequest, DeleteAccountMetadataEntryResponse, DeleteInstanceMetadataEntryRequest, DeleteInstanceMetadataEntryResponse, GetAccountMetadataRequest, GetAccountMetadataResponse, GetInstanceMetadataRequest, GetInstanceMetadataResponse, InstanceAddAccountRequest, InstanceAddAccountResponse, InstanceAddAccountsBatchRequest, InstanceAddAccountsBatchResponse, InstanceAddProxiesBatchRequest, InstanceAddProxiesBatchResponse, InstanceAddProxyRequest, InstanceAddProxyResponse, InstanceAuditLogRequest, InstanceAuditLogResponse, InstanceCreateRequest, InstanceCreateResponse, InstanceDeleteRequest, InstanceDeleteResponse, InstanceDuplicateRequest, InstanceDuplicateResponse, InstanceGetOrCreateBotRequest, InstanceGetOrCreateBotResponse, InstanceGetOrCreateRequest, InstanceGetOrCreateResponse, InstanceInfoRequest, InstanceInfoResponse, InstanceListRequest, InstanceListResponse, InstanceRemoveAccountRequest, InstanceRemoveAccountResponse, InstanceRemoveAccountsBatchRequest, InstanceRemoveAccountsBatchResponse, InstanceRemoveProxiesBatchRequest, InstanceRemoveProxiesBatchResponse, InstanceRemoveProxyRequest, InstanceRemoveProxyResponse, InstanceUpdateAccountRequest, InstanceUpdateAccountResponse, InstanceUpdateConfigEntryRequest, InstanceUpdateConfigEntryResponse, InstanceUpdateConfigRequest, InstanceUpdateConfigResponse, InstanceUpdateMetaRequest, InstanceUpdateMetaResponse, InstanceUpdateProxyRequest, InstanceUpdateProxyResponse, SetAccountMetadataEntryRequest, SetAccountMetadataEntryResponse, SetInstanceMetadataEntryRequest, SetInstanceMetadataEntryResponse
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Iterable, Mapping
@@ -42,6 +42,9 @@ class InstanceService(Protocol):
         raise ConnectError(Code.UNIMPLEMENTED, 'Not implemented')
 
     async def create_instance(self, request: InstanceCreateRequest, ctx: RequestContext[InstanceCreateRequest, InstanceCreateResponse]) -> InstanceCreateResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, 'Not implemented')
+
+    async def duplicate_instance(self, request: InstanceDuplicateRequest, ctx: RequestContext[InstanceDuplicateRequest, InstanceDuplicateResponse]) -> InstanceDuplicateResponse:
         raise ConnectError(Code.UNIMPLEMENTED, 'Not implemented')
 
     async def delete_instance(self, request: InstanceDeleteRequest, ctx: RequestContext[InstanceDeleteRequest, InstanceDeleteResponse]) -> InstanceDeleteResponse:
@@ -156,6 +159,16 @@ class InstanceServiceASGIApplication(ConnectASGIApplication[InstanceService]):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=svc.create_instance,
+                ),
+                "/soulfire.v1.InstanceService/DuplicateInstance": Endpoint.unary(
+                    method=MethodInfo(
+                        name="DuplicateInstance",
+                        service_name="soulfire.v1.InstanceService",
+                        input=InstanceDuplicateRequest,
+                        output=InstanceDuplicateResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=svc.duplicate_instance,
                 ),
                 "/soulfire.v1.InstanceService/DeleteInstance": Endpoint.unary(
                     method=MethodInfo(
@@ -479,6 +492,26 @@ class InstanceServiceClient(ConnectClient):
                 service_name="soulfire.v1.InstanceService",
                 input=InstanceCreateRequest,
                 output=InstanceCreateResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+
+    async def duplicate_instance(
+        self,
+        request: InstanceDuplicateRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> InstanceDuplicateResponse:
+        return await self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DuplicateInstance",
+                service_name="soulfire.v1.InstanceService",
+                input=InstanceDuplicateRequest,
+                output=InstanceDuplicateResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
@@ -955,6 +988,9 @@ class InstanceServiceSync(Protocol):
     def create_instance(self, request: InstanceCreateRequest, ctx: RequestContext[InstanceCreateRequest, InstanceCreateResponse]) -> InstanceCreateResponse:
         raise ConnectError(Code.UNIMPLEMENTED, 'Not implemented')
 
+    def duplicate_instance(self, request: InstanceDuplicateRequest, ctx: RequestContext[InstanceDuplicateRequest, InstanceDuplicateResponse]) -> InstanceDuplicateResponse:
+        raise ConnectError(Code.UNIMPLEMENTED, 'Not implemented')
+
     def delete_instance(self, request: InstanceDeleteRequest, ctx: RequestContext[InstanceDeleteRequest, InstanceDeleteResponse]) -> InstanceDeleteResponse:
         raise ConnectError(Code.UNIMPLEMENTED, 'Not implemented')
 
@@ -1065,6 +1101,16 @@ class InstanceServiceWSGIApplication(ConnectWSGIApplication):
                         idempotency_level=IdempotencyLevel.UNKNOWN,
                     ),
                     function=service.create_instance,
+                ),
+                "/soulfire.v1.InstanceService/DuplicateInstance": EndpointSync.unary(
+                    method=MethodInfo(
+                        name="DuplicateInstance",
+                        service_name="soulfire.v1.InstanceService",
+                        input=InstanceDuplicateRequest,
+                        output=InstanceDuplicateResponse,
+                        idempotency_level=IdempotencyLevel.UNKNOWN,
+                    ),
+                    function=service.duplicate_instance,
                 ),
                 "/soulfire.v1.InstanceService/DeleteInstance": EndpointSync.unary(
                     method=MethodInfo(
@@ -1386,6 +1432,25 @@ class InstanceServiceClientSync(ConnectClientSync):
                 service_name="soulfire.v1.InstanceService",
                 input=InstanceCreateRequest,
                 output=InstanceCreateResponse,
+                idempotency_level=IdempotencyLevel.UNKNOWN,
+            ),
+            headers=headers,
+            timeout_ms=timeout_ms,
+        )
+    def duplicate_instance(
+        self,
+        request: InstanceDuplicateRequest,
+        *,
+        headers: Headers | Mapping[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> InstanceDuplicateResponse:
+        return self.execute_unary(
+            request=request,
+            method=MethodInfo(
+                name="DuplicateInstance",
+                service_name="soulfire.v1.InstanceService",
+                input=InstanceDuplicateRequest,
+                output=InstanceDuplicateResponse,
                 idempotency_level=IdempotencyLevel.UNKNOWN,
             ),
             headers=headers,
