@@ -218,6 +218,11 @@ message InventorySlot {
   // MIME type for the rendered item icon image.
   // Values: "image/png" or "image/gif".
   optional string icon_mime_type = 6;
+
+  // Plain text lines from Minecraft's item tooltip, including the resolved name.
+  // Contains item details such as potion effects, enchantments, and lore.
+  // Empty when the tooltip is unavailable or hidden.
+  repeated string tooltip_lines = 7;
 }
 
 // Real-time state of a connected bot.

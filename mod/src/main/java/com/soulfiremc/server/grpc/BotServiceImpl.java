@@ -52,6 +52,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AnvilScreen;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
@@ -307,7 +308,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       for (var slot : container.slots) {
         var item = slot.getItem();
         if (!item.isEmpty()) {
-          builder.addInventory(buildInventorySlot(slot.index, item));
+          builder.addInventory(buildInventorySlot(minecraft, slot.index, item));
         }
       }
     }
@@ -405,11 +406,14 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     }
   }
 
-  private static InventorySlot buildInventorySlot(int slotIndex, ItemStack item) {
+  private static InventorySlot buildInventorySlot(Minecraft minecraft, int slotIndex, ItemStack item) {
     var slotBuilder = InventorySlot.newBuilder()
       .setSlot(slotIndex)
       .setItemId(item.typeHolder().getRegisteredName())
-      .setCount(item.getCount());
+      .setCount(item.getCount())
+      .addAllTooltipLines(Screen.getTooltipFromItem(minecraft, item).stream()
+        .map(Component::getString)
+        .toList());
 
     if (item.has(DataComponents.CUSTOM_NAME)) {
       slotBuilder.setDisplayName(item.getHoverName().getString());
@@ -425,7 +429,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     int slotIndex,
     ItemStack item
   ) {
-    var slotBuilder = buildInventorySlot(slotIndex, item).toBuilder();
+    var slotBuilder = buildInventorySlot(minecraft, slotIndex, item).toBuilder();
 
     try {
       var renderedIcon = InventoryItemIconRenderer.render(minecraft, level, itemOwner, item, slotIndex);
@@ -458,14 +462,14 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       }
       responseBuilder.addSlots(renderIcons
         ? buildInventorySlot(minecraft, minecraft.level, player, slot.index, item)
-        : buildInventorySlot(slot.index, item));
+        : buildInventorySlot(minecraft, slot.index, item));
     }
 
     var carried = container.getCarried();
     if (!carried.isEmpty()) {
       responseBuilder.setCarriedItem(renderIcons
         ? buildInventorySlot(minecraft, minecraft.level, player, -1, carried)
-        : buildInventorySlot(-1, carried));
+        : buildInventorySlot(minecraft, -1, carried));
     }
 
     return responseBuilder.build();

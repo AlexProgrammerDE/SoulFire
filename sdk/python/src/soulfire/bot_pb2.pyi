@@ -259,20 +259,22 @@ class BotListResponse(_message.Message):
     def __init__(self, bots: _Optional[_Iterable[_Union[BotListEntry, _Mapping]]] = ...) -> None: ...
 
 class InventorySlot(_message.Message):
-    __slots__ = ("slot", "item_id", "count", "display_name", "icon_base64", "icon_mime_type")
+    __slots__ = ("slot", "item_id", "count", "display_name", "icon_base64", "icon_mime_type", "tooltip_lines")
     SLOT_FIELD_NUMBER: _ClassVar[int]
     ITEM_ID_FIELD_NUMBER: _ClassVar[int]
     COUNT_FIELD_NUMBER: _ClassVar[int]
     DISPLAY_NAME_FIELD_NUMBER: _ClassVar[int]
     ICON_BASE64_FIELD_NUMBER: _ClassVar[int]
     ICON_MIME_TYPE_FIELD_NUMBER: _ClassVar[int]
+    TOOLTIP_LINES_FIELD_NUMBER: _ClassVar[int]
     slot: int
     item_id: str
     count: int
     display_name: str
     icon_base64: str
     icon_mime_type: str
-    def __init__(self, slot: _Optional[int] = ..., item_id: _Optional[str] = ..., count: _Optional[int] = ..., display_name: _Optional[str] = ..., icon_base64: _Optional[str] = ..., icon_mime_type: _Optional[str] = ...) -> None: ...
+    tooltip_lines: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, slot: _Optional[int] = ..., item_id: _Optional[str] = ..., count: _Optional[int] = ..., display_name: _Optional[str] = ..., icon_base64: _Optional[str] = ..., icon_mime_type: _Optional[str] = ..., tooltip_lines: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class BotLiveState(_message.Message):
     __slots__ = ("x", "y", "z", "xRot", "yRot", "health", "max_health", "food_level", "saturation_level", "inventory", "selected_hotbar_slot", "dimension", "experience_level", "experience_progress", "skin_texture_hash", "game_mode")
