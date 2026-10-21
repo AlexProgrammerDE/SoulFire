@@ -37,6 +37,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.key.Key;
 import org.jooq.impl.DSL;
 
 import java.time.Instant;
@@ -876,11 +877,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       }
 
       var settings = parseSettings(record.getSettings());
-      var account = settings.accounts().stream()
-        .filter(a -> a.profileId().equals(accountId))
-        .findFirst()
-        .orElseThrow(() ->
-          Status.NOT_FOUND.withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId)).asRuntimeException());
+      var account = requireAccount(settings, instanceId, accountId);
 
       responseObserver.onNext(GetAccountMetadataResponse.newBuilder()
         .addAllMetadata(SettingsSource.Stem.mapToSettingsNamespaceProto(account.persistentMetadata()))
@@ -901,6 +898,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
+      validateMetadataIdentifier(request.getNamespace(), request.getKey());
       var jsonValue = SettingsSource.Stem.valueToJsonElement(request.getValue());
 
       var dsl = soulFireServer.dsl();
@@ -912,6 +910,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
 
         var currentSettings = parseSettings(record.getSettings());
+        requireAccount(currentSettings, instanceId, accountId);
         var newAccounts = currentSettings.accounts().stream()
           .map(account -> {
             if (account.profileId().equals(accountId)) {
@@ -960,6 +959,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
+      validateMetadataIdentifier(request.getNamespace(), request.getKey());
       var dsl = soulFireServer.dsl();
       dsl.transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -969,6 +969,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
 
         var currentSettings = parseSettings(record.getSettings());
+        requireAccount(currentSettings, instanceId, accountId);
         var newAccounts = currentSettings.accounts().stream()
           .map(account -> {
             if (account.profileId().equals(accountId)) {
@@ -1041,6 +1042,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
 
     try {
+      validateMetadataIdentifier(request.getNamespace(), request.getKey());
       var jsonValue = SettingsSource.Stem.valueToJsonElement(request.getValue());
 
       var dsl = soulFireServer.dsl();
@@ -1088,6 +1090,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_META, instanceId));
 
     try {
+      validateMetadataIdentifier(request.getNamespace(), request.getKey());
       var dsl = soulFireServer.dsl();
       dsl.transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -1124,5 +1127,22 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       log.error("Error deleting instance metadata entry", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
+  }
+
+  private static void validateMetadataIdentifier(String namespace, String key) {
+    if (namespace.isEmpty() || !Key.parseableNamespace(namespace)) {
+      throw Status.INVALID_ARGUMENT.withDescription("Metadata namespace must contain only lowercase letters, digits, underscores, periods, or hyphens.").asRuntimeException();
+    }
+    if (key.isEmpty() || !Key.parseableValue(key)) {
+      throw Status.INVALID_ARGUMENT.withDescription("Metadata key must contain only lowercase letters, digits, underscores, periods, hyphens, or slashes.").asRuntimeException();
+    }
+  }
+
+  private static MinecraftAccount requireAccount(InstanceSettingsImpl.Stem settings, UUID instanceId, UUID accountId) {
+    return settings.accounts().stream()
+      .filter(account -> account.profileId().equals(accountId))
+      .findFirst()
+      .orElseThrow(() -> Status.NOT_FOUND
+        .withDescription("Account '%s' not found in instance '%s'".formatted(accountId, instanceId)).asRuntimeException());
   }
 }

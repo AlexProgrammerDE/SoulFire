@@ -42,6 +42,8 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.flywaydb.core.Flyway;
 import org.jooq.SQLDialect;
@@ -50,6 +52,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.sqlite.SQLiteDataSource;
 
@@ -61,7 +64,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -101,10 +106,10 @@ final class InstanceMetadataTest {
     JsonFormat.parser().merge(json, value);
     var expected = value.build();
     context.run(() -> service.setInstanceMetadataEntry(SetInstanceMetadataEntryRequest.newBuilder()
-      .setInstanceId(instanceId.toString()).setNamespace("metadata").setKey("value").setValue(expected).build(), mock()));
+      .setInstanceId(instanceId.toString()).setNamespace("_metadata-1.2").setKey("folder/value-1.2_").setValue(expected).build(), mock()));
     context.run(() -> service.setAccountMetadataEntry(SetAccountMetadataEntryRequest.newBuilder()
       .setInstanceId(instanceId.toString()).setAccountId(accountId.toString())
-      .setNamespace("metadata").setKey("value").setValue(expected).build(), mock()));
+      .setNamespace("_metadata-1.2").setKey("folder/value-1.2_").setValue(expected).build(), mock()));
 
     var reloadedService = new InstanceServiceImpl(server);
     var instance = context.call(() -> InstanceMetadataTest.<GetInstanceMetadataResponse>call(observer ->
@@ -149,9 +154,55 @@ final class InstanceMetadataTest {
     assertTrue(botMetadata.exportIfDirty().isPresent());
   }
 
+  @ParameterizedTest
+  @CsvSource({"'',value", "metadata,''", "Invalid,value", "invalid/name,value", "invalid:name,value",
+    "metadata,Invalid", "metadata,invalid:key", "metadata,invalid key", "méta,value"})
+  void invalidIdentifiersNeverChangeStoredMetadata(String namespace, String key) {
+    var before = server.dsl().selectFrom(Tables.INSTANCES).fetchSingle().intoMap();
+    var value = Value.newBuilder().setNumberValue(42).build();
+
+    assertAll(
+      () -> assertStatus(Status.Code.INVALID_ARGUMENT, () -> service.setInstanceMetadataEntry(SetInstanceMetadataEntryRequest.newBuilder()
+        .setInstanceId(instanceId.toString()).setNamespace(namespace).setKey(key).setValue(value).build(), mock())),
+      () -> assertStatus(Status.Code.INVALID_ARGUMENT, () -> service.setAccountMetadataEntry(SetAccountMetadataEntryRequest.newBuilder()
+        .setInstanceId(instanceId.toString()).setAccountId(accountId.toString())
+        .setNamespace(namespace).setKey(key).setValue(value).build(), mock())),
+      () -> assertStatus(Status.Code.INVALID_ARGUMENT, () -> service.deleteInstanceMetadataEntry(DeleteInstanceMetadataEntryRequest.newBuilder()
+        .setInstanceId(instanceId.toString()).setNamespace(namespace).setKey(key).build(), mock())),
+      () -> assertStatus(Status.Code.INVALID_ARGUMENT, () -> service.deleteAccountMetadataEntry(DeleteAccountMetadataEntryRequest.newBuilder()
+        .setInstanceId(instanceId.toString()).setAccountId(accountId.toString())
+        .setNamespace(namespace).setKey(key).build(), mock())),
+      () -> assertEquals(before, server.dsl().selectFrom(Tables.INSTANCES).fetchSingle().intoMap()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void missingAccountMutationsFailWithoutUpdatingTheInstance(boolean delete) {
+    var missingAccountId = UUID.randomUUID().toString();
+    var before = server.dsl().selectFrom(Tables.INSTANCES).fetchSingle().intoMap();
+
+    assertStatus(Status.Code.NOT_FOUND, () -> {
+      if (delete) {
+        service.deleteAccountMetadataEntry(DeleteAccountMetadataEntryRequest.newBuilder()
+          .setInstanceId(instanceId.toString()).setAccountId(missingAccountId)
+          .setNamespace("metadata").setKey("value").build(), mock());
+      } else {
+        service.setAccountMetadataEntry(SetAccountMetadataEntryRequest.newBuilder()
+          .setInstanceId(instanceId.toString()).setAccountId(missingAccountId)
+          .setNamespace("metadata").setKey("value").setValue(Value.newBuilder().setNumberValue(42)).build(), mock());
+      }
+    });
+    assertEquals(before, server.dsl().selectFrom(Tables.INSTANCES).fetchSingle().intoMap());
+  }
+
+  private void assertStatus(Status.Code expected, Runnable action) {
+    var error = assertThrows(StatusRuntimeException.class, () -> context.run(action));
+    assertEquals(expected, error.getStatus().getCode());
+  }
+
   private static Value value(List<SettingsNamespace> metadata) {
-    return metadata.stream().filter(namespace -> namespace.getNamespace().equals("metadata"))
-      .flatMap(namespace -> namespace.getEntriesList().stream()).filter(entry -> entry.getKey().equals("value"))
+    return metadata.stream().filter(namespace -> namespace.getNamespace().equals("_metadata-1.2"))
+      .flatMap(namespace -> namespace.getEntriesList().stream()).filter(entry -> entry.getKey().equals("folder/value-1.2_"))
       .findFirst().orElseThrow().getValue();
   }
 
