@@ -46,6 +46,7 @@ import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.pathfinding.PathfindingSupport;
 import com.soulfiremc.server.pathfinding.execution.BlockPlacementSupport;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
@@ -1608,10 +1609,11 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
         .asRuntimeException();
     }
     var center = player.chunkPosition();
+    var chunks = level.getChunkSource();
     var loaded = 0;
     for (var x = center.x() - radius; x <= center.x() + radius; x++) {
       for (var z = center.z() - radius; z <= center.z() + radius; z++) {
-        if (level.hasChunk(x, z)) {
+        if (chunks.hasChunk(x, z)) {
           loaded++;
         }
       }
@@ -1706,7 +1708,7 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
           return GetBlockResponse.newBuilder().setLoaded(false).build();
         }
         var pos = toMcBlockPos(request.getPosition());
-        if (!level.hasChunkAt(pos)) {
+        if (!SFBlockHelpers.isChunkLoaded(level, pos)) {
           return GetBlockResponse.newBuilder().setLoaded(false).build();
         }
         var state = level.getBlockState(pos);
@@ -1764,7 +1766,7 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
           for (var dy = -radius; dy <= radius; dy++) {
             for (var dz = -radius; dz <= radius; dz++) {
               var pos = origin.offset(dx, dy, dz);
-              if (!level.hasChunkAt(pos)) {
+              if (!SFBlockHelpers.isChunkLoaded(level, pos)) {
                 continue;
               }
               var state = level.getBlockState(pos);
@@ -2315,7 +2317,7 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
             )
             .asRuntimeException();
         }
-        if (!level.hasChunkAt(position)) {
+        if (!SFBlockHelpers.isChunkLoaded(level, position)) {
           throw Status.FAILED_PRECONDITION
             .withDescription("Target block is not loaded")
             .asRuntimeException();
@@ -2842,7 +2844,7 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
               .asRuntimeException();
           }
           var position = toMcBlockPos(request.getPosition());
-          if (!level.hasChunkAt(position)) {
+          if (!SFBlockHelpers.isChunkLoaded(level, position)) {
             throw Status.FAILED_PRECONDITION
               .withDescription("Sign position is not loaded")
               .asRuntimeException();
@@ -3793,7 +3795,7 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
         return;
       }
       if (!requested) {
-        if (!level.hasChunkAt(bed)) {
+        if (!SFBlockHelpers.isChunkLoaded(level, bed)) {
           throw Status.FAILED_PRECONDITION
             .withDescription("Bed is not loaded")
             .asRuntimeException();

@@ -32,6 +32,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.CloseToPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import io.grpc.Status;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -374,7 +375,7 @@ public final class SleepTaskProvider implements BotTaskProvider<SleepTask> {
         )
         .filter(position -> position.distSqr(origin)
           <= (double) searchRadius * searchRadius)
-        .filter(level::hasChunkAt)
+        .filter(position -> SFBlockHelpers.isChunkLoaded(level, position))
         .filter(position ->
           level.getBlockState(position).getBlock() instanceof BedBlock)
         .map(BlockPos::immutable)
@@ -385,7 +386,7 @@ public final class SleepTaskProvider implements BotTaskProvider<SleepTask> {
 
     private void requireBed(BlockPos target) {
       var level = Objects.requireNonNull(context.bot().minecraft().level);
-      if (!level.hasChunkAt(target)) {
+      if (!SFBlockHelpers.isChunkLoaded(level, target)) {
         throw Status.FAILED_PRECONDITION
           .withDescription("Bed is not loaded")
           .asRuntimeException();

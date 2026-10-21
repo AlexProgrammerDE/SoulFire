@@ -34,6 +34,7 @@ import com.soulfiremc.server.pathfinding.SFVec3i;
 import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.CloseToPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import io.grpc.Status;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -618,7 +619,7 @@ public final class FarmTaskProvider implements BotTaskProvider<FarmTask> {
               continue;
             }
             var position = center.offset(x, offsetY, z);
-            if (!level.hasChunkAt(position)) {
+            if (!SFBlockHelpers.isChunkLoaded(level, position)) {
               continue;
             }
             var state = level.getBlockState(position);

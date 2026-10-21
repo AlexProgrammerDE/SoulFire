@@ -42,6 +42,7 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.MouseClickHelper;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Status;
@@ -951,7 +952,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         for (var z = centerZ - radius; z <= centerZ + radius; z += step) {
           var probe = new BlockPos(x, player.getBlockY(), z);
           var column = BotWorldMapColumn.newBuilder().setX(x).setZ(z);
-          if (!level.hasChunkAt(probe)) {
+          if (!SFBlockHelpers.isChunkLoaded(level, probe)) {
             response.addColumns(column.setLoaded(false));
             continue;
           }

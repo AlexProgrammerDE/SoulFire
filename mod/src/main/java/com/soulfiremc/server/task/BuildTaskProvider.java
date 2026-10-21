@@ -44,6 +44,7 @@ import com.soulfiremc.server.pathfinding.goals.CloseToPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.DelegatePathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import io.grpc.Status;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -503,7 +504,7 @@ public final class BuildTaskProvider implements BotTaskProvider<BuildTask> {
         result.completeExceptionally(new IllegalStateException("Bot level is not available"));
         return;
       }
-      if (!level.hasChunkAt(placement.position())) {
+      if (!SFBlockHelpers.isChunkLoaded(level, placement.position())) {
         fail(
           BuildBlockStatus.BUILD_BLOCK_STATUS_UNREACHABLE,
           "",

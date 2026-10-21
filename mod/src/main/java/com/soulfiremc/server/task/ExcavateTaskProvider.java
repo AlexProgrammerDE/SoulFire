@@ -35,6 +35,7 @@ import com.soulfiremc.server.pathfinding.execution.PathExecutor;
 import com.soulfiremc.server.pathfinding.goals.BreakBlockPosGoal;
 import com.soulfiremc.server.pathfinding.graph.constraint.DelegatePathConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import io.grpc.Status;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
@@ -118,7 +119,7 @@ public final class ExcavateTaskProvider implements BotTaskProvider<ExcavateTask>
       for (var y = minimum.getY(); y <= maximum.getY(); y++) {
         for (var z = minimum.getZ(); z <= maximum.getZ(); z++) {
           var position = new BlockPos(x, y, z);
-          if (!level.hasChunkAt(position)) {
+          if (!SFBlockHelpers.isChunkLoaded(level, position)) {
             throw Status.FAILED_PRECONDITION
               .withDescription(
                 "Excavation cuboid contains an unloaded chunk at %d, %d"
@@ -342,7 +343,7 @@ public final class ExcavateTaskProvider implements BotTaskProvider<ExcavateTask>
       var cleared = pending.stream()
         .filter(position -> {
           var blockPosition = position.toBlockPos();
-          if (!level.hasChunkAt(blockPosition)) {
+          if (!SFBlockHelpers.isChunkLoaded(level, blockPosition)) {
             return false;
           }
           var state = level.getBlockState(blockPosition);

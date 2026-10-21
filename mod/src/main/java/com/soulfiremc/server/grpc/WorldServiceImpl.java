@@ -22,6 +22,7 @@ import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotThreadExecution;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SFEntityHelpers;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -228,7 +229,7 @@ public final class WorldServiceImpl extends WorldServiceGrpc.WorldServiceImplBas
       request.getSort(),
       request.getPageSize(),
       request.getPageToken(),
-      position -> level.hasChunkAt(position)
+      position -> SFBlockHelpers.isChunkLoaded(level, position)
         && matchesBlock(level, position, level.getBlockState(position), selector, player)
     );
     return QueryBlocksResponse.newBuilder()
@@ -762,7 +763,7 @@ public final class WorldServiceImpl extends WorldServiceGrpc.WorldServiceImplBas
   }
 
   private static void requireLoaded(ClientLevel level, BlockPos position) {
-    if (!level.hasChunkAt(position)) {
+    if (!SFBlockHelpers.isChunkLoaded(level, position)) {
       throw Status.FAILED_PRECONDITION
         .withDescription("Target chunk is not loaded")
         .asRuntimeException();

@@ -19,15 +19,21 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.test.utils.TestBlockAccessorBuilder;
 import com.soulfiremc.test.utils.TestBootstrap;
+import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 final class SFBlockHelpersTest {
   private static final BlockPos FLOOR = new BlockPos(0, 2, 0);
@@ -35,6 +41,20 @@ final class SFBlockHelpersTest {
   @BeforeAll
   static void setup() {
     TestBootstrap.bootstrapForTest();
+  }
+
+  @ParameterizedTest
+  @CsvSource({"0,0,0,0", "15,15,0,0", "16,31,1,1", "-1,-17,-1,-2", "-16,-32,-1,-2"})
+  void chunkAvailabilityFollowsReceivedTerrain(int blockX, int blockZ, int chunkX, int chunkZ) {
+    var level = mock(ClientLevel.class);
+    var chunks = mock(ClientChunkCache.class);
+    when(level.getChunkSource()).thenReturn(chunks);
+    var position = new BlockPos(blockX, 64, blockZ);
+    assertFalse(SFBlockHelpers.isChunkLoaded(level, position));
+    when(chunks.hasChunk(chunkX, chunkZ)).thenReturn(true);
+    assertTrue(SFBlockHelpers.isChunkLoaded(level, position));
+    when(chunks.hasChunk(chunkX, chunkZ)).thenReturn(false);
+    assertFalse(SFBlockHelpers.isChunkLoaded(level, position));
   }
 
   @Test

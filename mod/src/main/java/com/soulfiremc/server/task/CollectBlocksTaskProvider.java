@@ -47,6 +47,7 @@ import com.soulfiremc.server.pathfinding.goals.WithinBlockReachGoal;
 import com.soulfiremc.server.pathfinding.graph.BlockFace;
 import com.soulfiremc.server.pathfinding.graph.constraint.BlockBreakBlacklistConstraint;
 import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint;
+import com.soulfiremc.server.util.SFBlockHelpers;
 import io.grpc.Status;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -695,7 +696,7 @@ public final class CollectBlocksTaskProvider
               continue;
             }
             var position = origin.offset(x, offsetY, z);
-            if (!level.hasChunkAt(position)) {
+            if (!SFBlockHelpers.isChunkLoaded(level, position)) {
               continue;
             }
             var state = level.getBlockState(position);
@@ -746,7 +747,7 @@ public final class CollectBlocksTaskProvider
             var position = origin.offset(x, y, z);
             if (
               !isDirectBreakCandidate(origin, position)
-                || !level.hasChunkAt(position)
+                || !SFBlockHelpers.isChunkLoaded(level, position)
                 || (
                   avoidSubmergedTargets
                     && hasFluidAbove(level, origin, position)

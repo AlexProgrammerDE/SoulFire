@@ -19,6 +19,7 @@ package com.soulfiremc.server.util;
 
 import com.soulfiremc.server.util.structs.IDBooleanMap;
 import com.soulfiremc.server.util.structs.IDMap;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -66,6 +67,11 @@ public final class SFBlockHelpers {
   private static final double RAISED_FLOOR_MINIMUM_HEIGHT = 15.0 / 16.0;
 
   private SFBlockHelpers() {}
+
+  /// ClientLevel.hasChunk always succeeds; only the chunk cache tracks received terrain.
+  public static boolean isChunkLoaded(ClientLevel level, BlockPos position) {
+    return level.getChunkSource().hasChunk(position.getX() >> 4, position.getZ() >> 4);
+  }
 
   public static boolean isBlockFree(BlockState blockState) {
     return isCollisionShapeEmpty(blockState)
