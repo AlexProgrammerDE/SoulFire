@@ -17,12 +17,14 @@
  */
 package com.soulfiremc.mod.mixin.headless.rendering;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.soulfiremc.mod.access.ITextureManager;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.Identifier;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,20 +45,32 @@ public class MixinTextureManager implements ITextureManager {
   private Map<Identifier, AbstractTexture> byPath;
 
   @Unique
-  private boolean soulfire$isolated;
+  private @Nullable TextureManager soulfire$sharedTextureManager;
   @Unique
   private Set<AbstractTexture> soulfire$ownedTextures =
     Collections.newSetFromMap(new IdentityHashMap<>());
 
   @Override
   public void soulfire$initializeBotCopy(TextureManager sharedTextureManager) {
-    soulfire$isolated = true;
+    soulfire$sharedTextureManager = sharedTextureManager;
     soulfire$ownedTextures = Collections.newSetFromMap(new IdentityHashMap<>());
+  }
+
+  @WrapMethod(method = "getTexture")
+  private AbstractTexture resolveSharedTexture(Identifier location, Operation<AbstractTexture> original) {
+    // Shared atlases can be registered or replaced after the bot copies the texture registry.
+    if (soulfire$sharedTextureManager != null && !soulfire$ownedTextures.contains(byPath.get(location))) {
+      var sharedTexture = soulfire$sharedTextureManager.byPath.get(location);
+      if (sharedTexture != null) {
+        return sharedTexture;
+      }
+    }
+    return original.call(location);
   }
 
   @Inject(method = "register", at = @At("HEAD"))
   private void trackOwnedTexture(Identifier location, AbstractTexture texture, CallbackInfo ci) {
-    if (soulfire$isolated && byPath.get(location) != texture) {
+    if (soulfire$sharedTextureManager != null && byPath.get(location) != texture) {
       soulfire$ownedTextures.add(texture);
     }
   }
@@ -67,7 +81,7 @@ public class MixinTextureManager implements ITextureManager {
       value = "INVOKE",
       target = "Lnet/minecraft/client/renderer/texture/AbstractTexture;close()V"))
   private void onlyCloseOwnedBotTextures(AbstractTexture texture, Operation<Void> original) {
-    if (!soulfire$isolated || soulfire$ownedTextures.remove(texture)) {
+    if (soulfire$sharedTextureManager == null || soulfire$ownedTextures.remove(texture)) {
       original.call(texture);
     }
   }
