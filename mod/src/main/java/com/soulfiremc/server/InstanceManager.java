@@ -255,60 +255,8 @@ public final class InstanceManager {
 
   private void tick() {
     metricsCollector.tick();
-    persistDirtyMetadata();
+    InstanceMetadataPersistence.persist(dsl, id, persistentMetadata, botConnections);
     evictBots();
-  }
-
-  private void persistDirtyMetadata() {
-    var dirtyBots = new ArrayList<Map.Entry<UUID, Map<String, Map<String, JsonElement>>>>();
-    for (var entry : botConnections.entrySet()) {
-      var bot = entry.getValue();
-      bot.persistentMetadata().exportIfDirty().ifPresent(metadata -> {
-        dirtyBots.add(Map.entry(entry.getKey(), metadata));
-        bot.persistentMetadata().markClean();
-      });
-    }
-
-    var dirtyInstanceMetadata = persistentMetadata.exportIfDirty();
-    dirtyInstanceMetadata.ifPresent(_ -> persistentMetadata.markClean());
-
-    if (dirtyBots.isEmpty() && dirtyInstanceMetadata.isEmpty()) {
-      return;
-    }
-
-    dsl.transaction(cfg -> {
-      var ctx = DSL.using(cfg);
-      var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
-      if (record == null) {
-        return;
-      }
-
-      var currentSettings = InstanceSettingsImpl.Stem.deserialize(GsonInstance.GSON.fromJson(record.getSettings(), JsonElement.class));
-
-      if (!dirtyBots.isEmpty()) {
-        var newAccounts = currentSettings.accounts().stream()
-          .map(account -> {
-            for (var dirtyEntry : dirtyBots) {
-              if (account.profileId().equals(dirtyEntry.getKey())) {
-                return account.withPersistentMetadata(dirtyEntry.getValue());
-              }
-            }
-            return account;
-          })
-          .toList();
-        currentSettings = currentSettings.withAccounts(newAccounts);
-      }
-
-      if (dirtyInstanceMetadata.isPresent()) {
-        currentSettings = currentSettings.withPersistentMetadata(dirtyInstanceMetadata.get());
-      }
-
-      ctx.update(Tables.INSTANCES)
-        .set(Tables.INSTANCES.SETTINGS, GsonInstance.CONFIG_GSON.toJson(currentSettings.serializeToTree()))
-        .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
-        .where(Tables.INSTANCES.ID.eq(id.toString()))
-        .execute();
-    });
   }
 
   private void evictBots() {

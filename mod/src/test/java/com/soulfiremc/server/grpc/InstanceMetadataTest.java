@@ -17,8 +17,12 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import com.google.protobuf.Value;
 import com.google.protobuf.util.JsonFormat;
+import com.soulfiremc.grpc.generated.DeleteAccountMetadataEntryRequest;
+import com.soulfiremc.grpc.generated.DeleteInstanceMetadataEntryRequest;
 import com.soulfiremc.grpc.generated.GetAccountMetadataRequest;
 import com.soulfiremc.grpc.generated.GetAccountMetadataResponse;
 import com.soulfiremc.grpc.generated.GetInstanceMetadataRequest;
@@ -26,10 +30,13 @@ import com.soulfiremc.grpc.generated.GetInstanceMetadataResponse;
 import com.soulfiremc.grpc.generated.SetAccountMetadataEntryRequest;
 import com.soulfiremc.grpc.generated.SetInstanceMetadataEntryRequest;
 import com.soulfiremc.grpc.generated.SettingsNamespace;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.api.metadata.MetadataHolder;
+import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -40,6 +47,7 @@ import org.flywaydb.core.Flyway;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -48,11 +56,13 @@ import org.sqlite.SQLiteDataSource;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -106,6 +116,37 @@ final class InstanceMetadataTest {
 
     assertEquals(expected, value(instance.getMetadataList()));
     assertEquals(expected, value(account.getMetadataList()));
+  }
+
+  @Test
+  void metadataRpcUpdatesLeaveOtherLiveChangesPending() {
+    var instance = mock(InstanceManager.class);
+    var bot = mock(BotConnection.class);
+    var instanceMetadata = new MetadataHolder<JsonElement>();
+    var botMetadata = new MetadataHolder<JsonElement>();
+    instanceMetadata.set("test", "pending", new JsonPrimitive(7));
+    botMetadata.set("test", "pending", new JsonPrimitive(7));
+    when(server.getInstance(instanceId)).thenReturn(Optional.of(instance));
+    when(instance.persistentMetadata()).thenReturn(instanceMetadata);
+    when(instance.botConnections()).thenReturn(Map.of(accountId, bot));
+    when(bot.persistentMetadata()).thenReturn(botMetadata);
+    var value = Value.newBuilder().setNumberValue(42).build();
+
+    context.run(() -> service.setInstanceMetadataEntry(SetInstanceMetadataEntryRequest.newBuilder()
+      .setInstanceId(instanceId.toString()).setNamespace("test").setKey("saved").setValue(value).build(), mock()));
+    context.run(() -> service.setAccountMetadataEntry(SetAccountMetadataEntryRequest.newBuilder()
+      .setInstanceId(instanceId.toString()).setAccountId(accountId.toString())
+      .setNamespace("test").setKey("saved").setValue(value).build(), mock()));
+    assertEquals(new JsonPrimitive(7), instanceMetadata.exportIfDirty().orElseThrow().get("test").get("pending"));
+    assertEquals(new JsonPrimitive(7), botMetadata.exportIfDirty().orElseThrow().get("test").get("pending"));
+
+    context.run(() -> service.deleteInstanceMetadataEntry(DeleteInstanceMetadataEntryRequest.newBuilder()
+      .setInstanceId(instanceId.toString()).setNamespace("test").setKey("saved").build(), mock()));
+    context.run(() -> service.deleteAccountMetadataEntry(DeleteAccountMetadataEntryRequest.newBuilder()
+      .setInstanceId(instanceId.toString()).setAccountId(accountId.toString())
+      .setNamespace("test").setKey("saved").build(), mock()));
+    assertTrue(instanceMetadata.exportIfDirty().isPresent());
+    assertTrue(botMetadata.exportIfDirty().isPresent());
   }
 
   private static Value value(List<SettingsNamespace> metadata) {

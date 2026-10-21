@@ -939,9 +939,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         instance.invalidateSettingsCache();
         var bot = instance.botConnections().get(accountId);
         if (bot != null) {
-          bot.persistentMetadata().set(request.getNamespace(), request.getKey(), jsonValue);
-          // Mark clean since we just persisted it
-          bot.persistentMetadata().markClean();
+          bot.persistentMetadata().setPersisted(request.getNamespace(), request.getKey(), jsonValue);
         }
       });
 
@@ -997,9 +995,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         instance.invalidateSettingsCache();
         var bot = instance.botConnections().get(accountId);
         if (bot != null) {
-          bot.persistentMetadata().remove(request.getNamespace(), request.getKey());
-          // Mark clean since we just persisted it
-          bot.persistentMetadata().markClean();
+          bot.persistentMetadata().removePersisted(request.getNamespace(), request.getKey());
         }
       });
 
@@ -1073,8 +1069,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       // Also update the live instance's persistent metadata if loaded
       soulFireServer.getInstance(instanceId).ifPresent(instance -> {
         instance.invalidateSettingsCache();
-        instance.persistentMetadata().set(request.getNamespace(), request.getKey(), jsonValue);
-        instance.persistentMetadata().markClean();
+        instance.persistentMetadata().setPersisted(request.getNamespace(), request.getKey(), jsonValue);
       });
 
       responseObserver.onNext(SetInstanceMetadataEntryResponse.newBuilder().build());
@@ -1118,8 +1113,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       // Also update the live instance's persistent metadata if loaded
       soulFireServer.getInstance(instanceId).ifPresent(instance -> {
         instance.invalidateSettingsCache();
-        instance.persistentMetadata().remove(request.getNamespace(), request.getKey());
-        instance.persistentMetadata().markClean();
+        instance.persistentMetadata().removePersisted(request.getNamespace(), request.getKey());
       });
 
       responseObserver.onNext(DeleteInstanceMetadataEntryResponse.newBuilder().build());
