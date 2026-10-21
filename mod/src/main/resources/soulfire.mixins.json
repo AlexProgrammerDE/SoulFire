@@ -54,6 +54,7 @@
     "headless.rendering.MixinPovClipboard",
     "headless.rendering.MixinPovOpenUri",
     "headless.rendering.MixinRenderSystem",
+    "headless.rendering.MixinRecipeBookComponent",
     "headless.rendering.MixinScreen",
     "headless.rendering.MixinTextureManager",
     "headless.rendering.WindowAccessor",
