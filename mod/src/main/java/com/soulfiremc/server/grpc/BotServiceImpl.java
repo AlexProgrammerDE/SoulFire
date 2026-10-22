@@ -1732,7 +1732,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           .setLabel("Take Book")
           .setDescription(hasBook ? "Remove book from lectern" : "No book to take")
           .setIconItemId("minecraft:book")
-          .setDisabled(!hasBook)
+          .setDisabled(!hasBook || minecraft.player == null || !minecraft.player.mayBuild())
           .build());
       }
       case null, default -> {}
@@ -2072,7 +2072,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     }
   }
 
-  private static boolean activateContainerButton(Minecraft minecraft, int id) {
+  static boolean activateContainerButton(Minecraft minecraft, int id) {
     var player = minecraft.player;
     var gameMode = minecraft.gameMode;
     if (player == null || gameMode == null) {
@@ -2113,7 +2113,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       case StonecutterMenu stonecutter -> id >= 0 && id < stonecutter.getNumberOfVisibleRecipes();
       case LoomMenu loom -> id >= 0 && id < loom.getSelectablePatterns().size();
       case EnchantmentMenu enchanting -> id >= 0 && id < enchanting.costs.length && enchanting.clickMenuButton(player, id);
-      case LecternMenu ignored -> id >= 1 && id <= 3;
+      case LecternMenu lectern -> buildContainerButtons(lectern, minecraft).stream()
+        .anyMatch(button -> button.getButtonId() == id && !button.getDisabled());
       default -> false;
     };
     if (valid) gameMode.handleInventoryButtonClick(menu.containerId, id);
