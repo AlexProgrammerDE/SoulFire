@@ -1,6 +1,6 @@
 import { create } from "@bufbuild/protobuf";
 import { Code, ConnectError, createRouterTransport } from "@connectrpc/connect";
-import { Effect } from "effect";
+import { Cause, Effect, Exit } from "effect";
 import { describe, expect, it, vi } from "vitest";
 import { SoulFire as NodeSoulFire } from "../src/node.js";
 import { SoulFire as BunSoulFire } from "../src/bun.js";
@@ -18,7 +18,7 @@ import {
 import { MCAuthService } from "../src/generated/soulfire/mc-auth_pb.js";
 import { SdkService } from "../src/generated/soulfire/sdk_pb.js";
 
-function server(options: { running?: boolean; snapshot?: boolean } = {}) {
+function server(options: { running?: boolean; snapshot?: boolean; cleanupError?: Code } = {}) {
   const instanceRequests: InstanceGetOrCreateRequest[] = [];
   const botRequests: InstanceGetOrCreateBotRequest[] = [];
   const states: BotDesiredState[] = [];
@@ -29,6 +29,7 @@ function server(options: { running?: boolean; snapshot?: boolean } = {}) {
   let accounts = 0;
   let logins = 0;
   let subscriptions = 0;
+  let deleted = false;
   const transport = createRouterTransport(({ service }) => {
     service(SdkService, {
       handshake: () => ({
@@ -38,6 +39,10 @@ function server(options: { running?: boolean; snapshot?: boolean } = {}) {
       }),
     });
     service(InstanceService, {
+      deleteInstance: () => {
+        deleted = true;
+        return {};
+      },
       getOrCreateInstance: (request) => {
         instanceRequests.push(request);
         return { id: "instance-id" };
@@ -58,6 +63,8 @@ function server(options: { running?: boolean; snapshot?: boolean } = {}) {
       getBotInfo: () => ({ status }),
       setBotsDesiredState: (request) => {
         states.push(request.desiredState);
+        if (deleted)
+          throw new ConnectError("Cleanup rejected", options.cleanupError ?? Code.NotFound);
         status.desiredState = request.desiredState;
         return { bots: [status] };
       },
@@ -218,6 +225,35 @@ describe("named bot setup", () => {
     expect(fixture.states).toEqual([]);
     expect(fixture.subscriptions).toBe(0);
   });
+
+  it.each([Code.NotFound, Code.PermissionDenied, Code.Unavailable])(
+    "handles bot cleanup after instance deletion for RPC code %s",
+    async (code) => {
+      const fixture = server({ cleanupError: code });
+      const exit = await Effect.runPromiseExit(
+        Effect.scoped(
+          Effect.gen(function* () {
+            const client = yield* fixture.connect;
+            const instance = yield* client.getOrCreateInstance("farm");
+            const bot = yield* instance.getOrCreateBot("Builder");
+            yield* instance.delete();
+            const error = yield* bot.stop().pipe(Effect.flip);
+            expect(error).toMatchObject({ _tag: "SoulFireRpcError", code });
+          }),
+        ),
+      );
+      expect(Exit.isSuccess(exit)).toBe(code === Code.NotFound);
+      if (Exit.isFailure(exit)) {
+        expect(Cause.squash(exit.cause)).toMatchObject({ _tag: "SoulFireRpcError", code });
+      }
+      expect(fixture.states).toEqual([
+        BotDesiredState.RUNNING,
+        BotDesiredState.STOPPED,
+        BotDesiredState.STOPPED,
+      ]);
+      expect(fixture.subscriptions).toBe(0);
+    },
+  );
 
   it("can provision accounts without connecting them", async () => {
     const fixture = server();

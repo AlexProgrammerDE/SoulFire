@@ -1313,7 +1313,13 @@ export class SoulFireBot {
         yield* Effect.acquireRelease(Effect.succeed(info), (info) =>
           info.status?.desiredState === BotDesiredState.RUNNING
             ? Effect.void
-            : this.stop().pipe(Effect.asVoid, Effect.orDie),
+            : this.stop().pipe(
+                Effect.catchTag("SoulFireRpcError", (error) =>
+                  error.code === Code.NotFound ? Effect.void : Effect.fail(error),
+                ),
+                Effect.asVoid,
+                Effect.orDie,
+              ),
         );
         if (info.status?.desiredState !== BotDesiredState.RUNNING) {
           yield* this.start(options.call);

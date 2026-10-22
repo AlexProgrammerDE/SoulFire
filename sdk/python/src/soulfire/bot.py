@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 from collections.abc import Iterable
 
+from connectrpc.code import Code
 from effect_py import (
     Effect,
     EffectGen,
@@ -101,6 +102,7 @@ from .chat_connect import ChatServiceClient
 from .common_pb2 import BlockPosition
 from .errors import (
     SoulFireOperationError,
+    SoulFireRpcError,
     SoulFireTimeoutError,
     SoulFireValidationError,
     operation_error,
@@ -271,7 +273,16 @@ class SoulFireBot:
             lambda info, _: (
                 sync(lambda: None)
                 if info.status.desired_state == BOT_DESIRED_STATE_RUNNING
-                else self.stop().map(lambda _: None).or_die()
+                else self.stop()
+                .pipe(
+                    catch_tag(SoulFireRpcError)(
+                        lambda error: (
+                            sync(lambda: None) if error.code == Code.NOT_FOUND else fail(error)
+                        )
+                    )
+                )
+                .map(lambda _: None)
+                .or_die()
             ),
         )
         if info.status.desired_state != BOT_DESIRED_STATE_RUNNING:

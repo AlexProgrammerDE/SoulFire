@@ -7,7 +7,7 @@ from connectrpc.code import Code
 from connectrpc.errors import ConnectError
 from effect_py import acquire_release, gen, run_async, scoped, sync
 
-from soulfire import SoulFire, SoulFireTimeoutError
+from soulfire import SoulFire, SoulFireRpcError, SoulFireTimeoutError
 from soulfire.bot_connect import BotServiceClient
 from soulfire.bot_live_connect import BotLiveServiceClient
 from soulfire.bot_live_pb2 import BotEvent, WatchBotEventsRequest
@@ -26,6 +26,8 @@ from soulfire.instance_connect import InstanceServiceClient
 from soulfire.instance_pb2 import (
     BOT_AUTHENTICATION_MICROSOFT,
     BOT_AUTHENTICATION_OFFLINE,
+    InstanceDeleteRequest,
+    InstanceDeleteResponse,
     InstanceGetOrCreateBotRequest,
     InstanceGetOrCreateBotResponse,
     InstanceGetOrCreateRequest,
@@ -37,7 +39,9 @@ from soulfire.sdk_pb2 import SdkApiVersion, SdkCapability, SdkHandshakeResponse,
 
 
 class Server:
-    def __init__(self, *, running: bool = False, snapshot: bool = True) -> None:
+    def __init__(
+        self, *, running: bool = False, snapshot: bool = True, cleanup_error: Code = Code.NOT_FOUND
+    ) -> None:
         self.status = BotStatus(
             profile_id="bot-id",
             desired_state=BOT_DESIRED_STATE_RUNNING if running else BOT_DESIRED_STATE_STOPPED,
@@ -50,6 +54,14 @@ class Server:
         self.accounts = 0
         self.subscriptions = 0
         self.closed = False
+        self.deleted = False
+        self.cleanup_error = cleanup_error
+
+    async def delete_instance(
+        self, _: InstanceDeleteRequest, **_kwargs: object
+    ) -> InstanceDeleteResponse:
+        self.deleted = True
+        return InstanceDeleteResponse()
 
     async def get_or_create_instance(
         self, request: InstanceGetOrCreateRequest, **_: object
@@ -79,6 +91,8 @@ class Server:
         self, request: SetBotsDesiredStateRequest, **_: object
     ) -> SetBotsDesiredStateResponse:
         self.states.append(request.desired_state)
+        if self.deleted:
+            raise ConnectError(self.cleanup_error, "Cleanup rejected")
         self.status.desired_state = request.desired_state
         return SetBotsDesiredStateResponse(bots=[self.status])
 
@@ -167,6 +181,43 @@ async def test_existing_running_bot_keeps_running() -> None:
 
     await run_async(scoped(program).or_die())
     assert not server.states
+    assert server.subscriptions == 0
+
+
+@pytest.mark.parametrize("code", [Code.NOT_FOUND, Code.PERMISSION_DENIED, Code.UNAVAILABLE])
+async def test_managed_bot_cleanup_after_instance_deletion(code: Code) -> None:
+    server = Server(cleanup_error=code)
+    client = server.client()
+
+    @gen
+    def program():
+        instance = yield from client.get_or_create_instance("farm")
+        bot = yield from instance.get_or_create_bot("Builder")
+        yield from instance.delete()
+        yield from bot.stop()
+
+    # Explicit stop still reports a missing bot; only managed cleanup is idempotent.
+    with pytest.raises(SoulFireRpcError) as caught:
+        await run_async(scoped(program).or_die())
+    assert caught.value.code == code
+    assert server.subscriptions == 0
+
+    server = Server(cleanup_error=code)
+    client = server.client()
+
+    @gen
+    def delete_connected_instance():
+        instance = yield from client.get_or_create_instance("farm")
+        yield from instance.get_or_create_bot("Builder")
+        yield from instance.delete()
+
+    if code == Code.NOT_FOUND:
+        await run_async(scoped(delete_connected_instance).or_die())
+    else:
+        with pytest.raises(SoulFireRpcError) as cleanup_failure:
+            await run_async(scoped(delete_connected_instance).or_die())
+        assert cleanup_failure.value.code == code
+    assert server.states == [BOT_DESIRED_STATE_RUNNING, BOT_DESIRED_STATE_STOPPED]
     assert server.subscriptions == 0
 
 
