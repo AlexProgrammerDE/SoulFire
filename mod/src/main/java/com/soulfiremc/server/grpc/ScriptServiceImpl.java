@@ -72,6 +72,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   // Track active scripts: scriptId -> activation state
   private final Map<UUID, ScriptActivationState> activeScripts = new ConcurrentHashMap<>();
+  private final Set<DryRunExecution> activeDryRuns = ConcurrentHashMap.newKeySet();
 
   // Internal data classes for JSON serialization
   private record ScriptNodeData(
@@ -228,6 +229,9 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       if (state.instanceId().equals(instanceId)) {
         stopScriptInternal(state.scriptId());
       }
+    }
+    for (var run : List.copyOf(activeDryRuns)) {
+      if (run.instanceId.equals(instanceId)) run.context.cancel();
     }
   }
 
@@ -1759,152 +1763,207 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
-    try {
-      var scriptId = UUID.fromString(request.getScriptId());
-      var triggerNodeId = request.getTriggerNodeId();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        var scriptId = UUID.fromString(request.getScriptId());
+        var triggerNodeId = request.getTriggerNodeId();
 
-      var record = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var r = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (r == null || !r.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
-        return r;
-      });
-
-      var graph = buildScriptGraph(record);
-
-      if (!graph.findTriggerNodes().contains(triggerNodeId)) {
-        throw Status.INVALID_ARGUMENT.withDescription("Select a trigger node from the saved script").asRuntimeException();
-      }
-      // Build mock inputs from proto values
-      var mockInputs = new HashMap<String, NodeValue>();
-      for (var entry : request.getMockInputsMap().entrySet()) {
-        mockInputs.put(entry.getKey(), protoValueToNodeValue(entry.getValue()));
-      }
-
-      var observer = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
-      class DryRunListener implements ScriptEventListener {
-        private boolean closed;
-        private boolean failed;
-        private boolean executionFinished;
-        private boolean statsReceived;
-
-        private synchronized void send(ScriptEvent event) {
-          if (!closed && !observer.isCancelled()) {
-            observer.onNext(event);
+        var record = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var r = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (r == null || !r.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
           }
+          return r;
+        });
+
+        var graph = buildScriptGraph(record);
+
+        if (!graph.findTriggerNodes().contains(triggerNodeId)) {
+          throw Status.INVALID_ARGUMENT.withDescription("Select a trigger node from the saved script").asRuntimeException();
+        }
+        // Build mock inputs from proto values
+        var mockInputs = new HashMap<String, NodeValue>();
+        for (var entry : request.getMockInputsMap().entrySet()) {
+          mockInputs.put(entry.getKey(), protoValueToNodeValue(entry.getValue()));
         }
 
-        private synchronized void completeIfReady() {
-          if (closed || !executionFinished || !statsReceived || observer.isCancelled()) {
+        var observer = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+        var run = new DryRunExecution(instanceId, scriptId, observer,
+          ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson())));
+        activeDryRuns.add(run);
+        try {
+          // A profile-only deletion can finish while the saved graph is being loaded.
+          if (soulFireServer.isInstanceDeleting(instanceId)
+            || !soulFireServer.dsl().fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(instanceId.toString()))) {
+            run.context.cancel();
             return;
           }
-          send(ScriptEvent.newBuilder().setScriptCompleted(ScriptCompleted.newBuilder()
-            .setScriptId(scriptId.toString()).setSuccess(!failed)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))).build());
-          closed = true;
-          observer.onCompleted();
-        }
-
-        synchronized void finish() {
-          executionFinished = true;
-          completeIfReady();
-        }
-
-        synchronized void fail(Throwable error) {
-          if (!closed && !observer.isCancelled()) {
-            closed = true;
-            log.error("Error in dry run execution", error);
-            observer.onError(Status.INTERNAL.withDescription(error.getMessage()).withCause(error).asRuntimeException());
+          observer.setOnCancelHandler(() -> {
+            run.close();
+            run.context.cancel();
+          });
+          if (observer.isCancelled() || run.isClosed()) {
+            run.close();
+            run.context.cancel();
+            return;
           }
+          var engine = new ReactiveScriptEngine();
+          run.context.setExecution(engine.executeDryRun(graph, triggerNodeId, run.context, mockInputs)
+            .subscribe(_ -> {}, run::fail, run::finish));
+        } catch (RuntimeException | Error failure) {
+          run.close();
+          run.context.cancel();
+          throw failure;
         }
-
-        synchronized void close() {
-          closed = true;
-        }
-
-        @Override
-        public void onNodeStarted(String nodeId) {
-          send(ScriptEvent.newBuilder()
-            .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-            .build());
-        }
-
-        @Override
-        public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-          onNodeCompleted(nodeId, outputs, 0);
-        }
-
-        @Override
-        public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-          var completed = NodeCompleted.newBuilder().setNodeId(nodeId)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .setExecutionTimeNanos(executionTimeNanos);
-          outputs.forEach((key, value) -> completed.putOutputs(key, nodeValueToProtoValue(value)));
-          send(ScriptEvent.newBuilder().setNodeCompleted(completed).build());
-        }
-
-        @Override
-        public synchronized void onNodeError(String nodeId, String error) {
-          failed = true;
-          send(ScriptEvent.newBuilder()
-            .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-            .build());
-        }
-
-        @Override
-        public void onLog(String level, String message) {
-          send(ScriptEvent.newBuilder()
-            .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-            .build());
-        }
-
-        @Override
-        public synchronized void onScriptCompleted(boolean success) {
-          failed |= !success;
-        }
-
-        @Override
-        public void onScriptCancelled() {}
-
-        @Override
-        public synchronized void onExecutionStats(long nodeCount, long maxCount) {
-          send(ScriptEvent.newBuilder().setExecutionStats(ExecutionStats.newBuilder()
-            .setNodeCount(nodeCount).setMaxCount(maxCount)).build());
-          statsReceived = true;
-          completeIfReady();
-        }
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (ScriptGraphValidationException e) {
+        throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+      } catch (Exception e) {
+        log.error("Error in dry run", e);
+        throw Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
       }
-      var eventListener = new DryRunListener();
+    });
+  }
 
-      // Execute using dry-run context (no InstanceManager)
-      var context = new ReactiveScriptContext(eventListener, ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson())));
-      var engine = new ReactiveScriptEngine();
-      observer.setOnCancelHandler(() -> {
-        eventListener.close();
-        context.cancel();
-      });
+  private final class DryRunExecution implements ScriptEventListener {
+    private final UUID instanceId;
+    private final UUID scriptId;
+    private final ServerCallStreamObserver<ScriptEvent> observer;
+    private final ReactiveScriptContext context;
+    private boolean closed;
+    private boolean failed;
+    private boolean executionFinished;
+    private boolean statsReceived;
+
+    private DryRunExecution(UUID instanceId, UUID scriptId, ServerCallStreamObserver<ScriptEvent> observer,
+                            ScriptQuotasConfig quotas) {
+      this.instanceId = instanceId;
+      this.scriptId = scriptId;
+      this.observer = observer;
+      this.context = new ReactiveScriptContext(this, quotas);
+    }
+
+    private synchronized void send(ScriptEvent event) {
+      if (closed) return;
       if (observer.isCancelled()) {
-        eventListener.close();
+        close();
         context.cancel();
         return;
       }
-      context.setExecution(engine.executeDryRun(graph, triggerNodeId, context, mockInputs)
-        .subscribe(_ -> {}, eventListener::fail, eventListener::finish));
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (ScriptGraphValidationException e) {
-      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
-    } catch (Exception e) {
-      log.error("Error in dry run", e);
-      throw Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+      try {
+        observer.onNext(event);
+      } catch (RuntimeException error) {
+        close();
+        context.cancel();
+        log.debug("Dry-run stream closed during execution", error);
+      }
+    }
+
+    private synchronized void completeIfReady() {
+      if (closed || !executionFinished || !statsReceived) {
+        return;
+      }
+      complete(!failed);
+    }
+
+    synchronized void finish() {
+      executionFinished = true;
+      completeIfReady();
+    }
+
+    synchronized void fail(Throwable error) {
+      if (closed) return;
+      close();
+      if (!observer.isCancelled()) {
+        log.error("Error in dry run execution", error);
+        observer.onError(Status.INTERNAL.withDescription(error.getMessage()).withCause(error).asRuntimeException());
+      }
+    }
+
+    synchronized void close() {
+      closed = true;
+      activeDryRuns.remove(this);
+    }
+
+    synchronized boolean isClosed() {
+      return closed;
+    }
+
+    private synchronized void complete(boolean success) {
+      if (closed) return;
+      close();
+      if (!observer.isCancelled()) {
+        try {
+          observer.onNext(ScriptEvent.newBuilder().setScriptCompleted(ScriptCompleted.newBuilder()
+            .setScriptId(scriptId.toString()).setSuccess(success)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))).build());
+          observer.onCompleted();
+        } catch (RuntimeException error) {
+          log.debug("Dry-run stream closed during completion", error);
+        }
+      }
+    }
+
+    @Override
+    public void onNodeStarted(String nodeId) {
+      send(ScriptEvent.newBuilder()
+        .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId)
+          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
+        .build());
+    }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
+      onNodeCompleted(nodeId, outputs, 0);
+    }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
+      var completed = NodeCompleted.newBuilder().setNodeId(nodeId)
+        .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
+        .setExecutionTimeNanos(executionTimeNanos);
+      outputs.forEach((key, value) -> completed.putOutputs(key, nodeValueToProtoValue(value)));
+      send(ScriptEvent.newBuilder().setNodeCompleted(completed).build());
+    }
+
+    @Override
+    public synchronized void onNodeError(String nodeId, String error) {
+      failed = true;
+      send(ScriptEvent.newBuilder()
+        .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
+          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
+        .build());
+    }
+
+    @Override
+    public void onLog(String level, String message) {
+      send(ScriptEvent.newBuilder()
+        .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message)
+          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
+        .build());
+    }
+
+    @Override
+    public synchronized void onScriptCompleted(boolean success) {
+      failed |= !success;
+    }
+
+    @Override
+    public void onScriptCancelled() {
+      complete(false);
+    }
+
+    @Override
+    public synchronized void onExecutionStats(long nodeCount, long maxCount) {
+      send(ScriptEvent.newBuilder().setExecutionStats(ExecutionStats.newBuilder()
+        .setNodeCount(nodeCount).setMaxCount(maxCount)).build());
+      statsReceived = true;
+      completeIfReady();
     }
   }
 

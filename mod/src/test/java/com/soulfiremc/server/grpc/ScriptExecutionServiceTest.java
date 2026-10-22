@@ -70,6 +70,7 @@ import io.modelcontextprotocol.spec.McpSchema;
 import net.minecraft.world.phys.Vec3;
 import org.flywaydb.core.Flyway;
 import org.jooq.SQLDialect;
+import org.jooq.TransactionalCallable;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -100,9 +101,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -567,6 +571,79 @@ final class ScriptExecutionServiceTest {
     assertTrue(cancelled.await(5, TimeUnit.SECONDS));
     verify(observer, never()).onCompleted();
     verify(observer, never()).onError(any());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void instanceStopDisposesAllConcurrentPreviewsOfTheSameScript(boolean disconnectDuringCompletion) throws InterruptedException {
+    var started = new CountDownLatch(2);
+    var disposed = new CountDownLatch(2);
+    var type = registerAction(() -> Mono.defer(() -> {
+      started.countDown();
+      return Mono.<Map<String, NodeValue>>never().doOnCancel(disposed::countDown);
+    }));
+    var scriptId = saveScript(type);
+    run(request(scriptId).build());
+    var firstCancel = cancel.get();
+    var secondCancel = new AtomicReference<Runnable>();
+    ServerCallStreamObserver<ScriptEvent> second = mock();
+    doAnswer(call -> { secondCancel.set(call.getArgument(0)); return null; }).when(second).setOnCancelHandler(any());
+    try {
+      rpcContext.run(() -> service.dryRunScript(request(scriptId).build(), second));
+      assertTrue(started.await(5, TimeUnit.SECONDS));
+      if (disconnectDuringCompletion) doThrow(Status.CANCELLED.asRuntimeException()).when(observer).onCompleted();
+      service.stopAllScripts(UUID.fromString(instanceId));
+      assertTrue(disposed.await(5, TimeUnit.SECONDS));
+      verify(observer, times(1)).onCompleted();
+      verify(second, times(1)).onCompleted();
+      assertEquals(1, events.stream().filter(ScriptEvent::hasScriptCompleted).count());
+      assertFalse(events.getLast().getScriptCompleted().getSuccess());
+      verify(second).onNext(argThat(event -> event.hasScriptCompleted() && !event.getScriptCompleted().getSuccess()));
+    } finally {
+      firstCancel.run();
+      if (secondCancel.get() != null) secondCancel.get().run();
+    }
+  }
+
+  @Test
+  void instanceStopDuringPreviewRegistrationDoesNotStartExecution() {
+    var started = new CountDownLatch(1);
+    var type = registerAction(() -> { started.countDown(); return Mono.empty(); });
+    var scriptId = saveScript(type);
+    doAnswer(_ -> { service.stopAllScripts(UUID.fromString(instanceId)); return null; })
+      .when(observer).setOnCancelHandler(any());
+    try {
+      run(request(scriptId).build());
+      assertEquals(1, started.getCount());
+      verify(observer, times(1)).onCompleted();
+      assertEquals(1, events.stream().filter(ScriptEvent::hasScriptCompleted).count());
+      assertFalse(events.getLast().getScriptCompleted().getSuccess());
+    } finally {
+      if (cancel.get() != null) cancel.get().run();
+    }
+  }
+
+  @Test
+  void previewCannotStartFromASnapshotAfterItsInstanceDisappears() {
+    var started = new CountDownLatch(1);
+    var type = registerAction(() -> { started.countDown(); return Mono.never(); });
+    var scriptId = saveScript(type);
+    var dsl = server.dsl();
+    var intercepted = spy(dsl);
+    doAnswer(call -> {
+      var snapshot = call.callRealMethod();
+      dsl.deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId)).execute();
+      return snapshot;
+    }).when(intercepted).transactionResult(any(TransactionalCallable.class));
+    when(server.dsl()).thenReturn(intercepted);
+    try {
+      run(request(scriptId).build());
+      assertEquals(1, started.getCount());
+      verify(observer, times(1)).onCompleted();
+      assertFalse(events.getLast().getScriptCompleted().getSuccess());
+    } finally {
+      if (cancel.get() != null) cancel.get().run();
+    }
   }
 
   @Test

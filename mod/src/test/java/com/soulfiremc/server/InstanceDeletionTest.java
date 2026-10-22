@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.sqlite.SQLiteDataSource;
 
 import java.io.IOException;
@@ -221,7 +222,18 @@ final class InstanceDeletionTest {
   }
 
   @Test
-  void unloadedProfileRejectsNewScriptsWhileStorageCleanupIsPending() {
+  void deletionIsVisibleBeforeResourceCancellationWithoutARuntime() {
+    server.instances().clear();
+    doNothing().when(server).deleteInstanceStorage(id);
+    var scripts = server.rpcServer().scriptService();
+    doAnswer(_ -> { assertTrue(server.isInstanceDeleting(id)); return null; }).when(scripts).stopAllScripts(id);
+    server.deleteInstance(id).orElseThrow().join();
+    assertFalse(stored());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void unloadedProfileRejectsNewScriptsWhileStorageCleanupIsPending(boolean cancelCaller) {
     var scripts = scriptService();
     var scheduled = new ArrayDeque<Runnable>();
     var scheduler = server.scheduler();
@@ -231,6 +243,7 @@ final class InstanceDeletionTest {
     var deletion = server.deleteInstance(id).orElseThrow();
     try {
       assertFalse(deletion.isDone());
+      if (cancelCaller) deletion.cancel(false);
       var failure = assertThrows(StatusRuntimeException.class, () -> scriptContext.run(() ->
         scripts.createScript(CreateScriptRequest.newBuilder().setInstanceId(id.toString())
           .setName("during storage cleanup").setPaused(true).build(), mock())));
@@ -239,7 +252,8 @@ final class InstanceDeletionTest {
     } finally {
       Runnable task;
       while ((task = scheduled.poll()) != null) task.run();
-      deletion.join();
+      if (!cancelCaller) deletion.join();
+      assertFalse(stored());
     }
   }
 

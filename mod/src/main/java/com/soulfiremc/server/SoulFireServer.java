@@ -368,19 +368,30 @@ public final class SoulFireServer {
       return Optional.empty();
     }
 
-    var deletion = instanceDeletions.computeIfAbsent(id, _ -> {
+    var deletion = new CompletableFuture<Void>();
+    var existing = instanceDeletions.putIfAbsent(id, deletion);
+    if (existing != null) {
+      return Optional.of(existing);
+    }
+    try {
       if (instance != null) instance.markDeleting();
       rpcServer.scriptService().stopAllScripts(id);
       var cleanup = instance == null
         ? CompletableFuture.runAsync(() -> deleteInstanceStorage(id), scheduler)
         : instance.deleteInstance();
-      return cleanup.thenRunAsync(() -> {
+      cleanup.thenRunAsync(() -> {
         // Disconnect callbacks and scheduler cleanup can still reload the profile.
         dsl().deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).execute();
         if (instance != null) instances.remove(id, instance);
-      }, scheduler);
-    });
-    deletion.whenComplete((_, _) -> instanceDeletions.remove(id, deletion));
+      }, scheduler).whenComplete((_, failure) -> {
+        instanceDeletions.remove(id, deletion);
+        if (failure == null) deletion.complete(null);
+        else deletion.completeExceptionally(failure);
+      });
+    } catch (Throwable failure) {
+      instanceDeletions.remove(id, deletion);
+      deletion.completeExceptionally(failure);
+    }
     return Optional.of(deletion);
   }
 
