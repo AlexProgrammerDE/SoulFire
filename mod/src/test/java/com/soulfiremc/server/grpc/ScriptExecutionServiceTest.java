@@ -22,6 +22,8 @@ import com.google.protobuf.ListValue;
 import com.google.protobuf.NullValue;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
+import com.google.protobuf.util.JsonFormat;
+import com.linecorp.armeria.server.Server;
 import com.soulfiremc.grpc.generated.ActivateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptResponse;
@@ -52,6 +54,7 @@ import com.soulfiremc.server.script.NodeValue;
 import com.soulfiremc.server.script.PortDefinition;
 import com.soulfiremc.server.script.nodes.NodeRegistry;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
+import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.SFLogAppender;
@@ -60,6 +63,10 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import io.modelcontextprotocol.client.McpClient;
+import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
+import io.modelcontextprotocol.json.jackson3.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.spec.McpSchema;
 import net.minecraft.world.phys.Vec3;
 import org.flywaydb.core.Flyway;
 import org.jooq.SQLDialect;
@@ -71,8 +78,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.sqlite.SQLiteDataSource;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.net.http.HttpRequest;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -388,6 +398,53 @@ final class ScriptExecutionServiceTest {
         .setInstanceId(otherInstance).setScriptId(second).build(), o)).getStatus().getIsActive());
     } finally {
       service.stopAllScripts(UUID.fromString(otherInstance));
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void mcpControlsTheSameActivationAsGrpc(boolean delete) throws Exception {
+    when(server.getInstance(any(UUID.class))).thenReturn(Optional.of(mock(InstanceManager.class)));
+    var auth = mock(AuthSystem.class);
+    when(server.authSystem()).thenReturn(auth);
+    when(auth.authenticateByHeader("Bearer test", "api"))
+      .thenReturn(Optional.of(ServerRPCConstants.USER_CONTEXT_KEY.get(rpcContext)));
+    var scriptId = this.<CreateScriptResponse>rpcResponse(o -> service.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setName("MCP lifecycle").setPaused(true).build(), o)).getScript().getId();
+    rpcContext.run(() -> service.activateScript(ActivateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).build(), observer));
+    var mcp = new MCPService(server, service);
+    try (var http = Server.builder().http(0).service("/mcp", mcp.getTransportProvider().httpService()).build()) {
+      http.start().get(5, TimeUnit.SECONDS);
+      var transport = HttpClientStreamableHttpTransport.builder("http://127.0.0.1:" + http.activeLocalPort())
+        .endpoint("/mcp").jsonMapper(new JacksonMcpJsonMapper(new JsonMapper()))
+        .requestBuilder(HttpRequest.newBuilder().header("Authorization", "Bearer test")).build();
+      try (var client = McpClient.sync(transport).requestTimeout(Duration.ofSeconds(5)).build()) {
+        client.initialize();
+        Map<String, Object> arguments = Map.of("instance_id", instanceId, "script_id", scriptId);
+        var statusResult = client.callTool(new McpSchema.CallToolRequest("get_script_status", arguments));
+        assertFalse(Boolean.TRUE.equals(statusResult.isError()));
+        var status = GetScriptStatusResponse.newBuilder();
+        JsonFormat.parser().merge(((McpSchema.TextContent) statusResult.content().getFirst()).text(), status);
+        assertTrue(status.getStatus().getIsActive());
+        assertEquals(1, status.getStatus().getActivationCount());
+
+        var result = client.callTool(new McpSchema.CallToolRequest(delete ? "delete_script" : "deactivate_script", arguments));
+        assertFalse(Boolean.TRUE.equals(result.isError()));
+        awaitCompletion();
+        verify(observer, times(1)).onCompleted();
+        assertEquals(1, events.stream().filter(ScriptEvent::hasScriptCompleted).count());
+        if (delete) {
+          assertFalse(server.dsl().fetchExists(Tables.SCRIPTS, Tables.SCRIPTS.ID.eq(scriptId)));
+        } else {
+          assertTrue(server.dsl().selectFrom(Tables.SCRIPTS).where(Tables.SCRIPTS.ID.eq(scriptId)).fetchSingle().getPaused());
+          assertFalse(this.<GetScriptStatusResponse>rpcResponse(o -> service.getScriptStatus(GetScriptStatusRequest.newBuilder()
+            .setInstanceId(instanceId).setScriptId(scriptId).build(), o)).getStatus().getIsActive());
+        }
+      }
+    } finally {
+      mcp.shutdown();
+      service.stopAllScripts(UUID.fromString(instanceId));
     }
   }
 

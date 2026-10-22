@@ -91,7 +91,7 @@ public final class MCPService {
     return transportProvider;
   }
 
-  public MCPService(SoulFireServer soulFireServer) {
+  public MCPService(SoulFireServer soulFireServer, ScriptServiceImpl scriptService) {
     var jsonMapper = new JacksonMcpJsonMapper(new JsonMapper());
 
     this.transportProvider = ArmeriaStreamableServerTransportProvider
@@ -687,7 +687,6 @@ public final class MCPService {
             .build(), o)))));
 
     // === Script Tools ===
-    var scriptService = new ScriptServiceImpl(soulFireServer);
     tools.add(tool("list_scripts",
       "List all scripts in an instance.",
       Map.of("instance_id", prop("string", "UUID of the instance")),
@@ -1201,6 +1200,8 @@ public final class MCPService {
   @SuppressWarnings("deprecation")
   private static <T extends MessageOrBuilder> Mono<McpSchema.CallToolResult> grpc(
     Consumer<StreamObserver<T>> grpcCall) {
+    // Subscription happens after authed() restores the caller's thread context.
+    var context = Context.current();
     return Mono.create(sink -> {
       StreamObserver<T> observer = new StreamObserver<>() {
         @Override
@@ -1229,7 +1230,7 @@ public final class MCPService {
       };
 
       try {
-        grpcCall.accept(observer);
+        context.run(() -> grpcCall.accept(observer));
       } catch (StatusRuntimeException e) {
         sink.success(errorResult(e.getStatus().getCode() + ": " + e.getStatus().getDescription()));
       } catch (Exception e) {
