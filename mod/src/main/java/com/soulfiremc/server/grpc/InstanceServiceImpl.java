@@ -225,11 +225,13 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         var id = UUID.fromString(record.getId());
         var permissions = user.instancePermissionChecker(id);
         if (!permissions.test(InstancePermission.READ_INSTANCE)) continue;
+        var instance = soulFireServer.getInstance(id);
+        if (instance.isEmpty()) continue;
         response.addInstances(InstanceListResponse.Instance.newBuilder()
           .setId(record.getId())
           .setFriendlyName(record.getFriendlyName())
           .setIcon(record.getIcon())
-          .setBotSummary(soulFireServer.getInstance(id).orElseThrow().botStateManager().summary())
+          .setBotSummary(instance.get().botStateManager().summary())
           .addAllInstancePermissions(instancePermissionStates(permissions)));
       }
       responseObserver.onNext(response.build());

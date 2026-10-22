@@ -159,6 +159,15 @@ final class InstancePermissionListTest {
     }
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void skipsProfilesUntilTheirRuntimeIsAvailable(boolean admin) {
+    var user = admin ? auth.authenticateBySubject(AuthSystem.ROOT_USER_ID, Instant.now()).orElseThrow() : owner;
+    when(server.getInstance(ids.getFirst())).thenReturn(Optional.empty());
+    assertEquals(admin ? Set.copyOf(ids.subList(1, 3)) : Set.of(ids.get(1)), list(user).getInstancesList().stream()
+      .map(instance -> UUID.fromString(instance.getId())).collect(Collectors.toSet()));
+  }
+
   @Test
   void laterRequestsObserveOwnershipAndPolicyChanges() {
     assertEquals(2, list(owner).getInstancesCount());
