@@ -50,6 +50,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jooq.DSLContext;
 
 import javax.crypto.SecretKey;
@@ -354,11 +355,21 @@ public final class SoulFireServer {
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
     var instance = instances.get(id);
+    if (instance != null) {
+      synchronized (instance) {
+        return deleteInstance(id, instance);
+      }
+    }
+    return deleteInstance(id, null);
+  }
+
+  private Optional<CompletableFuture<?>> deleteInstance(UUID id, @Nullable InstanceManager instance) {
     if (instance == null && !dsl().fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(id.toString()))) {
       return Optional.empty();
     }
 
     var deletion = instanceDeletions.computeIfAbsent(id, _ -> {
+      if (instance != null) instance.markDeleting();
       rpcServer.scriptService().stopAllScripts(id);
       var cleanup = instance == null
         ? CompletableFuture.runAsync(() -> deleteInstanceStorage(id), scheduler)
@@ -383,6 +394,11 @@ public final class SoulFireServer {
         throw new UncheckedIOException("Could not delete instance storage " + path, e);
       }
     }
+  }
+
+  public boolean isInstanceDeleting(UUID id) {
+    var instance = instances.get(id);
+    return (instance != null && instance.deleting()) || instanceDeletions.containsKey(id);
   }
 
   public Optional<InstanceManager> getInstance(UUID id) {

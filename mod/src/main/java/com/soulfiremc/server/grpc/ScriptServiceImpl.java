@@ -128,6 +128,24 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   // Internal Script Lifecycle Methods
   // ============================================================================
 
+  /// Serializes script mutations with the start of instance deletion.
+  private void withInstanceLifecycle(UUID instanceId, Runnable action) {
+    var instance = soulFireServer.getInstance(instanceId).orElse(null);
+    if (instance == null) {
+      if (soulFireServer.isInstanceDeleting(instanceId)) {
+        throw Status.FAILED_PRECONDITION.withDescription("Instance is shutting down").asRuntimeException();
+      }
+      action.run();
+      return;
+    }
+    synchronized (instance) {
+      if (instance.deleting()) {
+        throw Status.FAILED_PRECONDITION.withDescription("Instance is shutting down").asRuntimeException();
+      }
+      action.run();
+    }
+  }
+
   /// Starts a script without modifying the paused flag in the database.
   /// Used for automatic script starting on create/update/server startup.
   private void startScriptInternal(ScriptsRecord record) {
@@ -135,47 +153,49 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     var instanceId = UUID.fromString(record.getInstanceId());
 
     try {
-      // Build the script graph from the record
-      var graph = buildScriptGraph(record);
+      withInstanceLifecycle(instanceId, () -> {
+        // Build the script graph from the record
+        var graph = buildScriptGraph(record);
 
-      // Get the instance manager
-      var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
-      if (instanceManager == null) {
-        log.warn("Instance {} not found, cannot start script {}", instanceId, scriptId);
-        return;
-      }
+        // Get the instance manager
+        var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
+        if (instanceManager == null) {
+          log.warn("Instance {} not found, cannot start script {}", instanceId, scriptId);
+          return;
+        }
 
-      var subscribers = new ScriptEventSubscribers();
-      var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
+        var subscribers = new ScriptEventSubscribers();
+        var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
 
-      // Parse quotas from the database record
-      var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
+        // Parse quotas from the database record
+        var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
 
-      // Create reactive context for trigger execution
-      var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
+        // Create reactive context for trigger execution
+        var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
 
-      // Atomically check-and-set to avoid race condition
-      var activationState = new ScriptActivationState(
-        scriptId,
-        instanceId,
-        true,
-        null,
-        1,
-        context,
-        subscribers
-      );
-      var existing = activeScripts.putIfAbsent(scriptId, activationState);
-      if (existing != null) {
-        log.debug("Script {} is already running, skipping start", scriptId);
-        return;
-      }
+        // Atomically check-and-set to avoid race condition
+        var activationState = new ScriptActivationState(
+          scriptId,
+          instanceId,
+          true,
+          null,
+          1,
+          context,
+          subscribers
+        );
+        var existing = activeScripts.putIfAbsent(scriptId, activationState);
+        if (existing != null) {
+          log.debug("Script {} is already running, skipping start", scriptId);
+          return;
+        }
 
-      // Register triggers for event-driven execution
-      var engine = new ReactiveScriptEngine();
-      triggerService.registerTriggers(scriptId, graph, context, engine);
+        // Register triggers for event-driven execution
+        var engine = new ReactiveScriptEngine();
+        triggerService.registerTriggers(scriptId, graph, context, engine);
 
-      log.info("Started script {} with {} triggers, {} data edges", scriptId,
-        graph.findTriggerNodes().size(), graph.dataEdges().size());
+        log.info("Started script {} with {} triggers, {} data edges", scriptId,
+          graph.findTriggerNodes().size(), graph.dataEdges().size());
+      });
     } catch (ScriptGraphValidationException e) {
       log.error("Script '{}' ({}) has invalid graph: {}", record.getName(), scriptId, e.errors());
     } catch (Exception e) {
@@ -277,55 +297,57 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .withDescription("Script description must not exceed " + MAX_DESCRIPTION_LENGTH + " characters").asRuntimeException();
     }
 
-    try {
-      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var instanceRecord = ctx.selectFrom(Tables.INSTANCES)
-          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
-          .fetchOne();
-        if (instanceRecord == null) {
-          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var instanceRecord = ctx.selectFrom(Tables.INSTANCES)
+            .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+            .fetchOne();
+          if (instanceRecord == null) {
+            throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+          }
+
+          var newId = UUID.randomUUID().toString();
+          var now = LocalDateTime.now(ZoneOffset.UTC);
+          ctx.insertInto(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.ID, newId)
+            .set(Tables.SCRIPTS.NAME, request.getName())
+            .set(Tables.SCRIPTS.DESCRIPTION, request.getDescription())
+            .set(Tables.SCRIPTS.INSTANCE_ID, instanceId.toString())
+            .set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()))
+            .set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()))
+            .set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null)
+            .set(Tables.SCRIPTS.PAUSED, request.getPaused())
+            .set(Tables.SCRIPTS.CREATED_AT, now)
+            .set(Tables.SCRIPTS.UPDATED_AT, now)
+            .set(Tables.SCRIPTS.VERSION, 0L)
+            .execute();
+
+          return ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(newId))
+            .fetchOne();
+        });
+
+        // Start the script immediately if not paused
+        if (!scriptRecord.getPaused()) {
+          startScriptInternal(scriptRecord);
         }
 
-        var newId = UUID.randomUUID().toString();
-        var now = LocalDateTime.now(ZoneOffset.UTC);
-        ctx.insertInto(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.ID, newId)
-          .set(Tables.SCRIPTS.NAME, request.getName())
-          .set(Tables.SCRIPTS.DESCRIPTION, request.getDescription())
-          .set(Tables.SCRIPTS.INSTANCE_ID, instanceId.toString())
-          .set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()))
-          .set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()))
-          .set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null)
-          .set(Tables.SCRIPTS.PAUSED, request.getPaused())
-          .set(Tables.SCRIPTS.CREATED_AT, now)
-          .set(Tables.SCRIPTS.UPDATED_AT, now)
-          .set(Tables.SCRIPTS.VERSION, 0L)
-          .execute();
-
-        return ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(newId))
-          .fetchOne();
-      });
-
-      // Start the script immediately if not paused
-      if (!scriptRecord.getPaused()) {
-        startScriptInternal(scriptRecord);
+        var createResponse = CreateScriptResponse.newBuilder()
+          .setScript(recordToScriptData(scriptRecord));
+        for (var diag : collectGraphWarnings(scriptRecord)) {
+          createResponse.addDiagnostics(diag);
+        }
+        responseObserver.onNext(createResponse.build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error creating script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
       }
-
-      var createResponse = CreateScriptResponse.newBuilder()
-        .setScript(recordToScriptData(scriptRecord));
-      for (var diag : collectGraphWarnings(scriptRecord)) {
-        createResponse.addDiagnostics(diag);
-      }
-      responseObserver.onNext(createResponse.build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error creating script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+    });
   }
 
   @Override
@@ -381,67 +403,69 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .withDescription("Script description must not exceed " + MAX_DESCRIPTION_LENGTH + " characters").asRuntimeException();
     }
 
-    try {
-      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+
+          var update = ctx.update(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC));
+
+          if (request.hasName()) {
+            update = update.set(Tables.SCRIPTS.NAME, request.getName());
+          }
+          if (request.hasDescription()) {
+            update = update.set(Tables.SCRIPTS.DESCRIPTION, request.getDescription());
+          }
+          if (request.getUpdateNodes()) {
+            update = update.set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()));
+          }
+          if (request.getUpdateEdges()) {
+            update = update.set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()));
+          }
+          if (request.getUpdateQuotas()) {
+            update = update.set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null);
+          }
+          if (request.hasPaused()) {
+            update = update.set(Tables.SCRIPTS.PAUSED, request.getPaused());
+          }
+
+          update.where(Tables.SCRIPTS.ID.eq(scriptId.toString())).execute();
+
+          return ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+        });
+
+        // Restart the script if it's not paused (to apply new configuration)
+        if (!scriptRecord.getPaused()) {
+          restartScriptInternal(scriptRecord);
+        } else {
+          // Script is paused, make sure it's stopped
+          stopScriptInternal(scriptId);
         }
 
-        var update = ctx.update(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC));
-
-        if (request.hasName()) {
-          update = update.set(Tables.SCRIPTS.NAME, request.getName());
+        var updateResponse = UpdateScriptResponse.newBuilder()
+          .setScript(recordToScriptData(scriptRecord));
+        for (var diag : collectGraphWarnings(scriptRecord)) {
+          updateResponse.addDiagnostics(diag);
         }
-        if (request.hasDescription()) {
-          update = update.set(Tables.SCRIPTS.DESCRIPTION, request.getDescription());
-        }
-        if (request.getUpdateNodes()) {
-          update = update.set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()));
-        }
-        if (request.getUpdateEdges()) {
-          update = update.set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()));
-        }
-        if (request.getUpdateQuotas()) {
-          update = update.set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null);
-        }
-        if (request.hasPaused()) {
-          update = update.set(Tables.SCRIPTS.PAUSED, request.getPaused());
-        }
-
-        update.where(Tables.SCRIPTS.ID.eq(scriptId.toString())).execute();
-
-        return ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-      });
-
-      // Restart the script if it's not paused (to apply new configuration)
-      if (!scriptRecord.getPaused()) {
-        restartScriptInternal(scriptRecord);
-      } else {
-        // Script is paused, make sure it's stopped
-        stopScriptInternal(scriptId);
+        responseObserver.onNext(updateResponse.build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error updating script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
       }
-
-      var updateResponse = UpdateScriptResponse.newBuilder()
-        .setScript(recordToScriptData(scriptRecord));
-      for (var diag : collectGraphWarnings(scriptRecord)) {
-        updateResponse.addDiagnostics(diag);
-      }
-      responseObserver.onNext(updateResponse.build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error updating script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+    });
   }
 
   @Override
@@ -451,34 +475,36 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
-    try {
-      soulFireServer.dsl().transaction(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        soulFireServer.dsl().transaction(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
 
-        // Stop the script if it's running (after ownership check)
-        stopScriptInternal(scriptId);
+          // Stop the script if it's running (after ownership check)
+          stopScriptInternal(scriptId);
 
-        ctx.deleteFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .execute();
-      });
+          ctx.deleteFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .execute();
+        });
 
-      log.info("Script {} deleted", scriptId);
-      responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error deleting script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+        log.info("Script {} deleted", scriptId);
+        responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error deleting script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+      }
+    });
   }
 
   @Override
@@ -525,100 +551,102 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
-    try {
-      record ValidatedActivation(ScriptsRecord record, ScriptGraph graph) {}
-      var instanceManager = soulFireServer.getInstance(instanceId)
-        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        record ValidatedActivation(ScriptsRecord record, ScriptGraph graph) {}
+        var instanceManager = soulFireServer.getInstance(instanceId)
+          .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
 
-      // Validate before persisting the resumed state so rejected scripts stay paused.
-      var activation = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
-        var graph = ConstantFolding.fold(buildScriptGraph(record));
-        // Set paused=false to persist the resumed state
-        if (record.getPaused()) {
-          ctx.update(Tables.SCRIPTS)
-            .set(Tables.SCRIPTS.PAUSED, false)
-            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+        // Validate before persisting the resumed state so rejected scripts stay paused.
+        var activation = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
             .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-            .execute();
-          record.setPaused(false);
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+          var graph = ConstantFolding.fold(buildScriptGraph(record));
+          // Set paused=false to persist the resumed state
+          if (record.getPaused()) {
+            ctx.update(Tables.SCRIPTS)
+              .set(Tables.SCRIPTS.PAUSED, false)
+              .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+              .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+              .execute();
+            record.setPaused(false);
+          }
+          return new ValidatedActivation(record, graph);
+        });
+        var scriptRecord = activation.record();
+
+        var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+
+        var existingState = activeScripts.get(scriptId);
+        if (existingState != null) {
+          existingState.subscribers().add(serverObserver);
+          // Update activation count (record is immutable, so create new state with same subscribers)
+          activeScripts.put(scriptId, new ScriptActivationState(
+            existingState.scriptId(),
+            existingState.instanceId(),
+            existingState.active(),
+            existingState.activeNodeId(),
+            existingState.activationCount() + 1,
+            existingState.context(),
+            existingState.subscribers()
+          ));
+
+          sendScriptStarted(existingState.subscribers(), serverObserver, scriptId);
+
+          log.info("Client attached to already-running script {}", scriptId);
+          return;
         }
-        return new ValidatedActivation(record, graph);
-      });
-      var scriptRecord = activation.record();
 
-      var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+        // Script is not running, start it
+        var graph = activation.graph();
 
-      var existingState = activeScripts.get(scriptId);
-      if (existingState != null) {
-        existingState.subscribers().add(serverObserver);
-        // Update activation count (record is immutable, so create new state with same subscribers)
-        activeScripts.put(scriptId, new ScriptActivationState(
-          existingState.scriptId(),
-          existingState.instanceId(),
-          existingState.active(),
-          existingState.activeNodeId(),
-          existingState.activationCount() + 1,
-          existingState.context(),
-          existingState.subscribers()
-        ));
+        var subscribers = new ScriptEventSubscribers();
+        subscribers.add(serverObserver);
+        var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
 
-        sendScriptStarted(existingState.subscribers(), serverObserver, scriptId);
+        // Parse quotas from the database record
+        var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
 
-        log.info("Client attached to already-running script {}", scriptId);
-        return;
+        // Create reactive context for trigger execution
+        var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
+
+        // Register triggers for event-driven execution using reactive engine
+        var engine = new ReactiveScriptEngine();
+        triggerService.registerTriggers(scriptId, graph, context, engine);
+
+        // Store active script state
+        var activationState = new ScriptActivationState(
+          scriptId,
+          instanceId,
+          true,
+          null,
+          1,
+          context,
+          subscribers
+        );
+        activeScripts.put(scriptId, activationState);
+
+        sendScriptStarted(subscribers, serverObserver, scriptId);
+
+        log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
+          graph.findTriggerNodes().size(), graph.dataEdges().size());
+
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (ScriptGraphValidationException e) {
+        log.error("Script {} has invalid graph: {}", scriptId, e.errors());
+        throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+      } catch (Throwable t) {
+        log.error("Error resuming script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
       }
-
-      // Script is not running, start it
-      var graph = activation.graph();
-
-      var subscribers = new ScriptEventSubscribers();
-      subscribers.add(serverObserver);
-      var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
-
-      // Parse quotas from the database record
-      var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
-
-      // Create reactive context for trigger execution
-      var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
-
-      // Register triggers for event-driven execution using reactive engine
-      var engine = new ReactiveScriptEngine();
-      triggerService.registerTriggers(scriptId, graph, context, engine);
-
-      // Store active script state
-      var activationState = new ScriptActivationState(
-        scriptId,
-        instanceId,
-        true,
-        null,
-        1,
-        context,
-        subscribers
-      );
-      activeScripts.put(scriptId, activationState);
-
-      sendScriptStarted(subscribers, serverObserver, scriptId);
-
-      log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
-        graph.findTriggerNodes().size(), graph.dataEdges().size());
-
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (ScriptGraphValidationException e) {
-      log.error("Script {} has invalid graph: {}", scriptId, e.errors());
-      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
-    } catch (Throwable t) {
-      log.error("Error resuming script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+    });
   }
 
   @Override
@@ -628,36 +656,38 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
-    try {
-      // Set paused=true in the database to persist the paused state
-      soulFireServer.dsl().transaction(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
-        ctx.update(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.PAUSED, true)
-          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .execute();
-      });
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        // Set paused=true in the database to persist the paused state
+        soulFireServer.dsl().transaction(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+          ctx.update(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.PAUSED, true)
+            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .execute();
+        });
 
-      // Stop the script if it's running
-      stopScriptInternal(scriptId);
+        // Stop the script if it's running
+        stopScriptInternal(scriptId);
 
-      log.info("Script {} paused", scriptId);
-      responseObserver.onNext(DeactivateScriptResponse.newBuilder().build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error pausing script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+        log.info("Script {} paused", scriptId);
+        responseObserver.onNext(DeactivateScriptResponse.newBuilder().build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error pausing script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+      }
+    });
   }
 
   @Override

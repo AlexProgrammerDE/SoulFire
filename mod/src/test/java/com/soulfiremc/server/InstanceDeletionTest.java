@@ -17,11 +17,24 @@
  */
 package com.soulfiremc.server;
 
+import com.soulfiremc.grpc.generated.ActivateScriptRequest;
+import com.soulfiremc.grpc.generated.CreateScriptRequest;
+import com.soulfiremc.grpc.generated.CreateScriptResponse;
+import com.soulfiremc.grpc.generated.ScriptEvent;
+import com.soulfiremc.grpc.generated.UpdateScriptRequest;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.grpc.RPCServer;
 import com.soulfiremc.server.grpc.ScriptServiceImpl;
+import com.soulfiremc.server.grpc.ServerRPCConstants;
+import com.soulfiremc.server.script.ScriptTriggerService;
+import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
+import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.ServerCallStreamObserver;
+import io.grpc.stub.StreamObserver;
 import net.lenni0451.reflect.Fields;
 import org.flywaydb.core.Flyway;
 import org.jooq.DSLContext;
@@ -31,16 +44,24 @@ import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.sqlite.SQLiteDataSource;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,9 +71,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -60,10 +84,13 @@ final class InstanceDeletionTest {
   private final UUID id = UUID.randomUUID();
   private final InstanceManager instance = mock();
   private final SoulFireServer server = mock(CALLS_REAL_METHODS);
+  private final Context scriptContext = Context.current().withValue(ServerRPCConstants.USER_CONTEXT_KEY, mock(SoulFireUser.class));
   private DSLContext dsl;
 
   @BeforeEach
   void setUp(@TempDir Path directory) {
+    doCallRealMethod().when(instance).markDeleting();
+    doCallRealMethod().when(instance).deleting();
     var source = new SQLiteDataSource();
     source.setUrl("jdbc:sqlite:" + directory.resolve("deletion.sqlite"));
     Flyway.configure().dataSource(source).locations("classpath:db/migration").load().migrate();
@@ -115,6 +142,105 @@ final class InstanceDeletionTest {
     assertFalse(stored());
     assertTrue(server.getInstance(id).isEmpty());
     assertTrue(server.deleteInstance(id).isEmpty());
+  }
+
+  @ParameterizedTest
+  @EnumSource(ScriptMutation.class)
+  void pendingDeletionRejectsScriptMutations(ScriptMutation mutation) {
+    var scripts = scriptService();
+    var scriptId = pausedScript(scripts);
+    ServerCallStreamObserver<ScriptEvent> activation = mock();
+    var cleanup = new CompletableFuture<Void>();
+    doReturn(cleanup).when(instance).deleteInstance();
+    var deletion = server.deleteInstance(id).orElseThrow();
+    try {
+      assertFalse(deletion.isDone());
+      var failure = assertThrows(StatusRuntimeException.class, () -> scriptContext.run(() -> {
+        switch (mutation) {
+          case CREATE, CREATE_PAUSED -> scripts.createScript(CreateScriptRequest.newBuilder().setInstanceId(id.toString())
+            .setName("during deletion").setPaused(mutation == ScriptMutation.CREATE_PAUSED).build(), mock());
+          case UPDATE -> scripts.updateScript(UpdateScriptRequest.newBuilder()
+            .setInstanceId(id.toString()).setScriptId(scriptId).setPaused(false).build(), mock());
+          case ACTIVATE -> scripts.activateScript(ActivateScriptRequest.newBuilder()
+            .setInstanceId(id.toString()).setScriptId(scriptId).build(), activation);
+        }
+      }));
+      assertEquals(Status.Code.FAILED_PRECONDITION, failure.getStatus().getCode());
+      assertTrue(dsl.selectFrom(Tables.SCRIPTS).where(Tables.SCRIPTS.ID.eq(scriptId)).fetchSingle().getPaused());
+      assertEquals(1, dsl.fetchCount(Tables.SCRIPTS));
+    } finally {
+      cleanup.complete(null);
+      deletion.join();
+      scripts.stopAllScripts(id);
+    }
+  }
+
+  @Test
+  void deletionWaitsForInFlightRegistrationAndStopsTheResultingActivation() throws Exception {
+    var scripts = scriptService();
+    var scriptId = pausedScript(scripts);
+    var registering = new CountDownLatch(1);
+    var release = new CountDownLatch(1);
+    var deleting = new CountDownLatch(1);
+    var triggers = spy(new ScriptTriggerService());
+    doAnswer(call -> {
+      registering.countDown();
+      assertTrue(release.await(5, TimeUnit.SECONDS));
+      return call.callRealMethod();
+    }).when(triggers).registerTriggers(any(), any(), any(), any());
+    Fields.setObject(scripts, Fields.getDeclaredField(ScriptServiceImpl.class, "triggerService"), triggers);
+    var cleanup = new CompletableFuture<Void>();
+    doReturn(cleanup).when(instance).deleteInstance();
+    ServerCallStreamObserver<ScriptEvent> observer = mock();
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var activation = workers.submit(() -> scriptContext.run(() -> scripts.activateScript(ActivateScriptRequest.newBuilder()
+        .setInstanceId(id.toString()).setScriptId(scriptId).build(), observer)));
+      try {
+        assertTrue(registering.await(5, TimeUnit.SECONDS));
+        var deletion = workers.submit(() -> {
+          deleting.countDown();
+          return server.deleteInstance(id).orElseThrow();
+        });
+        assertTrue(deleting.await(5, TimeUnit.SECONDS));
+        assertThrows(TimeoutException.class, () -> deletion.get(100, TimeUnit.MILLISECONDS));
+        release.countDown();
+        activation.get(5, TimeUnit.SECONDS);
+        var completion = deletion.get(5, TimeUnit.SECONDS);
+        assertFalse(completion.isDone());
+        verify(observer, times(1)).onCompleted();
+        cleanup.complete(null);
+        completion.join();
+        assertTrue(server.getInstance(id).isEmpty());
+      } finally {
+        release.countDown();
+        cleanup.complete(null);
+      }
+    } finally {
+      scripts.stopAllScripts(id);
+    }
+  }
+
+  @Test
+  void unloadedProfileRejectsNewScriptsWhileStorageCleanupIsPending() {
+    var scripts = scriptService();
+    var scheduled = new ArrayDeque<Runnable>();
+    var scheduler = server.scheduler();
+    doAnswer(call -> { scheduled.add(call.getArgument(0)); return null; }).when(scheduler).execute(any(Runnable.class));
+    doNothing().when(server).deleteInstanceStorage(id);
+    server.instances().clear();
+    var deletion = server.deleteInstance(id).orElseThrow();
+    try {
+      assertFalse(deletion.isDone());
+      var failure = assertThrows(StatusRuntimeException.class, () -> scriptContext.run(() ->
+        scripts.createScript(CreateScriptRequest.newBuilder().setInstanceId(id.toString())
+          .setName("during storage cleanup").setPaused(true).build(), mock())));
+      assertEquals(Status.Code.FAILED_PRECONDITION, failure.getStatus().getCode());
+      assertEquals(0, dsl.fetchCount(Tables.SCRIPTS));
+    } finally {
+      Runnable task;
+      while ((task = scheduled.poll()) != null) task.run();
+      deletion.join();
+    }
   }
 
   @Test
@@ -187,6 +313,24 @@ final class InstanceDeletionTest {
       assertFalse(stored());
     }
   }
+
+  private ScriptServiceImpl scriptService() {
+    var scripts = new ScriptServiceImpl(server);
+    var rpc = server.rpcServer();
+    doReturn(scripts).when(rpc).scriptService();
+    return scripts;
+  }
+
+  private String pausedScript(ScriptServiceImpl scripts) {
+    var created = new AtomicReference<CreateScriptResponse>();
+    StreamObserver<CreateScriptResponse> observer = mock();
+    doAnswer(call -> { created.set(call.getArgument(0)); return null; }).when(observer).onNext(any());
+    scriptContext.run(() -> scripts.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(id.toString()).setName("before deletion").setPaused(true).build(), observer));
+    return created.get().getScript().getId();
+  }
+
+  private enum ScriptMutation { CREATE, CREATE_PAUSED, UPDATE, ACTIVATE }
 
   private boolean stored() {
     return dsl.fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(id.toString()));
