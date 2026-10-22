@@ -1591,6 +1591,9 @@ message BotSubmitDialogRequest {
 
   // Action index, defaulting to the first action. Use -1 to dismiss.
   optional int32 button_index = 4;
+
+  // Reject the request if the active screen differs from this ServerDialog.screen_id.
+  optional string expected_screen_id = 5;
 }
 
 // Response for dialog submission.
@@ -1623,6 +1626,9 @@ message BotClickDialogButtonRequest {
   // For MULTI_ACTION: index into the actions list
   // Special value: -1 to close/escape the dialog
   int32 button_index = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // Reject the request if the active screen differs from this ServerDialog.screen_id.
+  optional string expected_screen_id = 4;
 }
 
 // Response for dialog button click.
@@ -1648,6 +1654,9 @@ message BotCloseDialogRequest {
 
   // The profile UUID of the bot to close dialog for.
   string bot_id = 2 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
+
+  // Reject the request if the active screen differs from this ServerDialog.screen_id.
+  optional string expected_screen_id = 3;
 }
 
 // Response for dialog close.

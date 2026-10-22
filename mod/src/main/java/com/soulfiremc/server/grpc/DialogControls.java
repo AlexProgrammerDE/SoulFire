@@ -18,6 +18,7 @@
 package com.soulfiremc.server.grpc;
 
 import com.soulfiremc.mod.access.IDialogScreen;
+import com.soulfiremc.mod.access.IScreenIdentity;
 import com.soulfiremc.server.renderer.PovClientActions;
 import io.grpc.Status;
 import net.minecraft.client.gui.components.AbstractSliderButton;
@@ -50,7 +51,10 @@ final class DialogControls {
     return screen instanceof DialogScreen<?> || screen instanceof ConfirmLinkScreen;
   }
 
-  static ClientActions act(@Nullable Screen screen, Map<String, String> values, int index) {
+  static ClientActions act(@Nullable Screen screen, Map<String, String> values, int index, @Nullable String expectedScreenId) {
+    if (expectedScreenId != null && (!(screen instanceof IScreenIdentity identity) || !expectedScreenId.equals(identity.soulfire$getScreenId()))) {
+      throw Status.ABORTED.withDescription("The dialog changed. Review the current dialog and try again.").asRuntimeException();
+    }
     if (screen instanceof ConfirmLinkScreen link) return LinkConfirmationDialog.act(link, values, index);
     if (screen instanceof DialogScreen<?> dialog) return actDialog(dialog, values, index);
     throw Status.FAILED_PRECONDITION.withDescription("No dialog is currently displayed").asRuntimeException();

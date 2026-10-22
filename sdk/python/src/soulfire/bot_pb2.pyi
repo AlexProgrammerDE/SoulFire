@@ -1201,7 +1201,7 @@ class BotGetDialogResponse(_message.Message):
     def __init__(self, dialog: _Optional[_Union[ServerDialog, _Mapping]] = ...) -> None: ...
 
 class BotSubmitDialogRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id", "input_values", "button_index")
+    __slots__ = ("instance_id", "bot_id", "input_values", "button_index", "expected_screen_id")
     class InputValuesEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -1213,11 +1213,13 @@ class BotSubmitDialogRequest(_message.Message):
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
     INPUT_VALUES_FIELD_NUMBER: _ClassVar[int]
     BUTTON_INDEX_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_SCREEN_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
     input_values: _containers.ScalarMap[str, str]
     button_index: int
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., input_values: _Optional[_Mapping[str, str]] = ..., button_index: _Optional[int] = ...) -> None: ...
+    expected_screen_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., input_values: _Optional[_Mapping[str, str]] = ..., button_index: _Optional[int] = ..., expected_screen_id: _Optional[str] = ...) -> None: ...
 
 class BotSubmitDialogResponse(_message.Message):
     __slots__ = ("success", "error", "clipboard", "open_url")
@@ -1232,14 +1234,16 @@ class BotSubmitDialogResponse(_message.Message):
     def __init__(self, success: bool = ..., error: _Optional[str] = ..., clipboard: _Optional[str] = ..., open_url: _Optional[str] = ...) -> None: ...
 
 class BotClickDialogButtonRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id", "button_index")
+    __slots__ = ("instance_id", "bot_id", "button_index", "expected_screen_id")
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
     BUTTON_INDEX_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_SCREEN_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
     button_index: int
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., button_index: _Optional[int] = ...) -> None: ...
+    expected_screen_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., button_index: _Optional[int] = ..., expected_screen_id: _Optional[str] = ...) -> None: ...
 
 class BotClickDialogButtonResponse(_message.Message):
     __slots__ = ("success", "error", "clipboard", "open_url")
@@ -1254,12 +1258,14 @@ class BotClickDialogButtonResponse(_message.Message):
     def __init__(self, success: bool = ..., error: _Optional[str] = ..., clipboard: _Optional[str] = ..., open_url: _Optional[str] = ...) -> None: ...
 
 class BotCloseDialogRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id")
+    __slots__ = ("instance_id", "bot_id", "expected_screen_id")
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_SCREEN_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ...) -> None: ...
+    expected_screen_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., expected_screen_id: _Optional[str] = ...) -> None: ...
 
 class BotCloseDialogResponse(_message.Message):
     __slots__ = ("success", "error", "clipboard", "open_url")

@@ -2262,7 +2262,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var result = new AtomicReference<DialogControls.ClientActions>();
       executeAction(activeBot, () -> {
-        result.set(DialogControls.act(activeBot.minecraft().gui.screen(), request.getInputValuesMap(), request.hasButtonIndex() ? request.getButtonIndex() : 0));
+        result.set(DialogControls.act(activeBot.minecraft().gui.screen(), request.getInputValuesMap(), request.hasButtonIndex() ? request.getButtonIndex() : 0,
+          request.hasExpectedScreenId() ? request.getExpectedScreenId() : null));
       });
       var builder = BotSubmitDialogResponse.newBuilder().setSuccess(true);
       result.get().clipboard().ifPresent(builder::setClipboard);
@@ -2297,7 +2298,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
 
       var result = new AtomicReference<DialogControls.ClientActions>();
       executeAction(activeBot, () -> {
-        result.set(DialogControls.act(activeBot.minecraft().gui.screen(), Map.of(), request.getButtonIndex()));
+        result.set(DialogControls.act(activeBot.minecraft().gui.screen(), Map.of(), request.getButtonIndex(),
+          request.hasExpectedScreenId() ? request.getExpectedScreenId() : null));
       });
       var builder = BotClickDialogButtonResponse.newBuilder().setSuccess(true);
       result.get().clipboard().ifPresent(builder::setClipboard);
@@ -2333,7 +2335,9 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       var result = new AtomicReference<DialogControls.ClientActions>();
       executeAction(activeBot, () -> {
         var screen = activeBot.minecraft().gui.screen();
-        if (DialogControls.supports(screen)) result.set(DialogControls.act(screen, Map.of(), -1));
+        if (DialogControls.supports(screen) || request.hasExpectedScreenId()) {
+          result.set(DialogControls.act(screen, Map.of(), -1, request.hasExpectedScreenId() ? request.getExpectedScreenId() : null));
+        }
       });
       var builder = BotCloseDialogResponse.newBuilder().setSuccess(true);
       if (result.get() != null) {

@@ -106,6 +106,19 @@ export default {
         replacement.screenId !== confirmation.screenId,
         "A replacement confirmation reused the previous screen identity",
       );
+      yield* rpc(async () => {
+        try {
+          await service.closeDialog({ ...scope, expectedScreenId: confirmation.screenId });
+        } catch (error) {
+          if (error instanceof ConnectError && error.code === Code.Aborted) return;
+          throw error;
+        }
+        throw new Error("An old confirmation dismissed its replacement");
+      });
+      yield* check(
+        (yield* rpc(() => service.getDialog(scope))).dialog?.screenId === replacement.screenId,
+        "Rejecting a stale confirmation changed the current screen",
+      );
       const declined = yield* rpc(() => service.clickDialogButton({ ...scope, buttonIndex: 2 }));
       yield* check(declined.success && declined.openUrl === undefined, "Declining opened the link");
       yield* returned();
