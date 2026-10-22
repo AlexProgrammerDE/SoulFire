@@ -9,7 +9,7 @@ import { create } from "@bufbuild/protobuf";
 import { ValueSchema } from "@bufbuild/protobuf/wkt";
 import type { SoulFireBot, SoulFireClient, SoulFireOperationError } from "@soulfiremc/sdk";
 import { SoulFire } from "@soulfiremc/sdk/node";
-import { Console, Data, Duration, Effect, Schedule } from "effect";
+import { Console, Data, Duration, Effect, Schedule, Semaphore } from "effect";
 
 const execFileAsync = promisify(execFile);
 
@@ -40,7 +40,11 @@ export const eventually = <A, E, R>(
   interval: Duration.Input = "250 millis",
 ) => Effect.retry(effect, Schedule.spaced(interval).pipe(Schedule.upTo({ duration: timeout })));
 
-const run = (command: string, args: readonly string[], options: { maxBuffer?: number } = {}) =>
+const run = (
+  command: string,
+  args: readonly string[],
+  options: { maxBuffer?: number; timeout?: number } = {},
+) =>
   Effect.tryPromise({
     try: () => execFileAsync(command, [...args], options),
     catch: (e) =>
@@ -72,6 +76,9 @@ const MINECRAFT_START_TIMEOUT = "5 minutes";
 const RCON_ERROR =
   /Unknown or incomplete command|Incorrect argument|Expected |Invalid |That position is not loaded|No player was found|Unknown |Could not /;
 
+// Vanilla's RCON handlers share one command-output buffer.
+const rconCommands = Semaphore.makeUnsafe(1);
+
 /**
  * Runs a server command and returns its output. Fails when the output says the command failed,
  * unless `check` is false (for commands whose failure is the answer, like `execute if`).
@@ -80,11 +87,15 @@ export const rcon = (
   command: string,
   { check = true } = {},
 ): Effect.Effect<string, CommandFailed> =>
-  run("docker", ["exec", CONTAINER, "rcon-cli", command]).pipe(
-    Effect.map(({ stdout }) => stdout.trim()),
-    Effect.filterOrFail(
-      (out) => !check || !RCON_ERROR.test(out),
-      (out) => new CommandFailed({ command: `/${command}`, message: out }),
+  rconCommands.withPermit(
+    run("docker", ["exec", CONTAINER, "rcon-cli", command], { timeout: 10_000 }).pipe(
+      // Cancellation must not release the buffer while the child process is still running.
+      Effect.uninterruptible,
+      Effect.map(({ stdout }) => stdout.trim()),
+      Effect.filterOrFail(
+        (out) => !check || !RCON_ERROR.test(out),
+        (out) => new CommandFailed({ command: `/${command}`, message: out }),
+      ),
     ),
   );
 
