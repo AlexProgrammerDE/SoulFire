@@ -28,6 +28,7 @@ import com.soulfiremc.grpc.generated.ActivateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptResponse;
 import com.soulfiremc.grpc.generated.DeactivateScriptRequest;
+import com.soulfiremc.grpc.generated.DeleteScriptRequest;
 import com.soulfiremc.grpc.generated.DryRunScriptRequest;
 import com.soulfiremc.grpc.generated.EdgeType;
 import com.soulfiremc.grpc.generated.GetScriptRequest;
@@ -605,6 +606,52 @@ final class ScriptExecutionServiceTest {
     }
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void deletingAScriptCancelsItsPreviewsAndKeepsASiblingPreviewAlive(boolean rejectDelete) throws InterruptedException {
+    var started = new CountDownLatch(3);
+    var disposed = new CountDownLatch(3);
+    var type = registerAction(() -> Mono.defer(() -> {
+      started.countDown();
+      return Mono.<Map<String, NodeValue>>never().doOnCancel(disposed::countDown);
+    }));
+    var target = saveScript(type);
+    var sibling = saveScript(type);
+    var observers = List.<ServerCallStreamObserver<ScriptEvent>>of(observer, mock(), mock());
+    var scriptIds = List.of(target, target, sibling);
+    var cancellations = new CopyOnWriteArrayList<Runnable>();
+    try {
+      for (var index = 0; index < observers.size(); index++) {
+        var monitor = observers.get(index);
+        var scriptId = scriptIds.get(index);
+        doAnswer(call -> { cancellations.add(call.getArgument(0)); return null; }).when(monitor).setOnCancelHandler(any());
+        rpcContext.run(() -> service.dryRunScript(request(scriptId).build(), monitor));
+      }
+      assertTrue(started.await(5, TimeUnit.SECONDS));
+      if (rejectDelete) {
+        server.dsl().execute("CREATE TRIGGER reject_script_delete BEFORE DELETE ON scripts BEGIN SELECT RAISE(ABORT, 'Delete rejected'); END");
+        var failure = assertThrows(StatusRuntimeException.class, () -> rpcContext.run(() -> service.deleteScript(DeleteScriptRequest.newBuilder()
+          .setInstanceId(instanceId).setScriptId(target).build(), mock())));
+        assertEquals(Status.Code.INTERNAL, failure.getStatus().getCode());
+        assertEquals(3, disposed.getCount());
+        for (var monitor : observers) verify(monitor, never()).onCompleted();
+        assertTrue(server.dsl().fetchExists(Tables.SCRIPTS, Tables.SCRIPTS.ID.eq(target)));
+      } else {
+        rpcContext.run(() -> service.deleteScript(DeleteScriptRequest.newBuilder()
+          .setInstanceId(instanceId).setScriptId(target).build(), mock()));
+        assertEquals(1, disposed.getCount());
+        verify(observers.get(0), times(1)).onCompleted();
+        verify(observers.get(1), times(1)).onCompleted();
+        verify(observers.get(2), never()).onCompleted();
+        assertFalse(server.dsl().fetchExists(Tables.SCRIPTS, Tables.SCRIPTS.ID.eq(target)));
+      }
+      assertTrue(server.dsl().fetchExists(Tables.SCRIPTS, Tables.SCRIPTS.ID.eq(sibling)));
+    } finally {
+      cancellations.forEach(Runnable::run);
+    }
+    assertEquals(0, disposed.getCount());
+  }
+
   @Test
   void instanceStopDuringPreviewRegistrationDoesNotStartExecution() {
     var started = new CountDownLatch(1);
@@ -623,8 +670,9 @@ final class ScriptExecutionServiceTest {
     }
   }
 
-  @Test
-  void previewCannotStartFromASnapshotAfterItsInstanceDisappears() {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void previewCannotStartFromASnapshotAfterItsOwnerDisappears(boolean instanceDeleted) {
     var started = new CountDownLatch(1);
     var type = registerAction(() -> { started.countDown(); return Mono.never(); });
     var scriptId = saveScript(type);
@@ -632,7 +680,8 @@ final class ScriptExecutionServiceTest {
     var intercepted = spy(dsl);
     doAnswer(call -> {
       var snapshot = call.callRealMethod();
-      dsl.deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId)).execute();
+      if (instanceDeleted) dsl.deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId)).execute();
+      else dsl.deleteFrom(Tables.SCRIPTS).where(Tables.SCRIPTS.ID.eq(scriptId)).execute();
       return snapshot;
     }).when(intercepted).transactionResult(any(TransactionalCallable.class));
     when(server.dsl()).thenReturn(intercepted);

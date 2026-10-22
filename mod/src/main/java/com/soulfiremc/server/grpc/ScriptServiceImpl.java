@@ -499,6 +499,10 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             .execute();
         });
 
+        for (var run : List.copyOf(activeDryRuns)) {
+          if (run.instanceId.equals(instanceId) && run.scriptId.equals(scriptId)) run.context.cancel();
+        }
+
         log.info("Script {} deleted", scriptId);
         responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
         responseObserver.onCompleted();
@@ -1796,9 +1800,11 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson())));
         activeDryRuns.add(run);
         try {
-          // A profile-only deletion can finish while the saved graph is being loaded.
+          // The script or its instance can disappear while the saved graph is being loaded.
           if (soulFireServer.isInstanceDeleting(instanceId)
-            || !soulFireServer.dsl().fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(instanceId.toString()))) {
+            || !soulFireServer.dsl().fetchExists(DSL.selectOne().from(Tables.SCRIPTS)
+              .join(Tables.INSTANCES).on(Tables.SCRIPTS.INSTANCE_ID.eq(Tables.INSTANCES.ID))
+              .where(Tables.SCRIPTS.ID.eq(scriptId.toString())).and(Tables.INSTANCES.ID.eq(instanceId.toString())))) {
             run.context.cancel();
             return;
           }
