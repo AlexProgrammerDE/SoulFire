@@ -65,6 +65,8 @@ import java.util.concurrent.atomic.AtomicReference;
 /// Authenticated live video over gRPC-Web with ordered, session-scoped WebSocket input.
 @RequiredArgsConstructor
 public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
+  private static final Duration CONTROL_LEASE_TTL = Duration.ofSeconds(10);
+
   private final SoulFireServer server;
   private final ConcurrentHashMap<UUID, Session> sessions = new ConcurrentHashMap<>();
 
@@ -82,7 +84,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       if (bot == null) throw Status.FAILED_PRECONDITION.withDescription("Bot is offline").asRuntimeException();
       dimensions(request.getWidth(), request.getHeight());
       var leases = instance.botControlLeaseManager();
-      var lease = leases.acquire(botId, user.getUniqueId(), Duration.ofSeconds(10));
+      var lease = leases.acquire(botId, user.getUniqueId(), PovSessionHeartbeat.STARTUP_TIMEOUT.plus(CONTROL_LEASE_TTL));
       var observer = (ServerCallStreamObserver<PovFrame>) response;
       var session = new Session(sessionId, bot, user, leases, lease.token(), observer,
         request.getWidth(), request.getHeight(), request.getMaxFps(), request.getCodecsList());
@@ -124,7 +126,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     if (request.hasClipboard() && request.getClipboard().length() > 16_384) throw new IllegalArgumentException("Clipboard too large");
     synchronized (session) {
       if (request.getSequence() <= session.inputSequence) throw Status.ABORTED.withDescription("Stale input batch").asRuntimeException();
-      session.leases.renew(session.bot.accountProfileId(), session.owner, session.token, Duration.ofSeconds(10));
+      session.leases.renew(session.bot.accountProfileId(), session.owner, session.token, CONTROL_LEASE_TTL);
       session.bot.minecraft().submit(() -> {
         if (session.closed.get()) return;
 
@@ -162,7 +164,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       if (request.getMaxFps() != 0) session.maxFps = request.getMaxFps();
       if (request.getRequestKeyFrame()) session.keyFrameRequested.set(true);
       session.feedback = request.hasFeedback() ? request.getFeedback() : null;
-      session.lastInput = System.nanoTime();
+      session.heartbeat.inputReceived(System.nanoTime());
     }
   }
 
@@ -292,7 +294,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private final VulkanRenderer.LiveReadback readback = new VulkanRenderer.LiveReadback();
     private AdaptivePovQuality adaptation;
     private volatile PovStreamFeedback feedback;
-    private volatile long lastInput = System.nanoTime();
+    private final PovSessionHeartbeat heartbeat = new PovSessionHeartbeat(startedAt);
     private long inputSequence;
     private final AtomicReference<String> openUrl = new AtomicReference<>();
     private final AtomicReference<ClipboardUpdate> clipboard = new AtomicReference<>();
@@ -321,7 +323,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       var started = System.nanoTime();
       try {
         if (observer.isCancelled()) { close(); return; }
-        if (started - lastInput > 5_000_000_000L) throw Status.DEADLINE_EXCEEDED.withDescription("POV heartbeat timed out").asRuntimeException();
+        heartbeat.check(started);
         if (adaptation == null || targetWidth != width || targetHeight != height || targetFps != maxFps) {
           targetWidth = width; targetHeight = height; targetFps = maxFps;
           var fps = Math.min(maxFps, (int) (530_000_000L / ((long) width * height)) / 5 * 5);
@@ -386,7 +388,16 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
             if (url != null) builder.setOpenUrl(url);
             var clipboardUpdate = clipboard.getAndSet(null);
             if (clipboardUpdate != null) builder.setClipboard(clipboardUpdate.text).setClipboardSequence(clipboardUpdate.sequence);
-            if (!closed.get() && !observer.isCancelled()) observer.onNext(builder.build());
+            if (!closed.get() && !observer.isCancelled()) {
+              synchronized (this) {
+                var now = System.nanoTime();
+                heartbeat.check(now);
+                // The browser can open its input channel only after receiving this capability.
+                if (frameSequence == 1) leases.renew(bot.accountProfileId(), owner, token, CONTROL_LEASE_TTL);
+                heartbeat.frameSent(now);
+              }
+              observer.onNext(builder.build());
+            }
           }
         }
       } catch (Throwable error) {
