@@ -22,6 +22,9 @@ import com.soulfiremc.server.api.InternalPluginClass;
 import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
+import com.soulfiremc.server.bot.ControlPriority;
+import com.soulfiremc.server.bot.ControlResource;
+import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
@@ -30,6 +33,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -56,13 +60,21 @@ public final class AutoJump extends InternalPlugin {
           return;
         }
 
-        var player = connection.minecraft().player;
-        if (player == null) {
-          return;
-        }
+        connection.botControl().tryStart(ControlTask.once(
+          "Auto jump",
+          ControlPriority.LOW,
+          Set.of(ControlResource.MOVEMENT),
+          () -> {
+            var player = connection.minecraft().player;
+            if (!settingsSource.get(AutoJumpSettings.ENABLED)
+              || player == null || !player.isAlive() || !player.onGround()) {
+              return;
+            }
 
-        log.debug("[AutoJump] Jumping!");
-        player.jumpFromGround();
+            log.debug("[AutoJump] Jumping!");
+            player.jumpFromGround();
+          }
+        ));
       },
       settingsSource.getRandom(AutoJumpSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
