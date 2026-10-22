@@ -193,6 +193,10 @@ message InstanceNotModified {
   // The current last_modified timestamp of the instance.
   // Clients should use this for subsequent conditional requests.
   google.protobuf.Timestamp last_modified = 1 [(google.api.field_behavior) = REQUIRED];
+  // Current permissions, which can change independently of the configuration.
+  repeated InstancePermissionState instance_permissions = 2;
+  // Current bot state, which can change independently of the configuration.
+  BotFleetSummary bot_summary = 3;
 }
 
 // Response for GetInstanceInfo containing either full info or a not-modified status.

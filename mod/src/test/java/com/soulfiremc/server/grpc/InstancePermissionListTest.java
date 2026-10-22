@@ -20,6 +20,8 @@ package com.soulfiremc.server.grpc;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.soulfiremc.grpc.generated.BotFleetSummary;
+import com.soulfiremc.grpc.generated.InstanceInfoRequest;
+import com.soulfiremc.grpc.generated.InstanceInfoResponse;
 import com.soulfiremc.grpc.generated.InstanceListRequest;
 import com.soulfiremc.grpc.generated.InstanceListResponse;
 import com.soulfiremc.grpc.generated.InstancePermission;
@@ -31,12 +33,15 @@ import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsDelegate;
 import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
 import com.soulfiremc.server.settings.lib.ServerSettingsSource;
+import com.soulfiremc.server.settings.lib.SettingsPageRegistry;
 import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.user.AuthSystem;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import io.grpc.Context;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.jsonwebtoken.Jwts;
 import org.flywaydb.core.Flyway;
@@ -64,6 +69,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Answers.CALLS_REAL_METHODS;
 import static org.mockito.ArgumentMatchers.any;
@@ -107,6 +113,7 @@ final class InstancePermissionListTest {
       var bots = mock(BotStateManager.class);
       when(server.getInstance(id)).thenReturn(Optional.of(runtime));
       when(runtime.botStateManager()).thenReturn(bots);
+      when(runtime.instanceSettingsPageRegistry()).thenReturn(new SettingsPageRegistry());
       when(bots.summary()).thenReturn(BotFleetSummary.getDefaultInstance());
     }
     owner = auth.authenticateBySubject(ownerId, Instant.now()).orElseThrow();
@@ -183,6 +190,48 @@ final class InstancePermissionListTest {
       Map.<String, JsonElement>of(ServerSettings.ALLOW_DELETING_INSTANCES.key(), new JsonPrimitive(allowed),
         ServerSettings.ALLOW_CHANGING_INSTANCE_META.key(), new JsonPrimitive(allowed))))));
     settings.invalidate();
+  }
+
+  @Test
+  void conditionalResponsesRefreshPolicyAndBotStateWithoutResendingConfiguration() {
+    var id = ids.getFirst();
+    var initial = info(InstanceInfoRequest.newBuilder().setId(id.toString()).build());
+    assertTrue(initial.hasInfo());
+    var request = InstanceInfoRequest.newBuilder().setId(id.toString())
+      .setIfModifiedSince(initial.getInfo().getLastModified()).build();
+    var updatedSummary = BotFleetSummary.newBuilder().setTotalBots(3).setDesiredBots(2).setOnlineBots(1).build();
+    when(server.getInstance(id).orElseThrow().botStateManager().summary()).thenReturn(updatedSummary);
+    policy(false);
+    var response = info(request);
+    assertTrue(response.hasNotModified());
+    var unchanged = response.getNotModified();
+    assertEquals(initial.getInfo().getLastModified(), unchanged.getLastModified());
+    assertEquals(updatedSummary, unchanged.getBotSummary());
+    var grants = unchanged.getInstancePermissionsList().stream().collect(Collectors.toMap(
+      permission -> permission.getInstancePermission(), permission -> permission.getGranted()));
+    assertEquals(InstancePermission.values().length - 1, grants.size());
+    assertFalse(grants.get(InstancePermission.DELETE_INSTANCE));
+    assertFalse(grants.get(InstancePermission.UPDATE_INSTANCE_META));
+    assertTrue(grants.get(InstancePermission.READ_INSTANCE));
+    policy(true);
+    assertTrue(info(request).getNotModified().getInstancePermissionsList().stream()
+      .filter(permission -> permission.getInstancePermission() == InstancePermission.UPDATE_INSTANCE_META)
+      .allMatch(permission -> permission.getGranted()));
+
+    server.dsl().update(Tables.INSTANCES).set(Tables.INSTANCES.OWNER_ID, AuthSystem.ROOT_USER_ID.toString())
+      .where(Tables.INSTANCES.ID.eq(id.toString())).execute();
+    var error = assertThrows(StatusRuntimeException.class, () -> info(request));
+    assertEquals(Status.Code.PERMISSION_DENIED, error.getStatus().getCode());
+  }
+
+  private InstanceInfoResponse info(InstanceInfoRequest request) {
+    StreamObserver<InstanceInfoResponse> observer = mock();
+    Context.current().withValue(ServerRPCConstants.USER_CONTEXT_KEY, owner).run(() ->
+      new InstanceServiceImpl(server).getInstanceInfo(request, observer));
+    var response = ArgumentCaptor.forClass(InstanceInfoResponse.class);
+    verify(observer).onNext(response.capture());
+    verify(observer).onCompleted();
+    return response.getValue();
   }
 
   private InstanceListResponse list(SoulFireUser user) {

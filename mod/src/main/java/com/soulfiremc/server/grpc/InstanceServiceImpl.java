@@ -257,6 +257,10 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       var lastModified = record.getUpdatedAt().toInstant(ZoneOffset.UTC);
       var lastModifiedProto = Timestamps.fromMillis(lastModified.toEpochMilli());
+      var instance = soulFireServer.getInstance(instanceId)
+        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException());
+      var permissions = instancePermissionStates(user.instancePermissionChecker(instanceId));
+      var botSummary = instance.botStateManager().summary();
 
       // Check if-modified-since
       if (request.hasIfModifiedSince()) {
@@ -269,6 +273,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           responseObserver.onNext(InstanceInfoResponse.newBuilder()
             .setNotModified(InstanceNotModified.newBuilder()
               .setLastModified(lastModifiedProto)
+              .addAllInstancePermissions(permissions)
+              .setBotSummary(botSummary)
               .build())
             .build());
           responseObserver.onCompleted();
@@ -276,12 +282,6 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
       }
 
-      var optionalInstance = soulFireServer.getInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
-        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
-      }
-
-      var instance = optionalInstance.get();
       var registry = instance.instanceSettingsPageRegistry();
       var settings = parseSettings(record.getSettings());
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
@@ -289,8 +289,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .setFriendlyName(record.getFriendlyName())
           .setIcon(record.getIcon())
           .setConfig(settings.toProto())
-          .setBotSummary(instance.botStateManager().summary())
-          .addAllInstancePermissions(instancePermissionStates(user.instancePermissionChecker(instanceId)))
+          .setBotSummary(botSummary)
+          .addAllInstancePermissions(permissions)
           .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
           .addAllInstanceSettings(registry.exportSettingsPages())
           .addAllPlugins(registry.exportRegisteredPlugins())

@@ -183,10 +183,14 @@ class InstanceInfo(_message.Message):
     def __init__(self, friendly_name: _Optional[str] = ..., icon: _Optional[str] = ..., config: _Optional[_Union[InstanceConfig, _Mapping]] = ..., instance_permissions: _Optional[_Iterable[_Union[InstancePermissionState, _Mapping]]] = ..., settings_definitions: _Optional[_Iterable[_Union[_common_pb2.SettingsDefinition, _Mapping]]] = ..., instance_settings: _Optional[_Iterable[_Union[_common_pb2.SettingsPage, _Mapping]]] = ..., plugins: _Optional[_Iterable[_Union[_common_pb2.ServerPlugin, _Mapping]]] = ..., last_modified: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., bot_summary: _Optional[_Union[_bot_pb2.BotFleetSummary, _Mapping]] = ...) -> None: ...
 
 class InstanceNotModified(_message.Message):
-    __slots__ = ("last_modified",)
+    __slots__ = ("last_modified", "instance_permissions", "bot_summary")
     LAST_MODIFIED_FIELD_NUMBER: _ClassVar[int]
+    INSTANCE_PERMISSIONS_FIELD_NUMBER: _ClassVar[int]
+    BOT_SUMMARY_FIELD_NUMBER: _ClassVar[int]
     last_modified: _timestamp_pb2.Timestamp
-    def __init__(self, last_modified: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    instance_permissions: _containers.RepeatedCompositeFieldContainer[InstancePermissionState]
+    bot_summary: _bot_pb2.BotFleetSummary
+    def __init__(self, last_modified: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., instance_permissions: _Optional[_Iterable[_Union[InstancePermissionState, _Mapping]]] = ..., bot_summary: _Optional[_Union[_bot_pb2.BotFleetSummary, _Mapping]] = ...) -> None: ...
 
 class InstanceInfoResponse(_message.Message):
     __slots__ = ("info", "not_modified")
