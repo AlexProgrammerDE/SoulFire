@@ -202,7 +202,7 @@ export default {
             check(
               data.includes('"minecraft:diamond_sword"') &&
                 !data.includes('"minecraft:nether_star"'),
-              "Vanilla did not retain the bot's restored hotbar",
+              `Vanilla did not retain the bot's restored hotbar: ${data}`,
             ),
           ),
         ),
