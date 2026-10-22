@@ -317,6 +317,18 @@ message InstanceAddAccountsBatchRequest {
 message InstanceAddAccountsBatchResponse {
 }
 
+// Request to atomically replace all accounts in an instance.
+message InstanceReplaceAccountsRequest {
+  // The unique identifier (UUID) of the instance.
+  string id = 1 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
+  // The complete replacement list. An empty list removes all accounts.
+  repeated MinecraftAccountProto accounts = 2;
+}
+
+// Response after replacing the account list.
+message InstanceReplaceAccountsResponse {
+}
+
 // Request to remove multiple Minecraft accounts from an instance in a single operation.
 // More efficient than multiple individual RemoveInstanceAccount calls.
 message InstanceRemoveAccountsBatchRequest {
@@ -772,6 +784,22 @@ service InstanceService {
     };
     option (soulfire.v1.api_method) = {
       display_name: "Batch add instance accounts"
+      permissions: "UPDATE_INSTANCE_CONFIG"
+      scope: "instance.account"
+    };
+  }
+
+  // Atomically replaces the account list and stops bots whose accounts were removed.
+  // Other instance configuration remains unchanged.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if the instance does not exist; INVALID_ARGUMENT for invalid accounts
+  rpc ReplaceInstanceAccounts (InstanceReplaceAccountsRequest) returns (InstanceReplaceAccountsResponse) {
+    option (google.api.http) = {
+      post: "/v1/instances/{id}/accounts:replace"
+      body: "*"
+    };
+    option (soulfire.v1.api_method) = {
+      display_name: "Replace instance accounts"
       permissions: "UPDATE_INSTANCE_CONFIG"
       scope: "instance.account"
     };

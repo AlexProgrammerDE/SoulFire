@@ -103,6 +103,7 @@ from .instance_pb2 import (
     InstanceRemoveAccountsBatchRequest,
     InstanceRemoveProxiesBatchRequest,
     InstanceRemoveProxyEntriesRequest,
+    InstanceReplaceAccountsRequest,
     InstanceUpdateConfigEntryRequest,
     InstanceUpdateMetaRequest,
 )
@@ -979,6 +980,24 @@ class SoulFireInstance:
             "SoulFireInstance.add_accounts",
             lambda: self._instance_service.add_instance_accounts_batch(
                 InstanceAddAccountsBatchRequest(id=self.id, accounts=accounts),
+                headers=headers,
+                timeout_ms=timeout_ms,
+            ),
+        )
+
+    @fn("SoulFireInstance.replace_accounts")
+    def replace_accounts(
+        self,
+        accounts: Iterable[MinecraftAccountProto],
+        *,
+        headers: dict[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> EffectGen[None, SoulFireOperationError]:
+        """Atomically replace accounts while preserving other instance configuration."""
+        yield from rpc(
+            "SoulFireInstance.replace_accounts",
+            lambda: self._instance_service.replace_instance_accounts(
+                InstanceReplaceAccountsRequest(id=self.id, accounts=accounts),
                 headers=headers,
                 timeout_ms=timeout_ms,
             ),

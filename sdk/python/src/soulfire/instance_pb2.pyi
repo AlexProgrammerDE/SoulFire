@@ -286,6 +286,18 @@ class InstanceAddAccountsBatchResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
+class InstanceReplaceAccountsRequest(_message.Message):
+    __slots__ = ("id", "accounts")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    ACCOUNTS_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    accounts: _containers.RepeatedCompositeFieldContainer[_common_pb2.MinecraftAccountProto]
+    def __init__(self, id: _Optional[str] = ..., accounts: _Optional[_Iterable[_Union[_common_pb2.MinecraftAccountProto, _Mapping]]] = ...) -> None: ...
+
+class InstanceReplaceAccountsResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
 class InstanceRemoveAccountsBatchRequest(_message.Message):
     __slots__ = ("id", "profile_ids")
     ID_FIELD_NUMBER: _ClassVar[int]

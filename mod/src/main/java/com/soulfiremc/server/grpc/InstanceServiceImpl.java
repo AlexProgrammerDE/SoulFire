@@ -595,6 +595,53 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   }
 
   @Override
+  public void replaceInstanceAccounts(InstanceReplaceAccountsRequest request, StreamObserver<InstanceReplaceAccountsResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      var accounts = request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList();
+      var accountIds = accounts.stream().map(MinecraftAccount::profileId).collect(Collectors.toSet());
+      var instance = soulFireServer.getInstance(instanceId)
+        .orElseThrow(() -> Status.NOT_FOUND
+          .withDescription("Instance '%s' not found".formatted(instanceId))
+          .asRuntimeException());
+      var removedAccountIds = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+        }
+
+        var currentSettings = parseSettings(record.getSettings());
+        var removed = currentSettings.accounts().stream()
+          .map(MinecraftAccount::profileId)
+          .filter(profileId -> !accountIds.contains(profileId))
+          .toList();
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(currentSettings.withAccounts(accounts)))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
+        return removed;
+      });
+
+      instance.invalidateSettingsCache();
+      instance.botStateManager().removeAccounts(removedAccountIds).join();
+      instance.botStateManager().syncConfiguredAccounts();
+      responseObserver.onNext(InstanceReplaceAccountsResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+    } catch (Throwable t) {
+      log.error("Error replacing instance accounts", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
   public void removeInstanceAccountsBatch(InstanceRemoveAccountsBatchRequest request, StreamObserver<InstanceRemoveAccountsBatchResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));

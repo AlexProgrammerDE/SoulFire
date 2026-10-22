@@ -922,6 +922,22 @@ export class SoulFireInstance {
     );
   }
 
+  /** Atomically replaces all accounts, preserving the other instance configuration. */
+  public replaceAccounts(
+    accounts: readonly MinecraftAccountProto[],
+    options?: CallOptions,
+  ): Effect.Effect<void, SoulFireOperationError> {
+    return Effect.map(
+      rpc("SoulFireInstance.replaceAccounts", (signal) =>
+        this.#instanceClient.replaceInstanceAccounts(
+          { id: this.id, accounts: [...accounts] },
+          withSignal(options, signal),
+        ),
+      ),
+      () => undefined,
+    );
+  }
+
   public removeAccounts(
     profileIds: readonly string[],
     options?: CallOptions,
