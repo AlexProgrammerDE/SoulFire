@@ -40,6 +40,7 @@ import com.soulfiremc.server.spark.SFSparkPlugin;
 import com.soulfiremc.server.task.BotTaskManager;
 import com.soulfiremc.server.user.*;
 import com.soulfiremc.server.util.KeyHelper;
+import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.GsonInstance;
@@ -62,6 +63,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -100,6 +102,7 @@ public final class SoulFireServer {
   private final SoulFireScheduler.RunnableWrapper runnableWrapper = new ServerRunnableWrapper(this);
   private final SoulFireScheduler scheduler = new SoulFireScheduler(runnableWrapper);
   private final Map<UUID, InstanceManager> instances = new ConcurrentHashMap<>();
+  private final Map<UUID, CompletableFuture<?>> instanceDeletions = new ConcurrentHashMap<>();
   private final MetadataHolder<Object> metadata = new MetadataHolder<>();
   private final ServerSettingsDelegate settingsSource;
   private final RPCServer rpcServer;
@@ -351,9 +354,35 @@ public final class SoulFireServer {
   }
 
   public Optional<CompletableFuture<?>> deleteInstance(UUID id) {
-    dsl().deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).execute();
+    var instance = instances.get(id);
+    if (instance == null && !dsl().fetchExists(Tables.INSTANCES, Tables.INSTANCES.ID.eq(id.toString()))) {
+      return Optional.empty();
+    }
 
-    return Optional.ofNullable(instances.remove(id)).map(InstanceManager::deleteInstance);
+    var deletion = instanceDeletions.computeIfAbsent(id, _ -> {
+      var cleanup = instance == null
+        ? CompletableFuture.runAsync(() -> deleteInstanceStorage(id), scheduler)
+        : instance.deleteInstance();
+      return cleanup.thenRunAsync(() -> {
+        // Disconnect callbacks and scheduler cleanup can still reload the profile.
+        dsl().deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).execute();
+        if (instance != null) instances.remove(id, instance);
+      }, scheduler);
+    });
+    deletion.whenComplete((_, _) -> instanceDeletions.remove(id, deletion));
+    return Optional.of(deletion);
+  }
+
+  void deleteInstanceStorage(UUID id) {
+    for (var path : List.of(
+      getObjectStoragePath().resolve("instance-" + id),
+      SFPathConstants.baseDirectory().resolve("client-data").resolve("instance-" + id))) {
+      try {
+        SFHelpers.deleteDirectory(path);
+      } catch (IOException e) {
+        throw new UncheckedIOException("Could not delete instance storage " + path, e);
+      }
+    }
   }
 
   public Optional<InstanceManager> getInstance(UUID id) {

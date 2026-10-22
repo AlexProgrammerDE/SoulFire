@@ -379,17 +379,8 @@ public final class InstanceManager {
   }
 
   public CompletableFuture<?> deleteInstance() {
-    return botStateManager.shutdown()
-      .thenRunAsync(scheduler::shutdown, soulFireServer.scheduler())
-      .thenRunAsync(() -> {
-        for (var path : List.of(getInstanceObjectStoragePath(), getInstanceClientDataPath())) {
-          try {
-            SFHelpers.deleteDirectory(path);
-          } catch (IOException e) {
-            log.error("Error while deleting instance storage {}", path, e);
-          }
-        }
-      }, soulFireServer.scheduler());
+    return shutdownHook()
+      .thenRunAsync(() -> soulFireServer.deleteInstanceStorage(id), soulFireServer.scheduler());
   }
 
   public CompletableFuture<?> shutdownHook() {
