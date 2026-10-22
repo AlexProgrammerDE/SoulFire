@@ -27,6 +27,7 @@ import com.soulfiremc.mod.access.IMenuIdentity;
 import com.soulfiremc.mod.mixin.soulfire.AnvilScreenAccessor;
 import com.soulfiremc.mod.mixin.soulfire.CrafterScreenAccessor;
 import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
+import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
@@ -577,6 +578,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::invalidateSettingsCache);
       responseObserver.onNext(BotUpdateConfigEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {

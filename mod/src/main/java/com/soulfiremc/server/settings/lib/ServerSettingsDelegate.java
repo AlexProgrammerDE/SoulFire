@@ -19,26 +19,33 @@ package com.soulfiremc.server.settings.lib;
 
 import com.google.gson.JsonElement;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.structs.CachedLazyObject;
-import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-@RequiredArgsConstructor
 public final class ServerSettingsDelegate implements ServerSettingsSource {
-  private final CachedLazyObject<ServerSettingsSource> source;
+  private final Supplier<ServerSettingsSource> loader;
+  private volatile ServerSettingsSource source;
 
-  public void invalidate() {
-    source.invalidate();
+  public ServerSettingsDelegate(Supplier<ServerSettingsSource> loader) {
+    this.loader = loader;
+    invalidate();
+  }
+
+  /// Reloads after a committed settings write. Readers keep the previous snapshot
+  /// until loading succeeds and never acquire a database connection or this lock.
+  public synchronized void invalidate() {
+    source = Objects.requireNonNull(loader.get());
   }
 
   @Override
   public Optional<JsonElement> get(Property<SettingsSource.Server> property) {
-    return source.get().get(property);
+    return source.get(property);
   }
 
   @Override
   public ServerSettingsImpl.Stem stem() {
-    return source.get().stem();
+    return source.stem();
   }
 }

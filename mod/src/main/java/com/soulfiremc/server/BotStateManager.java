@@ -627,7 +627,6 @@ public final class BotStateManager {
       return account;
     }
     instanceManager.persistAccountMetadataUpdates(Map.of(account.profileId(), metadata));
-    instanceManager.invalidateSettingsCache();
     return account.withPersistentMetadata(metadata);
   }
 

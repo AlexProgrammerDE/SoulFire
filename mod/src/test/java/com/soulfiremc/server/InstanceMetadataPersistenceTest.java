@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -88,12 +89,13 @@ final class InstanceMetadataPersistenceTest {
     assertTrue(instanceMetadata.exportIfDirty().isPresent());
     assertTrue(botMetadata.exportIfDirty().isPresent());
 
-    InstanceMetadataPersistence.persist(dsl, instanceId, instanceMetadata, Map.of(botId, bot));
+    assertTrue(InstanceMetadataPersistence.persist(dsl, instanceId, instanceMetadata, Map.of(botId, bot)));
 
     assertEquals(new JsonPrimitive(1), stored().persistentMetadata().get("test").get("value"));
     assertEquals(new JsonPrimitive(1), stored().accounts().getFirst().persistentMetadata().get("test").get("value"));
     assertTrue(instanceMetadata.exportIfDirty().isEmpty());
     assertTrue(botMetadata.exportIfDirty().isEmpty());
+    assertFalse(InstanceMetadataPersistence.persist(dsl, instanceId, instanceMetadata, Map.of(botId, bot)));
   }
 
   @Test
@@ -109,16 +111,17 @@ final class InstanceMetadataPersistenceTest {
     assertEquals(new JsonPrimitive(1), stored().persistentMetadata().get("test").get("value"));
     assertTrue(instanceMetadata.exportIfDirty().isPresent());
     assertTrue(botMetadata.exportIfDirty().isPresent());
-    InstanceMetadataPersistence.persist(dsl, instanceId, instanceMetadata, Map.of(botId, bot));
+    assertTrue(InstanceMetadataPersistence.persist(dsl, instanceId, instanceMetadata, Map.of(botId, bot)));
     assertEquals(new JsonPrimitive(2), stored().persistentMetadata().get("test").get("value"));
     assertTrue(stored().accounts().getFirst().persistentMetadata().isEmpty());
     assertTrue(instanceMetadata.exportIfDirty().isEmpty());
     assertTrue(botMetadata.exportIfDirty().isEmpty());
+    assertFalse(InstanceMetadataPersistence.persist(dsl, instanceId, instanceMetadata, Map.of(botId, bot)));
   }
 
   @Test
   void aMissingInstanceDoesNotAcknowledgeUnwrittenValues() {
-    InstanceMetadataPersistence.persist(dsl, UUID.randomUUID(), instanceMetadata, Map.of(botId, bot));
+    assertFalse(InstanceMetadataPersistence.persist(dsl, UUID.randomUUID(), instanceMetadata, Map.of(botId, bot)));
     assertTrue(instanceMetadata.exportIfDirty().isPresent());
     assertTrue(botMetadata.exportIfDirty().isPresent());
   }

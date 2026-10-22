@@ -42,7 +42,6 @@ import com.soulfiremc.server.user.*;
 import com.soulfiremc.server.util.KeyHelper;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.server.util.structs.SFUpdateChecker;
 import com.soulfiremc.server.util.structs.ShutdownManager;
@@ -175,7 +174,7 @@ public final class SoulFireServer {
     });
 
     this.databaseContext = databaseContextFuture.join();
-    this.settingsSource = new ServerSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
+    this.settingsSource = new ServerSettingsDelegate(this::fetchSettingsSource);
     this.authSystem = authSystemFuture.join();
     this.rpcServer = rpcServerFuture.join();
 

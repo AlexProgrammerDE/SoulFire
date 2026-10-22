@@ -47,7 +47,6 @@ import com.soulfiremc.server.settings.property.Property;
 import com.soulfiremc.server.user.SoulFireUser;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
-import com.soulfiremc.server.util.structs.CachedLazyObject;
 import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.SFLogAppender;
 import lombok.Getter;
@@ -118,7 +117,7 @@ public final class InstanceManager {
     this.scheduler = new SoulFireScheduler(runnableWrapper);
     this.soulFireServer = soulFireServer;
     this.dsl = dsl;
-    this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
+    this.settingsSource = new InstanceSettingsDelegate(this::fetchSettingsSource);
     refreshFriendlyName();
     initPersistentMetadata();
 
@@ -253,7 +252,9 @@ public final class InstanceManager {
 
   private void tick() {
     metricsCollector.tick();
-    InstanceMetadataPersistence.persist(dsl, id, persistentMetadata, botConnections);
+    if (InstanceMetadataPersistence.persist(dsl, id, persistentMetadata, botConnections)) {
+      invalidateSettingsCache();
+    }
     evictBots();
   }
 
@@ -304,6 +305,7 @@ public final class InstanceManager {
         .where(Tables.INSTANCES.ID.eq(id.toString()))
         .execute();
     });
+    invalidateSettingsCache();
   }
 
   MinecraftAccount refreshAccount(MinecraftAccount account) {

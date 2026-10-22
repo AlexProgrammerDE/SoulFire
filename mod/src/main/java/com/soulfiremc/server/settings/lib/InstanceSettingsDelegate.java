@@ -21,44 +21,51 @@ import com.google.gson.JsonElement;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.property.Property;
-import com.soulfiremc.server.util.structs.CachedLazyObject;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
-@RequiredArgsConstructor
 public final class InstanceSettingsDelegate implements InstanceSettingsSource {
-  private final CachedLazyObject<InstanceSettingsSource> source;
+  private final Supplier<InstanceSettingsSource> loader;
+  private volatile InstanceSettingsSource source;
 
-  public void invalidate() {
-    source.invalidate();
+  public InstanceSettingsDelegate(Supplier<InstanceSettingsSource> loader) {
+    this.loader = loader;
+    invalidate();
+  }
+
+  /// Reloads after a committed settings write. Readers keep the previous snapshot
+  /// until loading succeeds and never acquire a database connection or this lock.
+  public synchronized void invalidate() {
+    source = Objects.requireNonNull(loader.get());
   }
 
   @Override
   public Map<UUID, MinecraftAccount> accounts() {
-    return source.get().accounts();
+    return source.accounts();
   }
 
   @Override
   public List<SFProxy> proxies() {
-    return source.get().proxies();
+    return source.proxies();
   }
 
   @Override
   public ServerSettingsSource serverSettings() {
-    return source.get().serverSettings();
+    return source.serverSettings();
   }
 
   @Override
   public InstanceSettingsImpl.Stem stem() {
-    return source.get().stem();
+    return source.stem();
   }
 
   @Override
   public Optional<JsonElement> get(Property<SettingsSource.Instance> property) {
-    return source.get().get(property);
+    return source.get(property);
   }
 }

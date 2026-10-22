@@ -39,7 +39,7 @@ final class InstanceMetadataPersistence {
   private InstanceMetadataPersistence() {
   }
 
-  static void persist(DSLContext dsl, UUID instanceId, MetadataHolder<JsonElement> instanceMetadata,
+  static boolean persist(DSLContext dsl, UUID instanceId, MetadataHolder<JsonElement> instanceMetadata,
                       Map<UUID, BotConnection> bots) {
     var dirtyBots = new LinkedHashMap<UUID, PendingMetadata>();
     for (var entry : bots.entrySet()) {
@@ -48,7 +48,7 @@ final class InstanceMetadataPersistence {
     }
     var dirtyInstanceMetadata = instanceMetadata.snapshotIfDirty();
     if (dirtyBots.isEmpty() && dirtyInstanceMetadata.isEmpty()) {
-      return;
+      return false;
     }
 
     var persisted = dsl.transactionResult(cfg -> {
@@ -85,6 +85,7 @@ final class InstanceMetadataPersistence {
       savedBots.forEach(update -> update.holder().markClean(update.snapshot()));
       dirtyInstanceMetadata.ifPresent(instanceMetadata::markClean);
     });
+    return persisted.isPresent();
   }
 
   private record PendingMetadata(MetadataHolder<JsonElement> holder, MetadataHolder.Snapshot<JsonElement> snapshot) {}
