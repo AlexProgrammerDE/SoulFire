@@ -78,8 +78,27 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     String id,
     String type,
     PositionData position,
-    Map<String, JsonElement> data
-  ) {}
+    Map<String, JsonElement> data,
+    boolean muted,
+    boolean collapsed,
+    Double width,
+    Double height,
+    List<String> containedNodes,
+    String label,
+    Integer resolvedType,
+    String parentFrameId
+  ) {
+    private ScriptNodeData {
+      containedNodes = containedNodes == null ? List.of() : List.copyOf(containedNodes);
+      label = Objects.requireNonNullElse(label, "");
+      parentFrameId = Objects.requireNonNullElse(parentFrameId, "");
+    }
+
+    private ScriptNodeData withData(Map<String, JsonElement> updatedData) {
+      return new ScriptNodeData(id, type, position, updatedData, muted, collapsed, width, height,
+        containedNodes, label, resolvedType, parentFrameId);
+    }
+  }
 
   private record PositionData(double x, double y) {}
 
@@ -957,35 +976,42 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   // Helper Methods
   // ============================================================================
 
+  private ScriptNodeData nodeToData(ScriptNode node) {
+    return new ScriptNodeData(
+      node.getId(),
+      node.getType(),
+      new PositionData(node.getPosition().getX(), node.getPosition().getY()),
+      node.getDataMap().entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, entry -> valueToJsonElement(entry.getValue()))),
+      node.getMuted(),
+      node.getCollapsed(),
+      node.hasWidth() ? node.getWidth() : null,
+      node.hasHeight() ? node.getHeight() : null,
+      node.getContainedNodesList(),
+      node.getLabel(),
+      node.hasResolvedType() ? node.getResolvedTypeValue() : null,
+      node.getParentFrameId()
+    );
+  }
+
+  private ScriptEdgeData edgeToData(ScriptEdge edge) {
+    return new ScriptEdgeData(
+      edge.getId(),
+      edge.getSource(),
+      edge.getSourceHandle(),
+      edge.getTarget(),
+      edge.getTargetHandle(),
+      edge.getEdgeType().name(),
+      edge.hasOrder() ? edge.getOrder() : null
+    );
+  }
+
   private String nodesToJson(List<ScriptNode> nodes) {
-    var nodeDataList = nodes.stream()
-      .map(node -> new ScriptNodeData(
-        node.getId(),
-        node.getType(),
-        new PositionData(node.getPosition().getX(), node.getPosition().getY()),
-        node.getDataMap().entrySet().stream()
-          .collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> valueToJsonElement(e.getValue())
-          ))
-      ))
-      .toList();
-    return GsonInstance.CONFIG_GSON.toJson(nodeDataList);
+    return GsonInstance.CONFIG_GSON.toJson(nodes.stream().map(this::nodeToData).toList());
   }
 
   private String edgesToJson(List<ScriptEdge> edges) {
-    var edgeDataList = edges.stream()
-      .map(edge -> new ScriptEdgeData(
-        edge.getId(),
-        edge.getSource(),
-        edge.getSourceHandle(),
-        edge.getTarget(),
-        edge.getTargetHandle(),
-        edge.getEdgeType().name(),
-        edge.hasOrder() ? edge.getOrder() : null
-      ))
-      .toList();
-    return GsonInstance.GSON.toJson(edgeDataList);
+    return GsonInstance.GSON.toJson(edges.stream().map(this::edgeToData).toList());
   }
 
   private String quotasToJson(ScriptQuotas quotas) {
@@ -1023,7 +1049,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .setPosition(Position.newBuilder()
             .setX(data.position().x())
             .setY(data.position().y())
-            .build());
+            .build())
+          .setMuted(data.muted())
+          .setCollapsed(data.collapsed())
+          .addAllContainedNodes(data.containedNodes())
+          .setLabel(data.label())
+          .setParentFrameId(data.parentFrameId());
+        if (data.width() != null) {
+          nodeBuilder.setWidth(data.width());
+        }
+        if (data.height() != null) {
+          nodeBuilder.setHeight(data.height());
+        }
+        if (data.resolvedType() != null) {
+          nodeBuilder.setResolvedTypeValue(data.resolvedType());
+        }
 
         if (data.data() != null) {
           data.data().forEach((key, jsonElement) ->
@@ -1049,14 +1089,17 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           log.warn("Unknown edge type '{}' in edge {}, defaulting to EDGE_TYPE_DATA", data.edgeType(), data.id());
           edgeType = EdgeType.EDGE_TYPE_DATA;
         }
-        return ScriptEdge.newBuilder()
+        var edgeBuilder = ScriptEdge.newBuilder()
           .setId(data.id())
           .setSource(data.source())
           .setSourceHandle(data.sourceHandle())
           .setTarget(data.target())
           .setTargetHandle(data.targetHandle())
-          .setEdgeType(edgeType)
-          .build();
+          .setEdgeType(edgeType);
+        if (data.order() != null) {
+          edgeBuilder.setOrder(data.order());
+        }
+        return edgeBuilder.build();
       })
       .toList();
   }
@@ -1290,7 +1333,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           } else {
             newData.remove("parentGroupId");
           }
-          updatedNodes.add(new ScriptNodeData(n.id(), n.type(), n.position(), newData));
+          updatedNodes.add(n.withData(newData));
         } else {
           updatedNodes.add(n);
         }
@@ -1336,7 +1379,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             defaultInputs.put(entry.getKey(), jsonElementToObject(entry.getValue()));
           }
         }
-        builder.addNode(node.id(), node.type(), defaultInputs);
+        builder.addNode(new ScriptGraph.GraphNode(node.id(), node.type(), defaultInputs, node.muted()));
       }
     }
 
@@ -1596,26 +1639,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     try {
       var responseBuilder = ValidateScriptResponse.newBuilder();
 
-      List<ScriptNodeData> rawNodes = request.getNodesList().stream()
-        .map(node -> new ScriptNodeData(
-          node.getId(),
-          node.getType(),
-          new PositionData(node.getPosition().getX(), node.getPosition().getY()),
-          node.getDataMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> valueToJsonElement(e.getValue())))
-        ))
-        .toList();
-      List<ScriptEdgeData> rawEdges = request.getEdgesList().stream()
-        .map(edge -> new ScriptEdgeData(
-          edge.getId(),
-          edge.getSource(),
-          edge.getSourceHandle(),
-          edge.getTarget(),
-          edge.getTargetHandle(),
-          edge.getEdgeType().name(),
-          edge.hasOrder() ? edge.getOrder() : null
-        ))
-        .toList();
+      var rawNodes = request.getNodesList().stream().map(this::nodeToData).toList();
+      var rawEdges = request.getEdgesList().stream().map(this::edgeToData).toList();
 
       var flattened = flattenLayoutNodes(new ArrayList<>(rawNodes), new ArrayList<>(rawEdges));
       var builder = ScriptGraph.builder("validate", "Validation");
@@ -1627,7 +1652,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             defaultInputs.put(entry.getKey(), jsonElementToObject(entry.getValue()));
           }
         }
-        builder.addNode(node.id(), node.type(), defaultInputs);
+        builder.addNode(new ScriptGraph.GraphNode(node.id(), node.type(), defaultInputs, node.muted()));
       }
 
       for (var edge : flattened.edges()) {

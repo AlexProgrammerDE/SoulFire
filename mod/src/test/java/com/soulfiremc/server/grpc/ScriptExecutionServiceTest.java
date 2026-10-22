@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.google.gson.JsonArray;
 import com.google.protobuf.ListValue;
 import com.google.protobuf.NullValue;
 import com.google.protobuf.Struct;
@@ -26,8 +27,11 @@ import com.soulfiremc.grpc.generated.CreateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptResponse;
 import com.soulfiremc.grpc.generated.DeactivateScriptRequest;
 import com.soulfiremc.grpc.generated.DryRunScriptRequest;
+import com.soulfiremc.grpc.generated.EdgeType;
 import com.soulfiremc.grpc.generated.GetScriptRequest;
 import com.soulfiremc.grpc.generated.GetScriptResponse;
+import com.soulfiremc.grpc.generated.PortType;
+import com.soulfiremc.grpc.generated.Position;
 import com.soulfiremc.grpc.generated.ScriptEdge;
 import com.soulfiremc.grpc.generated.ScriptEvent;
 import com.soulfiremc.grpc.generated.ScriptNode;
@@ -193,6 +197,109 @@ final class ScriptExecutionServiceTest {
     rpcContext.run(() -> action.accept(observer));
     assertNull(failure.get());
     return response.get();
+  }
+
+  @Test
+  void preservesNodeMetadataAndEdgeOrderAcrossSaveAndReload() {
+    var frameId = UUID.randomUUID().toString();
+    var frame = ScriptNode.newBuilder().setId(frameId).setType("layout.frame")
+      .setPosition(Position.newBuilder().setX(-20).setY(-30))
+      .setWidth(512.5).setHeight(321).setLabel("frame").addContainedNodes(actionId).build();
+    var node = ScriptNode.newBuilder().setId(actionId).setType("action.print")
+      .setPosition(Position.newBuilder().setX(10).setY(20))
+      .setMuted(true).setCollapsed(true).setLabel("muted print").setWidth(0).setHeight(234.5)
+      .setParentFrameId(frameId).setResolvedType(PortType.PORT_TYPE_STRING).build();
+    var trigger = ScriptNode.newBuilder().setId(triggerId).setType("trigger.on_chat")
+      .setPosition(Position.getDefaultInstance()).build();
+    var edge = ScriptEdge.newBuilder().setId(UUID.randomUUID().toString())
+      .setSource(triggerId).setSourceHandle("out").setTarget(actionId).setTargetHandle("in")
+      .setEdgeType(EdgeType.EDGE_TYPE_EXECUTION).setOrder(9).build();
+    var nodes = List.of(trigger, node, frame);
+    var created = this.<CreateScriptResponse>rpcResponse(observer -> service.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setName("metadata").setPaused(true).addAllNodes(nodes).addEdges(edge).build(), observer));
+    assertEquals(nodes, created.getScript().getNodesList());
+    assertEquals(List.of(edge), created.getScript().getEdgesList());
+    var scriptId = created.getScript().getId();
+    for (var explicitZero : List.of(false, true)) {
+      var changedBuilder = node.toBuilder().setMuted(false).setCollapsed(false).setLabel("")
+        .clearWidth().clearHeight().clearContainedNodes().setParentFrameId("")
+        .clearResolvedType();
+      var changedEdgeBuilder = edge.toBuilder().clearOrder();
+      if (explicitZero) {
+        changedBuilder.setResolvedTypeValue(0);
+        changedEdgeBuilder.setOrder(0);
+      }
+      var changed = changedBuilder.build();
+      var changedNodes = List.of(trigger, changed, frame);
+      var changedEdge = changedEdgeBuilder.build();
+      var updated = this.<UpdateScriptResponse>rpcResponse(observer -> service.updateScript(UpdateScriptRequest.newBuilder()
+        .setInstanceId(instanceId).setScriptId(scriptId).setUpdateNodes(true).addAllNodes(changedNodes)
+        .setUpdateEdges(true).addEdges(changedEdge).build(), observer));
+      assertEquals(changedNodes, updated.getScript().getNodesList());
+      assertEquals(List.of(changedEdge), updated.getScript().getEdgesList());
+      var read = this.<GetScriptResponse>rpcResponse(observer -> service.getScript(GetScriptRequest.newBuilder()
+        .setInstanceId(instanceId).setScriptId(scriptId).build(), observer));
+      assertEquals(changedNodes, read.getScript().getNodesList());
+      assertEquals(List.of(changedEdge), read.getScript().getEdgesList());
+    }
+  }
+
+  @Test
+  void readsStoredGraphsWithoutOptionalMetadata() {
+    var scriptId = saveScript("action.print");
+    var record = server.dsl().selectFrom(Tables.SCRIPTS).where(Tables.SCRIPTS.ID.eq(scriptId)).fetchSingle();
+    var nodes = GsonInstance.GSON.fromJson(record.getNodesJson(), JsonArray.class);
+    for (var node : nodes) {
+      node.getAsJsonObject().keySet().retainAll(List.of("id", "type", "position", "data"));
+    }
+    server.dsl().update(Tables.SCRIPTS).set(Tables.SCRIPTS.NODES_JSON, GsonInstance.CONFIG_GSON.toJson(nodes))
+      .where(Tables.SCRIPTS.ID.eq(scriptId)).execute();
+    var read = this.<GetScriptResponse>rpcResponse(observer -> service.getScript(GetScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).build(), observer));
+    assertEquals(2, read.getScript().getNodesCount());
+    for (var node : read.getScript().getNodesList()) {
+      assertFalse(node.getMuted());
+      assertFalse(node.getCollapsed());
+      assertFalse(node.hasWidth());
+      assertFalse(node.hasHeight());
+      assertFalse(node.hasResolvedType());
+      assertTrue(node.getContainedNodesList().isEmpty());
+      assertTrue(node.getLabel().isEmpty());
+      assertTrue(node.getParentFrameId().isEmpty());
+    }
+    assertFalse(read.getScript().getEdges(0).hasOrder());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void savedMutedNodesBypassExecutionAndKeepDownstreamNodesRunning(boolean insideGroup) throws InterruptedException {
+    var groupId = UUID.randomUUID().toString();
+    var afterId = UUID.randomUUID().toString();
+    var muted = ScriptNode.newBuilder().setId(actionId).setType("action.print").setMuted(true)
+      .putData("message", Value.newBuilder().setStringValue("skip").build());
+    if (insideGroup) {
+      muted.putData("parentGroupId", Value.newBuilder().setStringValue(groupId).build());
+    }
+    var request = CreateScriptRequest.newBuilder().setInstanceId(instanceId).setName("muted node").setPaused(true)
+      .addNodes(ScriptNode.newBuilder().setId(triggerId).setType("trigger.on_chat"))
+      .addNodes(muted)
+      .addNodes(ScriptNode.newBuilder().setId(afterId).setType("action.print")
+        .putData("message", Value.newBuilder().setStringValue("after").build()))
+      .addEdges(ScriptEdge.newBuilder().setId(UUID.randomUUID().toString())
+        .setSource(triggerId).setSourceHandle("out").setTarget(actionId).setTargetHandle("in"))
+      .addEdges(ScriptEdge.newBuilder().setId(UUID.randomUUID().toString())
+        .setSource(actionId).setSourceHandle("out").setTarget(afterId).setTargetHandle("in"));
+    if (insideGroup) {
+      request.addNodes(ScriptNode.newBuilder().setId(groupId).setType("layout.group"));
+    }
+    var created = this.<CreateScriptResponse>rpcResponse(observer -> service.createScript(request.build(), observer));
+    run(request(created.getScript().getId()).build());
+    awaitCompletion();
+    assertTrue(events.getLast().getScriptCompleted().getSuccess());
+    assertEquals(List.of("after"), events.stream().filter(ScriptEvent::hasScriptLog)
+      .map(event -> event.getScriptLog().getMessage()).toList());
+    assertTrue(events.stream().filter(ScriptEvent::hasNodeCompleted)
+      .anyMatch(event -> event.getNodeCompleted().getNodeId().equals(actionId)));
   }
 
   @ParameterizedTest
