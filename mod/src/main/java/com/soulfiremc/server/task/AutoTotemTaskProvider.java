@@ -134,7 +134,8 @@ public final class AutoTotemTaskProvider
 
       var bot = context.bot();
       var player = bot.minecraft().player;
-      if (player == null || player.hasContainerOpen()) {
+      if (player == null || player.hasContainerOpen()
+        || !player.inventoryMenu.getCarried().isEmpty()) {
         return;
       }
       var offhand = player.inventoryMenu
