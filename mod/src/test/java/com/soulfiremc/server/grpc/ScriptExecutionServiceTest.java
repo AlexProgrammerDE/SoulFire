@@ -167,6 +167,45 @@ final class ScriptExecutionServiceTest {
     return DryRunScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).setTriggerNodeId(triggerId);
   }
 
+  @Test
+  void emptyResultsCompleteTheIdentifiedInvocation() throws InterruptedException {
+    run(request(saveScript(registerAction(Mono::empty))).build());
+    awaitCompletion();
+    var started = events.stream().filter(ScriptEvent::hasNodeStarted).map(ScriptEvent::getNodeStarted)
+      .filter(event -> event.getNodeId().equals(actionId)).findFirst().orElseThrow();
+    var completed = events.stream().filter(ScriptEvent::hasNodeCompleted).map(ScriptEvent::getNodeCompleted)
+      .filter(event -> event.getNodeId().equals(actionId)).findFirst().orElseThrow();
+    assertTrue(completed.hasExecutionId());
+    assertEquals(started.getExecutionId(), completed.getExecutionId());
+    assertTrue(events.getLast().getScriptCompleted().getSuccess());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void streamedNodeEventsCorrelateEachInvocation(boolean failing) throws InterruptedException {
+    var type = registerAction(() -> failing ? Mono.error(new IllegalStateException()) : Mono.just(Map.of()));
+    run(request(saveScript(type)).build());
+    awaitCompletion();
+    var starts = events.stream().filter(ScriptEvent::hasNodeStarted).map(ScriptEvent::getNodeStarted).toList();
+    assertEquals(2, starts.size());
+    assertTrue(starts.stream().allMatch(event -> event.hasExecutionId() && event.getExecutionId() > 0));
+    assertEquals(starts.size(), starts.stream().map(event -> event.getExecutionId()).distinct().count());
+    for (var event : events) {
+      if (event.hasNodeCompleted()) {
+        var completed = event.getNodeCompleted();
+        assertTrue(completed.hasExecutionId());
+        assertTrue(starts.stream().anyMatch(start -> start.getNodeId().equals(completed.getNodeId())
+          && start.getExecutionId() == completed.getExecutionId()));
+      } else if (event.hasNodeError()) {
+        var error = event.getNodeError();
+        assertTrue(error.hasExecutionId());
+        assertTrue(starts.stream().anyMatch(start -> start.getNodeId().equals(error.getNodeId())
+          && start.getExecutionId() == error.getExecutionId()));
+      }
+    }
+    assertEquals(failing, events.stream().anyMatch(ScriptEvent::hasNodeError));
+  }
+
   @ParameterizedTest
   @ValueSource(booleans = {false, true})
   void statusFollowsExecutingNodesWithoutActivatingAMonitor(boolean automatic) throws InterruptedException {

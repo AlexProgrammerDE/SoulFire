@@ -378,6 +378,8 @@ message NodeStarted {
   string node_id = 1 [(google.api.field_behavior) = REQUIRED];
   // When the node started execution.
   google.protobuf.Timestamp timestamp = 2 [(google.api.field_behavior) = REQUIRED];
+  // Identifies this invocation within the script activation.
+  optional uint64 execution_id = 3;
 }
 
 // Event emitted when a node completes execution successfully.
@@ -391,6 +393,8 @@ message NodeCompleted {
   google.protobuf.Timestamp timestamp = 3 [(google.api.field_behavior) = REQUIRED];
   // Execution time in nanoseconds for profiling.
   int64 execution_time_nanos = 4 [(google.api.field_behavior) = REQUIRED];
+  // Matches the execution_id of the corresponding NodeStarted event.
+  optional uint64 execution_id = 5;
 }
 
 // Execution statistics emitted when a trigger chain completes.
@@ -409,6 +413,8 @@ message NodeError {
   string error_message = 2 [(google.api.field_behavior) = REQUIRED];
   // When the error occurred.
   google.protobuf.Timestamp timestamp = 3 [(google.api.field_behavior) = REQUIRED];
+  // Matches NodeStarted when the error belongs to an executing invocation.
+  optional uint64 execution_id = 4;
 }
 
 // Event emitted when a script logs a message (e.g., from Print node).

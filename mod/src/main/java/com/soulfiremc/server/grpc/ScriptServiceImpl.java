@@ -1482,45 +1482,58 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     subscribers.sendTo(observer, event);
   }
 
+  private ScriptEvent nodeStartedEvent(String nodeId, long executionId) {
+    var event = NodeStarted.newBuilder().setNodeId(nodeId)
+      .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
+    if (executionId != 0) event.setExecutionId(executionId);
+    return ScriptEvent.newBuilder().setNodeStarted(event).build();
+  }
+
+  private ScriptEvent nodeCompletedEvent(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+    var event = NodeCompleted.newBuilder().setNodeId(nodeId)
+      .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).setExecutionTimeNanos(executionTimeNanos);
+    outputs.forEach((key, value) -> event.putOutputs(key, nodeValueToProtoValue(value)));
+    if (executionId != 0) event.setExecutionId(executionId);
+    return ScriptEvent.newBuilder().setNodeCompleted(event).build();
+  }
+
+  private ScriptEvent nodeErrorEvent(String nodeId, String error, long executionId) {
+    var event = NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
+      .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
+    if (executionId != 0) event.setExecutionId(executionId);
+    return ScriptEvent.newBuilder().setNodeError(event).build();
+  }
+
   private ScriptEventListener createStreamingEventListener(UUID instanceId, UUID scriptId, ScriptEventSubscribers subscribers) {
     return new ScriptEventListener() {
       @Override
-      public void onNodeStarted(String nodeId) {
-        subscribers.send(() -> ScriptEvent.newBuilder()
-          .setNodeStarted(NodeStarted.newBuilder()
-            .setNodeId(nodeId)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .build())
-          .build());
+      public void onNodeStarted(String nodeId) { onNodeStarted(nodeId, 0); }
+
+      @Override
+      public void onNodeStarted(String nodeId, long executionId) {
+        subscribers.send(() -> nodeStartedEvent(nodeId, executionId));
       }
 
       @Override
-      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-        onNodeCompleted(nodeId, outputs, 0);
-      }
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) { onNodeCompleted(nodeId, outputs, 0, 0); }
 
       @Override
       public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-        subscribers.send(() -> {
-          var builder = NodeCompleted.newBuilder()
-            .setNodeId(nodeId)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .setExecutionTimeNanos(executionTimeNanos);
-          outputs.forEach((key, value) -> builder.putOutputs(key, nodeValueToProtoValue(value)));
-          return ScriptEvent.newBuilder().setNodeCompleted(builder.build()).build();
-        });
+        onNodeCompleted(nodeId, outputs, executionTimeNanos, 0);
       }
 
       @Override
-      public void onNodeError(String nodeId, String error) {
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+        subscribers.send(() -> nodeCompletedEvent(nodeId, outputs, executionTimeNanos, executionId));
+      }
+
+      @Override
+      public void onNodeError(String nodeId, String error) { onNodeError(nodeId, error, 0); }
+
+      @Override
+      public void onNodeError(String nodeId, String error, long executionId) {
         logScriptMessage(instanceId, scriptId, "error", error);
-        subscribers.send(() -> ScriptEvent.newBuilder()
-          .setNodeError(NodeError.newBuilder()
-            .setNodeId(nodeId)
-            .setErrorMessage(error)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .build())
-          .build());
+        subscribers.send(() -> nodeErrorEvent(nodeId, error, executionId));
       }
 
       @Override
@@ -1914,34 +1927,31 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
 
     @Override
-    public void onNodeStarted(String nodeId) {
-      send(ScriptEvent.newBuilder()
-        .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId)
-          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-        .build());
-    }
+    public void onNodeStarted(String nodeId) { onNodeStarted(nodeId, 0); }
 
     @Override
-    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-      onNodeCompleted(nodeId, outputs, 0);
-    }
+    public void onNodeStarted(String nodeId, long executionId) { send(nodeStartedEvent(nodeId, executionId)); }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) { onNodeCompleted(nodeId, outputs, 0, 0); }
 
     @Override
     public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-      var completed = NodeCompleted.newBuilder().setNodeId(nodeId)
-        .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-        .setExecutionTimeNanos(executionTimeNanos);
-      outputs.forEach((key, value) -> completed.putOutputs(key, nodeValueToProtoValue(value)));
-      send(ScriptEvent.newBuilder().setNodeCompleted(completed).build());
+      onNodeCompleted(nodeId, outputs, executionTimeNanos, 0);
     }
 
     @Override
-    public synchronized void onNodeError(String nodeId, String error) {
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+      send(nodeCompletedEvent(nodeId, outputs, executionTimeNanos, executionId));
+    }
+
+    @Override
+    public void onNodeError(String nodeId, String error) { onNodeError(nodeId, error, 0); }
+
+    @Override
+    public synchronized void onNodeError(String nodeId, String error, long executionId) {
       failed = true;
-      send(ScriptEvent.newBuilder()
-        .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
-          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-        .build());
+      send(nodeErrorEvent(nodeId, error, executionId));
     }
 
     @Override

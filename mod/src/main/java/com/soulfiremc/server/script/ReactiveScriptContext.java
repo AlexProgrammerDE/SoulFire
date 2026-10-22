@@ -31,6 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongFunction;
 
 /// Reactive execution context for scripts.
 /// Per-invocation state (output sinks) lives in ExecutionRun, not here.
@@ -42,7 +43,9 @@ public final class ReactiveScriptContext {
   private final ScriptEventListener eventListener;
   private final ScriptQuotasConfig quotas;
   @Getter(AccessLevel.NONE)
-  private final LinkedHashMap<Object, String> activeNodes = new LinkedHashMap<>();
+  private final LinkedHashMap<Long, String> activeNodes = new LinkedHashMap<>();
+  @Getter(AccessLevel.NONE)
+  private long nextExecutionId;
 
   /// For cancellation via Disposable.
   private final AtomicReference<Disposable> execution = new AtomicReference<>();
@@ -107,16 +110,17 @@ public final class ReactiveScriptContext {
   }
 
   /// Tracks each subscription independently, including overlapping runs of the same node.
-  <T> Mono<T> trackNode(String nodeId, Mono<T> operation) {
+  <T> Mono<T> trackNode(String nodeId, LongFunction<Mono<T>> operation) {
     return Mono.defer(() -> {
-      var token = new Object();
+      final long executionId;
       synchronized (activeNodes) {
         if (cancelled) return Mono.empty();
-        activeNodes.put(token, nodeId);
+        executionId = ++nextExecutionId;
+        activeNodes.put(executionId, nodeId);
       }
-      return operation.doFinally(_ -> {
+      return Mono.defer(() -> operation.apply(executionId)).doFinally(_ -> {
         synchronized (activeNodes) {
-          activeNodes.remove(token);
+          activeNodes.remove(executionId);
         }
       });
     });

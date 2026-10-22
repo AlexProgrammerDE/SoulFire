@@ -310,15 +310,17 @@ class ScriptLogEntry(_message.Message):
     def __init__(self, script_id: _Optional[str] = ..., node_id: _Optional[str] = ..., level: _Optional[_Union[LogLevel, str]] = ..., message: _Optional[str] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class NodeStarted(_message.Message):
-    __slots__ = ("node_id", "timestamp")
+    __slots__ = ("node_id", "timestamp", "execution_id")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    EXECUTION_ID_FIELD_NUMBER: _ClassVar[int]
     node_id: str
     timestamp: _timestamp_pb2.Timestamp
-    def __init__(self, node_id: _Optional[str] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    execution_id: int
+    def __init__(self, node_id: _Optional[str] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., execution_id: _Optional[int] = ...) -> None: ...
 
 class NodeCompleted(_message.Message):
-    __slots__ = ("node_id", "outputs", "timestamp", "execution_time_nanos")
+    __slots__ = ("node_id", "outputs", "timestamp", "execution_time_nanos", "execution_id")
     class OutputsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
@@ -330,11 +332,13 @@ class NodeCompleted(_message.Message):
     OUTPUTS_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     EXECUTION_TIME_NANOS_FIELD_NUMBER: _ClassVar[int]
+    EXECUTION_ID_FIELD_NUMBER: _ClassVar[int]
     node_id: str
     outputs: _containers.MessageMap[str, _struct_pb2.Value]
     timestamp: _timestamp_pb2.Timestamp
     execution_time_nanos: int
-    def __init__(self, node_id: _Optional[str] = ..., outputs: _Optional[_Mapping[str, _struct_pb2.Value]] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., execution_time_nanos: _Optional[int] = ...) -> None: ...
+    execution_id: int
+    def __init__(self, node_id: _Optional[str] = ..., outputs: _Optional[_Mapping[str, _struct_pb2.Value]] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., execution_time_nanos: _Optional[int] = ..., execution_id: _Optional[int] = ...) -> None: ...
 
 class ExecutionStats(_message.Message):
     __slots__ = ("node_count", "max_count")
@@ -345,14 +349,16 @@ class ExecutionStats(_message.Message):
     def __init__(self, node_count: _Optional[int] = ..., max_count: _Optional[int] = ...) -> None: ...
 
 class NodeError(_message.Message):
-    __slots__ = ("node_id", "error_message", "timestamp")
+    __slots__ = ("node_id", "error_message", "timestamp", "execution_id")
     NODE_ID_FIELD_NUMBER: _ClassVar[int]
     ERROR_MESSAGE_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
+    EXECUTION_ID_FIELD_NUMBER: _ClassVar[int]
     node_id: str
     error_message: str
     timestamp: _timestamp_pb2.Timestamp
-    def __init__(self, node_id: _Optional[str] = ..., error_message: _Optional[str] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    execution_id: int
+    def __init__(self, node_id: _Optional[str] = ..., error_message: _Optional[str] = ..., timestamp: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., execution_id: _Optional[int] = ...) -> None: ...
 
 class ScriptLog(_message.Message):
     __slots__ = ("node_id", "level", "message", "timestamp")
