@@ -23,6 +23,7 @@ import com.google.protobuf.util.Timestamps;
 import com.mojang.authlib.GameProfile;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.mod.access.IDialogScreen;
+import com.soulfiremc.mod.access.IMenuIdentity;
 import com.soulfiremc.mod.mixin.soulfire.AnvilScreenAccessor;
 import com.soulfiremc.mod.mixin.soulfire.CrafterScreenAccessor;
 import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
@@ -455,7 +456,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     var container = player.containerMenu;
     var responseBuilder = BotInventoryStateResponse.newBuilder()
       .setLayout(buildContainerLayout(container, getContainerTitle(container, minecraft), minecraft))
-      .setSelectedHotbarSlot(player.getInventory().getSelectedSlot());
+      .setSelectedHotbarSlot(player.getInventory().getSelectedSlot())
+      .setMenuId(((IMenuIdentity) container).soulfire$getMenuId());
 
     for (var slot : container.slots) {
       var item = slot.getItem();
@@ -1787,6 +1789,13 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     return menu.getClass().getSimpleName().replace("Menu", "");
   }
 
+  private static void requireMenu(Minecraft minecraft, String expectedMenuId) {
+    if (expectedMenuId != null && (minecraft.player == null
+      || !expectedMenuId.equals(((IMenuIdentity) minecraft.player.containerMenu).soulfire$getMenuId()))) {
+      throw Status.ABORTED.withDescription("The container changed. Review the current inventory and try again.").asRuntimeException();
+    }
+  }
+
   @Override
   public void clickInventorySlot(BotInventoryClickRequest request, StreamObserver<BotInventoryClickResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getInstanceId());
@@ -1860,7 +1869,10 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           throw Status.FAILED_PRECONDITION.withDescription("Bot player or gameMode is not available").asRuntimeException();
         }
 
-        executeAction(activeBot, () -> ContainerClicks.click(minecraft, slotId, mouseButton, clickType));
+        executeAction(activeBot, () -> {
+          requireMenu(minecraft, request.hasExpectedMenuId() ? request.getExpectedMenuId() : null);
+          ContainerClicks.click(minecraft, slotId, mouseButton, clickType);
+        });
 
         return BotInventoryClickResponse.newBuilder()
           .setSuccess(true)
@@ -1899,7 +1911,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
         }
 
-        executeAction(activeBot, player::closeContainer);
+        executeAction(activeBot, () -> {
+          var minecraft = activeBot.minecraft();
+          requireMenu(minecraft, request.hasExpectedMenuId() ? request.getExpectedMenuId() : null);
+          minecraft.player.closeContainer();
+        });
         return BotCloseContainerResponse.newBuilder()
           .setSuccess(true)
           .build();
@@ -2037,7 +2053,11 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       }
 
       var success = new AtomicReference<Boolean>();
-      executeAction(activeBot, () -> success.set(activateContainerButton(activeBot.minecraft(), request.getButtonId())));
+      executeAction(activeBot, () -> {
+        var minecraft = activeBot.minecraft();
+        requireMenu(minecraft, request.hasExpectedMenuId() ? request.getExpectedMenuId() : null);
+        success.set(activateContainerButton(minecraft, request.getButtonId()));
+      });
       var response = BotContainerButtonClickResponse.newBuilder()
         .setSuccess(success.get())
         .build();
@@ -2156,49 +2176,41 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         throw Status.FAILED_PRECONDITION.withDescription("Bot '%s' is not online".formatted(botId)).asRuntimeException();
       }
 
-      var fieldId = request.getFieldId();
-      var text = request.getText();
-
-      var response = callInBotContext(activeBot, () -> {
+      var success = new AtomicReference<Boolean>();
+      var error = new AtomicReference<String>();
+      executeAction(activeBot, () -> {
         var minecraft = activeBot.minecraft();
+        requireMenu(minecraft, request.hasExpectedMenuId() ? request.getExpectedMenuId() : null);
         var player = minecraft.player;
         if (player == null) {
           throw Status.FAILED_PRECONDITION.withDescription("Bot player is not available").asRuntimeException();
         }
-
         var container = player.containerMenu;
+        var fieldId = request.getFieldId();
         if (container instanceof CreativeModeInventoryScreen.ItemPickerMenu && "search".equals(fieldId)) {
-          executeAction(activeBot, () -> {
-            if (!(minecraft.gui.screen() instanceof CreativeModeInventoryScreen screen) || screen.getMenu() != container) {
-              throw Status.FAILED_PRECONDITION.withDescription("Bot creative inventory screen is not available").asRuntimeException();
-            }
-            CreativeInventoryControls.search(screen, text);
-          });
-          return BotSetContainerTextResponse.newBuilder().setSuccess(true).build();
-        }
-        if (container instanceof AnvilMenu anvilMenu && "item_name".equals(fieldId)) {
+          if (!(minecraft.gui.screen() instanceof CreativeModeInventoryScreen screen) || screen.getMenu() != container) {
+            throw Status.FAILED_PRECONDITION.withDescription("Bot creative inventory screen is not available").asRuntimeException();
+          }
+          CreativeInventoryControls.search(screen, request.getText());
+          success.set(true);
+        } else if (container instanceof AnvilMenu && "item_name".equals(fieldId)) {
           if (minecraft.getConnection() == null) {
             throw Status.FAILED_PRECONDITION.withDescription("Bot network connection is not available").asRuntimeException();
           }
-
-          executeAction(activeBot, () -> {
-            if (!(minecraft.gui.screen() instanceof AnvilScreen screen) || screen.getMenu() != anvilMenu) {
-              throw Status.FAILED_PRECONDITION.withDescription("Bot anvil screen is not available").asRuntimeException();
-            }
-
-            // Keep the screen's text and its rename packet responder in sync.
-            ((AnvilScreenAccessor) screen).soulfire$getNameInput().setValue(text);
-          });
-          return BotSetContainerTextResponse.newBuilder()
-            .setSuccess(true)
-            .build();
+          if (!(minecraft.gui.screen() instanceof AnvilScreen screen) || screen.getMenu() != container) {
+            throw Status.FAILED_PRECONDITION.withDescription("Bot anvil screen is not available").asRuntimeException();
+          }
+          // Keep the screen's text and its rename packet responder in sync.
+          ((AnvilScreenAccessor) screen).soulfire$getNameInput().setValue(request.getText());
+          success.set(true);
+        } else {
+          success.set(false);
+          error.set("Unsupported container or field ID: " + container.getClass().getSimpleName() + "/" + fieldId);
         }
-
-        return BotSetContainerTextResponse.newBuilder()
-          .setSuccess(false)
-          .setError("Unsupported container or field ID: " + container.getClass().getSimpleName() + "/" + fieldId)
-          .build();
       });
+      var responseBuilder = BotSetContainerTextResponse.newBuilder().setSuccess(success.get());
+      if (error.get() != null) responseBuilder.setError(error.get());
+      var response = responseBuilder.build();
 
       responseObserver.onNext(response);
       responseObserver.onCompleted();

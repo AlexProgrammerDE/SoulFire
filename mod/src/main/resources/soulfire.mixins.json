@@ -68,6 +68,7 @@
     "headless.sound.MixinSoundAssets",
     "soulfire.AudioLibraryAccessor",
     "soulfire.SoundManagerAccessor",
+    "soulfire.MixinAbstractContainerMenu",
     "soulfire.AbstractFurnaceMenuAccessor",
     "soulfire.AnvilScreenAccessor",
     "soulfire.EditBoxAccessor",

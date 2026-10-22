@@ -654,6 +654,10 @@ message BotInventoryClickRequest {
   // Range: 0-8 (corresponding to hotbar slots 1-9).
   // Ignored for other click types.
   int32 hotbar_slot = 5 [(google.api.field_behavior) = REQUIRED];
+
+  // Reject the action with ABORTED if this menu is no longer open.
+  // Use menu_id from the displayed inventory state; omit to act on the current menu.
+  optional string expected_menu_id = 6;
 }
 
 // Types of inventory click actions available in Minecraft.
@@ -885,6 +889,10 @@ message BotInventoryStateResponse {
 
   // Currently selected hotbar slot index (0-8).
   int32 selected_hotbar_slot = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // Identity of this menu instance. Stable across item updates and screen resizes.
+  // Send this as expected_menu_id when acting on the displayed inventory.
+  string menu_id = 5 [(google.api.field_behavior) = REQUIRED];
 }
 
 // Request to close the currently open container.
@@ -894,6 +902,10 @@ message BotCloseContainerRequest {
 
   // The profile UUID of the bot to close container for.
   string bot_id = 2 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
+
+  // Reject the action with ABORTED if this menu is no longer open.
+  // Use menu_id from the displayed inventory state; omit to act on the current menu.
+  optional string expected_menu_id = 3;
 }
 
 // Response for container close action.
@@ -979,6 +991,10 @@ message BotContainerButtonClickRequest {
   // - Crafter: 0-8 (slot toggle index)
   // - Lectern: 1=prev page, 2=next page, 3=take book
   int32 button_id = 3 [(google.api.field_behavior) = REQUIRED];
+
+  // Reject the action with ABORTED if this menu is no longer open.
+  // Use menu_id from the displayed inventory state; omit to act on the current menu.
+  optional string expected_menu_id = 4;
 }
 
 // Response for container button click action.
@@ -1007,6 +1023,10 @@ message BotSetContainerTextRequest {
   // The text value to set.
   // Minecraft limits both supported fields to 50 characters.
   string text = 4 [(google.api.field_behavior) = REQUIRED];
+
+  // Reject the action with ABORTED if this menu is no longer open.
+  // Use menu_id from the displayed inventory state; omit to act on the current menu.
+  optional string expected_menu_id = 5;
 }
 
 // Response for container text input action.

@@ -637,18 +637,20 @@ class BotWorldMapResponse(_message.Message):
     def __init__(self, dimension: _Optional[str] = ..., center_x: _Optional[int] = ..., center_z: _Optional[int] = ..., radius: _Optional[int] = ..., sample_step: _Optional[int] = ..., min_y: _Optional[int] = ..., max_y: _Optional[int] = ..., world_revision: _Optional[int] = ..., sampled_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., columns: _Optional[_Iterable[_Union[BotWorldMapColumn, _Mapping]]] = ..., entities: _Optional[_Iterable[_Union[BotWorldMapEntity, _Mapping]]] = ...) -> None: ...
 
 class BotInventoryClickRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id", "slot", "click_type", "hotbar_slot")
+    __slots__ = ("instance_id", "bot_id", "slot", "click_type", "hotbar_slot", "expected_menu_id")
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
     SLOT_FIELD_NUMBER: _ClassVar[int]
     CLICK_TYPE_FIELD_NUMBER: _ClassVar[int]
     HOTBAR_SLOT_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_MENU_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
     slot: int
     click_type: ClickType
     hotbar_slot: int
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., slot: _Optional[int] = ..., click_type: _Optional[_Union[ClickType, str]] = ..., hotbar_slot: _Optional[int] = ...) -> None: ...
+    expected_menu_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., slot: _Optional[int] = ..., click_type: _Optional[_Union[ClickType, str]] = ..., hotbar_slot: _Optional[int] = ..., expected_menu_id: _Optional[str] = ...) -> None: ...
 
 class BotInventoryClickResponse(_message.Message):
     __slots__ = ("success", "error")
@@ -741,24 +743,28 @@ class ContainerLayout(_message.Message):
     def __init__(self, title: _Optional[str] = ..., regions: _Optional[_Iterable[_Union[SlotRegion, _Mapping]]] = ..., total_slots: _Optional[int] = ..., buttons: _Optional[_Iterable[_Union[ContainerButton, _Mapping]]] = ..., container_type: _Optional[str] = ..., text_inputs: _Optional[_Iterable[_Union[ContainerTextInput, _Mapping]]] = ..., book_pages: _Optional[_Iterable[_Union[BookPage, _Mapping]]] = ..., current_book_page: _Optional[int] = ...) -> None: ...
 
 class BotInventoryStateResponse(_message.Message):
-    __slots__ = ("layout", "slots", "carried_item", "selected_hotbar_slot")
+    __slots__ = ("layout", "slots", "carried_item", "selected_hotbar_slot", "menu_id")
     LAYOUT_FIELD_NUMBER: _ClassVar[int]
     SLOTS_FIELD_NUMBER: _ClassVar[int]
     CARRIED_ITEM_FIELD_NUMBER: _ClassVar[int]
     SELECTED_HOTBAR_SLOT_FIELD_NUMBER: _ClassVar[int]
+    MENU_ID_FIELD_NUMBER: _ClassVar[int]
     layout: ContainerLayout
     slots: _containers.RepeatedCompositeFieldContainer[InventorySlot]
     carried_item: InventorySlot
     selected_hotbar_slot: int
-    def __init__(self, layout: _Optional[_Union[ContainerLayout, _Mapping]] = ..., slots: _Optional[_Iterable[_Union[InventorySlot, _Mapping]]] = ..., carried_item: _Optional[_Union[InventorySlot, _Mapping]] = ..., selected_hotbar_slot: _Optional[int] = ...) -> None: ...
+    menu_id: str
+    def __init__(self, layout: _Optional[_Union[ContainerLayout, _Mapping]] = ..., slots: _Optional[_Iterable[_Union[InventorySlot, _Mapping]]] = ..., carried_item: _Optional[_Union[InventorySlot, _Mapping]] = ..., selected_hotbar_slot: _Optional[int] = ..., menu_id: _Optional[str] = ...) -> None: ...
 
 class BotCloseContainerRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id")
+    __slots__ = ("instance_id", "bot_id", "expected_menu_id")
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_MENU_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ...) -> None: ...
+    expected_menu_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., expected_menu_id: _Optional[str] = ...) -> None: ...
 
 class BotCloseContainerResponse(_message.Message):
     __slots__ = ("success",)
@@ -799,14 +805,16 @@ class BotMouseClickResponse(_message.Message):
     def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
 
 class BotContainerButtonClickRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id", "button_id")
+    __slots__ = ("instance_id", "bot_id", "button_id", "expected_menu_id")
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
     BUTTON_ID_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_MENU_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
     button_id: int
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., button_id: _Optional[int] = ...) -> None: ...
+    expected_menu_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., button_id: _Optional[int] = ..., expected_menu_id: _Optional[str] = ...) -> None: ...
 
 class BotContainerButtonClickResponse(_message.Message):
     __slots__ = ("success", "error")
@@ -817,16 +825,18 @@ class BotContainerButtonClickResponse(_message.Message):
     def __init__(self, success: bool = ..., error: _Optional[str] = ...) -> None: ...
 
 class BotSetContainerTextRequest(_message.Message):
-    __slots__ = ("instance_id", "bot_id", "field_id", "text")
+    __slots__ = ("instance_id", "bot_id", "field_id", "text", "expected_menu_id")
     INSTANCE_ID_FIELD_NUMBER: _ClassVar[int]
     BOT_ID_FIELD_NUMBER: _ClassVar[int]
     FIELD_ID_FIELD_NUMBER: _ClassVar[int]
     TEXT_FIELD_NUMBER: _ClassVar[int]
+    EXPECTED_MENU_ID_FIELD_NUMBER: _ClassVar[int]
     instance_id: str
     bot_id: str
     field_id: str
     text: str
-    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., field_id: _Optional[str] = ..., text: _Optional[str] = ...) -> None: ...
+    expected_menu_id: str
+    def __init__(self, instance_id: _Optional[str] = ..., bot_id: _Optional[str] = ..., field_id: _Optional[str] = ..., text: _Optional[str] = ..., expected_menu_id: _Optional[str] = ...) -> None: ...
 
 class BotSetContainerTextResponse(_message.Message):
     __slots__ = ("success", "error")
