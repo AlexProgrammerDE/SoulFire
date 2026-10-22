@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -263,15 +264,16 @@ public final class BotTaskManager implements AutoCloseable {
     var pageSize = requestedPageSize <= 0
       ? DEFAULT_PAGE_SIZE
       : Math.min(requestedPageSize, MAX_PAGE_SIZE);
+    var instanceAccess = new HashMap<UUID, Boolean>();
     var matching = tasks.values().stream()
       .filter(task -> instanceId.map(task.instanceId::equals).orElse(true))
       .filter(task -> botId.map(task.botId::equals).orElse(true))
       .filter(task -> statuses.isEmpty() || statuses.contains(task.status))
       .filter(task -> includeTerminal || !isTerminal(task.status))
-      .filter(task -> user.hasPermission(PermissionContext.instance(
+      .filter(task -> instanceAccess.computeIfAbsent(task.instanceId, id -> user.hasPermission(PermissionContext.instance(
         InstancePermission.READ_BOT_INFO,
-        task.instanceId
-      )))
+        id
+      ))))
       .sorted(Comparator
         .comparing((ManagedTask task) -> task.createdAt)
         .reversed()
