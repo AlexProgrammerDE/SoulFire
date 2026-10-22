@@ -119,7 +119,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     UUID scriptId,
     UUID instanceId,
     boolean active,
-    String activeNodeId,
     long activationCount,
     ReactiveScriptContext context,
     ScriptEventSubscribers subscribers
@@ -179,7 +178,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           scriptId,
           instanceId,
           true,
-          null,
           1,
           context,
           subscribers
@@ -599,7 +597,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             existingState.scriptId(),
             existingState.instanceId(),
             existingState.active(),
-            existingState.activeNodeId(),
             existingState.activationCount() + 1,
             existingState.context(),
             existingState.subscribers()
@@ -633,7 +630,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           scriptId,
           instanceId,
           true,
-          null,
           1,
           context,
           subscribers
@@ -726,8 +722,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .setIsActive(activationState != null)
         .setActivationCount(activationState != null ? activationState.activationCount() : 0);
 
-      if (activationState != null && activationState.activeNodeId() != null) {
-        statusBuilder.setActiveNodeId(activationState.activeNodeId());
+      if (activationState != null) {
+        activationState.context().activeNodeId().ifPresent(statusBuilder::setActiveNodeId);
       }
 
       responseObserver.onNext(GetScriptStatusResponse.newBuilder()

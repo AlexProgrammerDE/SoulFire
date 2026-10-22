@@ -19,12 +19,17 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.jetbrains.annotations.VisibleForTesting;
 import reactor.core.Disposable;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 /// Reactive execution context for scripts.
@@ -36,6 +41,8 @@ public final class ReactiveScriptContext {
   private final Scheduler reactorScheduler;
   private final ScriptEventListener eventListener;
   private final ScriptQuotasConfig quotas;
+  @Getter(AccessLevel.NONE)
+  private final LinkedHashMap<Object, String> activeNodes = new LinkedHashMap<>();
 
   /// For cancellation via Disposable.
   private final AtomicReference<Disposable> execution = new AtomicReference<>();
@@ -92,6 +99,29 @@ public final class ReactiveScriptContext {
     return cancelled;
   }
 
+  /// Returns the most recently started node that is still executing.
+  public Optional<String> activeNodeId() {
+    synchronized (activeNodes) {
+      return Optional.ofNullable(activeNodes.lastEntry()).map(Map.Entry::getValue);
+    }
+  }
+
+  /// Tracks each subscription independently, including overlapping runs of the same node.
+  <T> Mono<T> trackNode(String nodeId, Mono<T> operation) {
+    return Mono.defer(() -> {
+      var token = new Object();
+      synchronized (activeNodes) {
+        if (cancelled) return Mono.empty();
+        activeNodes.put(token, nodeId);
+      }
+      return operation.doFinally(_ -> {
+        synchronized (activeNodes) {
+          activeNodes.remove(token);
+        }
+      });
+    });
+  }
+
   /// Cancels the script execution.
   public void cancel() {
     this.cancelled = true;
@@ -100,6 +130,9 @@ public final class ReactiveScriptContext {
       exec.dispose();
     }
     stateStore.clear();
+    synchronized (activeNodes) {
+      activeNodes.clear();
+    }
     eventListener.onScriptCancelled();
   }
 

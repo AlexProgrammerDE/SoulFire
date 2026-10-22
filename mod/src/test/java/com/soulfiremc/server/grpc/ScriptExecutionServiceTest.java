@@ -80,6 +80,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.sqlite.SQLiteDataSource;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.net.http.HttpRequest;
@@ -164,6 +165,43 @@ final class ScriptExecutionServiceTest {
 
   private DryRunScriptRequest.Builder request(String scriptId) {
     return DryRunScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).setTriggerNodeId(triggerId);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void statusFollowsExecutingNodesWithoutActivatingAMonitor(boolean automatic) throws InterruptedException {
+    var scheduler = new SoulFireScheduler(runnable -> runnable);
+    var instance = mock(InstanceManager.class);
+    when(instance.scheduler()).thenReturn(scheduler);
+    when(server.getInstance(UUID.fromString(instanceId))).thenReturn(Optional.of(instance));
+    var started = new CountDownLatch(1);
+    var result = Sinks.<Map<String, NodeValue>>one();
+    var scriptId = saveScript(registerAction(() -> {
+      started.countDown();
+      return result.asMono();
+    }), "trigger.on_script_init");
+    try {
+      if (automatic) {
+        this.<UpdateScriptResponse>rpcResponse(o -> service.updateScript(UpdateScriptRequest.newBuilder()
+          .setInstanceId(instanceId).setScriptId(scriptId).setPaused(false).build(), o));
+      } else {
+        rpcContext.run(() -> service.activateScript(ActivateScriptRequest.newBuilder()
+          .setInstanceId(instanceId).setScriptId(scriptId).build(), observer));
+      }
+      assertTrue(started.await(5, TimeUnit.SECONDS));
+      var request = GetScriptStatusRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).build();
+      var active = this.<GetScriptStatusResponse>rpcResponse(o -> service.getScriptStatus(request, o)).getStatus();
+      assertEquals(actionId, active.getActiveNodeId());
+      assertEquals(1, active.getActivationCount());
+      result.tryEmitValue(Map.of());
+      var finished = this.<GetScriptStatusResponse>rpcResponse(o -> service.getScriptStatus(request, o)).getStatus();
+      assertTrue(finished.getIsActive());
+      assertFalse(finished.hasActiveNodeId());
+      assertEquals(1, finished.getActivationCount());
+    } finally {
+      service.stopAllScripts(UUID.fromString(instanceId));
+      scheduler.shutdown();
+    }
   }
 
   @ParameterizedTest
