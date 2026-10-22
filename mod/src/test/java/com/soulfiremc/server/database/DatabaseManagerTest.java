@@ -20,6 +20,7 @@ package com.soulfiremc.server.database;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.util.SFPathConstants;
 import org.flywaydb.core.Flyway;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.exception.DataAccessException;
 import org.jooq.impl.DSL;
@@ -28,6 +29,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.sql.DriverManager;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,8 +46,8 @@ final class DatabaseManagerTest {
     try (var paths = mockStatic(SFPathConstants.class)) {
       paths.when(SFPathConstants::baseDirectory).thenReturn(directory);
       try (var database = DatabaseManager.select()) {
-        var deleted = seed(database);
-        var retained = seed(database);
+        var deleted = seed(database.dsl());
+        var retained = seed(database.dsl());
         try (var connection = database.dataSource().getConnection()) {
           database.dataSource().evictConnection(connection);
         }
@@ -63,8 +67,8 @@ final class DatabaseManagerTest {
     try (var paths = mockStatic(SFPathConstants.class)) {
       paths.when(SFPathConstants::baseDirectory).thenReturn(directory);
       try (var database = DatabaseManager.select()) {
-        var deleted = seed(database);
-        var retained = seed(database);
+        var deleted = seed(database.dsl());
+        var retained = seed(database.dsl());
         database.dsl().deleteFrom(Tables.USERS)
           .where(Tables.USERS.ID.eq(deleted.owner())).execute();
         assertChildrenRemoved(database, deleted, retained);
@@ -108,9 +112,48 @@ final class DatabaseManagerTest {
     }
   }
 
-  private static Fixture seed(DatabaseManager.DatabaseContext database) {
+  @Test
+  void upgradingRemovesLegacyOrphansAndPreservesEveryValidRecord(@TempDir Path directory) throws Exception {
+    var url = "jdbc:sqlite:" + directory.resolve("soulfire.sqlite");
+    Flyway.configure().dataSource(url, null, null).locations("classpath:db/migration")
+      .target("7").load().migrate();
+    var expected = new LinkedHashMap<String, List<Map<String, Object>>>();
+    try (var connection = DriverManager.getConnection(url)) {
+      var legacy = DSL.using(connection, SQLDialect.SQLITE);
+      legacy.execute("PRAGMA foreign_keys = OFF");
+      var retained = seed(legacy);
+      for (var table : List.of("users", "instances", "scripts", "instance_audit_logs", "instance_desired_bots", "plugin_permission_grants")) {
+        expected.put(table, legacy.fetch("SELECT * FROM " + table + " ORDER BY 1, 2").intoMaps());
+      }
+      var removedOwner = seed(legacy);
+      var removedInstance = seed(legacy);
+      legacy.execute("INSERT INTO instance_audit_logs (id, type, instance_id, user_id) VALUES (?, 'EXECUTE_COMMAND', ?, ?)",
+        UUID.randomUUID().toString(), retained.instance(), removedOwner.owner());
+      legacy.deleteFrom(Tables.USERS).where(Tables.USERS.ID.eq(removedOwner.owner())).execute();
+      legacy.deleteFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(removedInstance.instance())).execute();
+      // Deleting a profile must preserve its owner and the owner's independent grants.
+      expected.put("users", legacy.fetch("SELECT * FROM users ORDER BY 1, 2").intoMaps());
+      expected.put("plugin_permission_grants", legacy.fetch("SELECT * FROM plugin_permission_grants WHERE user_id IN (?, ?) ORDER BY 1, 2",
+        retained.owner(), removedInstance.owner()).intoMaps());
+      assertFalse(legacy.fetch("PRAGMA foreign_key_check").isEmpty());
+    }
+
+    try (var paths = mockStatic(SFPathConstants.class)) {
+      paths.when(SFPathConstants::baseDirectory).thenReturn(directory);
+      for (var restart = 0; restart < 2; restart++) {
+        try (var database = DatabaseManager.select()) {
+          for (var entry : expected.entrySet()) {
+            assertEquals(entry.getValue(), database.dsl().fetch("SELECT * FROM " + entry.getKey() + " ORDER BY 1, 2").intoMaps(), entry.getKey());
+          }
+          assertTrue(database.dsl().fetch("PRAGMA foreign_key_check").isEmpty());
+          assertEquals(1, database.dsl().fetchValue("PRAGMA foreign_keys", Integer.class));
+        }
+      }
+    }
+  }
+
+  private static Fixture seed(DSLContext dsl) {
     var fixture = new Fixture(UUID.randomUUID().toString(), UUID.randomUUID().toString());
-    var dsl = database.dsl();
     dsl.execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, ?, ?, 'ADMIN', CURRENT_TIMESTAMP)",
       fixture.owner(), fixture.owner().substring(0, 12), fixture.owner() + "@example.com");
     dsl.execute("INSERT INTO instances (id, friendly_name, icon, owner_id, settings) VALUES (?, 'Instance', 'pickaxe', ?, '{}')",
