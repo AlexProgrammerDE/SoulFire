@@ -166,6 +166,21 @@ final class ScriptExecutionServiceTest {
     return DryRunScriptRequest.newBuilder().setInstanceId(instanceId).setScriptId(scriptId).setTriggerNodeId(triggerId);
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void statusIncludesPersistedPauseSettingWithoutAnActiveRuntime(boolean paused) {
+    var scriptId = saveScript("utility.log");
+    server.dsl().update(Tables.SCRIPTS).set(Tables.SCRIPTS.PAUSED, paused)
+      .where(Tables.SCRIPTS.ID.eq(scriptId)).execute();
+
+    var status = this.<GetScriptStatusResponse>rpcResponse(o -> service.getScriptStatus(GetScriptStatusRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).build(), o)).getStatus();
+
+    assertTrue(status.hasPaused());
+    assertEquals(paused, status.getPaused());
+    assertFalse(status.getIsActive());
+  }
+
   private void run(DryRunScriptRequest request) {
     rpcContext.run(() -> service.dryRunScript(request, observer));
   }

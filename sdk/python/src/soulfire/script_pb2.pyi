@@ -282,16 +282,18 @@ class ScriptInfo(_message.Message):
     def __init__(self, id: _Optional[str] = ..., name: _Optional[str] = ..., description: _Optional[str] = ..., instance_id: _Optional[str] = ..., created_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., paused: bool = ...) -> None: ...
 
 class ScriptStatus(_message.Message):
-    __slots__ = ("script_id", "is_active", "active_node_id", "activation_count")
+    __slots__ = ("script_id", "is_active", "active_node_id", "activation_count", "paused")
     SCRIPT_ID_FIELD_NUMBER: _ClassVar[int]
     IS_ACTIVE_FIELD_NUMBER: _ClassVar[int]
     ACTIVE_NODE_ID_FIELD_NUMBER: _ClassVar[int]
     ACTIVATION_COUNT_FIELD_NUMBER: _ClassVar[int]
+    PAUSED_FIELD_NUMBER: _ClassVar[int]
     script_id: str
     is_active: bool
     active_node_id: str
     activation_count: int
-    def __init__(self, script_id: _Optional[str] = ..., is_active: bool = ..., active_node_id: _Optional[str] = ..., activation_count: _Optional[int] = ...) -> None: ...
+    paused: bool
+    def __init__(self, script_id: _Optional[str] = ..., is_active: bool = ..., active_node_id: _Optional[str] = ..., activation_count: _Optional[int] = ..., paused: bool = ...) -> None: ...
 
 class ScriptLogEntry(_message.Message):
     __slots__ = ("script_id", "node_id", "level", "message", "timestamp")

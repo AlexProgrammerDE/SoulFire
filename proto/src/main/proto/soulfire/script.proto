@@ -351,6 +351,8 @@ message ScriptStatus {
   // The total number of times this script has been activated.
   // Incremented each time ActivateScript is called.
   int64 activation_count = 4 [(google.api.field_behavior) = REQUIRED];
+  // The persisted pause setting, independent of whether a runtime is active.
+  optional bool paused = 5;
 }
 
 // A single log entry generated during script execution.

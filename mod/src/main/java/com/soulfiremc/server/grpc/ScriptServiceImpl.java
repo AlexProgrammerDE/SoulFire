@@ -707,7 +707,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       // Verify script exists
-      soulFireServer.dsl().transaction(cfg -> {
+      var paused = soulFireServer.dsl().transactionResult(cfg -> {
         var ctx = DSL.using(cfg);
         var record = ctx.selectFrom(Tables.SCRIPTS)
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
@@ -716,11 +716,13 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
+        return record.getPaused();
       });
 
       var activationState = activeScripts.get(scriptId);
       var statusBuilder = ScriptStatus.newBuilder()
         .setScriptId(scriptId.toString())
+        .setPaused(paused)
         .setIsActive(activationState != null)
         .setActivationCount(activationState != null ? activationState.activationCount() : 0);
 
