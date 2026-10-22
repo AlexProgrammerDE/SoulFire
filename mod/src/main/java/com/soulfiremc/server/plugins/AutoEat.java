@@ -23,19 +23,16 @@ import com.soulfiremc.server.api.PluginInfo;
 import com.soulfiremc.server.api.event.bot.BotConnectionInitEvent;
 import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEvent;
 import com.soulfiremc.server.bot.ControlPriority;
-import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
+import com.soulfiremc.server.task.EatMealTask;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.lenni0451.lambdaevents.EventHandler;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.inventory.ContainerInput;
-import net.minecraft.world.inventory.InventoryMenu;
 
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +61,7 @@ public final class AutoEat extends InternalPlugin {
         }
 
         var player = connection.minecraft().player;
-        if (player == null) {
+        if (player == null || player.isDeadOrDying()) {
           return;
         }
 
@@ -87,41 +84,10 @@ public final class AutoEat extends InternalPlugin {
           return;
         }
 
-        var gameMode = connection.minecraft().gameMode;
-        ControlTask task;
-        if (slot == SFInventoryHelpers.getSelectedSlot(player.getInventory())) {
-          task = ControlTask.sequence(
-            "Auto eat",
-            ControlPriority.LOW,
-            ControlTask.action(() -> gameMode.useItem(player, InteractionHand.MAIN_HAND))
-          );
-        } else if (slot == InventoryMenu.SHIELD_SLOT) {
-          task = ControlTask.sequence(
-            "Auto eat",
-            ControlPriority.LOW,
-            ControlTask.action(() -> gameMode.useItem(player, InteractionHand.OFF_HAND))
-          );
-        } else if (SFInventoryHelpers.isSelectableHotbarSlot(slot)) {
-          task = ControlTask.sequence(
-            "Auto eat",
-            ControlPriority.LOW,
-            ControlTask.action(() -> player.getInventory().setSelectedSlot(SFInventoryHelpers.toHotbarIndex(slot))),
-            ControlTask.waitMillis(50L),
-            ControlTask.action(() -> gameMode.useItem(player, InteractionHand.MAIN_HAND))
-          );
-        } else {
-          task = ControlTask.sequence(
-            "Auto eat",
-            ControlPriority.LOW,
-            ControlTask.action(player::sendOpenInventory),
-            ControlTask.action(() -> gameMode.handleContainerInput(player.inventoryMenu.containerId, slot, player.getInventory().getSelectedSlot(), ContainerInput.SWAP, player)),
-            ControlTask.waitMillis(50L),
-            ControlTask.action(player::closeContainer),
-            ControlTask.waitMillis(50L),
-            ControlTask.action(() -> gameMode.useItem(player, InteractionHand.MAIN_HAND))
-          );
+        if (connection.minecraft().gameMode == null || !player.inventoryMenu.getCarried().isEmpty()) {
+          return;
         }
-        if (connection.botControl().tryStart(task)) {
+        if (connection.botControl().tryStart(new EatMealTask(connection, slot, true, ControlPriority.LOW))) {
           log.info("Auto Eat: {} is attempting to eat {} from inventory slot {}",
             connection.accountName(), playerInventory.getSlot(slot).getItem().getHoverName().getString(), slot);
         }

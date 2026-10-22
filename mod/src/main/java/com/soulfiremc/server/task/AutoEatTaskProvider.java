@@ -23,7 +23,6 @@ import com.soulfiremc.grpc.generated.AutoEatTaskResult;
 import com.soulfiremc.grpc.generated.BotTaskProgress;
 import com.soulfiremc.server.api.BotTaskExecution;
 import com.soulfiremc.server.api.BotTaskProvider;
-import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.CompletableControlTask;
 import com.soulfiremc.server.bot.ControlPriority;
 import com.soulfiremc.server.bot.ControlResource;
@@ -32,14 +31,9 @@ import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import com.soulfiremc.server.util.SFItemHelpers;
 import io.grpc.Status;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -50,16 +44,10 @@ public final class AutoEatTaskProvider
   private static final int DEFAULT_CHECK_INTERVAL_TICKS = 20;
   private static final int MAX_CHECK_INTERVAL_TICKS = 1_200;
   private static final int MAX_FAILED_MEAL_ATTEMPTS = 3;
-  private static final long CONSUMPTION_CONFIRMATION_GRACE_MILLIS = 1_000L;
   // Monitoring does not own a mutable bot resource. Each meal claims only
   // the hand and inventory resources it needs while it is being consumed.
   private static final Set<ControlResource> TASK_RESOURCES = Set.of();
-  private static final Set<ControlResource> EAT_RESOURCES = Set.of(
-    ControlResource.MAIN_HAND,
-    ControlResource.OFF_HAND,
-    ControlResource.INVENTORY,
-    ControlResource.CONTAINER
-  );
+
 
   @Override
   public AutoEatTask inputPrototype() {
@@ -115,7 +103,7 @@ public final class AutoEatTaskProvider
     private final boolean completeWhenNoFood;
     private final boolean restoreSelectedSlot;
     private final CompletableFuture<AutoEatTaskResult> result;
-    private @Nullable CompletableControlTask activeMeal;
+    private @Nullable ActiveMeal activeMeal;
     private int mealsEaten;
     private int failedMealAttempts;
     private int ticks;
@@ -178,7 +166,7 @@ public final class AutoEatTaskProvider
         }
         return;
       }
-      if (player.hasContainerOpen()) {
+      if (player.hasContainerOpen() || !player.inventoryMenu.getCarried().isEmpty()) {
         return;
       }
 
@@ -195,23 +183,20 @@ public final class AutoEatTaskProvider
         return;
       }
 
-      var meal = new CompletableControlTask(createMeal(
-        context,
-        slot.getAsInt(),
-        restoreSelectedSlot
-      ));
+      var consumption = new EatMealTask(bot, slot.getAsInt(), restoreSelectedSlot, ControlPriority.HIGH);
+      var meal = new CompletableControlTask(consumption);
       if (bot.botControl().submit(meal)) {
-        activeMeal = meal;
+        activeMeal = new ActiveMeal(consumption, meal);
       }
     }
 
     private boolean finishActiveMeal() {
       var meal = activeMeal;
-      if (meal == null || !meal.completion().isDone()) {
+      if (meal == null || !meal.control().completion().isDone()) {
         return false;
       }
       activeMeal = null;
-      if (meal.completion().isCompletedExceptionally()) {
+      if (meal.control().completion().isCompletedExceptionally()) {
         failedMealAttempts++;
         if (failedMealAttempts >= MAX_FAILED_MEAL_ATTEMPTS) {
           result.completeExceptionally(
@@ -224,7 +209,7 @@ public final class AutoEatTaskProvider
         }
         return true;
       }
-      if (meal.completion().join() == ControlStopReason.COMPLETED) {
+      if (meal.consumption().consumed()) {
         failedMealAttempts = 0;
         mealsEaten++;
         if (maximumMeals > 0 && mealsEaten >= maximumMeals) {
@@ -267,7 +252,7 @@ public final class AutoEatTaskProvider
       var meal = activeMeal;
       activeMeal = null;
       if (meal != null) {
-        context.bot().botControl().cancel(meal);
+        context.bot().botControl().cancel(meal.control());
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);
@@ -279,6 +264,8 @@ public final class AutoEatTaskProvider
       return "Auto eat";
     }
   }
+
+  private record ActiveMeal(EatMealTask consumption, CompletableControlTask control) {}
 
   static boolean isPermittedFood(
     ItemStack stack,
@@ -301,179 +288,6 @@ public final class AutoEatTaskProvider
     return foodItemIds.isEmpty()
       ? safeEdible
       : edible && foodItemIds.contains(itemId);
-  }
-
-  private static ControlTask createMeal(
-    BotTaskContext context,
-    int slot,
-    boolean restoreSelectedSlot
-  ) {
-    var bot = context.bot();
-    var player = bot.minecraft().player;
-    var gameMode = bot.minecraft().gameMode;
-    if (player == null || gameMode == null) {
-      return ControlTask.once("Auto eat unavailable", EAT_RESOURCES, () -> {
-        throw new IllegalStateException("Bot player or game mode is unavailable");
-      });
-    }
-    var originalHotbar = player.getInventory().getSelectedSlot();
-    var stack = player.inventoryMenu.getSlot(slot).getItem();
-    var initialFoodLevel = player.getFoodData().getFoodLevel();
-    var consumable = stack.get(DataComponents.CONSUMABLE);
-    var consumeMillis = consumable == null
-      ? 2_000L
-      : Math.max(250L, Math.round(consumable.consumeSeconds() * 1_000));
-    var steps = new ArrayList<ControlTask.Step>();
-    var swappedFromInventory = false;
-    var selectedDifferentHotbar = false;
-    InteractionHand hand;
-    if (slot == SFInventoryHelpers.getSelectedSlot(player.getInventory())) {
-      hand = InteractionHand.MAIN_HAND;
-    } else if (slot == InventoryMenu.SHIELD_SLOT) {
-      hand = InteractionHand.OFF_HAND;
-    } else if (SFInventoryHelpers.isSelectableHotbarSlot(slot)) {
-      hand = InteractionHand.MAIN_HAND;
-      selectedDifferentHotbar = true;
-      steps.add(ControlTask.action(() ->
-        player.getInventory().setSelectedSlot(
-          SFInventoryHelpers.toHotbarIndex(slot)
-        )));
-      steps.add(ControlTask.waitMillis(50L));
-    } else {
-      hand = InteractionHand.MAIN_HAND;
-      swappedFromInventory = true;
-      steps.add(ControlTask.action(() ->
-        TaskInventorySupport.swapWithHotbar(
-          bot,
-          slot,
-          originalHotbar
-        )));
-      steps.add(ControlTask.waitMillis(100L));
-    }
-    steps.add(ControlTask.action(() ->
-      bot.minecraft().options.keyUse.setDown(true)));
-    steps.add(ControlTask.action(() -> {
-      if (!(gameMode.useItem(player, hand) instanceof InteractionResult.Success)) {
-        throw new IllegalStateException(
-          "The selected meal could not be used"
-        );
-      }
-    }));
-    steps.add(ControlTask.waitMillis(
-      consumeMillis + CONSUMPTION_CONFIRMATION_GRACE_MILLIS
-    ));
-    steps.add(ControlTask.action(() -> {
-      if (
-        bot.minecraft().player != player
-          || player.isDeadOrDying()
-          || player.getFoodData().getFoodLevel() <= initialFoodLevel
-      ) {
-        stopHeldUse(bot);
-        throw new IllegalStateException(
-          player.isDeadOrDying() || bot.minecraft().player != player
-            ? "Player died or respawned before the meal was confirmed"
-            : "Food level did not increase after using the selected meal"
-        );
-      }
-      stopHeldUse(bot);
-    }));
-    if (restoreSelectedSlot && swappedFromInventory) {
-      steps.add(ControlTask.action(() ->
-        TaskInventorySupport.swapWithHotbar(
-          bot,
-          slot,
-          originalHotbar
-        )));
-      steps.add(ControlTask.waitMillis(100L));
-    } else if (restoreSelectedSlot && selectedDifferentHotbar) {
-      steps.add(ControlTask.action(() ->
-        player.getInventory().setSelectedSlot(originalHotbar)));
-    }
-    return new HeldUseControlTask(
-      bot,
-      ControlTask.sequence(
-        "SDK auto eat meal",
-        ControlPriority.HIGH,
-        EAT_RESOURCES,
-        steps
-      )
-    );
-  }
-
-  private static void stopHeldUse(BotConnection bot) {
-    bot.minecraft().options.keyUse.setDown(false);
-    var player = bot.minecraft().player;
-    var gameMode = bot.minecraft().gameMode;
-    if (player != null && gameMode != null && player.isUsingItem()) {
-      gameMode.releaseUsingItem(player);
-    }
-  }
-
-  private static final class HeldUseControlTask implements ControlTask {
-    private final BotConnection bot;
-    private final ControlTask delegate;
-    private boolean cleanedUp;
-
-    private HeldUseControlTask(
-      BotConnection bot,
-      ControlTask delegate
-    ) {
-      this.bot = bot;
-      this.delegate = delegate;
-    }
-
-    @Override
-    public void tick() {
-      try {
-        delegate.tick();
-      } catch (RuntimeException | Error cause) {
-        cleanUp();
-        throw cause;
-      }
-      if (delegate.isDone()) {
-        cleanUp();
-      }
-    }
-
-    @Override
-    public boolean isDone() {
-      return delegate.isDone();
-    }
-
-    @Override
-    public ControlPriority priority() {
-      return delegate.priority();
-    }
-
-    @Override
-    public Set<ControlResource> resources() {
-      return delegate.resources();
-    }
-
-    @Override
-    public void onStopped(
-      ControlStopReason reason,
-      @Nullable Throwable cause
-    ) {
-      try {
-        delegate.onStopped(reason, cause);
-      } finally {
-        cleanUp();
-      }
-    }
-
-    @Override
-    public @Nullable String description() {
-      return delegate.description();
-    }
-
-    private void cleanUp() {
-      if (cleanedUp) {
-        return;
-      }
-      cleanedUp = true;
-      stopHeldUse(bot);
-    }
   }
 
 }
