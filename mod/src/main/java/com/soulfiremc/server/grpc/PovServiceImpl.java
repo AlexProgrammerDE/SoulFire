@@ -131,10 +131,6 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
         if (request.hasClipboard()) {
           var minecraft = session.bot.minecraft();
           minecraft.keyboardHandler.setClipboard(request.getClipboard());
-          if (request.getCaptured() && minecraft.gui.screen() != null) {
-            minecraft.keyboardHandler.keyPress(minecraft.getWindow().handle(), 1, new KeyEvent(InputConstants.KEY_V, 'v', InputConstants.MOD_CONTROL));
-            minecraft.keyboardHandler.keyPress(minecraft.getWindow().handle(), 0, new KeyEvent(InputConstants.KEY_V, 'v', InputConstants.MOD_CONTROL));
-          }
         }
         var actions = new PovClientActions(text -> session.clipboard.set(new ClipboardUpdate(0, text)), session.openUrl::set);
         ScopedValue.where(PovClientActions.CURRENT, actions).run(() -> {
@@ -145,6 +141,15 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
           }
           session.bot.povInput().capture(request.getCaptured());
           for (var event : request.getEventsList()) session.bot.povInput().accept(event);
+          // Clipboard-only pastes follow the input queued before the browser's paste event.
+          // Explicit paste keys keep their own position in the batch and must run only once.
+          if (request.hasClipboard() && request.getCaptured() && request.getEventsList().stream().noneMatch(PovServiceImpl::isPasteKeyPress)) {
+            var minecraft = session.bot.minecraft();
+            if (minecraft.gui.screen() != null) {
+              minecraft.keyboardHandler.keyPress(minecraft.getWindow().handle(), 1, new KeyEvent(InputConstants.KEY_V, 'v', InputConstants.MOD_CONTROL));
+              minecraft.keyboardHandler.keyPress(minecraft.getWindow().handle(), 0, new KeyEvent(InputConstants.KEY_V, 'v', InputConstants.MOD_CONTROL));
+            }
+          }
         });
         if (request.getReadClipboard()) {
           session.clipboard.set(new ClipboardUpdate(request.getSequence(), session.bot.minecraft().keyboardHandler.getClipboard()));
@@ -227,6 +232,12 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
 
   private static void dimensions(int width, int height) {
     if (width < 1 || height < 1 || width > 3840 || height > 2160) throw new IllegalArgumentException("Invalid POV dimensions");
+  }
+
+  private static boolean isPasteKeyPress(PovInputEvent event) {
+    // The wire format uses GLFW keys and modifier bits, not Minecraft's SDL values.
+    return event.getKind() == PovInputEvent.Kind.KEY && event.getCode() == 86
+      && event.getAction() != 0 && (event.getModifiers() & 2) != 0;
   }
 
   static void validate(PovInputEvent event) {
