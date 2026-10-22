@@ -801,6 +801,58 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   }
 
   @Override
+  public void removeInstanceProxyEntries(InstanceRemoveProxyEntriesRequest request, StreamObserver<InstanceRemoveProxyEntriesResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      var selected = request.getProxiesList().stream().map(SFProxy::fromProto).toList();
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+        }
+
+        var currentSettings = parseSettings(record.getSettings());
+        var remainingToRemove = new HashMap<SFProxy, Integer>();
+        for (var proxy : selected) {
+          remainingToRemove.merge(proxy, 1, Integer::sum);
+        }
+        var newProxies = new ArrayList<SFProxy>();
+        for (var proxy : currentSettings.proxies()) {
+          var count = remainingToRemove.getOrDefault(proxy, 0);
+          if (count == 0) {
+            newProxies.add(proxy);
+          } else if (count == 1) {
+            remainingToRemove.remove(proxy);
+          } else {
+            remainingToRemove.put(proxy, count - 1);
+          }
+        }
+
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(currentSettings.withProxies(newProxies)))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
+      });
+
+      refreshRuntimeSettings(instanceId);
+      responseObserver.onNext(InstanceRemoveProxyEntriesResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+    } catch (Throwable t) {
+      log.error("Error removing instance proxy entries", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
   public void removeInstanceProxiesBatch(InstanceRemoveProxiesBatchRequest request, StreamObserver<InstanceRemoveProxiesBatchResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));

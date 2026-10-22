@@ -967,6 +967,22 @@ export class SoulFireInstance {
     );
   }
 
+  /** Removes one matching occurrence of each proxy, including its type and credentials. */
+  public removeProxyEntries(
+    proxies: readonly ProxyProto[],
+    options?: CallOptions,
+  ): Effect.Effect<void, SoulFireOperationError> {
+    return Effect.map(
+      rpc("SoulFireInstance.removeProxyEntries", (signal) =>
+        this.#instanceClient.removeInstanceProxyEntries(
+          { id: this.id, proxies: [...proxies] },
+          withSignal(options, signal),
+        ),
+      ),
+      () => undefined,
+    );
+  }
+
   public loginCredentials(
     request: InstanceScopedRequest<typeof CredentialsAuthRequestSchema>,
     options?: CallOptions,

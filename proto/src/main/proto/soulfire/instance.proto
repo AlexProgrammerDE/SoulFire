@@ -402,6 +402,19 @@ message InstanceRemoveProxiesBatchRequest {
 message InstanceRemoveProxiesBatchResponse {
 }
 
+// Request to remove specific proxy entries without removing their neighbors.
+message InstanceRemoveProxyEntriesRequest {
+  // The unique identifier (UUID) of the instance.
+  string id = 1 [(google.api.field_behavior) = REQUIRED, (soulfire.v1.api_field).format = "uuid"];
+  // Exact entries to remove, including type and credentials.
+  // Each entry removes one matching occurrence.
+  repeated ProxyProto proxies = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// Response after removing the matching proxy entries.
+message InstanceRemoveProxyEntriesResponse {
+}
+
 // Request to retrieve the audit log for an instance.
 message InstanceAuditLogRequest {
   // The unique identifier (UUID) of the instance.
@@ -851,6 +864,21 @@ service InstanceService {
     };
     option (soulfire.v1.api_method) = {
       display_name: "Batch remove instance proxies"
+      permissions: "UPDATE_INSTANCE_CONFIG"
+      scope: "instance.proxy"
+    };
+  }
+
+  // Removes one matching occurrence of each requested proxy entry.
+  // Requires: UPDATE_INSTANCE_CONFIG permission on the instance
+  // Errors: NOT_FOUND if the instance does not exist; INVALID_ARGUMENT for invalid proxies
+  rpc RemoveInstanceProxyEntries (InstanceRemoveProxyEntriesRequest) returns (InstanceRemoveProxyEntriesResponse) {
+    option (google.api.http) = {
+      post: "/v1/instances/{id}/proxies:removeEntries"
+      body: "*"
+    };
+    option (soulfire.v1.api_method) = {
+      display_name: "Remove matching proxy entries"
       permissions: "UPDATE_INSTANCE_CONFIG"
       scope: "instance.proxy"
     };

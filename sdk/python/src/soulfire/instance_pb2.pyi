@@ -360,6 +360,18 @@ class InstanceRemoveProxiesBatchResponse(_message.Message):
     __slots__ = ()
     def __init__(self) -> None: ...
 
+class InstanceRemoveProxyEntriesRequest(_message.Message):
+    __slots__ = ("id", "proxies")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    PROXIES_FIELD_NUMBER: _ClassVar[int]
+    id: str
+    proxies: _containers.RepeatedCompositeFieldContainer[_common_pb2.ProxyProto]
+    def __init__(self, id: _Optional[str] = ..., proxies: _Optional[_Iterable[_Union[_common_pb2.ProxyProto, _Mapping]]] = ...) -> None: ...
+
+class InstanceRemoveProxyEntriesResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
 class InstanceAuditLogRequest(_message.Message):
     __slots__ = ("id",)
     ID_FIELD_NUMBER: _ClassVar[int]
