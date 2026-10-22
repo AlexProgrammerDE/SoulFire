@@ -22,7 +22,7 @@ const hotbarShortcut = (client: SoulFireClient, bot: SoulFireBot, activator: num
       const sessionId = randomUUID();
       const abort = new AbortController();
       let sequence = 0n;
-      let startingFrame: bigint | undefined;
+      let stage: "shortcut" | "open" | "closed" = "shortcut";
       let token = "";
       const input = (
         events: Array<{ kind: Kind; code: number; action: number }>,
@@ -50,16 +50,27 @@ const hotbarShortcut = (client: SoulFireClient, bot: SoulFireBot, activator: num
           { signal: AbortSignal.any([abort.signal, AbortSignal.timeout(10_000)]) },
         )) {
           token = frame.inputToken;
-          if (frame.screenOpen) continue;
-          if (startingFrame === undefined) {
-            await input([{ kind: Kind.KEY, code: activator, action: 1 }]);
+          if (stage === "shortcut" && !frame.screenOpen) {
             await input([
+              { kind: Kind.KEY, code: activator, action: 1 },
               { kind: Kind.KEY, code: 57, action: 1 },
               { kind: Kind.KEY, code: 57, action: 0 },
+              // Vanilla consumes hotbar shortcuts before opening the inventory in its tick.
+              // Video frames alone do not confirm that those queued keys were processed.
+              { kind: Kind.KEY, code: 69, action: 1 },
+              { kind: Kind.KEY, code: 69, action: 0 },
             ]);
-            startingFrame = frame.sequence;
-          } else if (frame.sequence >= startingFrame + 2n) {
+            stage = "open";
+          } else if (stage === "open" && frame.screenOpen) {
+            await input([
+              { kind: Kind.KEY, code: 256, action: 1 },
+              { kind: Kind.KEY, code: 256, action: 0 },
+            ]);
+            stage = "closed";
+          } else if (stage === "closed" && !frame.screenOpen) {
             return;
+          } else {
+            await input([]);
           }
         }
         throw new Error("The native hotbar shortcut did not complete");
