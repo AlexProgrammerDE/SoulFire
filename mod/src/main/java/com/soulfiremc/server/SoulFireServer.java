@@ -359,6 +359,7 @@ public final class SoulFireServer {
     }
 
     var deletion = instanceDeletions.computeIfAbsent(id, _ -> {
+      rpcServer.scriptService().stopAllScripts(id);
       var cleanup = instance == null
         ? CompletableFuture.runAsync(() -> deleteInstanceStorage(id), scheduler)
         : instance.deleteInstance();

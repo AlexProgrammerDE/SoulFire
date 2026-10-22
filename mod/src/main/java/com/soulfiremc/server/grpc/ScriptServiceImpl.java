@@ -202,6 +202,15 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     log.info("Stopped script {}", scriptId);
   }
 
+  /// Stops an instance's scripts and releases their triggers and subscribers.
+  public void stopAllScripts(UUID instanceId) {
+    for (var state : List.copyOf(activeScripts.values())) {
+      if (state.instanceId().equals(instanceId)) {
+        stopScriptInternal(state.scriptId());
+      }
+    }
+  }
+
   /// Restarts a script by stopping it and starting it again.
   /// Used when a script is updated to apply new configuration.
   private void restartScriptInternal(ScriptsRecord record) {

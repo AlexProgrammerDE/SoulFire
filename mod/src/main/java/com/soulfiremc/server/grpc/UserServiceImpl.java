@@ -37,6 +37,7 @@ import org.jooq.impl.DSL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -95,6 +96,11 @@ public final class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
       var userId = UUID.fromString(request.getId());
       mutateOrThrow(userId);
 
+      var instances = soulFireServer.dsl().select(Tables.INSTANCES.ID).from(Tables.INSTANCES)
+        .where(Tables.INSTANCES.OWNER_ID.eq(userId.toString())).fetch(Tables.INSTANCES.ID);
+      for (var instanceId : instances) {
+        soulFireServer.deleteInstance(UUID.fromString(instanceId)).ifPresent(CompletableFuture::join);
+      }
       soulFireServer.authSystem().deleteUser(userId);
 
       responseObserver.onNext(UserDeleteResponse.newBuilder().build());

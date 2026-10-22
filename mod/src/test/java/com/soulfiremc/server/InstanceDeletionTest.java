@@ -18,6 +18,8 @@
 package com.soulfiremc.server;
 
 import com.soulfiremc.server.database.generated.Tables;
+import com.soulfiremc.server.grpc.RPCServer;
+import com.soulfiremc.server.grpc.ScriptServiceImpl;
 import com.soulfiremc.server.util.SFHelpers;
 import com.soulfiremc.server.util.SFPathConstants;
 import net.lenni0451.reflect.Fields;
@@ -77,6 +79,9 @@ final class InstanceDeletionTest {
       .set(Tables.INSTANCES.SETTINGS, "{}")
       .execute();
     doReturn(dsl).when(server).dsl();
+    var rpcServer = mock(RPCServer.class);
+    doReturn(mock(ScriptServiceImpl.class)).when(rpcServer).scriptService();
+    Fields.setObject(server, Fields.getDeclaredField(SoulFireServer.class, "rpcServer"), rpcServer);
     var instances = new ConcurrentHashMap<UUID, InstanceManager>();
     instances.put(id, instance);
     Fields.setObject(server, Fields.getDeclaredField(SoulFireServer.class, "instances"), instances);

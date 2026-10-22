@@ -30,6 +30,8 @@ import com.soulfiremc.grpc.generated.DryRunScriptRequest;
 import com.soulfiremc.grpc.generated.EdgeType;
 import com.soulfiremc.grpc.generated.GetScriptRequest;
 import com.soulfiremc.grpc.generated.GetScriptResponse;
+import com.soulfiremc.grpc.generated.GetScriptStatusRequest;
+import com.soulfiremc.grpc.generated.GetScriptStatusResponse;
 import com.soulfiremc.grpc.generated.PortType;
 import com.soulfiremc.grpc.generated.Position;
 import com.soulfiremc.grpc.generated.ScriptEdge;
@@ -353,6 +355,40 @@ final class ScriptExecutionServiceTest {
     }
     verify(observer, times(1)).onCompleted();
     assertEquals(1, events.stream().filter(ScriptEvent::hasScriptCompleted).count());
+  }
+
+  @Test
+  void stoppingAnInstanceCompletesItsObserversAndKeepsOtherInstancesActive() {
+    var otherInstance = UUID.randomUUID().toString();
+    var owner = server.dsl().selectFrom(Tables.INSTANCES)
+      .where(Tables.INSTANCES.ID.eq(instanceId)).fetchSingle().getOwnerId();
+    server.dsl().insertInto(Tables.INSTANCES).set(Tables.INSTANCES.ID, otherInstance)
+      .set(Tables.INSTANCES.FRIENDLY_NAME, "other").set(Tables.INSTANCES.OWNER_ID, owner)
+      .set(Tables.INSTANCES.ICON, "pickaxe").set(Tables.INSTANCES.SETTINGS, "{}").execute();
+    when(server.getInstance(any(UUID.class))).thenReturn(Optional.of(mock(InstanceManager.class)));
+    var first = this.<CreateScriptResponse>rpcResponse(o -> service.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setName("first").setPaused(true).build(), o)).getScript().getId();
+    var second = this.<CreateScriptResponse>rpcResponse(o -> service.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(otherInstance).setName("second").setPaused(true).build(), o)).getScript().getId();
+    ServerCallStreamObserver<ScriptEvent> otherObserver = mock();
+    try {
+      rpcContext.run(() -> service.activateScript(ActivateScriptRequest.newBuilder()
+        .setInstanceId(instanceId).setScriptId(first).build(), observer));
+      rpcContext.run(() -> service.activateScript(ActivateScriptRequest.newBuilder()
+        .setInstanceId(otherInstance).setScriptId(second).build(), otherObserver));
+      service.stopAllScripts(UUID.fromString(instanceId));
+      service.stopAllScripts(UUID.fromString(instanceId));
+      verify(observer, times(1)).onCompleted();
+      assertEquals(1, events.stream().filter(ScriptEvent::hasScriptCompleted).count());
+      assertFalse(events.getLast().getScriptCompleted().getSuccess());
+      verify(otherObserver, never()).onCompleted();
+      assertFalse(this.<GetScriptStatusResponse>rpcResponse(o -> service.getScriptStatus(GetScriptStatusRequest.newBuilder()
+        .setInstanceId(instanceId).setScriptId(first).build(), o)).getStatus().getIsActive());
+      assertTrue(this.<GetScriptStatusResponse>rpcResponse(o -> service.getScriptStatus(GetScriptStatusRequest.newBuilder()
+        .setInstanceId(otherInstance).setScriptId(second).build(), o)).getStatus().getIsActive());
+    } finally {
+      service.stopAllScripts(UUID.fromString(otherInstance));
+    }
   }
 
   @ParameterizedTest

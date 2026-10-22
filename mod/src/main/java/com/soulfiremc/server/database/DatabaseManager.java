@@ -26,6 +26,7 @@ import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
+import org.sqlite.SQLiteDataSource;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -48,17 +49,21 @@ public final class DatabaseManager {
     var dbFile = SFPathConstants.baseDirectory().resolve("soulfire.sqlite");
     var jdbcUrl = "jdbc:sqlite:%s".formatted(dbFile);
 
+    // Legacy migrations rebuild related tables with constraints temporarily disabled.
+    // Keep those connections separate from the runtime pool that enforces them.
+    var migrationDataSource = new SQLiteDataSource();
+    migrationDataSource.setUrl(jdbcUrl);
+    runMigrations(migrationDataSource);
+
     var hikariConfig = new HikariConfig();
     hikariConfig.setJdbcUrl(jdbcUrl);
+    hikariConfig.addDataSourceProperty("foreign_keys", "true");
     hikariConfig.setMinimumIdle(1);
     hikariConfig.setMaximumPoolSize(1);
     hikariConfig.setIdleTimeout(0);
     hikariConfig.setConnectionTimeout(30_000);
 
     var dataSource = new HikariDataSource(hikariConfig);
-
-    runMigrations(dataSource);
-
     var dsl = createDslContext(dataSource, SQLDialect.SQLITE);
     return new DatabaseContext(dsl, dataSource);
   }
