@@ -76,6 +76,10 @@ public final class AutoArmor extends InternalPlugin {
     EquipmentSlot equipmentSlotEnum) {
     var inventory = player.inventoryMenu;
     var equipmentSlotInt = SLOT_VIEW_MAP.get(equipmentSlotEnum);
+    var equipmentSlot = inventory.getSlot(equipmentSlotInt);
+    if (!equipmentSlot.mayPickup(player)) {
+      return;
+    }
 
     var bestItemSlotOptional =
       storageSlots()
@@ -111,7 +115,6 @@ public final class AutoArmor extends InternalPlugin {
       return;
     }
 
-    var equipmentSlot = inventory.getSlot(equipmentSlotInt);
     var equipmentSlotItem = equipmentSlot.getItem();
     if (SFItemHelpers.armorScore(equipmentSlotItem, equipmentSlotEnum)
       >= SFItemHelpers.armorScore(bestItem, equipmentSlotEnum)) {

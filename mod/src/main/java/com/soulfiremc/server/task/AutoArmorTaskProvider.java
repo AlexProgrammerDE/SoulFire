@@ -31,6 +31,7 @@ import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.util.SFItemHelpers;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -147,7 +148,7 @@ public final class AutoArmorTaskProvider
       ) {
         return;
       }
-      var upgrade = findUpgrade(player.inventoryMenu);
+      var upgrade = findUpgrade(player.inventoryMenu, player);
       if (upgrade.isEmpty()) {
         report("Best available armor is equipped");
         if (completeWhenNoUpgrade) {
@@ -245,13 +246,18 @@ public final class AutoArmorTaskProvider
     }
   }
 
-  private static Optional<ArmorUpgrade> findUpgrade(
-    InventoryMenu inventory
+  static Optional<ArmorUpgrade> findUpgrade(
+    InventoryMenu inventory,
+    Player player
   ) {
     for (var equipmentSlot : ARMOR_SLOTS.keySet()) {
       var equippedSlot = ARMOR_SLOTS.get(equipmentSlot);
+      var target = inventory.getSlot(equippedSlot);
+      if (!target.mayPickup(player)) {
+        continue;
+      }
       var equippedScore = SFItemHelpers.armorScore(
-        inventory.getSlot(equippedSlot).getItem(),
+        target.getItem(),
         equipmentSlot
       );
       var best = IntStream.range(
@@ -306,5 +312,5 @@ public final class AutoArmorTaskProvider
     );
   }
 
-  private record ArmorUpgrade(int sourceSlot, int equipmentSlot) {}
+  record ArmorUpgrade(int sourceSlot, int equipmentSlot) {}
 }
