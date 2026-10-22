@@ -19,6 +19,7 @@ package com.soulfiremc.server.bot;
 
 import com.soulfiremc.grpc.generated.PovInputEvent;
 import com.soulfiremc.mod.access.IMouseHandler;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonInfo;
@@ -80,6 +81,12 @@ public final class PovInputController implements ControlTask {
           var window = minecraft.getWindow();
           minecraft.mouseHandler.onMove(handle, event.getX() * window.getScreenWidth(), event.getY() * window.getScreenHeight(), 0, 0);
           minecraft.mouseHandler.handleAccumulatedMovement();
+          if (minecraft.gui.screen() instanceof AbstractContainerScreen<?> screen) {
+            // Native hotkeys and scrolling use a slot normally refreshed only while rendering.
+            var previous = screen.hoveredSlot;
+            screen.hoveredSlot = screen.getHoveredSlot(minecraft.mouseHandler.getScaledXPos(window), minecraft.mouseHandler.getScaledYPos(window));
+            if (previous != null && previous != screen.hoveredSlot) screen.onStopHovering(previous);
+          }
         }
       }
       case SCROLL -> minecraft.mouseHandler.onScroll(handle, event.getX(), event.getY());

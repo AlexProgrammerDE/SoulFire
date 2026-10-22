@@ -271,6 +271,9 @@ accessible method net/minecraft/client/KeyboardHandler charTyped (JLnet/minecraf
 accessible method net/minecraft/client/MouseHandler onButton (JLnet/minecraft/client/input/MouseButtonInfo;I)V
 accessible method net/minecraft/client/MouseHandler onScroll (JDD)V
 accessible method net/minecraft/client/MouseHandler onMove (JDDDD)V
+accessible field net/minecraft/client/gui/screens/inventory/AbstractContainerScreen hoveredSlot Lnet/minecraft/world/inventory/Slot;
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen getHoveredSlot (DD)Lnet/minecraft/world/inventory/Slot;
+accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen onStopHovering (Lnet/minecraft/world/inventory/Slot;)V
 accessible field net/minecraft/client/MouseHandler mouseGrabbed Z
 accessible field net/minecraft/client/KeyMapping key Lcom/mojang/blaze3d/platform/InputConstants$Key;
 accessible method net/minecraft/client/KeyMapping release ()V
