@@ -23,7 +23,7 @@ import org.lwjgl.openal.EXTThreadLocalContext;
 import org.lwjgl.openal.SOFTLoopback;
 import org.lwjgl.system.MemoryStack;
 
-/// Each bot owns an independent loopback device. Context bindings never affect other threads.
+/// Each bot owns an independent loopback device, bound only on its platform sound thread.
 public final class PovAudioContext {
   private final long device;
   private final long context;
@@ -38,6 +38,9 @@ public final class PovAudioContext {
 
   public void run(Runnable task) {
     if (closed) return;
+    if (Thread.currentThread().isVirtual()) {
+      throw new IllegalStateException("POV audio requires the sound executor's platform thread");
+    }
     var previous = EXTThreadLocalContext.alcGetThreadContext();
     var previousCapabilities = previous == 0 ? null : AL.getCapabilities();
     if (!EXTThreadLocalContext.alcSetThreadContext(context)) {

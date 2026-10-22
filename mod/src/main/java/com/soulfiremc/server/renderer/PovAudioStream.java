@@ -82,11 +82,19 @@ public final class PovAudioStream implements AutoCloseable {
 
   @Override
   public void close() {
+    var previousCapture = capture;
+    capture = null;
     try {
-      if (capture != null) capture.soulfire$setAudioEnabled(false);
-    } finally {
-      capture = null;
-      if (encoder != null) { encoder.close(); encoder = null; }
+      if (previousCapture != null) previousCapture.soulfire$setAudioEnabled(false);
+    } catch (RuntimeException failure) {
+      log.warn("Could not close POV audio capture", failure);
+    }
+    var previousEncoder = encoder;
+    encoder = null;
+    try {
+      if (previousEncoder != null) previousEncoder.close();
+    } catch (RuntimeException failure) {
+      log.warn("Could not close POV audio encoder", failure);
     }
   }
 

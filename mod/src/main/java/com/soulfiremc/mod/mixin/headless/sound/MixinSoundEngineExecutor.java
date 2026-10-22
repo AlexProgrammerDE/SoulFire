@@ -27,24 +27,63 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.function.Supplier;
+
 @Mixin(SoundEngineExecutor.class)
 public class MixinSoundEngineExecutor implements PovAudioExecutor {
   @Unique
-  private PovAudioContext soulfire$audioContext;
+  private volatile PovAudioContext soulfire$audioContext;
+  @Unique
+  private volatile boolean soulfire$initializing;
 
   @Override
-  public void soulfire$setAudioContext(PovAudioContext context) {
-    soulfire$audioContext = context;
+  public PovAudioContext soulfire$initializeAudio(Supplier<PovAudioContext> initializer) {
+    var executor = (SoundEngineExecutor) (Object) this;
+    soulfire$initializing = true;
+    try {
+      executor.startUp();
+      return executor.submit(() -> {
+        try {
+          soulfire$audioContext = initializer.get();
+          return soulfire$audioContext;
+        } finally {
+          PovAudioContext.unbind();
+        }
+      }).join();
+    } catch (RuntimeException | Error failure) {
+      executor.shutDown();
+      throw failure;
+    } finally {
+      soulfire$initializing = false;
+    }
+  }
+
+  @Override
+  public void soulfire$runAudio(Runnable task) {
+    if (soulfire$audioContext == null) throw new IllegalStateException("POV audio is not initialized");
+    ((SoundEngineExecutor) (Object) this).submit(task).join();
+  }
+
+  @Override
+  public void soulfire$shutdownAudio() {
+    try {
+      ((SoundEngineExecutor) (Object) this).shutDown();
+    } finally {
+      var context = soulfire$audioContext;
+      soulfire$audioContext = null;
+      if (context != null) context.invalidate();
+    }
   }
 
   @Redirect(method = "createThread", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;start()V"))
   private void startAudioThread(Thread thread) {
-    if (soulfire$audioContext != null) thread.start();
+    if (soulfire$initializing || soulfire$audioContext != null) thread.start();
   }
 
   @Inject(method = "wrapRunnable", at = @At("HEAD"), cancellable = true)
   private void bindAudioContext(Runnable task, CallbackInfoReturnable<Runnable> cir) {
     var context = soulfire$audioContext;
-    cir.setReturnValue(context == null ? () -> {} : () -> context.run(task));
+    if (context != null) cir.setReturnValue(() -> context.run(task));
+    else cir.setReturnValue(soulfire$initializing ? task : () -> {});
   }
 }

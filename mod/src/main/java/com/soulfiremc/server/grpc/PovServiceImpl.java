@@ -335,24 +335,29 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
           // A respawn or dimension transfer temporarily removes the world and player.
           if (minecraft.player == null || minecraft.level == null) return null;
           var image = VulkanRenderer.renderInteractive(minecraft, adaptation.width(), adaptation.height(), targetWidth, targetHeight, readback);
-          var cursorShape = switch (minecraft.getWindow().currentCursor.toString()) {
-            case "ibeam" -> PovFrame.CursorShape.TEXT;
-            case "crosshair" -> PovFrame.CursorShape.CROSSHAIR;
-            case "pointing_hand" -> PovFrame.CursorShape.POINTER;
-            case "resize_ns" -> PovFrame.CursorShape.RESIZE_NS;
-            case "resize_ew" -> PovFrame.CursorShape.RESIZE_EW;
-            case "resize_all" -> PovFrame.CursorShape.RESIZE_ALL;
-            case "not_allowed" -> PovFrame.CursorShape.NOT_ALLOWED;
-            default -> PovFrame.CursorShape.ARROW;
-          };
-          var timestamp = (started - startedAt) / 1000;
-          var captured = new Captured(image, readback.pipelined() ? previousScreenOpen : minecraft.gui.screen() != null,
-            readback.pipelined() ? previousCursor : cursorShape, readback.pipelined() ? previousTimestamp : timestamp,
-            audio.capture(minecraft, audioEnabled, (System.nanoTime() - startedAt) / 1000));
-          previousScreenOpen = minecraft.gui.screen() != null;
-          previousCursor = cursorShape;
-          previousTimestamp = timestamp;
-          return image == null ? null : captured;
+          try {
+            var cursorShape = switch (minecraft.getWindow().currentCursor.toString()) {
+              case "ibeam" -> PovFrame.CursorShape.TEXT;
+              case "crosshair" -> PovFrame.CursorShape.CROSSHAIR;
+              case "pointing_hand" -> PovFrame.CursorShape.POINTER;
+              case "resize_ns" -> PovFrame.CursorShape.RESIZE_NS;
+              case "resize_ew" -> PovFrame.CursorShape.RESIZE_EW;
+              case "resize_all" -> PovFrame.CursorShape.RESIZE_ALL;
+              case "not_allowed" -> PovFrame.CursorShape.NOT_ALLOWED;
+              default -> PovFrame.CursorShape.ARROW;
+            };
+            var timestamp = (started - startedAt) / 1000;
+            var captured = new Captured(image, readback.pipelined() ? previousScreenOpen : minecraft.gui.screen() != null,
+              readback.pipelined() ? previousCursor : cursorShape, readback.pipelined() ? previousTimestamp : timestamp,
+              audio.capture(minecraft, audioEnabled, (System.nanoTime() - startedAt) / 1000));
+            previousScreenOpen = minecraft.gui.screen() != null;
+            previousCursor = cursorShape;
+            previousTimestamp = timestamp;
+            return image == null ? null : captured;
+          } catch (Throwable failure) {
+            if (image != null) image.close();
+            throw failure;
+          }
         });
         Captured frame;
         try { frame = captureFuture.get(30, TimeUnit.SECONDS); }

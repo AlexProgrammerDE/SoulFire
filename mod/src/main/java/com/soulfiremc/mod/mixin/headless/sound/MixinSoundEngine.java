@@ -22,6 +22,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.audio.DeviceList;
 import com.mojang.blaze3d.audio.DeviceTracker;
 import com.mojang.blaze3d.audio.Library;
+import com.mojang.blaze3d.audio.Listener;
 import com.mojang.blaze3d.audio.PollingDeviceTracker;
 import com.soulfiremc.mod.mixin.soulfire.AudioLibraryAccessor;
 import com.soulfiremc.server.renderer.PovAudioCapture;
@@ -51,7 +52,6 @@ public abstract class MixinSoundEngine implements PovAudioCapture {
   @Shadow public abstract void destroy();
   @Unique private final Object soulfire$audioLock = new Object();
   @Unique private boolean soulfire$audioRequested;
-  @Unique private boolean soulfire$destroying;
   @Unique private PovAudioContext soulfire$audioContext;
 
   @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/Library;createDeviceTracker()Lcom/mojang/blaze3d/audio/DeviceTracker;"))
@@ -85,33 +85,41 @@ public abstract class MixinSoundEngine implements PovAudioCapture {
   @WrapMethod(method = "loadLibrary")
   private void loadAudibleLibrary(Operation<Void> original) {
     if (!soulfire$audioRequested || loaded) return;
-    try {
-      original.call();
-      if (loaded) {
-        var access = (AudioLibraryAccessor) library;
-        soulfire$audioContext = new PovAudioContext(access.soulfire$getDevice(), access.soulfire$getContext());
-        ((PovAudioExecutor) executor).soulfire$setAudioContext(soulfire$audioContext);
-        executor.startUp();
+    original.call();
+    if (!loaded && soulfire$audioContext != null) {
+      try {
+        ((PovAudioExecutor) executor).soulfire$runAudio(library::cleanup);
+      } finally {
+        soulfire$audioContext = null;
+        ((PovAudioExecutor) executor).soulfire$shutdownAudio();
       }
-    } finally {
-      if (loaded) PovAudioContext.unbind();
     }
+  }
+
+  @Redirect(method = "loadLibrary", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/Library;init(Ljava/lang/String;Lcom/mojang/blaze3d/audio/DeviceList;Z)V"))
+  private void initializeAudioOnSoundThread(Library soundLibrary, String preferred, DeviceList devices, boolean hrtf) {
+    soulfire$audioContext = ((PovAudioExecutor) executor).soulfire$initializeAudio(() -> {
+      soundLibrary.init(preferred, devices, hrtf);
+      var access = (AudioLibraryAccessor) soundLibrary;
+      return new PovAudioContext(access.soulfire$getDevice(), access.soulfire$getContext());
+    });
+  }
+
+  @Redirect(method = "loadLibrary", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/Listener;reset()V"))
+  private void resetListenerOnSoundThread(Listener listener) {
+    ((PovAudioExecutor) executor).soulfire$runAudio(listener::reset);
   }
 
   @WrapMethod(method = "destroy")
   private void destroyAudibleLibrary(Operation<Void> original) {
     synchronized (soulfire$audioLock) {
-    var context = soulfire$audioContext;
-    if (context == null) { original.call(); return; }
-    soulfire$destroying = true;
-    try {
-      context.run(() -> original.call());
-    } finally {
-      context.invalidate();
-      soulfire$audioContext = null;
-      ((PovAudioExecutor) executor).soulfire$setAudioContext(null);
-      soulfire$destroying = false;
-    }
+      if (soulfire$audioContext == null) { original.call(); return; }
+      try {
+        ((PovAudioExecutor) executor).soulfire$runAudio(() -> original.call());
+      } finally {
+        soulfire$audioContext = null;
+        ((PovAudioExecutor) executor).soulfire$shutdownAudio();
+      }
     }
   }
 
@@ -119,12 +127,17 @@ public abstract class MixinSoundEngine implements PovAudioCapture {
   private void stopAudibleSounds(Operation<Void> original) {
     var context = soulfire$audioContext;
     if (context == null) original.call();
-    else context.run(() -> original.call());
+    else ((PovAudioExecutor) executor).soulfire$runAudio(() -> original.call());
+  }
+
+  @Redirect(method = "stopAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundEngineExecutor;shutDown()V"))
+  private void keepAudioThreadForCleanup(SoundEngineExecutor soundExecutor) {
+    if (soulfire$audioContext == null) soundExecutor.shutDown();
   }
 
   @Redirect(method = "stopAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundEngineExecutor;startUp()V"))
   private void restartAudioThread(SoundEngineExecutor soundExecutor) {
-    if (!soulfire$destroying) soundExecutor.startUp();
+    if (soulfire$audioContext == null) soundExecutor.startUp();
   }
 
   @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
