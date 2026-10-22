@@ -108,10 +108,7 @@ public final class EatMealTask implements ControlTask {
       if (interrupted || bot.minecraft().player != player || player.isDeadOrDying()) {
         throw new IllegalStateException("The meal was interrupted before completion");
       }
-      if (consuming && !confirmed && consumptionConfirmed(meal, player.getItemInHand(hand), initialFoodLevel, player.getFoodData().getFoodLevel())) {
-        confirmed = true;
-        stopHeldUse();
-      }
+      confirmConsumption();
       delegate.tick();
     } catch (RuntimeException | Error cause) {
       cleanUp();
@@ -147,6 +144,7 @@ public final class EatMealTask implements ControlTask {
 
   @Override
   public void onSuspended() {
+    confirmConsumption();
     if (confirmed) {
       delegate.onStopped(ControlStopReason.COMPLETED, null);
     } else {
@@ -158,6 +156,7 @@ public final class EatMealTask implements ControlTask {
   @Override
   public void onStopped(ControlStopReason reason, @Nullable Throwable cause) {
     try {
+      confirmConsumption();
       delegate.onStopped(reason, cause);
     } finally {
       cleanUp();
@@ -167,6 +166,15 @@ public final class EatMealTask implements ControlTask {
   @Override
   public @Nullable String description() {
     return delegate.description();
+  }
+
+  private void confirmConsumption() {
+    // Input and inventory packets can run between vanilla consumption and our next tick.
+    if (consuming && !confirmed && bot.minecraft().player == player && !player.isDeadOrDying()
+      && consumptionConfirmed(meal, player.getItemInHand(hand), initialFoodLevel, player.getFoodData().getFoodLevel())) {
+      confirmed = true;
+      stopHeldUse();
+    }
   }
 
   private void cleanUp() {
