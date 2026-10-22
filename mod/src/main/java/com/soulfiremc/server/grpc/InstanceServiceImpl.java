@@ -335,6 +335,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .execute();
       });
 
+      soulFireServer.getInstance(instanceId).ifPresent(InstanceManager::refreshFriendlyName);
       refreshRuntimeSettings(instanceId);
       responseObserver.onNext(InstanceUpdateMetaResponse.newBuilder().build());
       responseObserver.onCompleted();

@@ -90,7 +90,7 @@ public final class InstanceManager {
   private final SoulFireServer soulFireServer;
   private final DSLContext dsl;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
-  private final CachedLazyObject<String> friendlyNameCache;
+  private volatile String friendlyName;
   private final SettingsPageRegistry instanceSettingsPageRegistry;
   private final InstanceMetricsCollector metricsCollector;
   private final InstancePluginStats pluginStats;
@@ -119,7 +119,7 @@ public final class InstanceManager {
     this.soulFireServer = soulFireServer;
     this.dsl = dsl;
     this.settingsSource = new InstanceSettingsDelegate(new CachedLazyObject<>(this::fetchSettingsSource, 1, TimeUnit.SECONDS));
-    this.friendlyNameCache = new CachedLazyObject<>(this::fetchFriendlyName, 1, TimeUnit.SECONDS);
+    refreshFriendlyName();
     initPersistentMetadata();
 
     this.metricsCollector = new InstanceMetricsCollector(this);
@@ -177,7 +177,6 @@ public final class InstanceManager {
 
   public void invalidateSettingsCache() {
     settingsSource.invalidate();
-    friendlyNameCache.invalidate();
     for (var bot : botConnections.values()) {
       bot.invalidateSettingsCache();
     }
@@ -244,14 +243,12 @@ public final class InstanceManager {
     invalidateSettingsCache();
   }
 
-  private String fetchFriendlyName() {
-    var record = dsl.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne();
-
-    if (record == null) {
-      return "Unknown";
-    } else {
-      return record.getFriendlyName();
-    }
+  /// Refreshes the name snapshot after a committed metadata change.
+  /// Readers use the snapshot without acquiring a database connection.
+  public synchronized void refreshFriendlyName() {
+    var name = dsl.select(Tables.INSTANCES.FRIENDLY_NAME).from(Tables.INSTANCES)
+      .where(Tables.INSTANCES.ID.eq(id.toString())).fetchOne(Tables.INSTANCES.FRIENDLY_NAME);
+    friendlyName = name == null ? "Unknown" : name;
   }
 
   private void tick() {
@@ -459,7 +456,7 @@ public final class InstanceManager {
       return () -> ScopedValue.where(CURRENT, instanceManager).run(() -> {
         try (
           var _ = SFHelpers.smartMDCCloseable(SFLogAppender.SF_INSTANCE_ID, instanceManager.id().toString());
-          var _ = SFHelpers.smartMDCCloseable(SFLogAppender.SF_INSTANCE_NAME, instanceManager.friendlyNameCache().get())) {
+          var _ = SFHelpers.smartMDCCloseable(SFLogAppender.SF_INSTANCE_NAME, instanceManager.friendlyName())) {
           runnable.run();
         }
       });

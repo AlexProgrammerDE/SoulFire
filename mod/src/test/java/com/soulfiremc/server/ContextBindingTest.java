@@ -19,20 +19,34 @@ package com.soulfiremc.server;
 
 import com.soulfiremc.mod.util.SFConstants;
 import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.script.SoulFireReactorScheduler;
-import com.soulfiremc.server.util.structs.CachedLazyObject;
+import com.soulfiremc.server.util.netty.NettyHelper;
 import com.soulfiremc.shared.SFLogAppender;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.local.LocalChannel;
+import io.netty.channel.local.LocalIoHandler;
 import net.lenni0451.reflect.Fields;
 import net.lenni0451.reflect.Objects;
 import net.minecraft.client.Minecraft;
+import org.jooq.SQLDialect;
+import org.jooq.exception.DataAccessException;
+import org.jooq.impl.DSL;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.MDC;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -92,6 +106,60 @@ final class ContextBindingTest {
     }
   }
 
+  @Test
+  void databaseContentionDoesNotDelayNetworkCallbacks(@TempDir Path directory) throws Exception {
+    var config = new HikariConfig();
+    config.setJdbcUrl("jdbc:sqlite:" + directory.resolve("names.sqlite"));
+    config.setMaximumPoolSize(1);
+    config.setConnectionTimeout(5_000);
+    var context = TestContext.create();
+    var updatedName = UUID.randomUUID().toString();
+    try (var source = new HikariDataSource(config)) {
+      var dsl = DSL.using(source, SQLDialect.SQLITE);
+      var name = context.instance().id().toString();
+      dsl.execute("CREATE TABLE instances (id TEXT PRIMARY KEY, friendly_name TEXT NOT NULL)");
+      dsl.insertInto(Tables.INSTANCES).set(Tables.INSTANCES.ID, name).set(Tables.INSTANCES.FRIENDLY_NAME, name).execute();
+      Fields.setObject(context.instance(), Fields.getDeclaredField(InstanceManager.class, "dsl"), dsl);
+      context.instance().refreshFriendlyName();
+      var loop = new MultiThreadIoEventLoopGroup(1, LocalIoHandler.newFactory());
+      var channel = new LocalChannel();
+      var received = new CompletableFuture<String>();
+      NettyHelper.addRunnableWrapper("test-", context.wrapper(), channel);
+      channel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+        @Override
+        public void channelRead(ChannelHandlerContext ignored, Object message) {
+          try {
+            context.assertBound();
+            received.complete(MDC.get(SFLogAppender.SF_INSTANCE_NAME));
+          } catch (Throwable error) {
+            received.completeExceptionally(error);
+          }
+        }
+      });
+      try {
+        loop.register(channel).syncUninterruptibly();
+        // Keep the only SQL connection busy while the shared network thread reads a packet.
+        try (var _ = source.getConnection()) {
+          assertEquals(1, source.getHikariPoolMXBean().getActiveConnections());
+          loop.submit(() -> channel.pipeline().fireChannelRead(new Object())).get(1, TimeUnit.SECONDS);
+          assertEquals(name, received.get(1, TimeUnit.SECONDS));
+        }
+      } finally {
+        channel.close().syncUninterruptibly();
+        loop.shutdownGracefully(0, 1, TimeUnit.SECONDS).syncUninterruptibly();
+      }
+      dsl.update(Tables.INSTANCES).set(Tables.INSTANCES.FRIENDLY_NAME, updatedName)
+        .where(Tables.INSTANCES.ID.eq(name)).execute();
+      context.instance().refreshFriendlyName();
+      assertEquals(updatedName, context.instance().friendlyName());
+      context.wrapper().runWrapped(context::assertBound);
+    }
+    assertThrows(DataAccessException.class, context.instance()::refreshFriendlyName);
+    assertEquals(updatedName, context.instance().friendlyName());
+    context.wrapper().runWrapped(context::assertBound);
+    assertUnbound();
+  }
+
   private static void assertConcurrentContext(TestContext context, CountDownLatch ready) {
     context.assertBound();
     ready.countDown();
@@ -128,8 +196,7 @@ final class ContextBindingTest {
       var instanceId = UUID.randomUUID();
       var accountId = UUID.randomUUID();
       Fields.setObject(instance, Fields.getDeclaredField(InstanceManager.class, "id"), instanceId);
-      Fields.setObject(instance, Fields.getDeclaredField(InstanceManager.class, "friendlyNameCache"),
-        new CachedLazyObject<>(instanceId::toString, 1, TimeUnit.DAYS));
+      Fields.setObject(instance, Fields.getDeclaredField(InstanceManager.class, "friendlyName"), instanceId.toString());
       Fields.setObject(bot, Fields.getDeclaredField(BotConnection.class, "accountProfileId"), accountId);
       Fields.setObject(bot, Fields.getDeclaredField(BotConnection.class, "accountName"), accountId.toString());
       Fields.setObject(bot, Fields.getDeclaredField(BotConnection.class, "minecraft"), Objects.allocate(Minecraft.class));
@@ -151,7 +218,7 @@ final class ContextBindingTest {
       assertSame(bot, BotConnection.current());
       assertSame(bot.minecraft(), Minecraft.getInstance());
       assertEquals(instance.id().toString(), MDC.get(SFLogAppender.SF_INSTANCE_ID));
-      assertEquals(instance.friendlyNameCache().get(), MDC.get(SFLogAppender.SF_INSTANCE_NAME));
+      assertEquals(instance.friendlyName(), MDC.get(SFLogAppender.SF_INSTANCE_NAME));
       assertEquals(bot.accountProfileId().toString(), MDC.get(SFLogAppender.SF_BOT_ACCOUNT_ID));
       assertEquals(bot.accountName(), MDC.get(SFLogAppender.SF_BOT_ACCOUNT_NAME));
     }

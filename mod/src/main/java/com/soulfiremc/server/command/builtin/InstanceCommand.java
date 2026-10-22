@@ -51,7 +51,7 @@ public final class InstanceCommand {
                   return c.getSource()
                     .withInstanceIds(c.getSource().getVisibleInstances()
                       .stream()
-                      .filter(instance -> instanceNames.contains(instance.friendlyNameCache().get()))
+                      .filter(instance -> instanceNames.contains(instance.friendlyName()))
                       .map(InstanceManager::id)
                       .collect(Collectors.toSet()));
                 }
@@ -65,7 +65,7 @@ public final class InstanceCommand {
 
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> c, SuggestionsBuilder b) {
-      c.getSource().getVisibleInstances().forEach(instance -> b.suggest(instance.friendlyNameCache().get()));
+      c.getSource().getVisibleInstances().forEach(instance -> b.suggest(instance.friendlyName()));
 
       return b.buildFuture();
     }

@@ -137,7 +137,7 @@ public final class BrigadierHelper {
 
     var resultSum = new AtomicInteger();
     for (var instance : instances) {
-      context.getSource().source().sendInfo("--- Running command for instance %s ---".formatted(instance.friendlyNameCache().get()));
+      context.getSource().source().sendInfo("--- Running command for instance %s ---".formatted(instance.friendlyName()));
 
       instance.addAuditLog(context.getSource().source(), AuditLogType.EXECUTE_COMMAND, context.getInput());
       instance.runnableWrapper().runWrapped(() ->
@@ -154,7 +154,7 @@ public final class BrigadierHelper {
       context,
       instance -> {
         if (context.getSource().getInstanceVisibleBots(instance).isEmpty()) {
-          context.getSource().source().sendWarn("Instance %s has no connected bots.".formatted(instance.friendlyNameCache().get()));
+          context.getSource().source().sendWarn("Instance %s has no connected bots.".formatted(instance.friendlyName()));
           return 0;
         }
 
