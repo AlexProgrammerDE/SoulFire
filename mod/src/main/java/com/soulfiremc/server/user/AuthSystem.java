@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.user;
 
+import com.soulfiremc.grpc.generated.InstancePermission;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.database.UserRole;
@@ -45,6 +46,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 @Getter
 @Slf4j
@@ -336,21 +339,34 @@ public final class AuthSystem {
                INVALIDATE_SELF_SESSIONS -> TriState.TRUE;
           case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + global.globalPermission());
         };
-        case PermissionContext.InstanceContext instance -> switch (instance.instancePermission()) {
-          case DELETE_INSTANCE -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
-            && settingsSource.get(ServerSettings.ALLOW_DELETING_INSTANCES));
-          case UPDATE_INSTANCE_META -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId())
-            && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
-          case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS,
-               ACCESS_OBJECT_STORAGE,
-               DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
-               CONTROL_BOTS, CONTROL_BOT_ACTIONS, EXECUTE_SCRIPTS, UPDATE_INSTANCE_CONFIG,
-               READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS,
-               READ_BOT_INFO, UPDATE_BOT_CONFIG -> TriState.byBoolean(isOwnerOfInstance(instance.instanceId()));
-          case RAW_PROTOCOL -> TriState.FALSE;
-          case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + instance.instancePermission());
-        };
+        case PermissionContext.InstanceContext instance -> instancePermission(instance.instancePermission(),
+          () -> isOwnerOfInstance(instance.instanceId()));
         case PermissionContext.PluginContext plugin -> pluginPermission(plugin);
+      };
+    }
+
+    @Override
+    public Predicate<InstancePermission> instancePermissionChecker(UUID instanceId) {
+      if (isAdmin()) return _ -> true;
+      var owned = isOwnerOfInstance(instanceId);
+      BooleanSupplier ownership = () -> owned;
+      return permission -> instancePermission(permission, ownership).toBooleanOrElse(false);
+    }
+
+    private TriState instancePermission(InstancePermission permission, BooleanSupplier ownership) {
+      return switch (permission) {
+        case DELETE_INSTANCE -> TriState.byBoolean(ownership.getAsBoolean()
+          && settingsSource.get(ServerSettings.ALLOW_DELETING_INSTANCES));
+        case UPDATE_INSTANCE_META -> TriState.byBoolean(ownership.getAsBoolean()
+          && settingsSource.get(ServerSettings.ALLOW_CHANGING_INSTANCE_META));
+        case INSTANCE_COMMAND_EXECUTION, INSTANCE_SUBSCRIBE_LOGS,
+             ACCESS_OBJECT_STORAGE,
+             DOWNLOAD_URL, CHECK_PROXY, AUTHENTICATE_MC_ACCOUNT,
+             CONTROL_BOTS, CONTROL_BOT_ACTIONS, EXECUTE_SCRIPTS, UPDATE_INSTANCE_CONFIG,
+             READ_INSTANCE, READ_INSTANCE_AUDIT_LOGS,
+             READ_BOT_INFO, UPDATE_BOT_CONFIG -> TriState.byBoolean(ownership.getAsBoolean());
+        case RAW_PROTOCOL -> TriState.FALSE;
+        case UNRECOGNIZED -> throw new IllegalStateException("Unexpected value: " + permission);
       };
     }
 

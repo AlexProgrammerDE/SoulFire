@@ -44,6 +44,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -119,13 +120,12 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     responseObserver.onCompleted();
   }
 
-  private Collection<InstancePermissionState> getInstancePermissions(UUID instanceId) {
-    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+  private static Collection<InstancePermissionState> instancePermissionStates(Predicate<InstancePermission> permissions) {
     return Arrays.stream(InstancePermission.values())
       .filter(permission -> permission != InstancePermission.UNRECOGNIZED)
       .map(permission -> InstancePermissionState.newBuilder()
         .setInstancePermission(permission)
-        .setGranted(user.hasPermission(PermissionContext.instance(permission, instanceId)))
+        .setGranted(permissions.test(permission))
         .build())
       .toList();
   }
@@ -219,28 +219,20 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var dsl = soulFireServer.dsl();
       var records = dsl.selectFrom(Tables.INSTANCES).fetch();
-
-      responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(records.stream()
-          .filter(record -> {
-            var id = UUID.fromString(record.getId());
-            return ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, id));
-          })
-          .map(record -> {
-            var id = UUID.fromString(record.getId());
-            return InstanceListResponse.Instance.newBuilder()
-              .setId(record.getId())
-              .setFriendlyName(record.getFriendlyName())
-              .setIcon(record.getIcon())
-              .setBotSummary(soulFireServer.getInstance(id)
-                .orElseThrow()
-                .botStateManager()
-                .summary())
-              .addAllInstancePermissions(getInstancePermissions(id))
-              .build();
-          })
-          .toList())
-        .build());
+      var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+      var response = InstanceListResponse.newBuilder();
+      for (var record : records) {
+        var id = UUID.fromString(record.getId());
+        var permissions = user.instancePermissionChecker(id);
+        if (!permissions.test(InstancePermission.READ_INSTANCE)) continue;
+        response.addInstances(InstanceListResponse.Instance.newBuilder()
+          .setId(record.getId())
+          .setFriendlyName(record.getFriendlyName())
+          .setIcon(record.getIcon())
+          .setBotSummary(soulFireServer.getInstance(id).orElseThrow().botStateManager().summary())
+          .addAllInstancePermissions(instancePermissionStates(permissions)));
+      }
+      responseObserver.onNext(response.build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
@@ -253,7 +245,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   @Override
   public void getInstanceInfo(InstanceInfoRequest request, StreamObserver<InstanceInfoResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
       var dsl = soulFireServer.dsl();
@@ -297,7 +290,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .setIcon(record.getIcon())
           .setConfig(settings.toProto())
           .setBotSummary(instance.botStateManager().summary())
-          .addAllInstancePermissions(getInstancePermissions(instanceId))
+          .addAllInstancePermissions(instancePermissionStates(user.instancePermissionChecker(instanceId)))
           .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
           .addAllInstanceSettings(registry.exportSettingsPages())
           .addAllPlugins(registry.exportRegisteredPlugins())

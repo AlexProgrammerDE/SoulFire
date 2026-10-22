@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.user;
 
+import com.soulfiremc.grpc.generated.InstancePermission;
 import com.soulfiremc.server.database.UserRole;
 import io.grpc.Status;
 import net.kyori.adventure.text.Component;
@@ -28,6 +29,7 @@ import org.slf4j.helpers.MessageFormatter;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public interface SoulFireUser {
   private static String format(String format, Object[] params, @Nullable Throwable t) {
@@ -61,6 +63,10 @@ public interface SoulFireUser {
 
   default boolean hasPermission(PermissionContext permission) {
     return getPermission(permission).toBooleanOrElse(false);
+  }
+
+  default Predicate<InstancePermission> instancePermissionChecker(UUID instanceId) {
+    return permission -> hasPermission(PermissionContext.instance(permission, instanceId));
   }
 
   default void hasPermissionOrThrow(PermissionContext permission) {
