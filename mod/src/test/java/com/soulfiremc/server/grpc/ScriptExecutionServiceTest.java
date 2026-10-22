@@ -33,6 +33,7 @@ import com.soulfiremc.grpc.generated.ScriptEvent;
 import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.grpc.generated.ScriptQuotas;
 import com.soulfiremc.grpc.generated.UpdateScriptRequest;
+import com.soulfiremc.grpc.generated.UpdateScriptResponse;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.SoulFireServer;
@@ -151,6 +152,47 @@ final class ScriptExecutionServiceTest {
   private void awaitCompletion() throws InterruptedException {
     assertTrue(terminal.await(5, TimeUnit.SECONDS));
     assertNull(error.get());
+  }
+
+  @Test
+  void preservesExplicitNullMembersAcrossCreateReadAndUpdate() {
+    var nil = Value.newBuilder().setNullValue(NullValue.NULL_VALUE).build();
+    var nested = Value.newBuilder().setStructValue(Struct.newBuilder()
+      .putFields("missing", nil)
+      .putFields("items", Value.newBuilder().setListValue(ListValue.newBuilder()
+        .addValues(nil)
+        .addValues(Value.newBuilder().setStructValue(Struct.newBuilder().putFields("missing", nil)))
+        .addValues(Value.newBuilder().setBoolValue(false))
+        .addValues(Value.newBuilder().setNumberValue(0))
+        .addValues(Value.newBuilder().setStringValue(""))).build())).build();
+    var node = ScriptNode.newBuilder().setId(actionId).setType("json.stringify")
+      .putData("value", nested).putData("nullable", nil).build();
+    var created = this.<CreateScriptResponse>rpcResponse(observer -> service.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setName("null values").setPaused(true).addNodes(node).build(), observer));
+    var scriptId = created.getScript().getId();
+    assertEquals(node.getDataMap(), created.getScript().getNodes(0).getDataMap());
+    var read = this.<GetScriptResponse>rpcResponse(observer -> service.getScript(GetScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).build(), observer));
+    assertEquals(node.getDataMap(), read.getScript().getNodes(0).getDataMap());
+
+    var changed = node.toBuilder().putData("added", nested).build();
+    var updated = this.<UpdateScriptResponse>rpcResponse(observer -> service.updateScript(UpdateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).setUpdateNodes(true).addNodes(changed).build(), observer));
+    assertEquals(changed.getDataMap(), updated.getScript().getNodes(0).getDataMap());
+    var reread = this.<GetScriptResponse>rpcResponse(observer -> service.getScript(GetScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(scriptId).build(), observer));
+    assertEquals(changed.getDataMap(), reread.getScript().getNodes(0).getDataMap());
+  }
+
+  private <T> T rpcResponse(Consumer<StreamObserver<T>> action) {
+    var response = new AtomicReference<T>();
+    var failure = new AtomicReference<Throwable>();
+    StreamObserver<T> observer = mock();
+    doAnswer(call -> { response.set(call.getArgument(0)); return null; }).when(observer).onNext(any());
+    doAnswer(call -> { failure.set(call.getArgument(0)); return null; }).when(observer).onError(any());
+    rpcContext.run(() -> action.accept(observer));
+    assertNull(failure.get());
+    return response.get();
   }
 
   @ParameterizedTest

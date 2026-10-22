@@ -970,7 +970,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           ))
       ))
       .toList();
-    return GsonInstance.GSON.toJson(nodeDataList);
+    return GsonInstance.CONFIG_GSON.toJson(nodeDataList);
   }
 
   private String edgesToJson(List<ScriptEdge> edges) {
@@ -1106,7 +1106,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   private Value jsonElementToValue(JsonElement element) {
     try {
       var builder = Value.newBuilder();
-      JsonFormat.parser().merge(GsonInstance.GSON.toJson(element), builder);
+      JsonFormat.parser().merge(GsonInstance.CONFIG_GSON.toJson(element), builder);
       return builder.build();
     } catch (InvalidProtocolBufferException e) {
       throw new RuntimeException(e);
