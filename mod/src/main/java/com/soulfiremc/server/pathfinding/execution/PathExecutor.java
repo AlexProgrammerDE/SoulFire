@@ -136,12 +136,18 @@ public final class PathExecutor implements ControlTask {
     PathConstraint pathConstraint
   ) {
     var completion = new CompletableFuture<Void>();
-    bot.shutdownHooks().add(() -> completion.cancel(true));
+    cancelOnShutdown(bot, completion);
     return new PathExecutor(
       bot,
       new LiveRouteFinder(bot, goalScorer, pathConstraint),
       completion
     );
+  }
+
+  private static void cancelOnShutdown(BotConnection bot, CompletableFuture<?> future) {
+    Runnable cancel = () -> future.cancel(true);
+    bot.shutdownHooks().add(cancel);
+    future.whenComplete((_, _) -> bot.shutdownHooks().remove(cancel));
   }
 
   public static CompletableFuture<PlannedRoute> plan(
@@ -858,7 +864,7 @@ public final class PathExecutor implements ControlTask {
       );
       var routeStart = start;
       var routeSearchResultFuture = routeFinder.findRouteFuture(NodeState.forInfo(start, inventory));
-      bot.shutdownHooks().add(() -> routeSearchResultFuture.cancel(true));
+      cancelOnShutdown(bot, routeSearchResultFuture);
       var plannedRouteFuture = routeSearchResultFuture.thenApply(
         routeSearchResult -> {
           log.info("Route search result: {}", routeSearchResult);
