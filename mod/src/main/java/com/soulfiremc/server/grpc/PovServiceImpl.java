@@ -47,6 +47,8 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.input.KeyEvent;
 import org.reactivestreams.Subscriber;
@@ -86,14 +88,19 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       var leases = instance.botControlLeaseManager();
       var lease = leases.acquire(botId, user.getUniqueId(), PovSessionHeartbeat.STARTUP_TIMEOUT.plus(CONTROL_LEASE_TTL));
       var observer = (ServerCallStreamObserver<PovFrame>) response;
+      var requestContext = ServiceRequestContext.current();
+      var channel = requestContext.log().partial().channel();
       var session = new Session(sessionId, bot, user, leases, lease.token(), observer,
-        request.getWidth(), request.getHeight(), request.getMaxFps(), request.getCodecsList());
+        request.getWidth(), request.getHeight(), request.getMaxFps(), request.getCodecsList(), channel == null ? null : channel.closeFuture());
       if (sessions.putIfAbsent(sessionId, session) != null) {
         leases.release(botId, user.getUniqueId(), lease.token());
         throw Status.ALREADY_EXISTS.asRuntimeException();
       }
       // The input heartbeat owns this long-lived stream's timeout.
-      ServiceRequestContext.current().clearRequestTimeout();
+      requestContext.clearRequestTimeout();
+      // HTTP/1 defers request cancellation after disconnect to finish responses.
+      // A disconnected POV must release control without that grace period.
+      if (session.transportClosed != null) session.transportClosed.addListener(session.onTransportClosed);
       observer.setOnCancelHandler(session::close);
       session.schedule(0);
     } catch (Throwable error) { response.onError(rpcError(error)); }
@@ -280,6 +287,8 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private final BotControlLeaseManager leases;
     private final String token;
     private final ServerCallStreamObserver<PovFrame> observer;
+    private final ChannelFuture transportClosed;
+    private final ChannelFutureListener onTransportClosed = _ -> close();
     private final AtomicBoolean rendering = new AtomicBoolean();
     private final AtomicBoolean closed = new AtomicBoolean();
     private final Object encoderLock = new Object();
@@ -308,8 +317,10 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private int targetHeight;
 
     private Session(UUID id, BotConnection bot, SoulFireUser user, BotControlLeaseManager leases, String token,
-                    ServerCallStreamObserver<PovFrame> observer, int width, int height, int maxFps, List<String> codecs) {
+                    ServerCallStreamObserver<PovFrame> observer, int width, int height, int maxFps, List<String> codecs,
+                    ChannelFuture transportClosed) {
       this.id = id; this.bot = bot; this.user = user; this.owner = user.getUniqueId(); this.leases = leases; this.token = token;
+      this.transportClosed = transportClosed;
       this.observer = observer; this.width = even(width); this.height = even(height);
       this.format = codecs.contains("av1") ? PovVideoEncoder.Format.AV1 : codecs.contains("h264-high") ? PovVideoEncoder.Format.HIGH : PovVideoEncoder.Format.BASELINE;
       this.maxFps = Math.clamp(maxFps == 0 ? 60 : maxFps, 15, 120);
@@ -376,6 +387,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
               encoder = null;
               encoder = new PovVideoEncoder(image.width(), image.height(), adaptation.fps(), format);
             }
+            if (closed.get()) return;
             encoder.bitrate(adaptation.bitrate());
             var encoded = encoder.encode(image.pixels(), frame.timestampUs, keyFrameRequested.getAndSet(false));
             var builder = PovFrame.newBuilder()
@@ -405,7 +417,10 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
         close();
       } finally {
         rendering.set(false);
-        if (closed.get()) bot.minecraft().execute(readback::close);
+        if (closed.get()) {
+          try { closeEncoder(); }
+          finally { bot.minecraft().execute(readback::close); }
+        }
         if (adaptation != null) adaptation.recordFrame(System.nanoTime() - started);
         if (!closed.get()) schedule(Math.max(0, 1_000_000_000L / (adaptation == null ? 60 : adaptation.fps()) - (System.nanoTime() - started)));
       }
@@ -414,10 +429,10 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private void close() {
       if (!closed.compareAndSet(false, true)) return;
       sessions.remove(id, this);
+      if (transportClosed != null) transportClosed.removeListener(onTransportClosed);
       if (inputChannel != null) inputChannel.close();
-      synchronized (encoderLock) {
-        if (encoder != null) { encoder.close(); encoder = null; }
-      }
+      // Queue input/audio cleanup before another owner can acquire control.
+      // Encoder startup and encoding may block; their frame owns final cleanup.
       bot.minecraft().execute(() -> {
         bot.povInput().capture(false);
         bot.minecraft().keyboardHandler.setClipboard("");
@@ -426,6 +441,15 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       });
       try { leases.release(bot.accountProfileId(), owner, token); }
       catch (BotControlLeaseManager.InvalidLeaseException ignored) { /* Expired leases already release ownership. */ }
+      if (!rendering.get()) closeEncoder();
+    }
+
+    private void closeEncoder() {
+      synchronized (encoderLock) {
+        var previous = encoder;
+        encoder = null;
+        if (previous != null) previous.close();
+      }
     }
   }
 
