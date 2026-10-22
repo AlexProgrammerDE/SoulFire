@@ -21,12 +21,91 @@ import com.mojang.blaze3d.audio.DeviceList;
 import com.mojang.blaze3d.audio.Library;
 import com.soulfiremc.mod.mixin.soulfire.AudioLibraryAccessor;
 import org.junit.jupiter.api.Test;
+import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.ALC;
+import org.lwjgl.openal.ALC10;
+import org.lwjgl.openal.ALCCapabilities;
 import org.lwjgl.system.MemoryStack;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mockStatic;
 
 class PovAudioContextTest {
+  @Test
+  void failedDeviceCapabilitiesReleaseTheDeviceAndAllowRetry() {
+    assertInitializationFailureIsCleanedUp(false);
+  }
+
+  @Test
+  void failedContextCapabilitiesReleaseNativeHandlesAndAllowRetry() {
+    assertInitializationFailureIsCleanedUp(true);
+  }
+
+  private static void assertInitializationFailureIsCleanedUp(boolean afterContextCreation) {
+    var library = new Library();
+    var access = (AudioLibraryAccessor) library;
+    var closedDevices = new AtomicInteger();
+    var destroyedContexts = new AtomicInteger();
+    var failOnce = new AtomicBoolean(true);
+    var failure = new IllegalStateException("Injected capability failure");
+    try (var devices = mockStatic(ALC10.class, CALLS_REAL_METHODS);
+         var deviceCapabilities = mockStatic(ALC.class, CALLS_REAL_METHODS);
+         var capabilities = mockStatic(AL.class, CALLS_REAL_METHODS)) {
+      devices.when(() -> ALC10.alcCloseDevice(anyLong())).thenAnswer(invocation -> {
+        var closed = (boolean) invocation.callRealMethod();
+        if (closed) closedDevices.incrementAndGet();
+        return closed;
+      });
+      devices.when(() -> ALC10.alcDestroyContext(anyLong())).thenAnswer(invocation -> {
+        invocation.callRealMethod();
+        destroyedContexts.incrementAndGet();
+        return null;
+      });
+      if (afterContextCreation) {
+        capabilities.when(() -> AL.createCapabilities(any(ALCCapabilities.class))).thenAnswer(invocation -> {
+          if (failOnce.getAndSet(false)) throw failure;
+          return invocation.callRealMethod();
+        });
+      } else {
+        deviceCapabilities.when(() -> ALC.createCapabilities(anyLong())).thenAnswer(invocation -> {
+          if (failOnce.getAndSet(false)) throw failure;
+          return invocation.callRealMethod();
+        });
+      }
+      try {
+        for (var cycle = 0; cycle < 2; cycle++) {
+          failOnce.set(true);
+          assertSame(failure, assertThrows(IllegalStateException.class, () -> library.init(null, DeviceList.EMPTY, false)));
+          assertEquals(cycle * 2 + 1, closedDevices.get());
+          assertEquals(cycle * (afterContextCreation ? 2 : 1) + (afterContextCreation ? 1 : 0), destroyedContexts.get());
+          assertEquals(0, access.soulfire$getDevice());
+          assertEquals(0, access.soulfire$getContext());
+          library.init(null, DeviceList.EMPTY, false);
+          var context = new PovAudioContext(access.soulfire$getDevice(), access.soulfire$getContext());
+          assertEquals(PovAudioCapture.FRAME_SAMPLES * 2, context.render(PovAudioCapture.FRAME_SAMPLES).length);
+          library.cleanup();
+          context.invalidate();
+          assertEquals(0, access.soulfire$getDevice());
+          assertEquals(0, access.soulfire$getContext());
+        }
+      } finally {
+        if (access.soulfire$getContext() != 0) library.cleanup();
+        else if (access.soulfire$getDevice() != 0) ALC10.alcCloseDevice(access.soulfire$getDevice());
+        PovAudioContext.unbind();
+      }
+    }
+  }
+
   @Test
   void mixingOneBotNeverPlaysInAnotherBotsLoopbackDevice() {
     var first = new Library();
