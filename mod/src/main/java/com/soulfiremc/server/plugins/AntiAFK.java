@@ -56,27 +56,28 @@ public final class AntiAFK extends InternalPlugin {
     connection
       .scheduler()
       .scheduleWithDynamicDelay(
-        () -> {
+        () -> connection.minecraft().execute(() -> {
           if (!settingsSource.get(AntiAFKSettings.ENABLED)) {
             return;
           }
 
           var player = connection.minecraft().player;
-          if (player == null) {
+          if (player == null || !player.isAlive()) {
             return;
           }
 
-          log.info("Moving bot to prevent AFK");
-          PathExecutor.executePathfinding(
+          var path = PathExecutor.createPathfinding(
             connection,
             new AwayFromPosGoal(
-              SFVec3i.fromDouble(connection
-                .minecraft()
-                .player
-                .position()),
+              SFVec3i.fromDouble(player.position()),
               settingsSource.getRandom(AntiAFKSettings.DISTANCE).getAsInt()),
             new PathConstraintImpl(connection));
-        },
+          if (!connection.botControl().tryStart(path)) {
+            path.completion().cancel(true);
+            return;
+          }
+          log.info("Moving bot to prevent AFK");
+        }),
         settingsSource.getRandom(AntiAFKSettings.DELAY).asLongSupplier(),
         TimeUnit.SECONDS);
   }
