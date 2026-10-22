@@ -25,11 +25,11 @@ import com.soulfiremc.server.api.event.lifecycle.InstanceSettingsRegistryInitEve
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.ControlPriority;
 import com.soulfiremc.server.bot.ControlResource;
-import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.settings.lib.SettingsObject;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.settings.property.*;
 import com.soulfiremc.server.task.TaskInventorySupport;
+import com.soulfiremc.server.util.SFItemHelpers;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,11 +38,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
@@ -97,10 +95,8 @@ public final class AutoArmor extends InternalPlugin {
           })
         .reduce(
           (first, second) -> {
-            var firstArmor = Objects.requireNonNullElse(first.getItem().get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-              .compute(null, 1, equipmentSlotEnum);
-            var secondArmor = Objects.requireNonNullElse(second.getItem().get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-              .compute(null, 1, equipmentSlotEnum);
+            var firstArmor = SFItemHelpers.armorScore(first.getItem(), equipmentSlotEnum);
+            var secondArmor = SFItemHelpers.armorScore(second.getItem(), equipmentSlotEnum);
 
             return firstArmor > secondArmor ? first : second;
           });
@@ -117,17 +113,9 @@ public final class AutoArmor extends InternalPlugin {
 
     var equipmentSlot = inventory.getSlot(equipmentSlotInt);
     var equipmentSlotItem = equipmentSlot.getItem();
-    if (!equipmentSlotItem.isEmpty()) {
-      var targetItemArmor = Objects.requireNonNullElse(
-          equipmentSlotItem.get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-        .compute(null, 1, equipmentSlotEnum);
-      var bestItemArmor = Objects.requireNonNullElse(
-          bestItem.get(DataComponents.ATTRIBUTE_MODIFIERS), ItemAttributeModifiers.EMPTY)
-        .compute(null, 1, equipmentSlotEnum);
-
-      if (targetItemArmor >= bestItemArmor) {
-        return;
-      }
+    if (SFItemHelpers.armorScore(equipmentSlotItem, equipmentSlotEnum)
+      >= SFItemHelpers.armorScore(bestItem, equipmentSlotEnum)) {
+      return;
     }
 
     if (

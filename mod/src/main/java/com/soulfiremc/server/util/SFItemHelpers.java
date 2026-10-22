@@ -162,6 +162,25 @@ public final class SFItemHelpers {
     ));
   }
 
+  public static Optional<ArmorStats> armorStats(ItemStack itemStack, EquipmentSlot slot) {
+    var equippable = itemStack.get(DataComponents.EQUIPPABLE);
+    if (equippable == null || equippable.slot() != slot) {
+      return Optional.empty();
+    }
+    var modifiers = Optional.ofNullable(itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS))
+      .orElse(ItemAttributeModifiers.EMPTY);
+    var armor = modifiers.compute(Attributes.ARMOR, 0, slot);
+    var toughness = modifiers.compute(Attributes.ARMOR_TOUGHNESS, 0, slot);
+    var knockback = modifiers.compute(Attributes.KNOCKBACK_RESISTANCE, 0, slot);
+    return Optional.of(new ArmorStats(armor, toughness, knockback, armor * 10 + toughness * 2 + knockback * 10));
+  }
+
+  public static double armorScore(ItemStack itemStack, EquipmentSlot slot) {
+    return armorStats(itemStack, slot).map(ArmorStats::score).orElse(0.0);
+  }
+
+  public record ArmorStats(double armor, double toughness, double knockbackResistance, double score) {}
+
   public record MeleeWeaponStats(
     double attackDamage,
     double attackSpeed,

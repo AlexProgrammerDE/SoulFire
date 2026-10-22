@@ -42,13 +42,11 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -925,21 +923,14 @@ public final class InventoryServiceImpl
     EquipmentSlot slot,
     List<InventoryItemScoreFactor> factors
   ) {
-    var equippable = stack.get(DataComponents.EQUIPPABLE);
-    if (equippable == null || equippable.slot() != slot) {
+    var optionalStats = SFItemHelpers.armorStats(stack, slot);
+    if (optionalStats.isEmpty()) {
       return Double.NaN;
     }
-    var modifiers = Objects.requireNonNullElse(
-      stack.get(DataComponents.ATTRIBUTE_MODIFIERS),
-      ItemAttributeModifiers.EMPTY
-    );
-    var armor = modifiers.compute(Attributes.ARMOR, 0, slot);
-    var toughness = modifiers.compute(Attributes.ARMOR_TOUGHNESS, 0, slot);
-    var knockback = modifiers.compute(
-      Attributes.KNOCKBACK_RESISTANCE,
-      0,
-      slot
-    );
+    var stats = optionalStats.orElseThrow();
+    var armor = stats.armor();
+    var toughness = stats.toughness();
+    var knockback = stats.knockbackResistance();
     return addFactor(
       factors,
       "armor",

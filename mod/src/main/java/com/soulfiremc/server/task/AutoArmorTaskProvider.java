@@ -28,15 +28,13 @@ import com.soulfiremc.server.bot.ControlPriority;
 import com.soulfiremc.server.bot.ControlResource;
 import com.soulfiremc.server.bot.ControlStopReason;
 import com.soulfiremc.server.bot.ControlTask;
+import com.soulfiremc.server.util.SFItemHelpers;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemAttributeModifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -252,7 +250,7 @@ public final class AutoArmorTaskProvider
   ) {
     for (var equipmentSlot : ARMOR_SLOTS.keySet()) {
       var equippedSlot = ARMOR_SLOTS.get(equipmentSlot);
-      var equippedScore = armorScore(
+      var equippedScore = SFItemHelpers.armorScore(
         inventory.getSlot(equippedSlot).getItem(),
         equipmentSlot
       );
@@ -266,11 +264,11 @@ public final class AutoArmorTaskProvider
           return equippable != null && equippable.slot() == equipmentSlot;
         })
         .max((left, right) -> Double.compare(
-          armorScore(left.getItem(), equipmentSlot),
-          armorScore(right.getItem(), equipmentSlot)
+          SFItemHelpers.armorScore(left.getItem(), equipmentSlot),
+          SFItemHelpers.armorScore(right.getItem(), equipmentSlot)
         ));
       if (best.isPresent()
-        && armorScore(best.orElseThrow().getItem(), equipmentSlot)
+        && SFItemHelpers.armorScore(best.orElseThrow().getItem(), equipmentSlot)
         > equippedScore) {
         return Optional.of(new ArmorUpgrade(
           best.orElseThrow().index,
@@ -279,19 +277,6 @@ public final class AutoArmorTaskProvider
       }
     }
     return Optional.empty();
-  }
-
-  private static double armorScore(
-    ItemStack item,
-    EquipmentSlot equipmentSlot
-  ) {
-    if (item.isEmpty()) {
-      return 0;
-    }
-    return Objects.requireNonNullElse(
-      item.get(DataComponents.ATTRIBUTE_MODIFIERS),
-      ItemAttributeModifiers.EMPTY
-    ).compute(null, 1, equipmentSlot);
   }
 
   private static ControlTask createEquip(
