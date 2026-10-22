@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /// Captures run at the vanilla render phase, after simulation and mouse updates.
+/// Pending captures report activity before running to keep passive viewers responsive.
 public final class PovFrameTasks implements AutoCloseable {
   private final ArrayDeque<Task<?>> pending = new ArrayDeque<>();
   private boolean closed;
@@ -33,13 +34,14 @@ public final class PovFrameTasks implements AutoCloseable {
     return result;
   }
 
-  public void drain() {
+  public void drain(Runnable onCapture) {
     final Task<?>[] tasks;
     synchronized (this) {
       if (pending.isEmpty()) return;
       tasks = pending.toArray(Task<?>[]::new);
       pending.clear();
     }
+    onCapture.run();
     for (var task : tasks) task.run();
   }
 
