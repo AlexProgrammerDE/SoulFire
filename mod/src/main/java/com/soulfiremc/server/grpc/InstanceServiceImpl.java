@@ -88,6 +88,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     var instanceId = UUID.fromString(request.getId());
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
+    // Ownership checks need a connection before the settings transaction acquires one.
+    var canUpdateConfig = user.hasPermission(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
     SdkProvisioning.AccountResult result;
     synchronized (provisioningLock) {
       result = soulFireServer.dsl().transactionResult(cfg -> {
@@ -98,7 +100,9 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
         var provisioned = SdkProvisioning.account(parseSettings(record.getSettings()), request);
         if (provisioned.created()) {
-          user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+          if (!canUpdateConfig) {
+            throw Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource").asRuntimeException();
+          }
           ctx.update(Tables.INSTANCES)
             .set(Tables.INSTANCES.SETTINGS, serializeSettings(provisioned.settings()))
             .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
