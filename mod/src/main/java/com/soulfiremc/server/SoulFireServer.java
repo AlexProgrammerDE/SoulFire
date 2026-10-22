@@ -138,7 +138,6 @@ public final class SoulFireServer {
 
     var serverCommandManagerFuture = scheduler.supplyAsync(() -> new ServerCommandManager(this));
     var databaseContextFuture = scheduler.supplyAsync(DatabaseManager::select);
-    var authSystemFuture = databaseContextFuture.thenApplyAsync(databaseContext -> new AuthSystem(this, databaseContext.dsl()), scheduler);
     this.botTaskManager = new BotTaskManager(this);
     var rpcServerFuture = scheduler.supplyAsync(() -> new RPCServer(host, port, this));
 
@@ -176,7 +175,7 @@ public final class SoulFireServer {
 
     this.databaseContext = databaseContextFuture.join();
     this.settingsSource = new ServerSettingsDelegate(this::fetchSettingsSource);
-    this.authSystem = authSystemFuture.join();
+    this.authSystem = new AuthSystem(this, databaseContext.dsl());
     this.rpcServer = rpcServerFuture.join();
 
     var newVersion = updateCheck.join();
