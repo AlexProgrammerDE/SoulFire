@@ -28,6 +28,9 @@ import com.soulfiremc.mod.util.SFConstants;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractScrollArea;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -37,6 +40,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -148,6 +153,7 @@ public final class VulkanRenderer {
     var oldScale = window.getGuiScale();
     var oldGuiWidth = window.getGuiScaledWidth();
     var oldGuiHeight = window.getGuiScaledHeight();
+    var scrollPositions = INTERACTIVE_VIEWPORT.isBound() ? List.<ScrollPosition>of() : captureScrollPositions(minecraft.gui.screen());
     var oldDistance = minecraft.options.renderDistance().get();
     var renderer = minecraft.gameRenderer;
     var delta = minecraft.getDeltaTracker() == null ? DeltaTracker.ONE : minecraft.getDeltaTracker();
@@ -189,8 +195,29 @@ public final class VulkanRenderer {
       return capture.apply(renderer.mainRenderTarget());
     } finally {
       minecraft.options.renderDistance().set(oldDistance);
-      if (!INTERACTIVE_VIEWPORT.isBound()) resize(minecraft, oldWidth, oldHeight, oldScale, oldGuiWidth, oldGuiHeight);
+      if (!INTERACTIVE_VIEWPORT.isBound()) {
+        resize(minecraft, oldWidth, oldHeight, oldScale, oldGuiWidth, oldGuiHeight);
+        scrollPositions.forEach(ScrollPosition::restore);
+      }
     }
+  }
+
+  private static List<ScrollPosition> captureScrollPositions(@Nullable GuiEventListener root) {
+    if (root == null) return List.of();
+    var positions = new ArrayList<ScrollPosition>();
+    captureScrollPositions(root, positions);
+    return positions;
+  }
+
+  private static void captureScrollPositions(GuiEventListener root, List<ScrollPosition> positions) {
+    if (root instanceof AbstractScrollArea area) positions.add(new ScrollPosition(area, area.scrollAmount()));
+    if (root instanceof ContainerEventHandler container) {
+      for (var child : container.children()) captureScrollPositions(child, positions);
+    }
+  }
+
+  private record ScrollPosition(AbstractScrollArea area, double amount) {
+    void restore() { area.setScrollAmount(amount); }
   }
 
   /// Applies RPC camera overrides without moving or rotating the bot entity.
