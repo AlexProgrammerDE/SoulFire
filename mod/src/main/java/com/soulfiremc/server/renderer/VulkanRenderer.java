@@ -217,6 +217,8 @@ public final class VulkanRenderer {
         var oldWidth = window.getWidth();
         var oldHeight = window.getHeight();
         var oldScale = window.getGuiScale();
+        var oldGuiWidth = window.getGuiScaledWidth();
+        var oldGuiHeight = window.getGuiScaledHeight();
         try {
           resizeWindow(minecraft, width, height);
           window.setGuiScale(scale);
@@ -240,6 +242,9 @@ public final class VulkanRenderer {
         } finally {
           resizeWindow(minecraft, oldWidth, oldHeight);
           window.setGuiScale(oldScale);
+          var accessor = (WindowAccessor) (Object) window;
+          accessor.soulfire$setGuiScaledWidth(oldGuiWidth);
+          accessor.soulfire$setGuiScaledHeight(oldGuiHeight);
         }
       });
     } finally {

@@ -88,6 +88,7 @@ export default {
                   throw new Error("The native offer did not accept the baseline pointer position");
                 selectedFirst = true;
               } else if (frame.width === 640 && frame.height === 360) {
+                await service.getInventoryState(scope);
                 await input(click(SECOND_Y));
                 return;
               } else await input([]);
