@@ -9,7 +9,7 @@ import {
 } from "@connectrpc/connect";
 import { createGrpcWebTransport, type GrpcWebTransportOptions } from "@connectrpc/connect-web";
 import * as HttpClient from "effect/http/HttpClient";
-import { Context, Effect, Filter, Layer, Option, Stream, type Scope } from "effect";
+import { Context, Effect, Exit, Filter, Layer, Option, Stream, type Scope } from "effect";
 import {
   operationError,
   rpcError,
@@ -124,6 +124,7 @@ import { BotTaskService } from "./generated/soulfire/task_pb.js";
 import { WorldService } from "./generated/soulfire/world_pb.js";
 import type { LocalSoulFireServer } from "./install-types.js";
 import { SoulFireInventory } from "./inventory.js";
+import { InstanceScopes } from "./instance-scopes.js";
 import { SoulFirePathfinder } from "./pathfinding.js";
 import { PluginCatalog } from "./plugins.js";
 import { SoulFireProtocol } from "./protocol.js";
@@ -317,6 +318,7 @@ export class SoulFireClient {
   readonly #loginClient: Client<typeof LoginService>;
   readonly #mcAuthClient: Client<typeof MCAuthService>;
   readonly #sdkClient: Client<typeof SdkService>;
+  readonly #instanceScopes = new InstanceScopes();
   #localServer: LocalServerController | undefined;
   #connection: ConnectionMetadata | undefined;
   #plugins: PluginCatalog | undefined;
@@ -506,6 +508,7 @@ export class SoulFireClient {
       createClient(BotProtocolService, this.#transport),
       this.#connection?.capabilities,
       createClient(InstanceLiveService, this.#transport),
+      this.#instanceScopes,
     );
   }
 
@@ -696,6 +699,7 @@ export class SoulFireInstance {
   readonly #protocolClient: Client<typeof BotProtocolService> | undefined;
   readonly #capabilities: CapabilitySet | undefined;
   readonly #instanceLiveClient: Client<typeof InstanceLiveService> | undefined;
+  readonly #instanceScopes: InstanceScopes;
 
   public constructor(
     public readonly id: string,
@@ -713,6 +717,7 @@ export class SoulFireInstance {
     protocolClient?: Client<typeof BotProtocolService>,
     capabilities?: CapabilitySet,
     instanceLiveClient?: Client<typeof InstanceLiveService>,
+    instanceScopes = new InstanceScopes(),
   ) {
     this.#botClient = botClient;
     this.#botLiveClient = botLiveClient;
@@ -728,6 +733,7 @@ export class SoulFireInstance {
     this.#protocolClient = protocolClient;
     this.#capabilities = capabilities;
     this.#instanceLiveClient = instanceLiveClient;
+    this.#instanceScopes = instanceScopes;
   }
 
   public get fleet(): SoulFireFleet {
@@ -754,6 +760,7 @@ export class SoulFireInstance {
       this.#registryClient,
       this.#worldClient,
       this.#protocolClient,
+      this.#instanceScopes,
     );
   }
 
@@ -869,12 +876,15 @@ export class SoulFireInstance {
    * Deletes the instance and its data for good. Its bots are stopped first.
    */
   public delete(options?: CallOptions): Effect.Effect<void, SoulFireOperationError> {
-    return Effect.map(
-      rpc("SoulFireInstance.delete", (signal) =>
+    return Effect.suspend(() => {
+      const complete = this.#instanceScopes.beginDeletion(this.id);
+      return rpc("SoulFireInstance.delete", (signal) =>
         this.#instanceClient.deleteInstance({ id: this.id }, withSignal(options, signal)),
-      ),
-      () => undefined,
-    );
+      ).pipe(
+        Effect.asVoid,
+        Effect.onExit((exit) => Effect.sync(() => complete(Exit.isSuccess(exit)))),
+      );
+    });
   }
 
   public updateMetadata(
@@ -1309,19 +1319,31 @@ export class SoulFireBot {
         );
       }
       yield* Effect.gen({ self: this }, function* () {
-        const info = yield* this.info(options.call);
-        yield* Effect.acquireRelease(Effect.succeed(info), (info) =>
-          info.status?.desiredState === BotDesiredState.RUNNING
-            ? Effect.void
-            : this.stop().pipe(
+        let stopOnExit = false;
+        yield* Effect.acquireRelease(
+          Effect.sync(() => this.instanceScopes.acquire(this.instanceId)),
+          (ownership) =>
+            Effect.gen({ self: this }, function* () {
+              if (!stopOnExit) return;
+              yield* ownership.awaitPendingDeletion;
+              if (ownership.deleted) return;
+              yield* this.stop().pipe(
                 Effect.catchTag("SoulFireRpcError", (error) =>
-                  error.code === Code.NotFound ? Effect.void : Effect.fail(error),
+                  ownership.awaitPendingDeletion.pipe(
+                    Effect.flatMap(() =>
+                      error.code === Code.NotFound || ownership.deleted
+                        ? Effect.void
+                        : Effect.fail(error),
+                    ),
+                  ),
                 ),
                 Effect.asVoid,
-                Effect.orDie,
-              ),
+              );
+            }).pipe(Effect.ensuring(Effect.sync(() => ownership.release())), Effect.orDie),
         );
-        if (info.status?.desiredState !== BotDesiredState.RUNNING) {
+        const info = yield* this.info(options.call);
+        stopOnExit = info.status?.desiredState !== BotDesiredState.RUNNING;
+        if (stopOnExit) {
           yield* this.start(options.call);
         }
         const session = yield* this.observe();
@@ -1360,6 +1382,7 @@ export class SoulFireBot {
     private readonly registryClient?: Client<typeof RegistryService>,
     private readonly worldClient?: Client<typeof WorldService>,
     private readonly protocolClient?: Client<typeof BotProtocolService>,
+    private readonly instanceScopes = new InstanceScopes(),
   ) {}
 
   /**
