@@ -661,6 +661,11 @@ public final class BotConnection {
     return newFuture;
   }
 
+  /// True once disconnection is requested, including while client cleanup runs.
+  public boolean isDisconnecting() {
+    return shutdownFuture.get() != null;
+  }
+
   private void disconnectNow(Component reason) throws InterruptedException, TimeoutException {
     disconnectReason = PlainTextComponentSerializer.plainText().serialize(reason);
     log.debug("Got Disconnected with reason: {}", disconnectReason);
