@@ -35,6 +35,7 @@ import io.grpc.stub.StreamObserver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.SharedConstants;
+import net.minecraft.util.StringUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
@@ -369,12 +370,15 @@ public final class ChatServiceImpl extends ChatServiceGrpc.ChatServiceImplBase {
     return response.build();
   }
 
-  private static String requireText(String value, String field, int maxLength) {
+  static String requireText(String value, String field, int maxLength) {
     if (value.isBlank()) {
       throw invalid(field + " must not be blank");
     }
     if (value.length() > maxLength) {
       throw invalid(field + " must be at most " + maxLength + " characters");
+    }
+    if (!value.chars().allMatch(StringUtil::isAllowedChatCharacter)) {
+      throw invalid(field + " contains characters that Minecraft does not allow");
     }
     return value;
   }
