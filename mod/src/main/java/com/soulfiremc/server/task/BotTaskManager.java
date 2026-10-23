@@ -30,6 +30,7 @@ import com.soulfiremc.server.api.RegisteredPluginPermission;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotConnectedEvent;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
+import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotThreadExecution;
 import com.soulfiremc.server.bot.ControlPriority;
@@ -81,6 +82,7 @@ public final class BotTaskManager implements AutoCloseable {
   private final SoulFireServer server;
   private final Map<String, ProviderEntry<?>> providers;
   private final Map<UUID, ManagedTask> tasks = new ConcurrentHashMap<>();
+  private final Map<BotConnection, List<ManagedTask>> pendingRecoveries = new ConcurrentHashMap<>();
   private final Map<IdempotencyKey, UUID> idempotencyKeys = new ConcurrentHashMap<>();
   private final Set<Consumer<BotTaskEvent>> listeners = new CopyOnWriteArraySet<>();
   private final Deque<BotTaskEvent> journal = new ArrayDeque<>();
@@ -89,6 +91,8 @@ public final class BotTaskManager implements AutoCloseable {
     this::onBotDisconnected;
   private final Consumer<BotConnectedEvent> connectedListener =
     this::onBotConnected;
+  private final Consumer<BotPostEntityTickEvent> readyListener =
+    this::onBotReady;
 
   public BotTaskManager(SoulFireServer server) {
     this.server = server;
@@ -100,6 +104,7 @@ public final class BotTaskManager implements AutoCloseable {
     this.providers = Map.copyOf(registered);
     SoulFireAPI.registerListener(BotDisconnectedEvent.class, disconnectedListener);
     SoulFireAPI.registerListener(BotConnectedEvent.class, connectedListener);
+    SoulFireAPI.registerListener(BotPostEntityTickEvent.class, readyListener);
   }
 
   static List<BotTaskProvider<?>> coreProviders() {
@@ -616,6 +621,9 @@ public final class BotTaskManager implements AutoCloseable {
     if (bot.instanceManager().soulFireServer() != server) {
       return;
     }
+    synchronized (this) {
+      pendingRecoveries.remove(bot);
+    }
     var key = new BotKey(bot.instanceManager().id(), bot.accountProfileId());
     var affected = tasks.values().stream()
       .filter(task -> task.instanceId.equals(key.instanceId)
@@ -661,6 +669,27 @@ public final class BotTaskManager implements AutoCloseable {
         && task.botId.equals(botId)
         && task.status == BotTaskStatus.BOT_TASK_STATUS_RECOVERING)
       .toList();
+    synchronized (this) {
+      if (!recoverable.isEmpty() && !bot.isDisconnecting()) {
+        pendingRecoveries.put(bot, recoverable);
+      }
+    }
+  }
+
+  private void onBotReady(BotPostEntityTickEvent event) {
+    var bot = event.connection();
+    var recoverable = pendingRecoveries.get(bot);
+    if (recoverable == null || bot.isDisconnecting()) {
+      return;
+    }
+    // Login finishes before the player, world, and initial position arrive.
+    var minecraft = bot.minecraft();
+    var connection = minecraft.getConnection();
+    if (minecraft.player == null || minecraft.level == null
+      || connection == null || !connection.hasClientLoaded()
+      || !pendingRecoveries.remove(bot, recoverable)) {
+      return;
+    }
     for (var task : recoverable) {
       synchronized (this) {
         if (task.status != BotTaskStatus.BOT_TASK_STATUS_RECOVERING
@@ -681,6 +710,8 @@ public final class BotTaskManager implements AutoCloseable {
   public void close() {
     SoulFireAPI.unregisterListener(BotDisconnectedEvent.class, disconnectedListener);
     SoulFireAPI.unregisterListener(BotConnectedEvent.class, connectedListener);
+    SoulFireAPI.unregisterListener(BotPostEntityTickEvent.class, readyListener);
+    pendingRecoveries.clear();
     tasks.values().stream()
       .filter(task -> !isTerminal(task.status))
       .forEach(task -> cancel(
