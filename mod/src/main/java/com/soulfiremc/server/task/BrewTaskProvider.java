@@ -112,7 +112,7 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     validateMaterials(context, input, count);
 
     BlockPos station = null;
-    if (!(player.containerMenu instanceof BrewingStandMenu)) {
+    if (input.hasStation() || !(player.containerMenu instanceof BrewingStandMenu)) {
       if (!input.hasStation()) {
         throw Status.FAILED_PRECONDITION
           .withDescription(
@@ -724,6 +724,12 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     @Override
     public void onStarted() {
       active = true;
+      if (station != null) {
+        var player = requirePlayer();
+        if (!(player.containerMenu instanceof InventoryMenu)) {
+          player.closeContainer();
+        }
+      }
     }
 
     @Override

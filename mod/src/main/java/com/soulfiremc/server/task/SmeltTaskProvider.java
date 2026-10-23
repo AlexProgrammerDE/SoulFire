@@ -120,7 +120,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     }
     BlockPos station = null;
     String stationId;
-    if (player.containerMenu instanceof AbstractFurnaceMenu menu) {
+    if (!input.hasStation() && player.containerMenu instanceof AbstractFurnaceMenu menu) {
       stationId = menuStation(menu);
     } else {
       if (!input.hasStation()) {
@@ -965,6 +965,12 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     @Override
     public void onStarted() {
       active = true;
+      if (station != null) {
+        var player = requirePlayer();
+        if (!(player.containerMenu instanceof InventoryMenu)) {
+          player.closeContainer();
+        }
+      }
     }
 
     @Override
