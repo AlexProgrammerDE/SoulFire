@@ -27,6 +27,7 @@ export default {
         yield* rcon("fill 3808 63 0 3855 63 15 stone");
         for (const kind of ["brew", "smelt"] as const) {
           const brewing = kind === "brew";
+          const brewCount = brewing ? 4 : 1;
           yield* bot.closeContainer();
           yield* rcon(`gamemode creative ${BOT_NAME}`);
           yield* placeBot(bot, { x: 3818.5, y: 64, z: 8.5 }, -90);
@@ -38,8 +39,8 @@ export default {
             yield* rcon(`setblock ${position} ${block}`);
           }
           for (const item of [
-            'potion[minecraft:potion_contents={potion:"minecraft:water"}]',
-            "nether_wart",
+            `potion[minecraft:potion_contents={potion:"minecraft:water"}] ${brewCount}`,
+            `nether_wart ${Math.ceil(brewCount / 3)}`,
             "blaze_powder",
             `iron_ore ${brewing ? 2 : 1}`,
             `coal ${brewing ? 2 : 1}`,
@@ -54,7 +55,7 @@ export default {
             bot.tasks.brew(
               { itemIds: ["minecraft:potion"] },
               { itemIds: ["minecraft:nether_wart"] },
-              1,
+              preempt ? 1 : brewCount,
               { station: STAND, ...(preempt ? urgent : {}) },
             );
           const smelt = (preempt = false) =>
@@ -111,12 +112,13 @@ export default {
           }
           const completed = yield* low.result({ call: { timeoutMs: 30000 } });
           yield* check(
-            completed.outputs.length === 1 && completed.outputs[0]?.count === 1,
+            completed.outputs.length === (brewing ? brewCount : 1) &&
+              completed.outputs.every((item) => item.count === 1),
             `${kind} lost or duplicated its batch after resuming`,
           );
           if (brewing)
             yield* check(
-              completed.outputs[0]?.potion?.potionId === "minecraft:awkward",
+              completed.outputs.every((item) => item.potion?.potionId === "minecraft:awkward"),
               "The resumed brew collected the wrong potion",
             );
           else
@@ -124,16 +126,13 @@ export default {
               completed.outputs[0]?.itemId === "minecraft:iron_ingot",
               "The resumed smelt collected the wrong item",
             );
-          for (const [filter, expected] of [
-            [
-              'id:"minecraft:potion",components:{"minecraft:potion_contents":{potion:"minecraft:awkward"}}',
-              1,
-            ],
-            ['id:"minecraft:iron_ingot"', brewing ? 2 : 1],
+          for (const [item, expected] of [
+            ['minecraft:potion[minecraft:potion_contents={potion:"minecraft:awkward"}]', brewCount],
+            ["minecraft:iron_ingot", brewing ? 2 : 1],
           ] as const) {
-            const value = yield* rcon(`data get entity ${BOT_NAME} Inventory[{${filter}}].count`);
+            const value = yield* rcon(`clear ${BOT_NAME} ${item} 0`);
             yield* check(
-              Number(value.match(/: (\d+)$/)?.[1]) === expected,
+              value.includes(`Found ${expected} `),
               `Vanilla output count changed after resuming ${kind}: ${value}`,
             );
           }

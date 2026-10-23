@@ -53,7 +53,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -225,6 +227,8 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     private final List<ItemStack> outputs = new ArrayList<>();
     private final List<ItemStack> batchInputs = new ArrayList<>();
     private final List<ItemStack> batchOutputs = new ArrayList<>();
+    private final Deque<ItemStack> remainingInputs = new ArrayDeque<>();
+    private boolean inputsSelected;
     private @Nullable PathExecutor activePath;
     private boolean active;
     private @Nullable BrewingStandMenu openedMenu;
@@ -431,35 +435,47 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
           .withDescription("No matching brewing ingredient remains")
           .asRuntimeException())
         .copy();
-      var inputs = findInputs(menu);
-      if (inputs.isEmpty()) {
-        throw Status.FAILED_PRECONDITION
-          .withDescription("No matching brewing input remains")
-          .asRuntimeException();
+      if (!inputsSelected) {
+        selectInputs(menu);
       }
-      activeBatchSize = Math.min(maximumBatchSize, inputs.size());
+      activeBatchSize = Math.min(maximumBatchSize, remainingInputs.size());
       for (var index = 0; index < activeBatchSize; index++) {
-        var selected = inputs.get(index);
-        batchInputs.add(selected.stack.copy());
-        moveOne(menu, selected.slot, index);
+        var selected = remainingInputs.getFirst();
+        var source = playerSlots(menu)
+          .filter(slot -> ItemStack.isSameItemSameComponents(menu.getSlot(slot).getItem(), selected))
+          .findFirst()
+          .orElseThrow(() -> Status.FAILED_PRECONDITION
+            .withDescription("A selected brewing input is no longer available")
+            .asRuntimeException());
+        batchInputs.add(selected.copy());
+        moveOne(menu, source, index);
+        remainingInputs.removeFirst();
       }
       transition(Stage.LOAD_INGREDIENT, "Loading brewing ingredient");
     }
 
-    private List<SourceStack> findInputs(BrewingStandMenu menu) {
+    private void selectInputs(BrewingStandMenu menu) {
       var inputs = requireLevel().recipeAccess().propertySet(RecipePropertySet.BREWING_INPUTS);
-      return playerSlots(menu)
-        .mapToObj(slot -> new SourceStack(
-          slot,
-          menu.getSlot(slot).getItem().copy()
-        ))
-        .filter(source -> InventoryServiceImpl.matches(
-          source.stack,
-          inputSelector
-        ))
-        .filter(source -> inputs.test(source.stack))
-        .limit(MAX_BATCH_SIZE)
+      var candidates = playerSlots(menu)
+        .mapToObj(slot -> menu.getSlot(slot).getItem())
+        .filter(stack -> InventoryServiceImpl.matches(stack, inputSelector))
+        .filter(inputs::test)
         .toList();
+      for (var stack : candidates) {
+        var amount = Math.min(stack.getCount(), targetCount - remainingInputs.size());
+        for (var index = 0; index < amount; index++) {
+          remainingInputs.addLast(stack.copyWithCount(1));
+        }
+        if (remainingInputs.size() == targetCount) {
+          break;
+        }
+      }
+      if (remainingInputs.size() < targetCount) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("Not enough matching brewing inputs remain")
+          .asRuntimeException();
+      }
+      inputsSelected = true;
     }
 
     private void loadIngredient() {
@@ -824,9 +840,6 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     public String description() {
       return "Brew potions";
     }
-  }
-
-  private record SourceStack(int slot, ItemStack stack) {
   }
 
   private enum Stage {
