@@ -412,7 +412,11 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       ticks++;
       try {
         if (activeEscape != null) {
-          tickEscape();
+          var incoming = incomingProjectile();
+          if (blockIncomingProjectile(incoming)) {
+            return;
+          }
+          tickEscape(incoming);
           defendWhileFleeing();
           return;
         }
@@ -443,7 +447,11 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
         }
         safeTicks = 0;
         startEscape();
-        dodgeIncomingProjectile();
+        var incoming = incomingProjectile();
+        if (blockIncomingProjectile(incoming)) {
+          return;
+        }
+        dodgeIncomingProjectile(incoming);
         defendWhileFleeing();
         context.reportProgress(BotTaskProgress.newBuilder()
           .setMessage("Escaping from " + threat.getName().getString())
@@ -510,15 +518,15 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       result.completeExceptionally(failure);
     }
 
-    private void tickEscape() {
+    private void tickEscape(@Nullable IncomingProjectile incoming) {
       var escape = Objects.requireNonNull(activeEscape);
       if (!escape.result().isDone()) {
         escape.control().tick();
       }
       if (!escape.result().isDone()) {
         maybeRestartForThreatRegression(escape);
-        maybeRestartForNewProjectile();
-        dodgeIncomingProjectile();
+        maybeRestartForNewProjectile(incoming);
+        dodgeIncomingProjectile(incoming);
         return;
       }
       lowerShield();
@@ -662,8 +670,7 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       startEscape();
     }
 
-    private void maybeRestartForNewProjectile() {
-      var incoming = incomingProjectile();
+    private void maybeRestartForNewProjectile(@Nullable IncomingProjectile incoming) {
       if (
         incoming == null
           || plannedProjectileIds.contains(incoming.arrow().getId())
@@ -681,17 +688,15 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       startEscape();
     }
 
-    private void dodgeIncomingProjectile() {
-      var incoming = incomingProjectile();
+    private boolean blockIncomingProjectile(@Nullable IncomingProjectile incoming) {
       if (incoming == null) {
-        lowerShield();
-        return;
+        return false;
       }
       var minecraft = context.bot().minecraft();
       var player = minecraft.player;
       var gameMode = minecraft.gameMode;
       if (player == null || gameMode == null) {
-        return;
+        return false;
       }
       if (
         incoming.dodge().ticksToImpact()
@@ -710,10 +715,23 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
         if (!player.isUsingItem()) {
           gameMode.useItem(player, InteractionHand.OFF_HAND);
         }
-        shieldRaised = true;
+        shieldRaised = player.isUsingItem()
+          && player.getUsedItemHand() == InteractionHand.OFF_HAND;
+        minecraft.options.keyUse.setDown(shieldRaised);
+        return shieldRaised;
+      }
+      return false;
+    }
+
+    private void dodgeIncomingProjectile(@Nullable IncomingProjectile incoming) {
+      lowerShield();
+      if (incoming == null) {
         return;
       }
-      lowerShield();
+      var player = context.bot().minecraft().player;
+      if (player == null) {
+        return;
+      }
       var controls = context.bot().controlState();
       controls.left(incoming.dodge().left());
       controls.right(!incoming.dodge().left());
@@ -759,6 +777,7 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       }
       shieldRaised = false;
       var minecraft = context.bot().minecraft();
+      minecraft.options.keyUse.setDown(false);
       var player = minecraft.player;
       var gameMode = minecraft.gameMode;
       if (

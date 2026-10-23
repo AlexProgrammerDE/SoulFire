@@ -332,7 +332,7 @@ public final class AttackEntityTaskProvider
         && !target.getUuid().equals(entity.getUUID().toString())) {
         stopPath(ControlStopReason.CANCELLED, null);
         bot.controlState().resetAll();
-        lowerShield(player, gameMode);
+        lowerShield();
         unavailableTicks++;
         reportUnavailable();
         if (unavailableTicks >= unavailableTimeoutTicks) {
@@ -481,7 +481,7 @@ public final class AttackEntityTaskProvider
         raiseShield(player, gameMode);
         return;
       }
-      lowerShield(player, gameMode);
+      lowerShield();
       if (!BotAttackSupport.tryAttack(bot, attackTarget, sprinting)) {
         return;
       }
@@ -619,11 +619,7 @@ public final class AttackEntityTaskProvider
       AttackEntityCompletionReason reason,
       boolean targetAlive
     ) {
-      var player = context.bot().minecraft().player;
-      var gameMode = context.bot().minecraft().gameMode;
-      if (player != null && gameMode != null) {
-        lowerShield(player, gameMode);
-      }
+      lowerShield();
       result.complete(AttackEntityTaskResult.newBuilder()
         .setFinalPosition(BotTaskSupport.position(context.bot()))
         .setReason(reason)
@@ -636,24 +632,33 @@ public final class AttackEntityTaskProvider
       LocalPlayer player,
       MultiPlayerGameMode gameMode
     ) {
-      if (!useOffhandShield || !player.getOffhandItem().is(Items.SHIELD)) {
+      if (!useOffhandShield) {
         return;
       }
-      if (player.isUsingItem()) {
-        if (player.getUsedItemHand() == InteractionHand.OFF_HAND) {
-          return;
-        }
+      if (!player.getOffhandItem().is(Items.SHIELD)) {
+        lowerShield();
+        return;
+      }
+      if (player.isUsingItem() && player.getUsedItemHand() != InteractionHand.OFF_HAND) {
         gameMode.releaseUsingItem(player);
       }
-      gameMode.useItem(player, InteractionHand.OFF_HAND);
+      if (!player.isUsingItem()) {
+        gameMode.useItem(player, InteractionHand.OFF_HAND);
+      }
+      context.bot().minecraft().options.keyUse.setDown(
+        player.isUsingItem() && player.getUsedItemHand() == InteractionHand.OFF_HAND
+      );
     }
 
-    private void lowerShield(
-      LocalPlayer player,
-      MultiPlayerGameMode gameMode
-    ) {
-      if (useOffhandShield
-        && player.isUsingItem()
+    private void lowerShield() {
+      if (!useOffhandShield) {
+        return;
+      }
+      var minecraft = context.bot().minecraft();
+      minecraft.options.keyUse.setDown(false);
+      var player = minecraft.player;
+      var gameMode = minecraft.gameMode;
+      if (player != null && gameMode != null && player.isUsingItem()
         && player.getUsedItemHand() == InteractionHand.OFF_HAND) {
         gameMode.releaseUsingItem(player);
       }
@@ -698,6 +703,7 @@ public final class AttackEntityTaskProvider
 
     @Override
     public void onSuspended() {
+      lowerShield();
       if (path != null) {
         path.onSuspended();
       }
@@ -717,11 +723,8 @@ public final class AttackEntityTaskProvider
     ) {
       stopPath(reason, cause);
       context.bot().controlState().resetAll();
+      lowerShield();
       var player = context.bot().minecraft().player;
-      var gameMode = context.bot().minecraft().gameMode;
-      if (player != null && gameMode != null) {
-        lowerShield(player, gameMode);
-      }
       if (restoreSelectedSlot && player != null) {
         player.getInventory().setSelectedSlot(originalSelectedSlot);
       }
