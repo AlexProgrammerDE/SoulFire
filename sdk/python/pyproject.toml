@@ -17,6 +17,8 @@ dependencies = [
   "connectrpc>=0.12.1,<0.13",
   "googleapis-common-protos>=1.70,<2",
   "protobuf>=6.31.1,<8",
+  # Connect 0.12 imports WKT symbols removed in protobuf-py 0.7.
+  "protobuf-py>=0.3.0,<0.7",
 ]
 
 [project.urls]

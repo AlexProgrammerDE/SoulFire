@@ -102,6 +102,8 @@ from .instance_pb2 import (
     InstanceListResponse,
     InstanceRemoveAccountsBatchRequest,
     InstanceRemoveProxiesBatchRequest,
+    InstanceRemoveProxyEntriesRequest,
+    InstanceReplaceAccountsRequest,
     InstanceUpdateConfigEntryRequest,
     InstanceUpdateMetaRequest,
 )
@@ -983,6 +985,24 @@ class SoulFireInstance:
             ),
         )
 
+    @fn("SoulFireInstance.replace_accounts")
+    def replace_accounts(
+        self,
+        accounts: Iterable[MinecraftAccountProto],
+        *,
+        headers: dict[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> EffectGen[None, SoulFireOperationError]:
+        """Atomically replace accounts while preserving other instance configuration."""
+        yield from rpc(
+            "SoulFireInstance.replace_accounts",
+            lambda: self._instance_service.replace_instance_accounts(
+                InstanceReplaceAccountsRequest(id=self.id, accounts=accounts),
+                headers=headers,
+                timeout_ms=timeout_ms,
+            ),
+        )
+
     @fn("SoulFireInstance.remove_accounts")
     def remove_accounts(
         self,
@@ -1031,6 +1051,24 @@ class SoulFireInstance:
             "SoulFireInstance.remove_proxies",
             lambda: self._instance_service.remove_instance_proxies_batch(
                 InstanceRemoveProxiesBatchRequest(id=self.id, addresses=dict.fromkeys(addresses)),
+                headers=headers,
+                timeout_ms=timeout_ms,
+            ),
+        )
+
+    @fn("SoulFireInstance.remove_proxy_entries")
+    def remove_proxy_entries(
+        self,
+        proxies: Iterable[ProxyProto],
+        *,
+        headers: dict[str, str] | None = None,
+        timeout_ms: int | None = None,
+    ) -> EffectGen[None, SoulFireOperationError]:
+        """Remove one matching occurrence of each proxy, including type and credentials."""
+        yield from rpc(
+            "SoulFireInstance.remove_proxy_entries",
+            lambda: self._instance_service.remove_instance_proxy_entries(
+                InstanceRemoveProxyEntriesRequest(id=self.id, proxies=proxies),
                 headers=headers,
                 timeout_ms=timeout_ms,
             ),

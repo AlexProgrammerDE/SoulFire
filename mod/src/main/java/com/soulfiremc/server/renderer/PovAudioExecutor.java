@@ -17,6 +17,12 @@
  */
 package com.soulfiremc.server.renderer;
 
+import java.util.function.Supplier;
+
 public interface PovAudioExecutor {
-  void soulfire$setAudioContext(PovAudioContext context);
+  PovAudioContext soulfire$initializeAudio(Supplier<PovAudioContext> initializer);
+
+  void soulfire$runAudio(Runnable task);
+
+  void soulfire$shutdownAudio();
 }

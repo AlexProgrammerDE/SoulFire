@@ -56,7 +56,8 @@ public class MixinMinecraft {
     minecraft.deltaTracker.advanceRealTime(net.minecraft.util.Util.getMillis());
     // Camera tracking updates simulation state used by lighting and fog, without drawing a frame.
     minecraft.gameRenderer.update(minecraft.getDeltaTracker());
-    com.soulfiremc.server.bot.BotConnection.currentOptional().ifPresent(bot -> bot.povFrameTasks().drain());
+    com.soulfiremc.server.bot.BotConnection.currentOptional().ifPresent(bot ->
+      bot.povFrameTasks().drain(minecraft.getFramerateLimitTracker()::onInputReceived));
     // There is no screen to present in headless mode, and the actual rendering is already
     // cancelled in GameRenderer. Skip the whole surface acquire/present path.
     ci.cancel();

@@ -221,10 +221,11 @@ public final class BotTaskServiceImpl
         return;
       }
       observer.setOnCancelHandler(() -> close(subscription, closed));
-      if (current.getRevision() > lastRevision.get()) {
-        emit(observer, closed, eventForSnapshot(current), lastRevision);
+      var latest = server.botTaskManager().get(taskId);
+      if (latest.getRevision() > lastRevision.get()) {
+        emit(observer, closed, eventForSnapshot(latest), lastRevision);
       }
-      if (BotTaskManager.isTerminal(current.getStatus())) {
+      if (BotTaskManager.isTerminal(latest.getStatus())) {
         close(observer, subscription, closed);
       }
     } catch (Throwable throwable) {

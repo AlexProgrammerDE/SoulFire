@@ -27,6 +27,11 @@ public interface ScriptEventListener {
   /// @param nodeId the unique identifier of the node
   void onNodeStarted(String nodeId);
 
+  /// Called with an identifier that distinguishes concurrent invocations of the same node.
+  default void onNodeStarted(String nodeId, long executionId) {
+    onNodeStarted(nodeId);
+  }
+
   /// Called when a node completes execution successfully.
   ///
   /// @param nodeId  the unique identifier of the node
@@ -38,6 +43,11 @@ public interface ScriptEventListener {
   /// @param nodeId the unique identifier of the node
   /// @param error  description of the error that occurred
   void onNodeError(String nodeId, String error);
+
+  /// Called when an identified invocation fails.
+  default void onNodeError(String nodeId, String error, long executionId) {
+    onNodeError(nodeId, error);
+  }
 
   /// Called when the entire script completes execution.
   ///
@@ -62,6 +72,11 @@ public interface ScriptEventListener {
   /// @param executionTimeNanos execution time in nanoseconds
   default void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
     onNodeCompleted(nodeId, outputs);
+  }
+
+  /// Called with the identifier supplied when this invocation started.
+  default void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+    onNodeCompleted(nodeId, outputs, executionTimeNanos);
   }
 
   /// Called when a trigger chain completes with execution statistics.

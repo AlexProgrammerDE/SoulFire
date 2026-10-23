@@ -56,35 +56,35 @@ public final class ExecutionRecorder implements ScriptEventListener {
   }
 
   @Override
-  public void onNodeStarted(String nodeId) {
+  public void onNodeStarted(String nodeId) { onNodeStarted(nodeId, 0); }
+
+  @Override
+  public void onNodeStarted(String nodeId, long executionId) {
     events.add(new RecordedEvent(Instant.now(), EventType.NODE_STARTED, nodeId, Map.of(), null, 0));
-    if (delegate != null) {
-      delegate.onNodeStarted(nodeId);
-    }
+    if (delegate != null) delegate.onNodeStarted(nodeId, executionId);
   }
 
   @Override
-  public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-    events.add(new RecordedEvent(Instant.now(), EventType.NODE_COMPLETED, nodeId, outputs, null, 0));
-    if (delegate != null) {
-      delegate.onNodeCompleted(nodeId, outputs);
-    }
-  }
+  public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) { onNodeCompleted(nodeId, outputs, 0, 0); }
 
   @Override
   public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-    events.add(new RecordedEvent(Instant.now(), EventType.NODE_COMPLETED, nodeId, outputs, null, executionTimeNanos));
-    if (delegate != null) {
-      delegate.onNodeCompleted(nodeId, outputs, executionTimeNanos);
-    }
+    onNodeCompleted(nodeId, outputs, executionTimeNanos, 0);
   }
 
   @Override
-  public void onNodeError(String nodeId, String error) {
+  public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+    events.add(new RecordedEvent(Instant.now(), EventType.NODE_COMPLETED, nodeId, outputs, null, executionTimeNanos));
+    if (delegate != null) delegate.onNodeCompleted(nodeId, outputs, executionTimeNanos, executionId);
+  }
+
+  @Override
+  public void onNodeError(String nodeId, String error) { onNodeError(nodeId, error, 0); }
+
+  @Override
+  public void onNodeError(String nodeId, String error, long executionId) {
     events.add(new RecordedEvent(Instant.now(), EventType.NODE_ERROR, nodeId, Map.of(), error, 0));
-    if (delegate != null) {
-      delegate.onNodeError(nodeId, error);
-    }
+    if (delegate != null) delegate.onNodeError(nodeId, error, executionId);
   }
 
   @Override

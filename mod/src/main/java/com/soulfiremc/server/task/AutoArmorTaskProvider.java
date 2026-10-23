@@ -33,6 +33,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
@@ -109,7 +110,7 @@ public final class AutoArmorTaskProvider
     private final int maximumEquips;
     private final boolean completeWhenNoUpgrade;
     private final CompletableFuture<AutoArmorTaskResult> result;
-    private @Nullable CompletableControlTask activeEquip;
+    private @Nullable EquipAttempt activeEquip;
     private int equips;
     private int ticks;
 
@@ -143,6 +144,8 @@ public final class AutoArmorTaskProvider
       var player = context.bot().minecraft().player;
       if (
         player == null
+          || player.isSpectator()
+          || player.isDeadOrDying()
           || player.hasContainerOpen()
           || !player.inventoryMenu.getCarried().isEmpty()
       ) {
@@ -161,25 +164,33 @@ public final class AutoArmorTaskProvider
       }
 
       var selected = upgrade.orElseThrow();
+      var expectedItem = player.inventoryMenu.getSlot(selected.sourceSlot())
+        .getItem().copy();
       var equip = new CompletableControlTask(createEquip(
         context,
         selected.sourceSlot(),
         selected.equipmentSlot()
       ));
       if (context.bot().botControl().submit(equip)) {
-        activeEquip = equip;
+        activeEquip = new EquipAttempt(equip, selected.equipmentSlot(), expectedItem);
         report("Equipping armor upgrade");
       }
     }
 
     private boolean finishActiveEquip() {
       var equip = activeEquip;
-      if (equip == null || !equip.completion().isDone()) {
+      if (equip == null || !equip.task().completion().isDone()) {
         return false;
       }
       activeEquip = null;
-      if (!equip.completion().isCompletedExceptionally()
-        && equip.completion().join() == ControlStopReason.COMPLETED) {
+      var player = context.bot().minecraft().player;
+      if (!equip.task().completion().isCompletedExceptionally()
+        && equip.task().completion().join() == ControlStopReason.COMPLETED
+        && player != null
+        && matchesEquippedArmor(
+          player.inventoryMenu.getSlot(equip.equipmentSlot()).getItem(),
+          equip.expectedItem()
+        )) {
         equips++;
         report("Armor upgraded");
         if (maximumEquips > 0 && equips >= maximumEquips) {
@@ -233,7 +244,7 @@ public final class AutoArmorTaskProvider
       var equip = activeEquip;
       activeEquip = null;
       if (equip != null) {
-        context.bot().botControl().cancel(equip);
+        context.bot().botControl().cancel(equip.task());
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);
@@ -244,6 +255,24 @@ public final class AutoArmorTaskProvider
     public String description() {
       return "Auto armor";
     }
+
+    private record EquipAttempt(
+      CompletableControlTask task,
+      int equipmentSlot,
+      ItemStack expectedItem
+    ) {}
+  }
+
+  static boolean matchesEquippedArmor(ItemStack equipped, ItemStack expected) {
+    if (equipped.isEmpty() || !ItemStack.isSameItem(equipped, expected)) {
+      return false;
+    }
+    // Armor can take damage between the equip click and inventory cleanup.
+    var equippedCopy = equipped.copy();
+    var expectedCopy = expected.copy();
+    equippedCopy.remove(DataComponents.DAMAGE);
+    expectedCopy.remove(DataComponents.DAMAGE);
+    return ItemStack.matches(equippedCopy, expectedCopy);
   }
 
   static Optional<ArmorUpgrade> findUpgrade(

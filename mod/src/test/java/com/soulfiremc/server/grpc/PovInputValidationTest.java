@@ -46,5 +46,11 @@ class PovInputValidationTest {
       .setKind(PovInputEvent.Kind.CHARACTER).setCode(0xD800).build()));
     assertDoesNotThrow(() -> PovServiceImpl.validate(PovInputEvent.newBuilder()
       .setKind(PovInputEvent.Kind.CHARACTER).setCode(0x1F600).build()));
+    assertDoesNotThrow(() -> PovServiceImpl.validate(PovInputEvent.newBuilder()
+      .setKind(PovInputEvent.Kind.KEY).setCode(81).setKey("a").build()));
+    assertThrows(IllegalArgumentException.class, () -> PovServiceImpl.validate(PovInputEvent.newBuilder()
+      .setKind(PovInputEvent.Kind.KEY).setCode(81).setKey("a".repeat(65)).build()));
+    assertThrows(IllegalArgumentException.class, () -> PovServiceImpl.validate(PovInputEvent.newBuilder()
+      .setKind(PovInputEvent.Kind.CHARACTER).setCode(97).setKey("a").build()));
   }
 }

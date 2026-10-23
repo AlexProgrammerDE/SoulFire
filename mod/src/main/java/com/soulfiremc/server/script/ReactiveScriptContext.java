@@ -19,13 +19,19 @@ package com.soulfiremc.server.script;
 
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.jetbrains.annotations.VisibleForTesting;
 import reactor.core.Disposable;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongFunction;
 
 /// Reactive execution context for scripts.
 /// Per-invocation state (output sinks) lives in ExecutionRun, not here.
@@ -36,6 +42,10 @@ public final class ReactiveScriptContext {
   private final Scheduler reactorScheduler;
   private final ScriptEventListener eventListener;
   private final ScriptQuotasConfig quotas;
+  @Getter(AccessLevel.NONE)
+  private final LinkedHashMap<Long, String> activeNodes = new LinkedHashMap<>();
+  @Getter(AccessLevel.NONE)
+  private long nextExecutionId;
 
   /// For cancellation via Disposable.
   private final AtomicReference<Disposable> execution = new AtomicReference<>();
@@ -92,6 +102,30 @@ public final class ReactiveScriptContext {
     return cancelled;
   }
 
+  /// Returns the most recently started node that is still executing.
+  public Optional<String> activeNodeId() {
+    synchronized (activeNodes) {
+      return Optional.ofNullable(activeNodes.lastEntry()).map(Map.Entry::getValue);
+    }
+  }
+
+  /// Tracks each subscription independently, including overlapping runs of the same node.
+  <T> Mono<T> trackNode(String nodeId, LongFunction<Mono<T>> operation) {
+    return Mono.defer(() -> {
+      final long executionId;
+      synchronized (activeNodes) {
+        if (cancelled) return Mono.empty();
+        executionId = ++nextExecutionId;
+        activeNodes.put(executionId, nodeId);
+      }
+      return Mono.defer(() -> operation.apply(executionId)).doFinally(_ -> {
+        synchronized (activeNodes) {
+          activeNodes.remove(executionId);
+        }
+      });
+    });
+  }
+
   /// Cancels the script execution.
   public void cancel() {
     this.cancelled = true;
@@ -100,6 +134,9 @@ public final class ReactiveScriptContext {
       exec.dispose();
     }
     stateStore.clear();
+    synchronized (activeNodes) {
+      activeNodes.clear();
+    }
     eventListener.onScriptCancelled();
   }
 

@@ -31,6 +31,7 @@ import org.bytedeco.javacpp.PointerPointer;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Optional;
 
 import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_FLAG_CLOSED_GOP;
 import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_FLAG_LOW_DELAY;
@@ -82,6 +83,7 @@ import static org.bytedeco.ffmpeg.global.swscale.sws_setColorspaceDetails;
 @Slf4j
 public final class PovVideoEncoder implements AutoCloseable {
   public static final int FPS = 60;
+  private static final PovEncoderProbes HARDWARE_PROBES = new PovEncoderProbes();
   private final int fps;
   public int fps() { return fps; }
   private final Format format;
@@ -119,7 +121,11 @@ public final class PovVideoEncoder implements AutoCloseable {
         : List.of("h264_nvenc", "h264_qsv", "h264_videotoolbox", "h264_mf", "libx264")) : List.of(requested);
     for (var name : candidates) {
       try {
-        encoder = new NativeEncoder(name, width, height, bitrate, fps, format);
+        var candidate = requested.equals("auto") && !name.equals("libx264")
+          ? HARDWARE_PROBES.open(name, () -> new NativeEncoder(name, width, height, bitrate, fps, format))
+          : Optional.of(new NativeEncoder(name, width, height, bitrate, fps, format));
+        if (candidate.isEmpty()) continue;
+        encoder = candidate.orElseThrow();
         log.info("POV video encoder: {} ({}x{}, up to {} FPS)", name, width, height, fps);
         return;
       } catch (RuntimeException error) {

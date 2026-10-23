@@ -58,7 +58,7 @@ public final class AutoTotem extends InternalPlugin {
     var connection = event.connection();
     var settingsSource = connection.settingsSource();
     connection.scheduler().scheduleWithDynamicDelay(
-      () -> {
+      () -> connection.minecraft().execute(() -> {
         if (!settingsSource.get(AutoTotemSettings.ENABLED)) {
           return;
         }
@@ -82,7 +82,7 @@ public final class AutoTotem extends InternalPlugin {
           return;
         }
 
-        if (player.hasContainerOpen()) {
+        if (player.hasContainerOpen() || !playerInventory.getCarried().isEmpty()) {
           return;
         }
 
@@ -98,7 +98,7 @@ public final class AutoTotem extends InternalPlugin {
           log.info("Auto Totem: {} is attempting to move a totem from inventory slot {} to the offhand",
             connection.accountName(), totemSlot.getAsInt());
         }
-      },
+      }),
       settingsSource.getRandom(AutoTotemSettings.DELAY).asLongSupplier(),
       TimeUnit.SECONDS);
   }

@@ -122,7 +122,7 @@ final class HeadlessRendererBenchmark {
         camera.update(minecraft.deltaTracker);
         var expectedPosition = camera.position();
         var expectedFov = camera.getFov();
-        try (var frame = VulkanRenderer.renderInteractive(minecraft, 854, 480, readback)) {
+        try (var frame = VulkanRenderer.renderInteractive(minecraft, 854, 480, 854, 480, readback)) {
           if (frame == null || camera.position().distanceTo(expectedPosition) > 0.000001
             || Math.abs(camera.getFov() - expectedFov) > 0.000001) {
             throw new IllegalStateException("Live capture replaced vanilla camera interpolation at " + fraction);
@@ -160,7 +160,7 @@ final class HeadlessRendererBenchmark {
         var totalBytes = 0L;
         for (var i = 0; i < 90; i++) {
           var start = System.nanoTime();
-          try (var frame = VulkanRenderer.renderInteractive(minecraft, 1280, 720, readback)) {
+          try (var frame = VulkanRenderer.renderInteractive(minecraft, 1280, 720, 1280, 720, readback)) {
             if (frame == null) continue;
             var encoded = encoder.encode(frame.pixels(), i * 16_667L, i == 0);
             if (i >= 30) { times.add((System.nanoTime() - start) / 1_000_000.0); totalBytes += encoded.data().length; }

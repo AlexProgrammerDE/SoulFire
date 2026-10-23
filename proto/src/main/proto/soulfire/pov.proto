@@ -108,4 +108,7 @@ message PovInputEvent {
   double x = 5;
   double y = 6;
   bool relative = 7;
+  // Logical browser key for KEY events, such as "a" or "ArrowLeft".
+  // The physical key remains in code for bindings and held-input ownership.
+  optional string key = 8;
 }

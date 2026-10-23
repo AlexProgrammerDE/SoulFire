@@ -90,6 +90,7 @@ public final class InstanceManager {
   private final DSLContext dsl;
   private final SoulFireScheduler.RunnableWrapper runnableWrapper;
   private volatile String friendlyName;
+  private volatile boolean deleting;
   private final SettingsPageRegistry instanceSettingsPageRegistry;
   private final InstanceMetricsCollector metricsCollector;
   private final InstancePluginStats pluginStats;
@@ -375,6 +376,10 @@ public final class InstanceManager {
       }
       return account.withAccountData(refreshed.accountData()).withLastKnownName(refreshed.lastKnownName());
     }).toList();
+  }
+
+  void markDeleting() {
+    deleting = true;
   }
 
   public CompletableFuture<?> deleteInstance() {

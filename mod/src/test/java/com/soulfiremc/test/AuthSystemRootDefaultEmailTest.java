@@ -17,9 +17,17 @@
  */
 package com.soulfiremc.test;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.soulfiremc.grpc.generated.GlobalPermission;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.database.generated.Tables;
+import com.soulfiremc.server.settings.lib.ServerSettingsImpl;
+import com.soulfiremc.server.settings.server.ServerSettings;
 import com.soulfiremc.server.user.AuthSystem;
+import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.PortHelper;
+import com.soulfiremc.server.util.structs.GsonInstance;
 import com.soulfiremc.shared.SFLogAppender;
 import com.soulfiremc.test.utils.TestBootstrap;
 import org.junit.jupiter.api.Test;
@@ -27,9 +35,12 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class AuthSystemRootDefaultEmailTest {
   private static final String ROOT_DEFAULT_EMAIL_PROPERTY = "sf.root.default.email";
@@ -75,7 +86,7 @@ public final class AuthSystemRootDefaultEmailTest {
   }
 
   @Test
-  void rootUserUsesJvmConfiguredDefaultEmailOnFirstStartup() {
+  void startupInitializesRootIdentityAndLiveUserPermissionSettings() {
     var previousBaseDir = System.getProperty("sf.baseDir");
     var previousUnitTest = System.getProperty("sf.unit.test");
     var previousRootDefaultEmail = System.getProperty(ROOT_DEFAULT_EMAIL_PROPERTY);
@@ -94,6 +105,24 @@ public final class AuthSystemRootDefaultEmailTest {
           "bootstrap-admin@example.com",
           server.authSystem().rootUserData().getEmail()
         );
+        var userId = UUID.randomUUID();
+        server.dsl().execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+          userId.toString(), "permission-user", "permission-user@example.com", "USER");
+        var user = server.authSystem().authenticateBySubject(userId, Instant.now()).orElseThrow();
+        var createInstance = PermissionContext.global(GlobalPermission.CREATE_INSTANCE);
+        assertTrue(user.hasPermission(createInstance));
+        assertFalse(user.hasPermission(PermissionContext.global(GlobalPermission.READ_SERVER_CONFIG)));
+
+        var setting = ServerSettings.ALLOW_CREATING_INSTANCES;
+        for (var allowed : new boolean[]{false, true}) {
+          var stem = new ServerSettingsImpl.Stem(Map.of(setting.namespace(),
+            Map.<String, JsonElement>of(setting.key(), new JsonPrimitive(allowed))));
+          server.dsl().update(Tables.SERVER_CONFIG)
+            .set(Tables.SERVER_CONFIG.SETTINGS, GsonInstance.CONFIG_GSON.toJson(stem.serializeToTree()))
+            .where(Tables.SERVER_CONFIG.ID.eq(1L)).execute();
+          server.configUpdateHook();
+          assertEquals(allowed, user.hasPermission(createInstance));
+        }
       } finally {
         server.shutdownManager().shutdownSoftware(false);
         server.shutdownManager().awaitShutdown();

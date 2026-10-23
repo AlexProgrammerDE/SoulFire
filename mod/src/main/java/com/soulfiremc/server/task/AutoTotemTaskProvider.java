@@ -31,6 +31,7 @@ import com.soulfiremc.server.bot.ControlTask;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -99,7 +100,7 @@ public final class AutoTotemTaskProvider
     private final boolean completeWhenNoTotem;
     private final boolean replaceOccupiedOffhand;
     private final CompletableFuture<AutoTotemTaskResult> result;
-    private @Nullable CompletableControlTask activeEquip;
+    private @Nullable EquipAttempt activeEquip;
     private int equips;
     private int ticks;
 
@@ -134,7 +135,9 @@ public final class AutoTotemTaskProvider
 
       var bot = context.bot();
       var player = bot.minecraft().player;
-      if (player == null || player.hasContainerOpen()) {
+      if (player == null || player.isSpectator() || player.isDeadOrDying()
+        || player.hasContainerOpen()
+        || !player.inventoryMenu.getCarried().isEmpty()) {
         return;
       }
       var offhand = player.inventoryMenu
@@ -168,20 +171,28 @@ public final class AutoTotemTaskProvider
       var equip = new CompletableControlTask(
         createEquip(context, source.getAsInt())
       );
+      var previousActivation = player.itemActivation().item();
       if (bot.botControl().submit(equip)) {
-        activeEquip = equip;
+        activeEquip = new EquipAttempt(equip, previousActivation);
         report("Equipping totem");
       }
     }
 
     private boolean finishActiveEquip() {
       var equip = activeEquip;
-      if (equip == null || !equip.completion().isDone()) {
+      if (equip == null || !equip.task().completion().isDone()) {
         return false;
       }
       activeEquip = null;
-      if (!equip.completion().isCompletedExceptionally()
-        && equip.completion().join() == ControlStopReason.COMPLETED) {
+      var player = context.bot().minecraft().player;
+      if (!equip.task().completion().isCompletedExceptionally()
+        && equip.task().completion().join() == ControlStopReason.COMPLETED
+        && player != null
+        && confirmsTotemEquip(
+          player.getOffhandItem(),
+          equip.previousActivation(),
+          player.itemActivation().item()
+        )) {
         equips++;
         report("Totem equipped");
         if (maximumEquips > 0 && equips >= maximumEquips) {
@@ -235,7 +246,7 @@ public final class AutoTotemTaskProvider
       var equip = activeEquip;
       activeEquip = null;
       if (equip != null) {
-        context.bot().botControl().cancel(equip);
+        context.bot().botControl().cancel(equip.task());
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);
@@ -246,6 +257,23 @@ public final class AutoTotemTaskProvider
     public String description() {
       return "Auto totem";
     }
+
+    private record EquipAttempt(
+      CompletableControlTask task,
+      @Nullable ItemStack previousActivation
+    ) {}
+  }
+
+  static boolean confirmsTotemEquip(
+    ItemStack offhand,
+    @Nullable ItemStack previousActivation,
+    @Nullable ItemStack activation
+  ) {
+    // The server's totem-use event replaces the activation stack. Retain that
+    // confirmation if the totem was consumed before inventory cleanup ended.
+    return offhand.is(Items.TOTEM_OF_UNDYING)
+      || activation != null && activation != previousActivation
+      && activation.is(Items.TOTEM_OF_UNDYING);
   }
 
   private static ControlTask createEquip(

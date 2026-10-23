@@ -44,6 +44,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -88,6 +89,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     var instanceId = UUID.fromString(request.getId());
     var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
     user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
+    // Ownership checks need a connection before the settings transaction acquires one.
+    var canUpdateConfig = user.hasPermission(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
     SdkProvisioning.AccountResult result;
     synchronized (provisioningLock) {
       result = soulFireServer.dsl().transactionResult(cfg -> {
@@ -98,7 +101,9 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
         var provisioned = SdkProvisioning.account(parseSettings(record.getSettings()), request);
         if (provisioned.created()) {
-          user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+          if (!canUpdateConfig) {
+            throw Status.PERMISSION_DENIED.withDescription("You do not have permission to access this resource").asRuntimeException();
+          }
           ctx.update(Tables.INSTANCES)
             .set(Tables.INSTANCES.SETTINGS, serializeSettings(provisioned.settings()))
             .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
@@ -115,13 +120,12 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     responseObserver.onCompleted();
   }
 
-  private Collection<InstancePermissionState> getInstancePermissions(UUID instanceId) {
-    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+  private static Collection<InstancePermissionState> instancePermissionStates(Predicate<InstancePermission> permissions) {
     return Arrays.stream(InstancePermission.values())
       .filter(permission -> permission != InstancePermission.UNRECOGNIZED)
       .map(permission -> InstancePermissionState.newBuilder()
         .setInstancePermission(permission)
-        .setGranted(user.hasPermission(PermissionContext.instance(permission, instanceId)))
+        .setGranted(permissions.test(permission))
         .build())
       .toList();
   }
@@ -215,28 +219,22 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     try {
       var dsl = soulFireServer.dsl();
       var records = dsl.selectFrom(Tables.INSTANCES).fetch();
-
-      responseObserver.onNext(InstanceListResponse.newBuilder()
-        .addAllInstances(records.stream()
-          .filter(record -> {
-            var id = UUID.fromString(record.getId());
-            return ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermission(PermissionContext.instance(InstancePermission.READ_INSTANCE, id));
-          })
-          .map(record -> {
-            var id = UUID.fromString(record.getId());
-            return InstanceListResponse.Instance.newBuilder()
-              .setId(record.getId())
-              .setFriendlyName(record.getFriendlyName())
-              .setIcon(record.getIcon())
-              .setBotSummary(soulFireServer.getInstance(id)
-                .orElseThrow()
-                .botStateManager()
-                .summary())
-              .addAllInstancePermissions(getInstancePermissions(id))
-              .build();
-          })
-          .toList())
-        .build());
+      var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+      var response = InstanceListResponse.newBuilder();
+      for (var record : records) {
+        var id = UUID.fromString(record.getId());
+        var permissions = user.instancePermissionChecker(id);
+        if (!permissions.test(InstancePermission.READ_INSTANCE)) continue;
+        var instance = soulFireServer.getInstance(id);
+        if (instance.isEmpty()) continue;
+        response.addInstances(InstanceListResponse.Instance.newBuilder()
+          .setId(record.getId())
+          .setFriendlyName(record.getFriendlyName())
+          .setIcon(record.getIcon())
+          .setBotSummary(instance.get().botStateManager().summary())
+          .addAllInstancePermissions(instancePermissionStates(permissions)));
+      }
+      responseObserver.onNext(response.build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
@@ -249,7 +247,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   @Override
   public void getInstanceInfo(InstanceInfoRequest request, StreamObserver<InstanceInfoResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
-    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
+    var user = ServerRPCConstants.USER_CONTEXT_KEY.get();
+    user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.READ_INSTANCE, instanceId));
 
     try {
       var dsl = soulFireServer.dsl();
@@ -260,6 +259,10 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
       var lastModified = record.getUpdatedAt().toInstant(ZoneOffset.UTC);
       var lastModifiedProto = Timestamps.fromMillis(lastModified.toEpochMilli());
+      var instance = soulFireServer.getInstance(instanceId)
+        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException());
+      var permissions = instancePermissionStates(user.instancePermissionChecker(instanceId));
+      var botSummary = instance.botStateManager().summary();
 
       // Check if-modified-since
       if (request.hasIfModifiedSince()) {
@@ -272,6 +275,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           responseObserver.onNext(InstanceInfoResponse.newBuilder()
             .setNotModified(InstanceNotModified.newBuilder()
               .setLastModified(lastModifiedProto)
+              .addAllInstancePermissions(permissions)
+              .setBotSummary(botSummary)
               .build())
             .build());
           responseObserver.onCompleted();
@@ -279,12 +284,6 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         }
       }
 
-      var optionalInstance = soulFireServer.getInstance(instanceId);
-      if (optionalInstance.isEmpty()) {
-        throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
-      }
-
-      var instance = optionalInstance.get();
       var registry = instance.instanceSettingsPageRegistry();
       var settings = parseSettings(record.getSettings());
       responseObserver.onNext(InstanceInfoResponse.newBuilder()
@@ -292,8 +291,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
           .setFriendlyName(record.getFriendlyName())
           .setIcon(record.getIcon())
           .setConfig(settings.toProto())
-          .setBotSummary(instance.botStateManager().summary())
-          .addAllInstancePermissions(getInstancePermissions(instanceId))
+          .setBotSummary(botSummary)
+          .addAllInstancePermissions(permissions)
           .addAllSettingsDefinitions(registry.exportSettingsDefinitions())
           .addAllInstanceSettings(registry.exportSettingsPages())
           .addAllPlugins(registry.exportRegisteredPlugins())
@@ -595,6 +594,53 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
   }
 
   @Override
+  public void replaceInstanceAccounts(InstanceReplaceAccountsRequest request, StreamObserver<InstanceReplaceAccountsResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      var accounts = request.getAccountsList().stream().map(MinecraftAccount::fromProto).toList();
+      var accountIds = accounts.stream().map(MinecraftAccount::profileId).collect(Collectors.toSet());
+      var instance = soulFireServer.getInstance(instanceId)
+        .orElseThrow(() -> Status.NOT_FOUND
+          .withDescription("Instance '%s' not found".formatted(instanceId))
+          .asRuntimeException());
+      var removedAccountIds = soulFireServer.dsl().transactionResult(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+        }
+
+        var currentSettings = parseSettings(record.getSettings());
+        var removed = currentSettings.accounts().stream()
+          .map(MinecraftAccount::profileId)
+          .filter(profileId -> !accountIds.contains(profileId))
+          .toList();
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(currentSettings.withAccounts(accounts)))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
+        return removed;
+      });
+
+      instance.invalidateSettingsCache();
+      instance.botStateManager().removeAccounts(removedAccountIds).join();
+      instance.botStateManager().syncConfiguredAccounts();
+      responseObserver.onNext(InstanceReplaceAccountsResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+    } catch (Throwable t) {
+      log.error("Error replacing instance accounts", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
   public void removeInstanceAccountsBatch(InstanceRemoveAccountsBatchRequest request, StreamObserver<InstanceRemoveAccountsBatchResponse> responseObserver) {
     var instanceId = UUID.fromString(request.getId());
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
@@ -796,6 +842,58 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       throw e;
     } catch (Throwable t) {
       log.error("Error adding instance proxies batch", t);
+      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+    }
+  }
+
+  @Override
+  public void removeInstanceProxyEntries(InstanceRemoveProxyEntriesRequest request, StreamObserver<InstanceRemoveProxyEntriesResponse> responseObserver) {
+    var instanceId = UUID.fromString(request.getId());
+    ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
+
+    try {
+      var selected = request.getProxiesList().stream().map(SFProxy::fromProto).toList();
+      var dsl = soulFireServer.dsl();
+      dsl.transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        var record = ctx.selectFrom(Tables.INSTANCES).where(Tables.INSTANCES.ID.eq(instanceId.toString())).fetchOne();
+        if (record == null) {
+          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+        }
+
+        var currentSettings = parseSettings(record.getSettings());
+        var remainingToRemove = new HashMap<SFProxy, Integer>();
+        for (var proxy : selected) {
+          remainingToRemove.merge(proxy, 1, Integer::sum);
+        }
+        var newProxies = new ArrayList<SFProxy>();
+        for (var proxy : currentSettings.proxies()) {
+          var count = remainingToRemove.getOrDefault(proxy, 0);
+          if (count == 0) {
+            newProxies.add(proxy);
+          } else if (count == 1) {
+            remainingToRemove.remove(proxy);
+          } else {
+            remainingToRemove.put(proxy, count - 1);
+          }
+        }
+
+        ctx.update(Tables.INSTANCES)
+          .set(Tables.INSTANCES.SETTINGS, serializeSettings(currentSettings.withProxies(newProxies)))
+          .set(Tables.INSTANCES.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+          .execute();
+      });
+
+      refreshRuntimeSettings(instanceId);
+      responseObserver.onNext(InstanceRemoveProxyEntriesResponse.newBuilder().build());
+      responseObserver.onCompleted();
+    } catch (StatusRuntimeException e) {
+      throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+    } catch (Throwable t) {
+      log.error("Error removing instance proxy entries", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
     }
   }

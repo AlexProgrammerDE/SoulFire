@@ -72,14 +72,34 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
   // Track active scripts: scriptId -> activation state
   private final Map<UUID, ScriptActivationState> activeScripts = new ConcurrentHashMap<>();
+  private final Set<DryRunExecution> activeDryRuns = ConcurrentHashMap.newKeySet();
 
   // Internal data classes for JSON serialization
   private record ScriptNodeData(
     String id,
     String type,
     PositionData position,
-    Map<String, JsonElement> data
-  ) {}
+    Map<String, JsonElement> data,
+    boolean muted,
+    boolean collapsed,
+    Double width,
+    Double height,
+    List<String> containedNodes,
+    String label,
+    Integer resolvedType,
+    String parentFrameId
+  ) {
+    private ScriptNodeData {
+      containedNodes = containedNodes == null ? List.of() : List.copyOf(containedNodes);
+      label = Objects.requireNonNullElse(label, "");
+      parentFrameId = Objects.requireNonNullElse(parentFrameId, "");
+    }
+
+    private ScriptNodeData withData(Map<String, JsonElement> updatedData) {
+      return new ScriptNodeData(id, type, position, updatedData, muted, collapsed, width, height,
+        containedNodes, label, resolvedType, parentFrameId);
+    }
+  }
 
   private record PositionData(double x, double y) {}
 
@@ -99,7 +119,6 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     UUID scriptId,
     UUID instanceId,
     boolean active,
-    String activeNodeId,
     long activationCount,
     ReactiveScriptContext context,
     ScriptEventSubscribers subscribers
@@ -109,6 +128,24 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   // Internal Script Lifecycle Methods
   // ============================================================================
 
+  /// Serializes script mutations with the start of instance deletion.
+  private void withInstanceLifecycle(UUID instanceId, Runnable action) {
+    var instance = soulFireServer.getInstance(instanceId).orElse(null);
+    if (instance == null) {
+      if (soulFireServer.isInstanceDeleting(instanceId)) {
+        throw Status.FAILED_PRECONDITION.withDescription("Instance is shutting down").asRuntimeException();
+      }
+      action.run();
+      return;
+    }
+    synchronized (instance) {
+      if (instance.deleting()) {
+        throw Status.FAILED_PRECONDITION.withDescription("Instance is shutting down").asRuntimeException();
+      }
+      action.run();
+    }
+  }
+
   /// Starts a script without modifying the paused flag in the database.
   /// Used for automatic script starting on create/update/server startup.
   private void startScriptInternal(ScriptsRecord record) {
@@ -116,47 +153,48 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     var instanceId = UUID.fromString(record.getInstanceId());
 
     try {
-      // Build the script graph from the record
-      var graph = buildScriptGraph(record);
+      withInstanceLifecycle(instanceId, () -> {
+        // Build the script graph from the record
+        var graph = buildScriptGraph(record);
 
-      // Get the instance manager
-      var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
-      if (instanceManager == null) {
-        log.warn("Instance {} not found, cannot start script {}", instanceId, scriptId);
-        return;
-      }
+        // Get the instance manager
+        var instanceManager = soulFireServer.getInstance(instanceId).orElse(null);
+        if (instanceManager == null) {
+          log.warn("Instance {} not found, cannot start script {}", instanceId, scriptId);
+          return;
+        }
 
-      var subscribers = new ScriptEventSubscribers();
-      var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
+        var subscribers = new ScriptEventSubscribers();
+        var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
 
-      // Parse quotas from the database record
-      var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
+        // Parse quotas from the database record
+        var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson()));
 
-      // Create reactive context for trigger execution
-      var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
+        // Create reactive context for trigger execution
+        var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
 
-      // Atomically check-and-set to avoid race condition
-      var activationState = new ScriptActivationState(
-        scriptId,
-        instanceId,
-        true,
-        null,
-        1,
-        context,
-        subscribers
-      );
-      var existing = activeScripts.putIfAbsent(scriptId, activationState);
-      if (existing != null) {
-        log.debug("Script {} is already running, skipping start", scriptId);
-        return;
-      }
+        // Atomically check-and-set to avoid race condition
+        var activationState = new ScriptActivationState(
+          scriptId,
+          instanceId,
+          true,
+          1,
+          context,
+          subscribers
+        );
+        var existing = activeScripts.putIfAbsent(scriptId, activationState);
+        if (existing != null) {
+          log.debug("Script {} is already running, skipping start", scriptId);
+          return;
+        }
 
-      // Register triggers for event-driven execution
-      var engine = new ReactiveScriptEngine();
-      triggerService.registerTriggers(scriptId, graph, context, engine);
+        // Register triggers for event-driven execution
+        var engine = new ReactiveScriptEngine();
+        triggerService.registerTriggers(scriptId, graph, context, engine);
 
-      log.info("Started script {} with {} triggers, {} data edges", scriptId,
-        graph.findTriggerNodes().size(), graph.dataEdges().size());
+        log.info("Started script {} with {} triggers, {} data edges", scriptId,
+          graph.findTriggerNodes().size(), graph.dataEdges().size());
+      });
     } catch (ScriptGraphValidationException e) {
       log.error("Script '{}' ({}) has invalid graph: {}", record.getName(), scriptId, e.errors());
     } catch (Exception e) {
@@ -181,6 +219,18 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     }
 
     log.info("Stopped script {}", scriptId);
+  }
+
+  /// Stops an instance's scripts and releases their triggers and subscribers.
+  public void stopAllScripts(UUID instanceId) {
+    for (var state : List.copyOf(activeScripts.values())) {
+      if (state.instanceId().equals(instanceId)) {
+        stopScriptInternal(state.scriptId());
+      }
+    }
+    for (var run : List.copyOf(activeDryRuns)) {
+      if (run.instanceId.equals(instanceId)) run.context.cancel();
+    }
   }
 
   /// Restarts a script by stopping it and starting it again.
@@ -249,55 +299,57 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .withDescription("Script description must not exceed " + MAX_DESCRIPTION_LENGTH + " characters").asRuntimeException();
     }
 
-    try {
-      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var instanceRecord = ctx.selectFrom(Tables.INSTANCES)
-          .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
-          .fetchOne();
-        if (instanceRecord == null) {
-          throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var instanceRecord = ctx.selectFrom(Tables.INSTANCES)
+            .where(Tables.INSTANCES.ID.eq(instanceId.toString()))
+            .fetchOne();
+          if (instanceRecord == null) {
+            throw Status.NOT_FOUND.withDescription("Instance '%s' not found".formatted(instanceId)).asRuntimeException();
+          }
+
+          var newId = UUID.randomUUID().toString();
+          var now = LocalDateTime.now(ZoneOffset.UTC);
+          ctx.insertInto(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.ID, newId)
+            .set(Tables.SCRIPTS.NAME, request.getName())
+            .set(Tables.SCRIPTS.DESCRIPTION, request.getDescription())
+            .set(Tables.SCRIPTS.INSTANCE_ID, instanceId.toString())
+            .set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()))
+            .set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()))
+            .set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null)
+            .set(Tables.SCRIPTS.PAUSED, request.getPaused())
+            .set(Tables.SCRIPTS.CREATED_AT, now)
+            .set(Tables.SCRIPTS.UPDATED_AT, now)
+            .set(Tables.SCRIPTS.VERSION, 0L)
+            .execute();
+
+          return ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(newId))
+            .fetchOne();
+        });
+
+        // Start the script immediately if not paused
+        if (!scriptRecord.getPaused()) {
+          startScriptInternal(scriptRecord);
         }
 
-        var newId = UUID.randomUUID().toString();
-        var now = LocalDateTime.now(ZoneOffset.UTC);
-        ctx.insertInto(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.ID, newId)
-          .set(Tables.SCRIPTS.NAME, request.getName())
-          .set(Tables.SCRIPTS.DESCRIPTION, request.getDescription())
-          .set(Tables.SCRIPTS.INSTANCE_ID, instanceId.toString())
-          .set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()))
-          .set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()))
-          .set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null)
-          .set(Tables.SCRIPTS.PAUSED, request.getPaused())
-          .set(Tables.SCRIPTS.CREATED_AT, now)
-          .set(Tables.SCRIPTS.UPDATED_AT, now)
-          .set(Tables.SCRIPTS.VERSION, 0L)
-          .execute();
-
-        return ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(newId))
-          .fetchOne();
-      });
-
-      // Start the script immediately if not paused
-      if (!scriptRecord.getPaused()) {
-        startScriptInternal(scriptRecord);
+        var createResponse = CreateScriptResponse.newBuilder()
+          .setScript(recordToScriptData(scriptRecord));
+        for (var diag : collectGraphWarnings(scriptRecord)) {
+          createResponse.addDiagnostics(diag);
+        }
+        responseObserver.onNext(createResponse.build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error creating script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
       }
-
-      var createResponse = CreateScriptResponse.newBuilder()
-        .setScript(recordToScriptData(scriptRecord));
-      for (var diag : collectGraphWarnings(scriptRecord)) {
-        createResponse.addDiagnostics(diag);
-      }
-      responseObserver.onNext(createResponse.build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error creating script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+    });
   }
 
   @Override
@@ -353,67 +405,69 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         .withDescription("Script description must not exceed " + MAX_DESCRIPTION_LENGTH + " characters").asRuntimeException();
     }
 
-    try {
-      var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        var scriptRecord = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+
+          var update = ctx.update(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC));
+
+          if (request.hasName()) {
+            update = update.set(Tables.SCRIPTS.NAME, request.getName());
+          }
+          if (request.hasDescription()) {
+            update = update.set(Tables.SCRIPTS.DESCRIPTION, request.getDescription());
+          }
+          if (request.getUpdateNodes()) {
+            update = update.set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()));
+          }
+          if (request.getUpdateEdges()) {
+            update = update.set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()));
+          }
+          if (request.getUpdateQuotas()) {
+            update = update.set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null);
+          }
+          if (request.hasPaused()) {
+            update = update.set(Tables.SCRIPTS.PAUSED, request.getPaused());
+          }
+
+          update.where(Tables.SCRIPTS.ID.eq(scriptId.toString())).execute();
+
+          return ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+        });
+
+        // Restart the script if it's not paused (to apply new configuration)
+        if (!scriptRecord.getPaused()) {
+          restartScriptInternal(scriptRecord);
+        } else {
+          // Script is paused, make sure it's stopped
+          stopScriptInternal(scriptId);
         }
 
-        var update = ctx.update(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC));
-
-        if (request.hasName()) {
-          update = update.set(Tables.SCRIPTS.NAME, request.getName());
+        var updateResponse = UpdateScriptResponse.newBuilder()
+          .setScript(recordToScriptData(scriptRecord));
+        for (var diag : collectGraphWarnings(scriptRecord)) {
+          updateResponse.addDiagnostics(diag);
         }
-        if (request.hasDescription()) {
-          update = update.set(Tables.SCRIPTS.DESCRIPTION, request.getDescription());
-        }
-        if (request.getUpdateNodes()) {
-          update = update.set(Tables.SCRIPTS.NODES_JSON, nodesToJson(request.getNodesList()));
-        }
-        if (request.getUpdateEdges()) {
-          update = update.set(Tables.SCRIPTS.EDGES_JSON, edgesToJson(request.getEdgesList()));
-        }
-        if (request.getUpdateQuotas()) {
-          update = update.set(Tables.SCRIPTS.QUOTAS_JSON, request.hasQuotas() ? quotasToJson(request.getQuotas()) : null);
-        }
-        if (request.hasPaused()) {
-          update = update.set(Tables.SCRIPTS.PAUSED, request.getPaused());
-        }
-
-        update.where(Tables.SCRIPTS.ID.eq(scriptId.toString())).execute();
-
-        return ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-      });
-
-      // Restart the script if it's not paused (to apply new configuration)
-      if (!scriptRecord.getPaused()) {
-        restartScriptInternal(scriptRecord);
-      } else {
-        // Script is paused, make sure it's stopped
-        stopScriptInternal(scriptId);
+        responseObserver.onNext(updateResponse.build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error updating script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
       }
-
-      var updateResponse = UpdateScriptResponse.newBuilder()
-        .setScript(recordToScriptData(scriptRecord));
-      for (var diag : collectGraphWarnings(scriptRecord)) {
-        updateResponse.addDiagnostics(diag);
-      }
-      responseObserver.onNext(updateResponse.build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error updating script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+    });
   }
 
   @Override
@@ -423,34 +477,40 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
-    try {
-      soulFireServer.dsl().transaction(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        soulFireServer.dsl().transaction(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+
+          // Stop the script if it's running (after ownership check)
+          stopScriptInternal(scriptId);
+
+          ctx.deleteFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .execute();
+        });
+
+        for (var run : List.copyOf(activeDryRuns)) {
+          if (run.instanceId.equals(instanceId) && run.scriptId.equals(scriptId)) run.context.cancel();
         }
 
-        // Stop the script if it's running (after ownership check)
-        stopScriptInternal(scriptId);
-
-        ctx.deleteFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .execute();
-      });
-
-      log.info("Script {} deleted", scriptId);
-      responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error deleting script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+        log.info("Script {} deleted", scriptId);
+        responseObserver.onNext(DeleteScriptResponse.newBuilder().build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error deleting script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+      }
+    });
   }
 
   @Override
@@ -497,100 +557,100 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
-    try {
-      record ValidatedActivation(ScriptsRecord record, ScriptGraph graph) {}
-      var instanceManager = soulFireServer.getInstance(instanceId)
-        .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        record ValidatedActivation(ScriptsRecord record, ScriptGraph graph) {}
+        var instanceManager = soulFireServer.getInstance(instanceId)
+          .orElseThrow(() -> Status.NOT_FOUND.withDescription("Instance not found").asRuntimeException());
 
-      // Validate before persisting the resumed state so rejected scripts stay paused.
-      var activation = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
-        var graph = ConstantFolding.fold(buildScriptGraph(record));
-        // Set paused=false to persist the resumed state
-        if (record.getPaused()) {
-          ctx.update(Tables.SCRIPTS)
-            .set(Tables.SCRIPTS.PAUSED, false)
-            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+        // Validate before persisting the resumed state so rejected scripts stay paused.
+        var activation = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
             .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-            .execute();
-          record.setPaused(false);
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+          var graph = ConstantFolding.fold(buildScriptGraph(record));
+          // Set paused=false to persist the resumed state
+          if (record.getPaused()) {
+            ctx.update(Tables.SCRIPTS)
+              .set(Tables.SCRIPTS.PAUSED, false)
+              .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+              .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+              .execute();
+            record.setPaused(false);
+          }
+          return new ValidatedActivation(record, graph);
+        });
+        var scriptRecord = activation.record();
+
+        var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+
+        var existingState = activeScripts.get(scriptId);
+        if (existingState != null) {
+          existingState.subscribers().add(serverObserver);
+          // Update activation count (record is immutable, so create new state with same subscribers)
+          activeScripts.put(scriptId, new ScriptActivationState(
+            existingState.scriptId(),
+            existingState.instanceId(),
+            existingState.active(),
+            existingState.activationCount() + 1,
+            existingState.context(),
+            existingState.subscribers()
+          ));
+
+          sendScriptStarted(existingState.subscribers(), serverObserver, scriptId);
+
+          log.info("Client attached to already-running script {}", scriptId);
+          return;
         }
-        return new ValidatedActivation(record, graph);
-      });
-      var scriptRecord = activation.record();
 
-      var serverObserver = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+        // Script is not running, start it
+        var graph = activation.graph();
 
-      var existingState = activeScripts.get(scriptId);
-      if (existingState != null) {
-        existingState.subscribers().add(serverObserver);
-        // Update activation count (record is immutable, so create new state with same subscribers)
-        activeScripts.put(scriptId, new ScriptActivationState(
-          existingState.scriptId(),
-          existingState.instanceId(),
-          existingState.active(),
-          existingState.activeNodeId(),
-          existingState.activationCount() + 1,
-          existingState.context(),
-          existingState.subscribers()
-        ));
+        var subscribers = new ScriptEventSubscribers();
+        subscribers.add(serverObserver);
+        var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
 
-        sendScriptStarted(existingState.subscribers(), serverObserver, scriptId);
+        // Parse quotas from the database record
+        var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
 
-        log.info("Client attached to already-running script {}", scriptId);
-        return;
+        // Create reactive context for trigger execution
+        var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
+
+        // Register triggers for event-driven execution using reactive engine
+        var engine = new ReactiveScriptEngine();
+        triggerService.registerTriggers(scriptId, graph, context, engine);
+
+        // Store active script state
+        var activationState = new ScriptActivationState(
+          scriptId,
+          instanceId,
+          true,
+          1,
+          context,
+          subscribers
+        );
+        activeScripts.put(scriptId, activationState);
+
+        sendScriptStarted(subscribers, serverObserver, scriptId);
+
+        log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
+          graph.findTriggerNodes().size(), graph.dataEdges().size());
+
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (ScriptGraphValidationException e) {
+        log.error("Script {} has invalid graph: {}", scriptId, e.errors());
+        throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+      } catch (Throwable t) {
+        log.error("Error resuming script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
       }
-
-      // Script is not running, start it
-      var graph = activation.graph();
-
-      var subscribers = new ScriptEventSubscribers();
-      subscribers.add(serverObserver);
-      var eventListener = createStreamingEventListener(instanceId, scriptId, subscribers);
-
-      // Parse quotas from the database record
-      var quotas = ScriptQuotasConfig.fromProto(jsonToQuotas(scriptRecord.getQuotasJson()));
-
-      // Create reactive context for trigger execution
-      var context = new ReactiveScriptContext(instanceManager, eventListener, quotas);
-
-      // Register triggers for event-driven execution using reactive engine
-      var engine = new ReactiveScriptEngine();
-      triggerService.registerTriggers(scriptId, graph, context, engine);
-
-      // Store active script state
-      var activationState = new ScriptActivationState(
-        scriptId,
-        instanceId,
-        true,
-        null,
-        1,
-        context,
-        subscribers
-      );
-      activeScripts.put(scriptId, activationState);
-
-      sendScriptStarted(subscribers, serverObserver, scriptId);
-
-      log.info("Script {} resumed with {} triggers, {} data edges", scriptId,
-        graph.findTriggerNodes().size(), graph.dataEdges().size());
-
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (ScriptGraphValidationException e) {
-      log.error("Script {} has invalid graph: {}", scriptId, e.errors());
-      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
-    } catch (Throwable t) {
-      log.error("Error resuming script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+    });
   }
 
   @Override
@@ -600,36 +660,38 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
-    try {
-      // Set paused=true in the database to persist the paused state
-      soulFireServer.dsl().transaction(cfg -> {
-        var ctx = DSL.using(cfg);
-        var record = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
-        ctx.update(Tables.SCRIPTS)
-          .set(Tables.SCRIPTS.PAUSED, true)
-          .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .execute();
-      });
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        // Set paused=true in the database to persist the paused state
+        soulFireServer.dsl().transaction(cfg -> {
+          var ctx = DSL.using(cfg);
+          var record = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (record == null || !record.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
+          }
+          ctx.update(Tables.SCRIPTS)
+            .set(Tables.SCRIPTS.PAUSED, true)
+            .set(Tables.SCRIPTS.UPDATED_AT, LocalDateTime.now(ZoneOffset.UTC))
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .execute();
+        });
 
-      // Stop the script if it's running
-      stopScriptInternal(scriptId);
+        // Stop the script if it's running
+        stopScriptInternal(scriptId);
 
-      log.info("Script {} paused", scriptId);
-      responseObserver.onNext(DeactivateScriptResponse.newBuilder().build());
-      responseObserver.onCompleted();
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (Throwable t) {
-      log.error("Error pausing script", t);
-      throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
-    }
+        log.info("Script {} paused", scriptId);
+        responseObserver.onNext(DeactivateScriptResponse.newBuilder().build());
+        responseObserver.onCompleted();
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (Throwable t) {
+        log.error("Error pausing script", t);
+        throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
+      }
+    });
   }
 
   @Override
@@ -641,7 +703,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
 
     try {
       // Verify script exists
-      soulFireServer.dsl().transaction(cfg -> {
+      var paused = soulFireServer.dsl().transactionResult(cfg -> {
         var ctx = DSL.using(cfg);
         var record = ctx.selectFrom(Tables.SCRIPTS)
           .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
@@ -650,16 +712,18 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           throw Status.NOT_FOUND.withDescription(
             "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
         }
+        return record.getPaused();
       });
 
       var activationState = activeScripts.get(scriptId);
       var statusBuilder = ScriptStatus.newBuilder()
         .setScriptId(scriptId.toString())
+        .setPaused(paused)
         .setIsActive(activationState != null)
         .setActivationCount(activationState != null ? activationState.activationCount() : 0);
 
-      if (activationState != null && activationState.activeNodeId() != null) {
-        statusBuilder.setActiveNodeId(activationState.activeNodeId());
+      if (activationState != null) {
+        activationState.context().activeNodeId().ifPresent(statusBuilder::setActiveNodeId);
       }
 
       responseObserver.onNext(GetScriptStatusResponse.newBuilder()
@@ -957,35 +1021,42 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   // Helper Methods
   // ============================================================================
 
+  private ScriptNodeData nodeToData(ScriptNode node) {
+    return new ScriptNodeData(
+      node.getId(),
+      node.getType(),
+      new PositionData(node.getPosition().getX(), node.getPosition().getY()),
+      node.getDataMap().entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, entry -> valueToJsonElement(entry.getValue()))),
+      node.getMuted(),
+      node.getCollapsed(),
+      node.hasWidth() ? node.getWidth() : null,
+      node.hasHeight() ? node.getHeight() : null,
+      node.getContainedNodesList(),
+      node.getLabel(),
+      node.hasResolvedType() ? node.getResolvedTypeValue() : null,
+      node.getParentFrameId()
+    );
+  }
+
+  private ScriptEdgeData edgeToData(ScriptEdge edge) {
+    return new ScriptEdgeData(
+      edge.getId(),
+      edge.getSource(),
+      edge.getSourceHandle(),
+      edge.getTarget(),
+      edge.getTargetHandle(),
+      edge.getEdgeType().name(),
+      edge.hasOrder() ? edge.getOrder() : null
+    );
+  }
+
   private String nodesToJson(List<ScriptNode> nodes) {
-    var nodeDataList = nodes.stream()
-      .map(node -> new ScriptNodeData(
-        node.getId(),
-        node.getType(),
-        new PositionData(node.getPosition().getX(), node.getPosition().getY()),
-        node.getDataMap().entrySet().stream()
-          .collect(Collectors.toMap(
-            Map.Entry::getKey,
-            e -> valueToJsonElement(e.getValue())
-          ))
-      ))
-      .toList();
-    return GsonInstance.GSON.toJson(nodeDataList);
+    return GsonInstance.CONFIG_GSON.toJson(nodes.stream().map(this::nodeToData).toList());
   }
 
   private String edgesToJson(List<ScriptEdge> edges) {
-    var edgeDataList = edges.stream()
-      .map(edge -> new ScriptEdgeData(
-        edge.getId(),
-        edge.getSource(),
-        edge.getSourceHandle(),
-        edge.getTarget(),
-        edge.getTargetHandle(),
-        edge.getEdgeType().name(),
-        edge.hasOrder() ? edge.getOrder() : null
-      ))
-      .toList();
-    return GsonInstance.GSON.toJson(edgeDataList);
+    return GsonInstance.GSON.toJson(edges.stream().map(this::edgeToData).toList());
   }
 
   private String quotasToJson(ScriptQuotas quotas) {
@@ -1023,7 +1094,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .setPosition(Position.newBuilder()
             .setX(data.position().x())
             .setY(data.position().y())
-            .build());
+            .build())
+          .setMuted(data.muted())
+          .setCollapsed(data.collapsed())
+          .addAllContainedNodes(data.containedNodes())
+          .setLabel(data.label())
+          .setParentFrameId(data.parentFrameId());
+        if (data.width() != null) {
+          nodeBuilder.setWidth(data.width());
+        }
+        if (data.height() != null) {
+          nodeBuilder.setHeight(data.height());
+        }
+        if (data.resolvedType() != null) {
+          nodeBuilder.setResolvedTypeValue(data.resolvedType());
+        }
 
         if (data.data() != null) {
           data.data().forEach((key, jsonElement) ->
@@ -1049,14 +1134,17 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           log.warn("Unknown edge type '{}' in edge {}, defaulting to EDGE_TYPE_DATA", data.edgeType(), data.id());
           edgeType = EdgeType.EDGE_TYPE_DATA;
         }
-        return ScriptEdge.newBuilder()
+        var edgeBuilder = ScriptEdge.newBuilder()
           .setId(data.id())
           .setSource(data.source())
           .setSourceHandle(data.sourceHandle())
           .setTarget(data.target())
           .setTargetHandle(data.targetHandle())
-          .setEdgeType(edgeType)
-          .build();
+          .setEdgeType(edgeType);
+        if (data.order() != null) {
+          edgeBuilder.setOrder(data.order());
+        }
+        return edgeBuilder.build();
       })
       .toList();
   }
@@ -1106,7 +1194,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   private Value jsonElementToValue(JsonElement element) {
     try {
       var builder = Value.newBuilder();
-      JsonFormat.parser().merge(GsonInstance.GSON.toJson(element), builder);
+      JsonFormat.parser().merge(GsonInstance.CONFIG_GSON.toJson(element), builder);
       return builder.build();
     } catch (InvalidProtocolBufferException e) {
       throw new RuntimeException(e);
@@ -1290,7 +1378,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           } else {
             newData.remove("parentGroupId");
           }
-          updatedNodes.add(new ScriptNodeData(n.id(), n.type(), n.position(), newData));
+          updatedNodes.add(n.withData(newData));
         } else {
           updatedNodes.add(n);
         }
@@ -1336,7 +1424,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             defaultInputs.put(entry.getKey(), jsonElementToObject(entry.getValue()));
           }
         }
-        builder.addNode(node.id(), node.type(), defaultInputs);
+        builder.addNode(new ScriptGraph.GraphNode(node.id(), node.type(), defaultInputs, node.muted()));
       }
     }
 
@@ -1394,45 +1482,58 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     subscribers.sendTo(observer, event);
   }
 
+  private ScriptEvent nodeStartedEvent(String nodeId, long executionId) {
+    var event = NodeStarted.newBuilder().setNodeId(nodeId)
+      .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
+    if (executionId != 0) event.setExecutionId(executionId);
+    return ScriptEvent.newBuilder().setNodeStarted(event).build();
+  }
+
+  private ScriptEvent nodeCompletedEvent(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+    var event = NodeCompleted.newBuilder().setNodeId(nodeId)
+      .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).setExecutionTimeNanos(executionTimeNanos);
+    outputs.forEach((key, value) -> event.putOutputs(key, nodeValueToProtoValue(value)));
+    if (executionId != 0) event.setExecutionId(executionId);
+    return ScriptEvent.newBuilder().setNodeCompleted(event).build();
+  }
+
+  private ScriptEvent nodeErrorEvent(String nodeId, String error, long executionId) {
+    var event = NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
+      .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()));
+    if (executionId != 0) event.setExecutionId(executionId);
+    return ScriptEvent.newBuilder().setNodeError(event).build();
+  }
+
   private ScriptEventListener createStreamingEventListener(UUID instanceId, UUID scriptId, ScriptEventSubscribers subscribers) {
     return new ScriptEventListener() {
       @Override
-      public void onNodeStarted(String nodeId) {
-        subscribers.send(() -> ScriptEvent.newBuilder()
-          .setNodeStarted(NodeStarted.newBuilder()
-            .setNodeId(nodeId)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .build())
-          .build());
+      public void onNodeStarted(String nodeId) { onNodeStarted(nodeId, 0); }
+
+      @Override
+      public void onNodeStarted(String nodeId, long executionId) {
+        subscribers.send(() -> nodeStartedEvent(nodeId, executionId));
       }
 
       @Override
-      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-        onNodeCompleted(nodeId, outputs, 0);
-      }
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) { onNodeCompleted(nodeId, outputs, 0, 0); }
 
       @Override
       public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-        subscribers.send(() -> {
-          var builder = NodeCompleted.newBuilder()
-            .setNodeId(nodeId)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .setExecutionTimeNanos(executionTimeNanos);
-          outputs.forEach((key, value) -> builder.putOutputs(key, nodeValueToProtoValue(value)));
-          return ScriptEvent.newBuilder().setNodeCompleted(builder.build()).build();
-        });
+        onNodeCompleted(nodeId, outputs, executionTimeNanos, 0);
       }
 
       @Override
-      public void onNodeError(String nodeId, String error) {
+      public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+        subscribers.send(() -> nodeCompletedEvent(nodeId, outputs, executionTimeNanos, executionId));
+      }
+
+      @Override
+      public void onNodeError(String nodeId, String error) { onNodeError(nodeId, error, 0); }
+
+      @Override
+      public void onNodeError(String nodeId, String error, long executionId) {
         logScriptMessage(instanceId, scriptId, "error", error);
-        subscribers.send(() -> ScriptEvent.newBuilder()
-          .setNodeError(NodeError.newBuilder()
-            .setNodeId(nodeId)
-            .setErrorMessage(error)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .build())
-          .build());
+        subscribers.send(() -> nodeErrorEvent(nodeId, error, executionId));
       }
 
       @Override
@@ -1596,26 +1697,8 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     try {
       var responseBuilder = ValidateScriptResponse.newBuilder();
 
-      List<ScriptNodeData> rawNodes = request.getNodesList().stream()
-        .map(node -> new ScriptNodeData(
-          node.getId(),
-          node.getType(),
-          new PositionData(node.getPosition().getX(), node.getPosition().getY()),
-          node.getDataMap().entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> valueToJsonElement(e.getValue())))
-        ))
-        .toList();
-      List<ScriptEdgeData> rawEdges = request.getEdgesList().stream()
-        .map(edge -> new ScriptEdgeData(
-          edge.getId(),
-          edge.getSource(),
-          edge.getSourceHandle(),
-          edge.getTarget(),
-          edge.getTargetHandle(),
-          edge.getEdgeType().name(),
-          edge.hasOrder() ? edge.getOrder() : null
-        ))
-        .toList();
+      var rawNodes = request.getNodesList().stream().map(this::nodeToData).toList();
+      var rawEdges = request.getEdgesList().stream().map(this::edgeToData).toList();
 
       var flattened = flattenLayoutNodes(new ArrayList<>(rawNodes), new ArrayList<>(rawEdges));
       var builder = ScriptGraph.builder("validate", "Validation");
@@ -1627,7 +1710,7 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
             defaultInputs.put(entry.getKey(), jsonElementToObject(entry.getValue()));
           }
         }
-        builder.addNode(node.id(), node.type(), defaultInputs);
+        builder.addNode(new ScriptGraph.GraphNode(node.id(), node.type(), defaultInputs, node.muted()));
       }
 
       for (var edge : flattened.edges()) {
@@ -1695,152 +1778,206 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(
       PermissionContext.instance(InstancePermission.EXECUTE_SCRIPTS, instanceId));
 
-    try {
-      var scriptId = UUID.fromString(request.getScriptId());
-      var triggerNodeId = request.getTriggerNodeId();
+    withInstanceLifecycle(instanceId, () -> {
+      try {
+        var scriptId = UUID.fromString(request.getScriptId());
+        var triggerNodeId = request.getTriggerNodeId();
 
-      var record = soulFireServer.dsl().transactionResult(cfg -> {
-        var ctx = DSL.using(cfg);
-        var r = ctx.selectFrom(Tables.SCRIPTS)
-          .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
-          .fetchOne();
-        if (r == null || !r.getInstanceId().equals(instanceId.toString())) {
-          throw Status.NOT_FOUND.withDescription(
-            "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
-        }
-        return r;
-      });
-
-      var graph = buildScriptGraph(record);
-
-      if (!graph.findTriggerNodes().contains(triggerNodeId)) {
-        throw Status.INVALID_ARGUMENT.withDescription("Select a trigger node from the saved script").asRuntimeException();
-      }
-      // Build mock inputs from proto values
-      var mockInputs = new HashMap<String, NodeValue>();
-      for (var entry : request.getMockInputsMap().entrySet()) {
-        mockInputs.put(entry.getKey(), protoValueToNodeValue(entry.getValue()));
-      }
-
-      var observer = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
-      class DryRunListener implements ScriptEventListener {
-        private boolean closed;
-        private boolean failed;
-        private boolean executionFinished;
-        private boolean statsReceived;
-
-        private synchronized void send(ScriptEvent event) {
-          if (!closed && !observer.isCancelled()) {
-            observer.onNext(event);
+        var record = soulFireServer.dsl().transactionResult(cfg -> {
+          var ctx = DSL.using(cfg);
+          var r = ctx.selectFrom(Tables.SCRIPTS)
+            .where(Tables.SCRIPTS.ID.eq(scriptId.toString()))
+            .fetchOne();
+          if (r == null || !r.getInstanceId().equals(instanceId.toString())) {
+            throw Status.NOT_FOUND.withDescription(
+              "Script '%s' not found in instance '%s'".formatted(scriptId, instanceId)).asRuntimeException();
           }
+          return r;
+        });
+
+        var graph = buildScriptGraph(record);
+
+        if (!graph.findTriggerNodes().contains(triggerNodeId)) {
+          throw Status.INVALID_ARGUMENT.withDescription("Select a trigger node from the saved script").asRuntimeException();
+        }
+        // Build mock inputs from proto values
+        var mockInputs = new HashMap<String, NodeValue>();
+        for (var entry : request.getMockInputsMap().entrySet()) {
+          mockInputs.put(entry.getKey(), protoValueToNodeValue(entry.getValue()));
         }
 
-        private synchronized void completeIfReady() {
-          if (closed || !executionFinished || !statsReceived || observer.isCancelled()) {
+        var observer = (ServerCallStreamObserver<ScriptEvent>) responseObserver;
+        var run = new DryRunExecution(instanceId, scriptId, observer,
+          ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson())));
+        activeDryRuns.add(run);
+        try {
+          // The script or its instance can disappear while the saved graph is being loaded.
+          if (soulFireServer.isInstanceDeleting(instanceId)
+            || !soulFireServer.dsl().fetchExists(DSL.selectOne().from(Tables.SCRIPTS)
+              .join(Tables.INSTANCES).on(Tables.SCRIPTS.INSTANCE_ID.eq(Tables.INSTANCES.ID))
+              .where(Tables.SCRIPTS.ID.eq(scriptId.toString())).and(Tables.INSTANCES.ID.eq(instanceId.toString())))) {
+            run.context.cancel();
             return;
           }
-          send(ScriptEvent.newBuilder().setScriptCompleted(ScriptCompleted.newBuilder()
-            .setScriptId(scriptId.toString()).setSuccess(!failed)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))).build());
-          closed = true;
-          observer.onCompleted();
-        }
-
-        synchronized void finish() {
-          executionFinished = true;
-          completeIfReady();
-        }
-
-        synchronized void fail(Throwable error) {
-          if (!closed && !observer.isCancelled()) {
-            closed = true;
-            log.error("Error in dry run execution", error);
-            observer.onError(Status.INTERNAL.withDescription(error.getMessage()).withCause(error).asRuntimeException());
+          observer.setOnCancelHandler(() -> {
+            run.close();
+            run.context.cancel();
+          });
+          if (observer.isCancelled() || run.isClosed()) {
+            run.close();
+            run.context.cancel();
+            return;
           }
+          var engine = new ReactiveScriptEngine();
+          run.context.setExecution(engine.executeDryRun(graph, triggerNodeId, run.context, mockInputs)
+            .subscribe(_ -> {}, run::fail, run::finish));
+        } catch (RuntimeException | Error failure) {
+          run.close();
+          run.context.cancel();
+          throw failure;
         }
-
-        synchronized void close() {
-          closed = true;
-        }
-
-        @Override
-        public void onNodeStarted(String nodeId) {
-          send(ScriptEvent.newBuilder()
-            .setNodeStarted(NodeStarted.newBuilder().setNodeId(nodeId)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-            .build());
-        }
-
-        @Override
-        public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) {
-          onNodeCompleted(nodeId, outputs, 0);
-        }
-
-        @Override
-        public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
-          var completed = NodeCompleted.newBuilder().setNodeId(nodeId)
-            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))
-            .setExecutionTimeNanos(executionTimeNanos);
-          outputs.forEach((key, value) -> completed.putOutputs(key, nodeValueToProtoValue(value)));
-          send(ScriptEvent.newBuilder().setNodeCompleted(completed).build());
-        }
-
-        @Override
-        public synchronized void onNodeError(String nodeId, String error) {
-          failed = true;
-          send(ScriptEvent.newBuilder()
-            .setNodeError(NodeError.newBuilder().setNodeId(nodeId).setErrorMessage(error)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-            .build());
-        }
-
-        @Override
-        public void onLog(String level, String message) {
-          send(ScriptEvent.newBuilder()
-            .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message)
-              .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
-            .build());
-        }
-
-        @Override
-        public synchronized void onScriptCompleted(boolean success) {
-          failed |= !success;
-        }
-
-        @Override
-        public void onScriptCancelled() {}
-
-        @Override
-        public synchronized void onExecutionStats(long nodeCount, long maxCount) {
-          send(ScriptEvent.newBuilder().setExecutionStats(ExecutionStats.newBuilder()
-            .setNodeCount(nodeCount).setMaxCount(maxCount)).build());
-          statsReceived = true;
-          completeIfReady();
-        }
+      } catch (StatusRuntimeException e) {
+        throw e;
+      } catch (ScriptGraphValidationException e) {
+        throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+      } catch (Exception e) {
+        log.error("Error in dry run", e);
+        throw Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
       }
-      var eventListener = new DryRunListener();
+    });
+  }
 
-      // Execute using dry-run context (no InstanceManager)
-      var context = new ReactiveScriptContext(eventListener, ScriptQuotasConfig.fromProto(jsonToQuotas(record.getQuotasJson())));
-      var engine = new ReactiveScriptEngine();
-      observer.setOnCancelHandler(() -> {
-        eventListener.close();
-        context.cancel();
-      });
+  private final class DryRunExecution implements ScriptEventListener {
+    private final UUID instanceId;
+    private final UUID scriptId;
+    private final ServerCallStreamObserver<ScriptEvent> observer;
+    private final ReactiveScriptContext context;
+    private boolean closed;
+    private boolean failed;
+    private boolean executionFinished;
+    private boolean statsReceived;
+
+    private DryRunExecution(UUID instanceId, UUID scriptId, ServerCallStreamObserver<ScriptEvent> observer,
+                            ScriptQuotasConfig quotas) {
+      this.instanceId = instanceId;
+      this.scriptId = scriptId;
+      this.observer = observer;
+      this.context = new ReactiveScriptContext(this, quotas);
+    }
+
+    private synchronized void send(ScriptEvent event) {
+      if (closed) return;
       if (observer.isCancelled()) {
-        eventListener.close();
+        close();
         context.cancel();
         return;
       }
-      context.setExecution(engine.executeDryRun(graph, triggerNodeId, context, mockInputs)
-        .subscribe(_ -> {}, eventListener::fail, eventListener::finish));
-    } catch (StatusRuntimeException e) {
-      throw e;
-    } catch (ScriptGraphValidationException e) {
-      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
-    } catch (Exception e) {
-      log.error("Error in dry run", e);
-      throw Status.INTERNAL.withDescription(e.getMessage()).withCause(e).asRuntimeException();
+      try {
+        observer.onNext(event);
+      } catch (RuntimeException error) {
+        close();
+        context.cancel();
+        log.debug("Dry-run stream closed during execution", error);
+      }
+    }
+
+    private synchronized void completeIfReady() {
+      if (closed || !executionFinished || !statsReceived) {
+        return;
+      }
+      complete(!failed);
+    }
+
+    synchronized void finish() {
+      executionFinished = true;
+      completeIfReady();
+    }
+
+    synchronized void fail(Throwable error) {
+      if (closed) return;
+      close();
+      if (!observer.isCancelled()) {
+        log.error("Error in dry run execution", error);
+        observer.onError(Status.INTERNAL.withDescription(error.getMessage()).withCause(error).asRuntimeException());
+      }
+    }
+
+    synchronized void close() {
+      closed = true;
+      activeDryRuns.remove(this);
+    }
+
+    synchronized boolean isClosed() {
+      return closed;
+    }
+
+    private synchronized void complete(boolean success) {
+      if (closed) return;
+      close();
+      if (!observer.isCancelled()) {
+        try {
+          observer.onNext(ScriptEvent.newBuilder().setScriptCompleted(ScriptCompleted.newBuilder()
+            .setScriptId(scriptId.toString()).setSuccess(success)
+            .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis()))).build());
+          observer.onCompleted();
+        } catch (RuntimeException error) {
+          log.debug("Dry-run stream closed during completion", error);
+        }
+      }
+    }
+
+    @Override
+    public void onNodeStarted(String nodeId) { onNodeStarted(nodeId, 0); }
+
+    @Override
+    public void onNodeStarted(String nodeId, long executionId) { send(nodeStartedEvent(nodeId, executionId)); }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs) { onNodeCompleted(nodeId, outputs, 0, 0); }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos) {
+      onNodeCompleted(nodeId, outputs, executionTimeNanos, 0);
+    }
+
+    @Override
+    public void onNodeCompleted(String nodeId, Map<String, NodeValue> outputs, long executionTimeNanos, long executionId) {
+      send(nodeCompletedEvent(nodeId, outputs, executionTimeNanos, executionId));
+    }
+
+    @Override
+    public void onNodeError(String nodeId, String error) { onNodeError(nodeId, error, 0); }
+
+    @Override
+    public synchronized void onNodeError(String nodeId, String error, long executionId) {
+      failed = true;
+      send(nodeErrorEvent(nodeId, error, executionId));
+    }
+
+    @Override
+    public void onLog(String level, String message) {
+      send(ScriptEvent.newBuilder()
+        .setScriptLog(ScriptLog.newBuilder().setLevel(level).setMessage(message)
+          .setTimestamp(Timestamps.fromMillis(System.currentTimeMillis())).build())
+        .build());
+    }
+
+    @Override
+    public synchronized void onScriptCompleted(boolean success) {
+      failed |= !success;
+    }
+
+    @Override
+    public void onScriptCancelled() {
+      complete(false);
+    }
+
+    @Override
+    public synchronized void onExecutionStats(long nodeCount, long maxCount) {
+      send(ScriptEvent.newBuilder().setExecutionStats(ExecutionStats.newBuilder()
+        .setNodeCount(nodeCount).setMaxCount(maxCount)).build());
+      statsReceived = true;
+      completeIfReady();
     }
   }
 

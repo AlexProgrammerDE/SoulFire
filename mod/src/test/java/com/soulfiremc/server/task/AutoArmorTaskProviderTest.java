@@ -37,6 +37,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -71,6 +72,26 @@ final class AutoArmorTaskProviderTest {
     var upgrade = AutoArmorTaskProvider.findUpgrade(inventory, player).orElseThrow();
     assertEquals(10, upgrade.sourceSlot());
     assertEquals(6, upgrade.equipmentSlot());
+  }
+
+  @Test
+  void confirmsEquippedArmorThatTookDamageDuringTheSwap() {
+    var expected = armor(EquipmentSlot.HEAD, EquipmentSlotGroup.HEAD, 3);
+    var equipped = expected.copy();
+    equipped.set(DataComponents.DAMAGE, 1);
+
+    assertTrue(AutoArmorTaskProvider.matchesEquippedArmor(equipped, expected));
+    assertEquals(1, equipped.get(DataComponents.DAMAGE));
+    assertFalse(expected.has(DataComponents.DAMAGE));
+  }
+
+  @Test
+  void doesNotConfirmDifferentArmorComponents() {
+    var expected = armor(EquipmentSlot.HEAD, EquipmentSlotGroup.HEAD, 3);
+    var unchanged = armor(EquipmentSlot.HEAD, EquipmentSlotGroup.HEAD, 1);
+
+    assertFalse(AutoArmorTaskProvider.matchesEquippedArmor(unchanged, expected));
+    assertFalse(AutoArmorTaskProvider.matchesEquippedArmor(ItemStack.EMPTY, expected));
   }
 
   private static InventoryMenu inventory(Player player) {

@@ -77,7 +77,7 @@ public final class RPCServer {
     this.host = host;
     this.port = port;
     this.scriptService = new ScriptServiceImpl(soulFireServer);
-    this.mcpService = new MCPService(soulFireServer);
+    this.mcpService = new MCPService(soulFireServer, scriptService);
     this.openApiService = new OpenApiService(soulFireServer);
 
     var meterRegistry = PrometheusMeterRegistries.defaultRegistry();

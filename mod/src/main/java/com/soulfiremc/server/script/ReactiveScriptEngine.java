@@ -239,8 +239,6 @@ public final class ReactiveScriptEngine {
           .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toDebugString())));
       }
 
-      context.eventListener().onNodeStarted(triggerNodeId);
-
       var nodeRuntime = createNodeRuntime(graph, triggerNodeId, context, run, ExecutionContext.empty());
 
       // Mark the trigger as already triggered so that downstream DATA edges
@@ -249,7 +247,10 @@ public final class ReactiveScriptEngine {
       // cause them to be misidentified as data-only nodes).
       run.markDataNodeTriggered(triggerNodeId);
 
-      return Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs))
+      return context.trackNode(triggerNodeId, executionId -> Mono.defer(() -> {
+        context.eventListener().onNodeStarted(triggerNodeId, executionId);
+        return nodeImpl.executeReactive(nodeRuntime, inputs);
+      })
         .map(outputs -> {
           if (!overrideTriggerOutputs || eventInputs.isEmpty()) {
             return outputs;
@@ -258,20 +259,24 @@ public final class ReactiveScriptEngine {
           mocked.putAll(eventInputs);
           return mocked;
         })
-        .doOnNext(outputs -> {
+        .doOnSuccess(outputs -> {
+          if (outputs == null) {
+            context.eventListener().onNodeCompleted(triggerNodeId, Map.of(), 0, executionId);
+            return;
+          }
           if (log.isDebugEnabled()) {
             log.debug("Trigger {} outputs: {}", nodeDesc, outputs.entrySet().stream()
               .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toDebugString())));
           }
           run.publishNodeOutputs(triggerNodeId, outputs);
-          context.eventListener().onNodeCompleted(triggerNodeId, outputs);
+          context.eventListener().onNodeCompleted(triggerNodeId, outputs, 0, executionId);
         })
         .doOnError(e -> {
           var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
           log.error("Error executing trigger node {}: {}", nodeDesc, message, e);
-          context.eventListener().onNodeError(triggerNodeId, nodeDesc + ": " + message);
+          context.eventListener().onNodeError(triggerNodeId, nodeDesc + ": " + message, executionId);
         })
-        .onErrorResume(_ -> Mono.empty())
+        .onErrorResume(_ -> Mono.empty()))
         .flatMap(outputs -> {
           var execPortIds = metadata.execOutputPortIds();
           var contextOutputs = new HashMap<>(outputs);
@@ -578,92 +583,98 @@ public final class ReactiveScriptEngine {
     ExecutionRun run,
     ExecutionContext execContext
   ) {
-    context.eventListener().onNodeStarted(nodeId);
+    return context.trackNode(nodeId, executionId -> Mono.defer(() -> {
+      context.eventListener().onNodeStarted(nodeId, executionId);
 
-    var nodeDesc = describeNode(nodeId, graph);
-    var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
+      var nodeDesc = describeNode(nodeId, graph);
+      var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, execContext);
 
-    // Item 9: Input contract validation
-    for (var port : metadata.inputs()) {
-      if (port.required() && port.type() != PortType.EXEC && !inputs.containsKey(port.id())) {
-        context.eventListener().onNodeError(nodeId, nodeDesc + ": Missing required input: " + port.id());
-        return Mono.empty();
-      }
-    }
-
-    // Item 11: Runtime type assertions on DATA edge inputs
-    for (var edge : graph.getIncomingDataEdges(nodeId)) {
-      var value = inputs.get(edge.targetHandle());
-      if (value == null) {
-        continue;
-      }
-      var targetNode = graph.getNode(nodeId);
-      if (targetNode == null || !NodeRegistry.isRegistered(targetNode.type())) {
-        continue;
-      }
-      var portMeta = NodeRegistry.getMetadata(targetNode.type());
-      var portDef = portMeta.inputs().stream()
-        .filter(p -> p.id().equals(edge.targetHandle())).findFirst();
-      if (portDef.isPresent()) {
-        var conversion = NodeValueConversion.convert(value, portDef.get().type());
-        if (!conversion.success()) {
-          context.eventListener().onLog("warn", "Type mismatch at runtime: port '" + edge.targetHandle()
-            + "' expected " + portDef.get().type() + ", got " + NodeValueTypeChecker.describeActualType(value)
-            + " (" + conversion.failureReason() + ")");
+      // Item 9: Input contract validation
+      for (var port : metadata.inputs()) {
+        if (port.required() && port.type() != PortType.EXEC && !inputs.containsKey(port.id())) {
+          context.eventListener().onNodeError(nodeId, nodeDesc + ": Missing required input: " + port.id(), executionId);
+          return Mono.empty();
         }
       }
-    }
 
-    var startNanos = System.nanoTime();
-    var nodeMono = Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs));
-    // Add per-node timeout for async execution (skip for tick-synchronous to avoid interrupting tick thread)
-    // Duration.ZERO means timeouts are disabled
-    var nodeTimeout = context.quotas().nodeExecutionTimeout();
-    if (!run.isTickSynchronous() && !nodeTimeout.isZero()) {
-      nodeMono = nodeMono.timeout(nodeTimeout);
-    }
-    return nodeMono
-      .doOnNext(outputs -> {
-        var executionTimeNanos = System.nanoTime() - startNanos;
-        // Item 10: Output contract validation
-        for (var port : metadata.outputs()) {
-          if (port.type() != PortType.EXEC) {
-            var hasOutgoingEdge = graph.edges().stream().anyMatch(e ->
-              e.edgeType() == ScriptGraph.EdgeType.DATA
-                && e.sourceNodeId().equals(nodeId)
-                && e.sourceHandle().equals(port.id()));
-            if (hasOutgoingEdge && !outputs.containsKey(port.id())) {
-              context.eventListener().onLog("warn",
-                "Node did not produce expected output: " + port.id());
-            }
+      // Item 11: Runtime type assertions on DATA edge inputs
+      for (var edge : graph.getIncomingDataEdges(nodeId)) {
+        var value = inputs.get(edge.targetHandle());
+        if (value == null) {
+          continue;
+        }
+        var targetNode = graph.getNode(nodeId);
+        if (targetNode == null || !NodeRegistry.isRegistered(targetNode.type())) {
+          continue;
+        }
+        var portMeta = NodeRegistry.getMetadata(targetNode.type());
+        var portDef = portMeta.inputs().stream()
+          .filter(p -> p.id().equals(edge.targetHandle())).findFirst();
+        if (portDef.isPresent()) {
+          var conversion = NodeValueConversion.convert(value, portDef.get().type());
+          if (!conversion.success()) {
+            context.eventListener().onLog("warn", "Type mismatch at runtime: port '" + edge.targetHandle()
+              + "' expected " + portDef.get().type() + ", got " + NodeValueTypeChecker.describeActualType(value)
+              + " (" + conversion.failureReason() + ")");
           }
         }
-        run.publishNodeOutputs(nodeId, outputs);
-        context.eventListener().onNodeCompleted(nodeId, outputs, executionTimeNanos);
-      })
-      .doOnError(e -> {
-        var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-        log.error("Error executing node {}: {}", nodeDesc, message, e);
-        context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message);
-      })
-      .onErrorResume(e -> {
-        if (metadata.hasExecErrorPort()) {
-          var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-          return Mono.just(Map.of(
-            StandardPorts.EXEC_ERROR, NodeValue.ofBoolean(true),
-            "success", NodeValue.ofBoolean(false),
-            "errorMessage", NodeValue.ofString(msg != null ? msg : e.getClass().getSimpleName())
-          ));
-        }
-        // No error port — stop this branch
-        return Mono.empty();
-      })
-      .map(outputs -> {
-        var contextOutputs = new HashMap<>(outputs);
-        metadata.execOutputPortIds().forEach(contextOutputs::remove);
-        var newExecContext = execContext.mergeWith(contextOutputs);
-        return new NodeExecResult(nodeId, metadata, outputs, newExecContext);
-      });
+      }
+
+      var startNanos = System.nanoTime();
+      var nodeMono = Mono.defer(() -> nodeImpl.executeReactive(nodeRuntime, inputs));
+      // Add per-node timeout for async execution (skip for tick-synchronous to avoid interrupting tick thread)
+      // Duration.ZERO means timeouts are disabled
+      var nodeTimeout = context.quotas().nodeExecutionTimeout();
+      if (!run.isTickSynchronous() && !nodeTimeout.isZero()) {
+        nodeMono = nodeMono.timeout(nodeTimeout);
+      }
+      return nodeMono
+        .doOnSuccess(outputs -> {
+          var executionTimeNanos = System.nanoTime() - startNanos;
+          if (outputs == null) {
+            context.eventListener().onNodeCompleted(nodeId, Map.of(), executionTimeNanos, executionId);
+            return;
+          }
+          // Item 10: Output contract validation
+          for (var port : metadata.outputs()) {
+            if (port.type() != PortType.EXEC) {
+              var hasOutgoingEdge = graph.edges().stream().anyMatch(e ->
+                e.edgeType() == ScriptGraph.EdgeType.DATA
+                  && e.sourceNodeId().equals(nodeId)
+                  && e.sourceHandle().equals(port.id()));
+              if (hasOutgoingEdge && !outputs.containsKey(port.id())) {
+                context.eventListener().onLog("warn",
+                  "Node did not produce expected output: " + port.id());
+              }
+            }
+          }
+          run.publishNodeOutputs(nodeId, outputs);
+          context.eventListener().onNodeCompleted(nodeId, outputs, executionTimeNanos, executionId);
+        })
+        .doOnError(e -> {
+          var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+          log.error("Error executing node {}: {}", nodeDesc, message, e);
+          context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message, executionId);
+        })
+        .onErrorResume(e -> {
+          if (metadata.hasExecErrorPort()) {
+            var msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            return Mono.just(Map.of(
+              StandardPorts.EXEC_ERROR, NodeValue.ofBoolean(true),
+              "success", NodeValue.ofBoolean(false),
+              "errorMessage", NodeValue.ofString(msg != null ? msg : e.getClass().getSimpleName())
+            ));
+          }
+          // No error port — stop this branch
+          return Mono.empty();
+        })
+        .map(outputs -> {
+          var contextOutputs = new HashMap<>(outputs);
+          metadata.execOutputPortIds().forEach(contextOutputs::remove);
+          var newExecContext = execContext.mergeWith(contextOutputs);
+          return new NodeExecResult(nodeId, metadata, outputs, newExecContext);
+        });
+    }));
   }
 
   /// Eagerly executes a data-only node that is not on any execution path.
@@ -753,20 +764,26 @@ public final class ReactiveScriptEngine {
           return mergeResolvedInputs(baseInputs, singleInputs, multiInputs);
         })
         .flatMap(inputs -> {
-          context.eventListener().onNodeStarted(nodeId);
           var nodeRuntime = createNodeRuntime(graph, nodeId, context, run, ExecutionContext.empty());
-          return nodeImpl.executeReactive(nodeRuntime, inputs)
-            .doOnNext(outputs -> {
+          return context.trackNode(nodeId, executionId -> Mono.defer(() -> {
+            context.eventListener().onNodeStarted(nodeId, executionId);
+            return nodeImpl.executeReactive(nodeRuntime, inputs);
+          })
+            .doOnSuccess(outputs -> {
+              if (outputs == null) {
+                context.eventListener().onNodeCompleted(nodeId, Map.of(), 0, executionId);
+                return;
+              }
               run.publishNodeOutputs(nodeId, outputs);
-              context.eventListener().onNodeCompleted(nodeId, outputs);
+              context.eventListener().onNodeCompleted(nodeId, outputs, 0, executionId);
             })
             .doOnError(e -> {
               var message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
               log.error("Error executing data node {}: {}", nodeDesc, message, e);
-              context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message);
+              context.eventListener().onNodeError(nodeId, nodeDesc + ": " + message, executionId);
               run.publishNodeFailure(nodeId);
             })
-            .onErrorResume(_ -> Mono.empty());
+            .onErrorResume(_ -> Mono.empty()));
         })
         .then();
     }));

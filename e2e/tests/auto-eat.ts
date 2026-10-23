@@ -60,37 +60,31 @@ export default {
             "100 millis",
           );
           yield* rcon(`effect clear ${BOT_NAME} hunger`);
-          yield* rcon(`item replace entity ${BOT_NAME} hotbar.0 with minecraft:${item} 3`);
+          const giveFood = rcon(
+            `item replace entity ${BOT_NAME} hotbar.0 with minecraft:${item} 3`,
+          );
           yield* bot.selectHotbar(0);
-          yield* eventually(
-            bot.inventoryState().pipe(
-              Effect.flatMap((state) =>
-                check(
-                  state.slots.some(
-                    (slot) =>
-                      slot.slot === 36 && slot.itemId === `minecraft:${item}` && slot.count === 3,
+          // Start the handoff task without food so it waits while its POV initializes.
+          if (mode !== "sdk-handoff") {
+            yield* giveFood;
+            yield* eventually(
+              bot.inventoryState().pipe(
+                Effect.flatMap((state) =>
+                  check(
+                    state.slots.some(
+                      (slot) =>
+                        slot.slot === 36 && slot.itemId === `minecraft:${item}` && slot.count === 3,
+                    ),
+                    "The food fixture never reached the bot",
                   ),
-                  "The food fixture never reached the bot",
                 ),
               ),
-            ),
-            "5 seconds",
-          );
+              "5 seconds",
+            );
+          }
           if (mode !== "plugin") {
             const task = yield* bot.tasks.autoEat([], { checkIntervalTicks: 1, maximumMeals: 1 });
             if (mode === "sdk-handoff") {
-              yield* eventually(
-                bot.inventoryState().pipe(
-                  Effect.flatMap((state) =>
-                    check(
-                      state.slots.some((slot) => slot.slot === 36 && slot.count === 2),
-                      "The meal never completed before control takeover",
-                    ),
-                  ),
-                ),
-                "5 seconds",
-                "20 millis",
-              );
               yield* Effect.tryPromise({
                 try: async () => {
                   const abort = new AbortController();
@@ -106,10 +100,25 @@ export default {
                         sessionId,
                         width: 640,
                         height: 480,
-                        maxFps: 5,
+                        maxFps: 15,
                       },
                       { signal: AbortSignal.any([abort.signal, AbortSignal.timeout(10000)]) },
                     )) {
+                      await Effect.runPromise(giveFood);
+                      await Effect.runPromise(
+                        eventually(
+                          bot.inventoryState().pipe(
+                            Effect.flatMap((state) =>
+                              check(
+                                state.slots.some((slot) => slot.slot === 36 && slot.count === 2),
+                                "The meal never completed before control takeover",
+                              ),
+                            ),
+                          ),
+                          "5 seconds",
+                          "20 millis",
+                        ),
+                      );
                       if (
                         (await client.service(BotTaskService).getBotTask({ taskId: task.id }))
                           .status !== BotTaskStatus.RUNNING

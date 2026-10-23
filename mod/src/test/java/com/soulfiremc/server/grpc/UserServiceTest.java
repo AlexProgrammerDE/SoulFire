@@ -22,6 +22,7 @@ import com.soulfiremc.grpc.generated.UpdateSelfUsernameRequest;
 import com.soulfiremc.grpc.generated.UpdateUserRequest;
 import com.soulfiremc.grpc.generated.UserCreateRequest;
 import com.soulfiremc.grpc.generated.UserCreateResponse;
+import com.soulfiremc.grpc.generated.UserDeleteRequest;
 import com.soulfiremc.grpc.generated.UserInfoRequest;
 import com.soulfiremc.grpc.generated.UserInfoResponse;
 import com.soulfiremc.grpc.generated.UserRole;
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.sqlite.SQLiteDataSource;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
@@ -51,15 +53,24 @@ import org.sqlite.SQLiteException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 final class UserServiceTest {
@@ -181,6 +192,43 @@ final class UserServiceTest {
     assertEquals("self-user", stored.getUsername());
     assertEquals("self+tag@sub.example.com", stored.getEmail());
     assertEquals(3, dsl.fetchCount(Tables.USERS));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void deletingAnOwnerWaitsForInstanceCleanupAndRetainsTheUserOnFailure(boolean fail) throws Exception {
+    var instanceId = UUID.randomUUID();
+    dsl.execute("INSERT INTO instances (id, friendly_name, icon, owner_id, settings) VALUES (?, 'owned', 'pickaxe', ?, '{}')",
+      instanceId.toString(), existingId.toString());
+    var otherOwner = UUID.randomUUID();
+    var otherInstance = UUID.randomUUID();
+    dsl.execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, 'other-owner', 'other@example.com', 'USER', CURRENT_TIMESTAMP)",
+      otherOwner.toString());
+    dsl.execute("INSERT INTO instances (id, friendly_name, icon, owner_id, settings) VALUES (?, 'other', 'pickaxe', ?, '{}')",
+      otherInstance.toString(), otherOwner.toString());
+    var auth = mock(AuthSystem.class);
+    when(server.authSystem()).thenReturn(auth);
+    var cleanup = new CompletableFuture<Void>();
+    var started = new CountDownLatch(1);
+    when(server.deleteInstance(instanceId)).thenAnswer(_ -> {
+      started.countDown();
+      return Optional.of(cleanup);
+    });
+    var deletion = CompletableFuture.runAsync(() -> context.run(() -> service.deleteUser(
+      UserDeleteRequest.newBuilder().setId(existingId.toString()).build(), mock())));
+    assertTrue(started.await(5, TimeUnit.SECONDS));
+    assertFalse(deletion.isDone());
+    verify(auth, never()).deleteUser(existingId);
+    if (fail) {
+      cleanup.completeExceptionally(new IllegalStateException("Instance cleanup failed"));
+      assertTrue(assertThrows(CompletionException.class, deletion::join).getCause() instanceof StatusRuntimeException);
+      verify(auth, never()).deleteUser(existingId);
+    } else {
+      cleanup.complete(null);
+      deletion.get(5, TimeUnit.SECONDS);
+      verify(auth, times(1)).deleteUser(existingId);
+    }
+    verify(server, never()).deleteInstance(otherInstance);
   }
 
   @ParameterizedTest

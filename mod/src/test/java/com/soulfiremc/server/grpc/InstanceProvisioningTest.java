@@ -69,6 +69,7 @@ final class InstanceProvisioningTest {
       ownerId.toString(), "owner", "owner@example.com", "ADMIN");
     var user = mock(SoulFireUser.class);
     when(user.getUniqueId()).thenReturn(ownerId);
+    when(user.hasPermission(any())).thenReturn(true);
     var server = mock(SoulFireServer.class);
     when(server.dsl()).thenReturn(dsl);
     when(server.getInstance(any())).thenReturn(Optional.empty());

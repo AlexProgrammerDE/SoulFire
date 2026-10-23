@@ -28,6 +28,9 @@ import com.soulfiremc.mod.util.SFConstants;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractScrollArea;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -37,6 +40,8 @@ import org.jspecify.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -116,7 +121,7 @@ public final class VulkanRenderer {
       minecraft.options.getEffectiveRenderDistance() * 16);
     DEVICE_LOCK.lock();
     try {
-      return ScopedValue.where(INTERACTIVE_VIEWPORT, new Viewport(viewportWidth, viewportHeight)).where(CAPTURE, true).where(REQUEST, options)
+      return ScopedValue.where(INTERACTIVE_VIEWPORT, Viewport.interactive(viewportWidth, viewportHeight)).where(CAPTURE, true).where(REQUEST, options)
         .call(() -> renderWorld(minecraft, options, readback::capture));
     } finally {
       DEVICE_LOCK.unlock();
@@ -148,6 +153,7 @@ public final class VulkanRenderer {
     var oldScale = window.getGuiScale();
     var oldGuiWidth = window.getGuiScaledWidth();
     var oldGuiHeight = window.getGuiScaledHeight();
+    var scrollPositions = INTERACTIVE_VIEWPORT.isBound() ? List.<ScrollPosition>of() : captureScrollPositions(minecraft.gui.screen());
     var oldDistance = minecraft.options.renderDistance().get();
     var renderer = minecraft.gameRenderer;
     var delta = minecraft.getDeltaTracker() == null ? DeltaTracker.ONE : minecraft.getDeltaTracker();
@@ -189,8 +195,29 @@ public final class VulkanRenderer {
       return capture.apply(renderer.mainRenderTarget());
     } finally {
       minecraft.options.renderDistance().set(oldDistance);
-      if (!INTERACTIVE_VIEWPORT.isBound()) resize(minecraft, oldWidth, oldHeight, oldScale, oldGuiWidth, oldGuiHeight);
+      if (!INTERACTIVE_VIEWPORT.isBound()) {
+        resize(minecraft, oldWidth, oldHeight, oldScale, oldGuiWidth, oldGuiHeight);
+        scrollPositions.forEach(ScrollPosition::restore);
+      }
     }
+  }
+
+  private static List<ScrollPosition> captureScrollPositions(@Nullable GuiEventListener root) {
+    if (root == null) return List.of();
+    var positions = new ArrayList<ScrollPosition>();
+    captureScrollPositions(root, positions);
+    return positions;
+  }
+
+  private static void captureScrollPositions(GuiEventListener root, List<ScrollPosition> positions) {
+    if (root instanceof AbstractScrollArea area) positions.add(new ScrollPosition(area, area.scrollAmount()));
+    if (root instanceof ContainerEventHandler container) {
+      for (var child : container.children()) captureScrollPositions(child, positions);
+    }
+  }
+
+  private record ScrollPosition(AbstractScrollArea area, double amount) {
+    void restore() { area.setScrollAmount(amount); }
   }
 
   /// Applies RPC camera overrides without moving or rotating the bot entity.
@@ -217,6 +244,8 @@ public final class VulkanRenderer {
         var oldWidth = window.getWidth();
         var oldHeight = window.getHeight();
         var oldScale = window.getGuiScale();
+        var oldGuiWidth = window.getGuiScaledWidth();
+        var oldGuiHeight = window.getGuiScaledHeight();
         try {
           resizeWindow(minecraft, width, height);
           window.setGuiScale(scale);
@@ -240,6 +269,9 @@ public final class VulkanRenderer {
         } finally {
           resizeWindow(minecraft, oldWidth, oldHeight);
           window.setGuiScale(oldScale);
+          var accessor = (WindowAccessor) (Object) window;
+          accessor.soulfire$setGuiScaledWidth(oldGuiWidth);
+          accessor.soulfire$setGuiScaledHeight(oldGuiHeight);
         }
       });
     } finally {
@@ -435,7 +467,13 @@ public final class VulkanRenderer {
     }
   }
 
-  private record Viewport(int width, int height) {}
+  record Viewport(int width, int height) {
+    /// Keep native menus inside small viewers without increasing encoded pixels.
+    static Viewport interactive(int width, int height) {
+      var scale = Math.max(1, Math.max(320.0 / width, 240.0 / height));
+      return new Viewport((int) Math.ceil(width * scale), (int) Math.ceil(height * scale));
+    }
+  }
 
   public record Trace(long totalNanos, String device) {}
   public record Result(BufferedImage image, @Nullable Trace debugTrace) {}

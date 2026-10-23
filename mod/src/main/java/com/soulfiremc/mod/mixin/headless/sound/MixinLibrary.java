@@ -17,6 +17,9 @@
  */
 package com.soulfiremc.mod.mixin.headless.sound;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.mojang.blaze3d.audio.DeviceList;
 import com.mojang.blaze3d.audio.Library;
 import com.soulfiremc.server.renderer.PovAudioCapture;
 import org.lwjgl.openal.ALC;
@@ -26,16 +29,46 @@ import org.lwjgl.openal.EXTThreadLocalContext;
 import org.lwjgl.openal.SOFTLoopback;
 import org.lwjgl.system.MemoryStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 @Mixin(Library.class)
-public class MixinLibrary {
+public abstract class MixinLibrary {
+  @Shadow private long currentDevice;
+  @Shadow private long context;
+  @Shadow public abstract void cleanup();
+
+  @WrapMethod(method = "init")
+  private void releaseFailedInitialization(String preferred, DeviceList devices, boolean hrtf, Operation<Void> original) {
+    try {
+      original.call(preferred, devices, hrtf);
+    } catch (RuntimeException | Error failure) {
+      try {
+        if (context != 0) cleanup();
+        else if (currentDevice != 0) ALC10.alcCloseDevice(currentDevice);
+      } catch (RuntimeException | Error cleanupFailure) {
+        failure.addSuppressed(cleanupFailure);
+      } finally {
+        currentDevice = 0;
+        context = 0;
+      }
+      throw failure;
+    }
+  }
+
+  @Inject(method = "cleanup", at = @At("RETURN"))
+  private void clearReleasedHandles(CallbackInfo ci) {
+    currentDevice = 0;
+    context = 0;
+  }
+
   @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/Library;openDeviceOrFallback(Ljava/lang/String;Ljava/lang/String;)J"))
   private long openLoopback(String preferred, String fallback) {
     var device = SOFTLoopback.alcLoopbackOpenDeviceSOFT((ByteBuffer) null);
@@ -56,7 +89,6 @@ public class MixinLibrary {
   private ALCCapabilities requireThreadContexts(long device) {
     var capabilities = ALC.createCapabilities(device);
     if (!capabilities.ALC_EXT_thread_local_context) {
-      ALC10.alcCloseDevice(device);
       throw new IllegalStateException("POV audio requires thread-local OpenAL contexts");
     }
     return capabilities;

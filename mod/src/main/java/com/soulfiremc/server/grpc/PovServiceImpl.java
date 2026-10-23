@@ -34,8 +34,11 @@ import com.soulfiremc.grpc.generated.PovServiceGrpc;
 import com.soulfiremc.grpc.generated.PovStreamFeedback;
 import com.soulfiremc.grpc.generated.PovWatchRequest;
 import com.soulfiremc.server.SoulFireServer;
+import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
+import com.soulfiremc.server.bot.PovInputCodes;
 import com.soulfiremc.server.renderer.AdaptivePovQuality;
 import com.soulfiremc.server.renderer.PovAudioStream;
 import com.soulfiremc.server.renderer.PovClientActions;
@@ -47,6 +50,8 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.client.input.KeyEvent;
 import org.reactivestreams.Subscriber;
@@ -61,10 +66,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /// Authenticated live video over gRPC-Web with ordered, session-scoped WebSocket input.
 @RequiredArgsConstructor
 public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
+  private static final Duration CONTROL_LEASE_TTL = Duration.ofSeconds(10);
+
   private final SoulFireServer server;
   private final ConcurrentHashMap<UUID, Session> sessions = new ConcurrentHashMap<>();
 
@@ -79,20 +87,22 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       user.hasPermissionOrThrow(PermissionContext.instance(InstancePermission.CONTROL_BOT_ACTIONS, instanceId));
       var instance = server.getInstance(instanceId).orElseThrow(() -> Status.NOT_FOUND.asRuntimeException());
       var bot = instance.botConnections().get(botId);
-      if (bot == null) throw Status.FAILED_PRECONDITION.withDescription("Bot is offline").asRuntimeException();
+      if (bot == null || bot.isDisconnecting()) throw Status.FAILED_PRECONDITION.withDescription("Bot is offline").asRuntimeException();
       dimensions(request.getWidth(), request.getHeight());
       var leases = instance.botControlLeaseManager();
-      var lease = leases.acquire(botId, user.getUniqueId(), Duration.ofSeconds(10));
+      var lease = leases.acquire(botId, user.getUniqueId(), PovSessionHeartbeat.STARTUP_TIMEOUT.plus(CONTROL_LEASE_TTL));
       var observer = (ServerCallStreamObserver<PovFrame>) response;
+      var requestContext = ServiceRequestContext.current();
+      var channel = requestContext.log().partial().channel();
       var session = new Session(sessionId, bot, user, leases, lease.token(), observer,
-        request.getWidth(), request.getHeight(), request.getMaxFps(), request.getCodecsList());
+        request.getWidth(), request.getHeight(), request.getMaxFps(), request.getCodecsList(), channel == null ? null : channel.closeFuture());
       if (sessions.putIfAbsent(sessionId, session) != null) {
         leases.release(botId, user.getUniqueId(), lease.token());
         throw Status.ALREADY_EXISTS.asRuntimeException();
       }
       // The input heartbeat owns this long-lived stream's timeout.
-      ServiceRequestContext.current().clearRequestTimeout();
-      observer.setOnCancelHandler(session::close);
+      requestContext.clearRequestTimeout();
+      session.registerCancellation();
       session.schedule(0);
     } catch (Throwable error) { response.onError(rpcError(error)); }
   }
@@ -124,7 +134,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     if (request.hasClipboard() && request.getClipboard().length() > 16_384) throw new IllegalArgumentException("Clipboard too large");
     synchronized (session) {
       if (request.getSequence() <= session.inputSequence) throw Status.ABORTED.withDescription("Stale input batch").asRuntimeException();
-      session.leases.renew(session.bot.accountProfileId(), session.owner, session.token, Duration.ofSeconds(10));
+      session.leases.renew(session.bot.accountProfileId(), session.owner, session.token, CONTROL_LEASE_TTL);
       session.bot.minecraft().submit(() -> {
         if (session.closed.get()) return;
 
@@ -162,7 +172,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
       if (request.getMaxFps() != 0) session.maxFps = request.getMaxFps();
       if (request.getRequestKeyFrame()) session.keyFrameRequested.set(true);
       session.feedback = request.hasFeedback() ? request.getFeedback() : null;
-      session.lastInput = System.nanoTime();
+      session.heartbeat.inputReceived(System.nanoTime());
     }
   }
 
@@ -235,15 +245,16 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
   }
 
   private static boolean isPasteKeyPress(PovInputEvent event) {
-    // The wire format uses GLFW keys and modifier bits, not Minecraft's SDL values.
-    return event.getKind() == PovInputEvent.Kind.KEY && event.getCode() == 86
+    // Resolve the logical shortcut before deciding whether to synthesize paste.
+    return event.getKind() == PovInputEvent.Kind.KEY && PovInputCodes.keycode(event.getCode(), event.getKey()) == 'v'
       && event.getAction() != 0 && (event.getModifiers() & 2) != 0;
   }
 
   static void validate(PovInputEvent event) {
     if (!Double.isFinite(event.getX()) || !Double.isFinite(event.getY())
       || Math.abs(event.getX()) > 10_000 || Math.abs(event.getY()) > 10_000
-      || event.getAction() < 0 || event.getAction() > 2 || event.getModifiers() < 0 || event.getModifiers() > 63) {
+      || event.getAction() < 0 || event.getAction() > 2 || event.getModifiers() < 0 || event.getModifiers() > 63
+      || event.getKey().length() > 64 || event.hasKey() && event.getKind() != PovInputEvent.Kind.KEY) {
       throw new IllegalArgumentException("Invalid input values");
     }
     switch (event.getKind()) {
@@ -278,6 +289,11 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private final BotControlLeaseManager leases;
     private final String token;
     private final ServerCallStreamObserver<PovFrame> observer;
+    private final ChannelFuture transportClosed;
+    private final ChannelFutureListener onTransportClosed = _ -> close();
+    private final Consumer<BotDisconnectedEvent> onBotDisconnected;
+    private final Object lifecycleLock = new Object();
+    private final Object observerLock = new Object();
     private final AtomicBoolean rendering = new AtomicBoolean();
     private final AtomicBoolean closed = new AtomicBoolean();
     private final Object encoderLock = new Object();
@@ -292,7 +308,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private final VulkanRenderer.LiveReadback readback = new VulkanRenderer.LiveReadback();
     private AdaptivePovQuality adaptation;
     private volatile PovStreamFeedback feedback;
-    private volatile long lastInput = System.nanoTime();
+    private final PovSessionHeartbeat heartbeat = new PovSessionHeartbeat(startedAt);
     private long inputSequence;
     private final AtomicReference<String> openUrl = new AtomicReference<>();
     private final AtomicReference<ClipboardUpdate> clipboard = new AtomicReference<>();
@@ -306,8 +322,11 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
     private int targetHeight;
 
     private Session(UUID id, BotConnection bot, SoulFireUser user, BotControlLeaseManager leases, String token,
-                    ServerCallStreamObserver<PovFrame> observer, int width, int height, int maxFps, List<String> codecs) {
+                    ServerCallStreamObserver<PovFrame> observer, int width, int height, int maxFps, List<String> codecs,
+                    ChannelFuture transportClosed) {
       this.id = id; this.bot = bot; this.user = user; this.owner = user.getUniqueId(); this.leases = leases; this.token = token;
+      this.transportClosed = transportClosed;
+      this.onBotDisconnected = event -> { if (event.connection() == bot) disconnected(); };
       this.observer = observer; this.width = even(width); this.height = even(height);
       this.format = codecs.contains("av1") ? PovVideoEncoder.Format.AV1 : codecs.contains("h264-high") ? PovVideoEncoder.Format.HIGH : PovVideoEncoder.Format.BASELINE;
       this.maxFps = Math.clamp(maxFps == 0 ? 60 : maxFps, 15, 120);
@@ -315,13 +334,32 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
 
     private void schedule(long delay) { server.scheduler().schedule(this::frame, delay, TimeUnit.NANOSECONDS); }
 
+    private void registerCancellation() {
+      synchronized (lifecycleLock) {
+        SoulFireAPI.registerListener(BotDisconnectedEvent.class, onBotDisconnected);
+        // HTTP/1 defers request cancellation after disconnect to finish responses.
+        // A disconnected POV must release control without that grace period.
+        if (transportClosed != null) transportClosed.addListener(onTransportClosed);
+        observer.setOnCancelHandler(this::close);
+      }
+      // Disconnection may have begun before the listener was registered.
+      if (bot.isDisconnecting()) disconnected();
+    }
+
+    private void disconnected() {
+      if (!close()) return;
+      synchronized (observerLock) {
+        if (!observer.isCancelled()) observer.onError(Status.UNAVAILABLE.withDescription("Bot disconnected").asRuntimeException());
+      }
+    }
+
     private void frame() {
       if (closed.get()) return;
       rendering.set(true);
       var started = System.nanoTime();
       try {
         if (observer.isCancelled()) { close(); return; }
-        if (started - lastInput > 5_000_000_000L) throw Status.DEADLINE_EXCEEDED.withDescription("POV heartbeat timed out").asRuntimeException();
+        heartbeat.check(started);
         if (adaptation == null || targetWidth != width || targetHeight != height || targetFps != maxFps) {
           targetWidth = width; targetHeight = height; targetFps = maxFps;
           var fps = Math.min(maxFps, (int) (530_000_000L / ((long) width * height)) / 5 * 5);
@@ -335,24 +373,29 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
           // A respawn or dimension transfer temporarily removes the world and player.
           if (minecraft.player == null || minecraft.level == null) return null;
           var image = VulkanRenderer.renderInteractive(minecraft, adaptation.width(), adaptation.height(), targetWidth, targetHeight, readback);
-          var cursorShape = switch (minecraft.getWindow().currentCursor.toString()) {
-            case "ibeam" -> PovFrame.CursorShape.TEXT;
-            case "crosshair" -> PovFrame.CursorShape.CROSSHAIR;
-            case "pointing_hand" -> PovFrame.CursorShape.POINTER;
-            case "resize_ns" -> PovFrame.CursorShape.RESIZE_NS;
-            case "resize_ew" -> PovFrame.CursorShape.RESIZE_EW;
-            case "resize_all" -> PovFrame.CursorShape.RESIZE_ALL;
-            case "not_allowed" -> PovFrame.CursorShape.NOT_ALLOWED;
-            default -> PovFrame.CursorShape.ARROW;
-          };
-          var timestamp = (started - startedAt) / 1000;
-          var captured = new Captured(image, readback.pipelined() ? previousScreenOpen : minecraft.gui.screen() != null,
-            readback.pipelined() ? previousCursor : cursorShape, readback.pipelined() ? previousTimestamp : timestamp,
-            audio.capture(minecraft, audioEnabled, (System.nanoTime() - startedAt) / 1000));
-          previousScreenOpen = minecraft.gui.screen() != null;
-          previousCursor = cursorShape;
-          previousTimestamp = timestamp;
-          return image == null ? null : captured;
+          try {
+            var cursorShape = switch (minecraft.getWindow().currentCursor.toString()) {
+              case "ibeam" -> PovFrame.CursorShape.TEXT;
+              case "crosshair" -> PovFrame.CursorShape.CROSSHAIR;
+              case "pointing_hand" -> PovFrame.CursorShape.POINTER;
+              case "resize_ns" -> PovFrame.CursorShape.RESIZE_NS;
+              case "resize_ew" -> PovFrame.CursorShape.RESIZE_EW;
+              case "resize_all" -> PovFrame.CursorShape.RESIZE_ALL;
+              case "not_allowed" -> PovFrame.CursorShape.NOT_ALLOWED;
+              default -> PovFrame.CursorShape.ARROW;
+            };
+            var timestamp = (started - startedAt) / 1000;
+            var captured = new Captured(image, readback.pipelined() ? previousScreenOpen : minecraft.gui.screen() != null,
+              readback.pipelined() ? previousCursor : cursorShape, readback.pipelined() ? previousTimestamp : timestamp,
+              audio.capture(minecraft, audioEnabled, (System.nanoTime() - startedAt) / 1000));
+            previousScreenOpen = minecraft.gui.screen() != null;
+            previousCursor = cursorShape;
+            previousTimestamp = timestamp;
+            return image == null ? null : captured;
+          } catch (Throwable failure) {
+            if (image != null) image.close();
+            throw failure;
+          }
         });
         Captured frame;
         try { frame = captureFuture.get(30, TimeUnit.SECONDS); }
@@ -369,6 +412,7 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
               encoder = null;
               encoder = new PovVideoEncoder(image.width(), image.height(), adaptation.fps(), format);
             }
+            if (closed.get()) return;
             encoder.bitrate(adaptation.bitrate());
             var encoded = encoder.encode(image.pixels(), frame.timestampUs, keyFrameRequested.getAndSet(false));
             var builder = PovFrame.newBuilder()
@@ -381,35 +425,77 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
             if (url != null) builder.setOpenUrl(url);
             var clipboardUpdate = clipboard.getAndSet(null);
             if (clipboardUpdate != null) builder.setClipboard(clipboardUpdate.text).setClipboardSequence(clipboardUpdate.sequence);
-            if (!closed.get() && !observer.isCancelled()) observer.onNext(builder.build());
+            if (!closed.get() && !observer.isCancelled()) {
+              synchronized (this) {
+                var now = System.nanoTime();
+                heartbeat.check(now);
+                // The browser can open its input channel only after receiving this capability.
+                if (frameSequence == 1) leases.renew(bot.accountProfileId(), owner, token, CONTROL_LEASE_TTL);
+                heartbeat.frameSent(now);
+              }
+              synchronized (observerLock) {
+                if (!closed.get() && !observer.isCancelled()) observer.onNext(builder.build());
+              }
+            }
           }
         }
       } catch (Throwable error) {
-        if (!closed.get() && !observer.isCancelled()) observer.onError(rpcError(error));
-        close();
+        if (close()) {
+          synchronized (observerLock) {
+            if (!observer.isCancelled()) observer.onError(rpcError(error));
+          }
+        }
       } finally {
         rendering.set(false);
-        if (closed.get()) bot.minecraft().execute(readback::close);
+        if (closed.get()) {
+          try { closeEncoder(); }
+          finally { releaseReadback(); }
+        }
         if (adaptation != null) adaptation.recordFrame(System.nanoTime() - started);
         if (!closed.get()) schedule(Math.max(0, 1_000_000_000L / (adaptation == null ? 60 : adaptation.fps()) - (System.nanoTime() - started)));
       }
     }
 
-    private void close() {
-      if (!closed.compareAndSet(false, true)) return;
-      sessions.remove(id, this);
-      if (inputChannel != null) inputChannel.close();
-      synchronized (encoderLock) {
-        if (encoder != null) { encoder.close(); encoder = null; }
+    private boolean close() {
+      synchronized (lifecycleLock) {
+        if (!closed.compareAndSet(false, true)) return false;
+        sessions.remove(id, this);
+        SoulFireAPI.unregisterListener(BotDisconnectedEvent.class, onBotDisconnected);
+        if (transportClosed != null) transportClosed.removeListener(onTransportClosed);
       }
+      if (inputChannel != null) inputChannel.close();
+      // Queue input/audio cleanup before another owner can acquire control.
+      // Encoder startup and encoding may block; their frame owns final cleanup.
       bot.minecraft().execute(() -> {
         bot.povInput().capture(false);
         bot.minecraft().keyboardHandler.setClipboard("");
         try { audio.close(); }
-        finally { if (!rendering.get()) readback.close(); }
+        finally { if (!rendering.get()) closeReadback(); }
       });
       try { leases.release(bot.accountProfileId(), owner, token); }
       catch (BotControlLeaseManager.InvalidLeaseException ignored) { /* Expired leases already release ownership. */ }
+      if (!rendering.get()) closeEncoder();
+      return true;
+    }
+
+    private void releaseReadback() {
+      // An encoder may finish after the bot's game loop has stopped.
+      if (bot.isDisconnecting()) closeReadback();
+      else bot.minecraft().execute(this::closeReadback);
+    }
+
+    private void closeReadback() {
+      VulkanRenderer.DEVICE_LOCK.lock();
+      try { readback.close(); }
+      finally { VulkanRenderer.DEVICE_LOCK.unlock(); }
+    }
+
+    private void closeEncoder() {
+      synchronized (encoderLock) {
+        var previous = encoder;
+        encoder = null;
+        if (previous != null) previous.close();
+      }
     }
   }
 

@@ -1,13 +1,18 @@
 import { create } from "@bufbuild/protobuf";
 import { Code, ConnectError, createRouterTransport } from "@connectrpc/connect";
-import { Effect } from "effect";
+import { Cause, Deferred, Effect, Exit, Fiber, Scope } from "effect";
 import { describe, expect, it, vi } from "vitest";
 import { SoulFire as NodeSoulFire } from "../src/node.js";
 import { SoulFire as BunSoulFire } from "../src/bun.js";
 import * as LocalServer from "../src/local-server.js";
 import { SoulFire } from "../src/client.js";
 import { BotLiveService } from "../src/generated/soulfire/bot_live_pb.js";
-import { BotDesiredState, BotService, BotStatusSchema } from "../src/generated/soulfire/bot_pb.js";
+import {
+  type BotStatus,
+  BotDesiredState,
+  BotService,
+  BotStatusSchema,
+} from "../src/generated/soulfire/bot_pb.js";
 import { MinecraftAccountProto_AccountTypeProto } from "../src/generated/soulfire/common_pb.js";
 import {
   BotAuthentication,
@@ -18,17 +23,37 @@ import {
 import { MCAuthService } from "../src/generated/soulfire/mc-auth_pb.js";
 import { SdkService } from "../src/generated/soulfire/sdk_pb.js";
 
-function server(options: { running?: boolean; snapshot?: boolean } = {}) {
+function server(
+  options: {
+    running?: boolean;
+    snapshot?: boolean;
+    cleanupError?: Code;
+    deleteError?: Code;
+    beforeDelete?: () => Promise<void>;
+    beforeStop?: () => Promise<void>;
+  } = {},
+) {
   const instanceRequests: InstanceGetOrCreateRequest[] = [];
   const botRequests: InstanceGetOrCreateBotRequest[] = [];
   const states: BotDesiredState[] = [];
-  const status = create(BotStatusSchema, {
-    profileId: "bot-id",
-    desiredState: options.running ? BotDesiredState.RUNNING : BotDesiredState.STOPPED,
-  });
+  const statuses = new Map<string, BotStatus>();
+  const statusFor = (id: string) => {
+    let status = statuses.get(id);
+    if (!status) {
+      status = create(BotStatusSchema, {
+        profileId: "bot-id",
+        desiredState: options.running ? BotDesiredState.RUNNING : BotDesiredState.STOPPED,
+      });
+      statuses.set(id, status);
+    }
+    return status;
+  };
+  const instanceIds = new Map<string, string>();
   let accounts = 0;
   let logins = 0;
   let subscriptions = 0;
+  const deleted = new Set<string>();
+  let accessRevoked = false;
   const transport = createRouterTransport(({ service }) => {
     service(SdkService, {
       handshake: () => ({
@@ -38,9 +63,21 @@ function server(options: { running?: boolean; snapshot?: boolean } = {}) {
       }),
     });
     service(InstanceService, {
+      deleteInstance: async (request) => {
+        await options.beforeDelete?.();
+        if (options.deleteError !== undefined)
+          throw new ConnectError("Delete rejected", options.deleteError);
+        deleted.add(request.id);
+        return {};
+      },
       getOrCreateInstance: (request) => {
         instanceRequests.push(request);
-        return { id: "instance-id" };
+        let id = instanceIds.get(request.name);
+        if (!id) {
+          id = instanceIds.size === 0 ? "instance-id" : `instance-${instanceIds.size + 1}`;
+          instanceIds.set(request.name, id);
+        }
+        return { id };
       },
       getOrCreateBot: (request) => {
         botRequests.push(request);
@@ -55,15 +92,21 @@ function server(options: { running?: boolean; snapshot?: boolean } = {}) {
       },
     });
     service(BotService, {
-      getBotInfo: () => ({ status }),
-      setBotsDesiredState: (request) => {
+      getBotInfo: (request) => ({ status: statusFor(request.instanceId) }),
+      setBotsDesiredState: async (request) => {
         states.push(request.desiredState);
+        if (request.desiredState === BotDesiredState.STOPPED) await options.beforeStop?.();
+        if (accessRevoked) throw new ConnectError("Access revoked", Code.PermissionDenied);
+        if (deleted.has(request.instanceId))
+          throw new ConnectError("Cleanup rejected", options.cleanupError ?? Code.NotFound);
+        const status = statusFor(request.instanceId);
         status.desiredState = request.desiredState;
         return { bots: [status] };
       },
     });
     service(BotLiveService, {
-      async *watchBotEvents(_, context) {
+      async *watchBotEvents(request, context) {
+        const status = statusFor(request.instanceId);
         subscriptions += 1;
         let active = true;
         const release = () => {
@@ -113,6 +156,9 @@ function server(options: { running?: boolean; snapshot?: boolean } = {}) {
     connect: SoulFire.connect({ baseUrl: "http://localhost", transport }),
     instanceRequests,
     botRequests,
+    revokeAccess: () => {
+      accessRevoked = true;
+    },
     states,
     get logins() {
       return logins;
@@ -216,6 +262,197 @@ describe("named bot setup", () => {
       ),
     );
     expect(fixture.states).toEqual([]);
+    expect(fixture.subscriptions).toBe(0);
+  });
+
+  it.each([Code.NotFound, Code.PermissionDenied, Code.Unavailable])(
+    "releases owned startup after confirmed deletion without hiding explicit stop errors (%s)",
+    async (code) => {
+      const fixture = server({ cleanupError: code });
+      const exit = await Effect.runPromiseExit(
+        Effect.scoped(
+          Effect.gen(function* () {
+            const client = yield* fixture.connect;
+            const instance = yield* client.getOrCreateInstance("farm");
+            const bot = yield* instance.getOrCreateBot("Builder");
+            yield* client.instance(instance.id).delete();
+            const error = yield* bot.stop().pipe(Effect.flip);
+            expect(error).toMatchObject({ _tag: "SoulFireRpcError", code });
+          }),
+        ),
+      );
+      expect(Exit.isSuccess(exit)).toBe(true);
+      expect(fixture.states).toEqual([BotDesiredState.RUNNING, BotDesiredState.STOPPED]);
+      expect(fixture.subscriptions).toBe(0);
+    },
+  );
+
+  it("still reports cleanup permission errors when no deletion succeeded", async () => {
+    const fixture = server();
+    const exit = await Effect.runPromiseExit(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const client = yield* fixture.connect;
+          yield* client.createBot({ server: "localhost:25565", username: "Builder" });
+          fixture.revokeAccess();
+        }),
+      ),
+    );
+    expect(Exit.isFailure(exit)).toBe(true);
+    if (Exit.isFailure(exit))
+      expect(Cause.squash(exit.cause)).toMatchObject({
+        _tag: "SoulFireRpcError",
+        code: Code.PermissionDenied,
+      });
+    expect(fixture.states).toEqual([BotDesiredState.RUNNING, BotDesiredState.STOPPED]);
+    expect(fixture.subscriptions).toBe(0);
+  });
+
+  it("keeps cleanup ownership after a failed instance deletion", async () => {
+    const fixture = server({ deleteError: Code.Unavailable });
+    await Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const client = yield* fixture.connect;
+          const instance = yield* client.getOrCreateInstance("farm");
+          yield* instance.getOrCreateBot("Builder");
+          const error = yield* instance.delete().pipe(Effect.flip);
+          expect(error).toMatchObject({ code: Code.Unavailable });
+        }),
+      ),
+    );
+    expect(fixture.states).toEqual([BotDesiredState.RUNNING, BotDesiredState.STOPPED]);
+    expect(fixture.subscriptions).toBe(0);
+  });
+
+  it("does not release ownership for a different instance", async () => {
+    const fixture = server();
+    await Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const client = yield* fixture.connect;
+          const instance = yield* client.getOrCreateInstance("farm");
+          yield* instance.getOrCreateBot("Builder");
+          const other = yield* client.getOrCreateInstance("other");
+          yield* other.delete();
+        }),
+      ),
+    );
+    expect(fixture.states).toEqual([BotDesiredState.RUNNING, BotDesiredState.STOPPED]);
+    expect(fixture.subscriptions).toBe(0);
+  });
+
+  it.each([undefined, Code.Unavailable])(
+    "settles pending deletion before cleanup (%s)",
+    async (deleteError) => {
+      const entered = Deferred.makeUnsafe<void>();
+      const proceed = Deferred.makeUnsafe<void>();
+      const fixture = server({
+        ...(deleteError === undefined ? {} : { deleteError }),
+        beforeDelete: () =>
+          Effect.runPromise(
+            Effect.gen(function* () {
+              yield* Deferred.succeed(entered, undefined);
+              yield* Deferred.await(proceed);
+            }),
+          ),
+      });
+      await Effect.runPromise(
+        Effect.scoped(
+          Effect.gen(function* () {
+            const client = yield* fixture.connect;
+            const instance = yield* client.getOrCreateInstance("farm");
+            const scope = yield* Effect.acquireRelease(Scope.make(), (value) =>
+              Scope.close(value, Exit.void),
+            );
+            yield* instance.getOrCreateBot("Builder").pipe(Scope.provide(scope));
+            yield* Effect.gen(function* () {
+              const deleting = yield* Effect.forkChild(
+                client.instance(instance.id).delete().pipe(Effect.exit),
+              );
+              yield* Deferred.await(entered);
+              const closing = yield* Effect.forkChild(Scope.close(scope, Exit.void));
+              yield* Effect.sleep("20 millis");
+              expect(closing.pollUnsafe()).toBeUndefined();
+              expect(fixture.states).toEqual([BotDesiredState.RUNNING]);
+              yield* Deferred.succeed(proceed, undefined);
+              const deleted = yield* Fiber.join(deleting);
+              expect(Exit.isSuccess(deleted)).toBe(deleteError === undefined);
+              yield* Fiber.join(closing);
+            }).pipe(Effect.ensuring(Deferred.succeed(proceed, undefined)));
+          }),
+        ),
+      );
+      expect(fixture.states).toEqual(
+        deleteError === undefined
+          ? [BotDesiredState.RUNNING]
+          : [BotDesiredState.RUNNING, BotDesiredState.STOPPED],
+      );
+      expect(fixture.subscriptions).toBe(0);
+    },
+  );
+
+  it("keeps cleanup ownership when instance deletion is interrupted", async () => {
+    const entered = Deferred.makeUnsafe<void>();
+    const proceed = Deferred.makeUnsafe<void>();
+    const fixture = server({
+      beforeDelete: () =>
+        Effect.runPromise(
+          Effect.gen(function* () {
+            yield* Deferred.succeed(entered, undefined);
+            yield* Deferred.await(proceed);
+          }),
+        ),
+    });
+    await Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const client = yield* fixture.connect;
+          const instance = yield* client.getOrCreateInstance("farm");
+          yield* instance.getOrCreateBot("Builder");
+          const deleting = yield* Effect.forkChild(instance.delete());
+          yield* Deferred.await(entered);
+          yield* Fiber.interrupt(deleting);
+        }),
+      ).pipe(Effect.ensuring(Deferred.succeed(proceed, undefined))),
+    );
+    expect(fixture.states).toEqual([BotDesiredState.RUNNING, BotDesiredState.STOPPED]);
+    expect(fixture.subscriptions).toBe(0);
+  });
+
+  it("recognizes confirmed deletion while a cleanup stop is in flight", async () => {
+    const entered = Deferred.makeUnsafe<void>();
+    const proceed = Deferred.makeUnsafe<void>();
+    const fixture = server({
+      cleanupError: Code.PermissionDenied,
+      beforeStop: () =>
+        Effect.runPromise(
+          Effect.gen(function* () {
+            yield* Deferred.succeed(entered, undefined);
+            yield* Deferred.await(proceed);
+          }),
+        ),
+    });
+    await Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const client = yield* fixture.connect;
+          const instance = yield* client.getOrCreateInstance("farm");
+          const scope = yield* Effect.acquireRelease(Scope.make(), (value) =>
+            Scope.close(value, Exit.void),
+          );
+          yield* instance.getOrCreateBot("Builder").pipe(Scope.provide(scope));
+          yield* Effect.gen(function* () {
+            const closing = yield* Effect.forkChild(Scope.close(scope, Exit.void));
+            yield* Deferred.await(entered);
+            yield* client.instance(instance.id).delete();
+            yield* Deferred.succeed(proceed, undefined);
+            yield* Fiber.join(closing);
+          }).pipe(Effect.ensuring(Deferred.succeed(proceed, undefined)));
+        }),
+      ),
+    );
+    expect(fixture.states).toEqual([BotDesiredState.RUNNING, BotDesiredState.STOPPED]);
     expect(fixture.subscriptions).toBe(0);
   });
 
