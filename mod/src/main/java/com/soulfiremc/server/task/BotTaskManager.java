@@ -474,6 +474,10 @@ public final class BotTaskManager implements AutoCloseable {
     ManagedControlTask control
   ) {
     synchronized (this) {
+      // History keeps the result, not the stopped execution and its bot.
+      if (task.control == control) {
+        task.control = null;
+      }
       if (isTerminal(task.status)
         || control.retired.get()
         || control.generation != task.generation) {
@@ -1028,6 +1032,12 @@ public final class BotTaskManager implements AutoCloseable {
         execution.control().onStopped(ControlStopReason.CANCELLED, null);
       } catch (Throwable throwable) {
         log.debug("Failed to stop retired task execution {}", record.taskId, throwable);
+      } finally {
+        synchronized (BotTaskManager.this) {
+          if (record.control == this) {
+            record.control = null;
+          }
+        }
       }
     }
   }
