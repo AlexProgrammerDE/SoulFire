@@ -116,7 +116,7 @@ public final class VulkanRenderer {
       minecraft.options.getEffectiveRenderDistance() * 16);
     DEVICE_LOCK.lock();
     try {
-      return ScopedValue.where(INTERACTIVE_VIEWPORT, new Viewport(viewportWidth, viewportHeight)).where(CAPTURE, true).where(REQUEST, options)
+      return ScopedValue.where(INTERACTIVE_VIEWPORT, Viewport.interactive(viewportWidth, viewportHeight)).where(CAPTURE, true).where(REQUEST, options)
         .call(() -> renderWorld(minecraft, options, readback::capture));
     } finally {
       DEVICE_LOCK.unlock();
@@ -435,7 +435,13 @@ public final class VulkanRenderer {
     }
   }
 
-  private record Viewport(int width, int height) {}
+  record Viewport(int width, int height) {
+    /// Keep native menus inside small viewers without increasing encoded pixels.
+    static Viewport interactive(int width, int height) {
+      var scale = Math.max(1, Math.max(320.0 / width, 240.0 / height));
+      return new Viewport((int) Math.ceil(width * scale), (int) Math.ceil(height * scale));
+    }
+  }
 
   public record Trace(long totalNanos, String device) {}
   public record Result(BufferedImage image, @Nullable Trace debugTrace) {}
