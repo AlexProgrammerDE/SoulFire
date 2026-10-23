@@ -220,6 +220,7 @@ public final class RangedAttackTaskProvider
     private int cooldownTicks;
     private boolean strafeRight;
     private boolean lastObservedAlive;
+    private boolean active;
     private final ShotProgressWatchdog shotProgress =
       new ShotProgressWatchdog(MAX_IN_RANGE_TICKS_WITHOUT_SHOT);
 
@@ -774,8 +775,15 @@ public final class RangedAttackTaskProvider
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       stopUsingItem();
+      context.bot().controlState().resetAll();
       if (path != null) {
         path.onSuspended();
       }
@@ -783,6 +791,7 @@ public final class RangedAttackTaskProvider
 
     @Override
     public void onResumed() {
+      active = true;
       if (path != null) {
         path.onResumed();
       }
@@ -793,12 +802,15 @@ public final class RangedAttackTaskProvider
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      stopUsingItem();
       stopPath(reason, cause);
-      context.bot().controlState().resetAll();
-      var player = context.bot().minecraft().player;
-      if (restoreSelectedSlot && player != null) {
-        player.getInventory().setSelectedSlot(originalSelectedSlot);
+      if (active) {
+        active = false;
+        stopUsingItem();
+        context.bot().controlState().resetAll();
+        var player = context.bot().minecraft().player;
+        if (restoreSelectedSlot && player != null) {
+          player.getInventory().setSelectedSlot(originalSelectedSlot);
+        }
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);

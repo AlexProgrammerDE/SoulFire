@@ -84,6 +84,7 @@ public final class PathExecutor implements ControlTask {
   private int totalMovements;
   private int ticks;
   private int movementNumber = 1;
+  private boolean active;
 
   @Override
   public Set<ControlResource> resources() {
@@ -183,14 +184,14 @@ public final class PathExecutor implements ControlTask {
     awaitingPath = false;
     worldDataWait = null;
     cancelPrefetch();
-    stopActiveBlockBreak();
+    releaseControls();
     worldActionQueue.clear();
-    connection.controlState().resetAll();
     pathCompletionFuture.complete(null);
   }
 
   @Override
   public void onStarted() {
+    active = true;
     submitForPathCalculation(true);
   }
 
@@ -498,12 +499,12 @@ public final class PathExecutor implements ControlTask {
 
   @Override
   public void onSuspended() {
-    stopActiveBlockBreak();
-    connection.controlState().resetAll();
+    releaseControls();
   }
 
   @Override
   public void onResumed() {
+    active = true;
     if (!isDone() && !awaitingPath && worldDataWait == null) {
       log.info("Resuming path execution, recalculating path...");
       recalculatePath();
@@ -519,9 +520,16 @@ public final class PathExecutor implements ControlTask {
     awaitingPath = false;
     worldDataWait = null;
     cancelPrefetch();
-    stopActiveBlockBreak();
+    releaseControls();
     worldActionQueue.clear();
-    connection.controlState().resetAll();
+  }
+
+  private void releaseControls() {
+    if (active) {
+      active = false;
+      stopActiveBlockBreak();
+      connection.controlState().resetAll();
+    }
   }
 
   private void stopActiveBlockBreak() {

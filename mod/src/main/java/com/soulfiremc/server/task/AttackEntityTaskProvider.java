@@ -273,6 +273,7 @@ public final class AttackEntityTaskProvider
     private int attacks;
     private int ticks;
     private boolean lastObservedAlive;
+    private boolean active;
 
     private AttackControl(
       BotTaskContext context,
@@ -702,8 +703,15 @@ public final class AttackEntityTaskProvider
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       lowerShield();
+      context.bot().controlState().resetAll();
       if (path != null) {
         path.onSuspended();
       }
@@ -711,6 +719,7 @@ public final class AttackEntityTaskProvider
 
     @Override
     public void onResumed() {
+      active = true;
       if (path != null) {
         path.onResumed();
       }
@@ -722,11 +731,14 @@ public final class AttackEntityTaskProvider
       @Nullable Throwable cause
     ) {
       stopPath(reason, cause);
-      context.bot().controlState().resetAll();
-      lowerShield();
-      var player = context.bot().minecraft().player;
-      if (restoreSelectedSlot && player != null) {
-        player.getInventory().setSelectedSlot(originalSelectedSlot);
+      if (active) {
+        active = false;
+        context.bot().controlState().resetAll();
+        lowerShield();
+        var player = context.bot().minecraft().player;
+        if (restoreSelectedSlot && player != null) {
+          player.getInventory().setSelectedSlot(originalSelectedSlot);
+        }
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);
