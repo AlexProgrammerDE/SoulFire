@@ -147,7 +147,7 @@ public final class SFItemHelpers {
       1,
       EquipmentSlot.MAINHAND
     );
-    if (damage <= 1) {
+    if (damage <= 1 && !itemStack.has(DataComponents.PIERCING_WEAPON)) {
       return Optional.empty();
     }
     var speed = modifiers.compute(

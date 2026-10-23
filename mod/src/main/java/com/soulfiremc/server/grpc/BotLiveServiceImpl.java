@@ -36,6 +36,7 @@ import com.soulfiremc.server.api.event.bot.BotPostEntityTickEvent;
 import com.soulfiremc.server.api.event.bot.BotPostTickEvent;
 import com.soulfiremc.server.api.event.bot.ChatMessageReceiveEvent;
 import com.soulfiremc.server.bot.BlockPredictionSupport;
+import com.soulfiremc.server.bot.BotAttackSupport;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
 import com.soulfiremc.server.bot.BotInteractionSupport;
@@ -60,6 +61,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
@@ -2450,44 +2452,72 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
       : null);
     submitAction(
       bot,
-      ControlTask.once("SDK attack entity", () -> {
-        var gameMode = bot.minecraft().gameMode;
-        var player = bot.minecraft().player;
-        var level = bot.minecraft().level;
-        if (gameMode == null || player == null || level == null) {
-          throw Status.FAILED_PRECONDITION
-            .withDescription("Bot player, level, or game mode is not available")
-            .asRuntimeException();
-        }
-        var target = findEntityById(level, request.getEntityId());
-        if (target == null) {
-          throw Status.NOT_FOUND
-            .withDescription("Target entity is not observable")
-            .asRuntimeException();
-        }
-        if (!SFEntityHelpers.isValidAttackTarget(player, target)) {
-          throw Status.FAILED_PRECONDITION
-            .withDescription("Target entity cannot be attacked")
-            .asRuntimeException();
-        }
-        if (target.distanceToSqr(player) > 36.0D) {
-          throw Status.OUT_OF_RANGE
-            .withDescription("Target entity is outside the bot's interaction reach")
-            .asRuntimeException();
-        }
-        var wasSprinting = player.isSprinting();
-        player.setSprinting(request.getSprinting());
-        try {
-          gameMode.attack(player, target);
-          player.swing(InteractionHand.MAIN_HAND, player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
-          player.connection.send(ServerboundPunchPacket.INSTANCE);
-        } finally {
-          player.setSprinting(wasSprinting);
-        }
-      }),
+      new AttackEntityControl(bot, request.getEntityId(), request.getSprinting()),
       DEFAULT_ACTION_TIMEOUT,
       result -> AttackEntityResponse.newBuilder().setResult(result).build(),
       responseObserver);
+  }
+
+  private static final class AttackEntityControl implements ControlTask {
+    private final BotConnection bot;
+    private final int entityId;
+    private final boolean sprinting;
+    private boolean done;
+
+    private AttackEntityControl(BotConnection bot, int entityId, boolean sprinting) {
+      this.bot = bot;
+      this.entityId = entityId;
+      this.sprinting = sprinting;
+    }
+
+    @Override
+    public void tick() {
+      if (done) {
+        return;
+      }
+      var gameMode = bot.minecraft().gameMode;
+      var player = bot.minecraft().player;
+      var level = bot.minecraft().level;
+      if (gameMode == null || player == null || level == null) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("Bot player, level, or game mode is not available")
+          .asRuntimeException();
+      }
+      var target = findEntityById(level, entityId);
+      if (target == null) {
+        throw Status.NOT_FOUND
+          .withDescription("Target entity is not observable")
+          .asRuntimeException();
+      }
+      if (!SFEntityHelpers.isValidAttackTarget(player, target)) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("Target entity cannot be attacked")
+          .asRuntimeException();
+      }
+      if (target.distanceToSqr(player) > 36.0D) {
+        throw Status.OUT_OF_RANGE
+          .withDescription("Target entity is outside the bot's interaction reach")
+          .asRuntimeException();
+      }
+      done = BotAttackSupport.tryAttack(bot, target, sprinting);
+      if (!done && player.getMainHandItem().has(DataComponents.PIERCING_WEAPON)
+        && BotAttackSupport.isFacingTarget(bot, target)
+        && !BotAttackSupport.canPierceTarget(player, target)) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("Target entity is outside the weapon's attack path")
+          .asRuntimeException();
+      }
+    }
+
+    @Override
+    public boolean isDone() {
+      return done;
+    }
+
+    @Override
+    public String description() {
+      return "SDK attack entity";
+    }
   }
 
   private static Entity findEntityById(ClientLevel level, int id) {

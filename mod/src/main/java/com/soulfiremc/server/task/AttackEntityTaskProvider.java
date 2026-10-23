@@ -25,6 +25,7 @@ import com.soulfiremc.grpc.generated.EntityReference;
 import com.soulfiremc.grpc.generated.ItemSelector;
 import com.soulfiremc.server.api.BotTaskExecution;
 import com.soulfiremc.server.api.BotTaskProvider;
+import com.soulfiremc.server.bot.BotAttackSupport;
 import com.soulfiremc.server.bot.ControlResource;
 import com.soulfiremc.server.bot.ControlStopReason;
 import com.soulfiremc.server.bot.ControlTask;
@@ -40,7 +41,7 @@ import io.grpc.Status;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
@@ -258,7 +259,8 @@ public final class AttackEntityTaskProvider
     private final boolean restoreSelectedSlot;
     private final boolean useOffhandShield;
     private final int originalSelectedSlot;
-    private final PathfindingSupport.ResolvedGoal goal;
+    private PathfindingSupport.ResolvedGoal goal;
+    private float approachRange;
     private final List<ResolvedGoal> waitingGoals;
     private final com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint
       constraint;
@@ -303,6 +305,7 @@ public final class AttackEntityTaskProvider
         context.bot().minecraft().player
       ).getInventory().getSelectedSlot();
       this.goal = goal;
+      this.approachRange = attackRange;
       this.waitingGoals = new ArrayList<>(waitingGoals);
       this.constraint = constraint;
       this.result = result;
@@ -382,21 +385,52 @@ public final class AttackEntityTaskProvider
         return;
       }
 
+      if (!ensureBestWeapon()) {
+        stopPath(ControlStopReason.CANCELLED, null);
+        bot.controlState().resetAll();
+        return;
+      }
+      var heldItem = player.getMainHandItem();
+      var piercing = heldItem.has(DataComponents.PIERCING_WEAPON);
+      var weaponRange = player.getAttackRangeWith(heldItem);
+      var effectiveRange = piercing
+        ? Math.min(attackRange, weaponRange.effectiveMaxRange(player))
+        : attackRange;
+      if (effectiveRange != approachRange) {
+        stopPath(ControlStopReason.CANCELLED, null);
+        goal = CombatTaskSupport.reachGoal(bot, target, pathfindingApproachRange(effectiveRange));
+        approachRange = effectiveRange;
+      }
       var attackTarget = CombatTaskSupport.preferredTarget(entity);
       var visiblePoint = attackTarget.getEyePosition();
       var distance = distanceToBoundingBox(
         player.getEyePosition(),
         attackTarget.getBoundingBox()
       );
+      if (piercing && distance < weaponRange.effectiveMinRange(player)) {
+        bot.rotationControl().lookAt(visiblePoint);
+        if (!BotAttackSupport.isFacingTarget(bot, attackTarget)
+          || !BotAttackSupport.canPierceTarget(player, attackTarget)) {
+          stopPath(ControlStopReason.CANCELLED, null);
+          bot.controlState().resetAll();
+          if (BotAttackSupport.isFacingTarget(bot, attackTarget)) {
+            var retreatPoint = player.position().scale(2).subtract(attackTarget.position());
+            bot.controlState().down(player.isInWater() || player.isInLava()
+              || hasSafeTerrainAhead(player, retreatPoint));
+          }
+          raiseShield(player, gameMode);
+          return;
+        }
+      }
       if (ticks % 20 == 0) {
         context.reportProgress(BotTaskProgress.newBuilder()
-          .setMessage(distance <= attackRange
+          .setMessage(distance <= effectiveRange
             ? "Attacking entity"
             : "Chasing entity")
           .setCurrent(attacks)
           .build());
       }
-      if (distance > attackRange) {
+      if (distance > effectiveRange) {
         var movingInFluid = player.isInWater() || player.isInLava();
         if (shouldPursueDirectly(
           distance,
@@ -441,9 +475,6 @@ public final class AttackEntityTaskProvider
       consecutivePathFailures = 0;
       stopPath(ControlStopReason.CANCELLED, null);
       bot.controlState().resetAll();
-      if (!ensureBestWeapon()) {
-        return;
-      }
       bot.rotationControl().lookAt(visiblePoint);
       if (player.getAttackStrengthScale(0) < 1.0F
         || !bot.rotationControl().isFacing(visiblePoint)) {
@@ -451,14 +482,8 @@ public final class AttackEntityTaskProvider
         return;
       }
       lowerShield(player, gameMode);
-      var wasSprinting = player.isSprinting();
-      player.setSprinting(sprinting);
-      try {
-        gameMode.attack(player, attackTarget);
-        player.swing(InteractionHand.MAIN_HAND, player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
-        player.connection.send(ServerboundPunchPacket.INSTANCE);
-      } finally {
-        player.setSprinting(wasSprinting);
+      if (!BotAttackSupport.tryAttack(bot, attackTarget, sprinting)) {
+        return;
       }
       attacks++;
       if (maximumAttacks > 0 && attacks >= maximumAttacks) {

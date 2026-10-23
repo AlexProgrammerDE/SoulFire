@@ -24,6 +24,7 @@ export default {
           Effect.gen(function* () {
             yield* rcon(`kill @e[tag=${TAG}]`, { check: false });
             yield* rcon(`gamemode creative ${BOT_NAME}`, { check: false });
+            yield* placeBot(bot, { x: 0.5, y: 64, z: 0.5 }).pipe(Effect.ignore);
             yield* rcon("fill 3200 63 0 3263 63 15 air", { check: false });
             yield* rcon("forceload remove 3200 0 3263 15", { check: false });
             yield* rcon("forceload remove 3600 0", { check: false });

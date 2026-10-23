@@ -23,6 +23,7 @@ import com.soulfiremc.grpc.generated.FleeTask;
 import com.soulfiremc.grpc.generated.FleeTaskResult;
 import com.soulfiremc.server.api.BotTaskExecution;
 import com.soulfiremc.server.api.BotTaskProvider;
+import com.soulfiremc.server.bot.BotAttackSupport;
 import com.soulfiremc.server.bot.ControlPriority;
 import com.soulfiremc.server.bot.ControlResource;
 import com.soulfiremc.server.bot.ControlStopReason;
@@ -34,7 +35,6 @@ import com.soulfiremc.server.pathfinding.graph.constraint.ProjectileAvoidanceCon
 import com.soulfiremc.server.pathfinding.graph.constraint.ThreatAvoidanceConstraint;
 import com.soulfiremc.server.util.SFEntityHelpers;
 import io.grpc.Status;
-import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -460,7 +460,6 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       }
       var bot = context.bot();
       var player = Objects.requireNonNull(bot.minecraft().player);
-      var gameMode = Objects.requireNonNull(bot.minecraft().gameMode);
       var threat = BotTaskSupport.nearestMatchingEntity(
         bot,
         input.getThreats(),
@@ -494,15 +493,7 @@ public final class FleeTaskProvider implements BotTaskProvider<FleeTask> {
       if (!CombatTaskSupport.ensureBestMeleeWeapon(bot, null)) {
         return;
       }
-      var wasSprinting = player.isSprinting();
-      player.setSprinting(true);
-      try {
-        gameMode.attack(player, attackTarget);
-        player.swing(InteractionHand.MAIN_HAND, player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
-        player.connection.send(ServerboundPunchPacket.INSTANCE);
-      } finally {
-        player.setSprinting(wasSprinting);
-      }
+      BotAttackSupport.tryAttack(bot, attackTarget, true);
     }
 
     private void abortForPlayerDeath() {
