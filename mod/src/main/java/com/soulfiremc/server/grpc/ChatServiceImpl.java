@@ -17,6 +17,8 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.mojang.brigadier.context.StringRange;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.soulfiremc.grpc.generated.*;
 import com.soulfiremc.server.SoulFireServer;
@@ -39,6 +41,7 @@ import net.minecraft.util.StringUtil;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -334,20 +337,19 @@ public final class ChatServiceImpl extends ChatServiceGrpc.ChatServiceImplBase {
       );
     }
 
-    var start = input.lastIndexOf(' ', Math.max(0, cursor - 1)) + 1;
+    return CompletableFuture.completedFuture(chatSuggestions(input, cursor,
+      connection.getSuggestionsProvider().getCustomTabSuggestions()));
+  }
+
+  static Suggestions chatSuggestions(String input, int cursor, Collection<String> candidates) {
+    var start = input.lastIndexOf(' ', cursor - 1) + 1;
     var prefix = input.substring(start, cursor).toLowerCase(Locale.ROOT);
-    var suggestions = connection.getSuggestionsProvider()
-      .getCustomTabSuggestions()
-      .stream()
+    var suggestions = candidates.stream()
       .filter(value -> value.toLowerCase(Locale.ROOT).startsWith(prefix))
-      .map(value -> new com.mojang.brigadier.suggestion.Suggestion(
-        new com.mojang.brigadier.context.StringRange(start, cursor),
-        value
-      ))
+      .map(value -> new Suggestion(
+        new StringRange(start, cursor), value))
       .toList();
-    return CompletableFuture.completedFuture(
-      Suggestions.create(input, suggestions)
-    );
+    return Suggestions.create(input, suggestions);
   }
 
   private static TabCompleteResponse toResponse(
