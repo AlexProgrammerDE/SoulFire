@@ -189,21 +189,24 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
         )
         .asRuntimeException();
     }
-    var menuFuel = player.containerMenu instanceof BrewingStandMenu menu
-      ? menu.getFuel()
-      : 0;
-    var inventoryFuel = inventory.stream()
+  }
+
+  private static void validateFuel(
+    BotTaskContext context,
+    @Nullable ItemSelector fuelSelector,
+    BrewingStandMenu menu
+  ) {
+    var player = Objects.requireNonNull(context.bot().minecraft().player);
+    var inventoryFuel = player.getInventory().getNonEquipmentItems().stream()
       .filter(stack -> stack.has(DataComponents.BREWING_FUEL))
-      .filter(stack -> !input.hasFuel()
-        || InventoryServiceImpl.matches(stack, input.getFuel()))
+      .filter(stack -> fuelSelector == null
+        || InventoryServiceImpl.matches(stack, fuelSelector))
       .findFirst();
-    var stationFuel = player.containerMenu instanceof BrewingStandMenu menu
-      ? menu.getSlot(4).getItem()
-      : ItemStack.EMPTY;
+    var stationFuel = menu.getSlot(4).getItem();
     var stationFuelMatches = stationFuel.has(DataComponents.BREWING_FUEL)
-      && (!input.hasFuel()
-      || InventoryServiceImpl.matches(stationFuel, input.getFuel()));
-    if (menuFuel <= 0 && inventoryFuel.isEmpty() && !stationFuelMatches) {
+      && (fuelSelector == null
+      || InventoryServiceImpl.matches(stationFuel, fuelSelector));
+    if (menu.getFuel() <= 0 && inventoryFuel.isEmpty() && !stationFuelMatches) {
       throw Status.FAILED_PRECONDITION
         .withDescription("No matching brewing fuel is available")
         .asRuntimeException();
@@ -394,6 +397,7 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
           )
           .asRuntimeException();
       }
+      validateFuel(context, fuelSelector, menu);
       transition(Stage.LOAD_BOTTLES, "Loading potion bottles");
     }
 

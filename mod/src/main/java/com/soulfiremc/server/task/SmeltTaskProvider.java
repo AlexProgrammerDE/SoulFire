@@ -160,7 +160,6 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
       count,
       stationId
     );
-    validateFuel(context, input);
 
     var result = new CompletableFuture<SmeltTaskResult>();
     return new BotTaskExecution(
@@ -223,23 +222,22 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
   private static void validateFuel(
     BotTaskContext context,
-    SmeltTask input
+    @Nullable ItemSelector fuelSelector,
+    AbstractFurnaceMenu menu
   ) {
     var player = Objects.requireNonNull(context.bot().minecraft().player);
     Predicate<ItemStack> matchesFuel = stack -> !stack.isEmpty()
-      && (!input.hasFuel()
-      || InventoryServiceImpl.matches(stack, input.getFuel()))
+      && (fuelSelector == null
+      || InventoryServiceImpl.matches(stack, fuelSelector))
       && stack.has(DataComponents.COOKING_FUEL);
     var inventoryFuel = player.getInventory().getNonEquipmentItems().stream()
       .filter(matchesFuel)
       .findFirst();
     var offhandFuelMatches = matchesFuel.test(player.getOffhandItem());
-    var stationFuel = player.containerMenu instanceof AbstractFurnaceMenu menu
-      ? menu.getSlot(1).getItem()
-      : ItemStack.EMPTY;
-    var stationFuelMatches = matchesFuel.test(stationFuel);
+    var stationFuelMatches = matchesFuel.test(menu.getSlot(1).getItem());
     if (
-      inventoryFuel.isEmpty()
+      !menu.isLit()
+        && inventoryFuel.isEmpty()
         && !offhandFuelMatches
         && !stationFuelMatches
     ) {
@@ -260,6 +258,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private final List<ItemStack> outputs = new ArrayList<>();
     private @Nullable PathExecutor activePath;
     private boolean active;
+    private boolean stationValidated;
     private @Nullable AbstractFurnaceMenu openedMenu;
     private @Nullable Stage resumeStage;
     private int resumeStageTicks;
@@ -433,6 +432,8 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
           )
           .asRuntimeException();
       }
+      validateFuel(context, fuelSelector, menu);
+      stationValidated = true;
       var existingFuel = menu.getSlot(1).getItem();
       if (!existingFuel.isEmpty()
         && (!existingFuel.has(DataComponents.COOKING_FUEL)
@@ -885,7 +886,8 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private void recoverFurnaceContents(
       net.minecraft.client.player.LocalPlayer player
     ) {
-      if (!(player.containerMenu instanceof AbstractFurnaceMenu menu)) {
+      var menu = openedMenu;
+      if (!stationValidated || menu == null || player.containerMenu != menu) {
         return;
       }
       var gameMode = context.bot().minecraft().gameMode;
