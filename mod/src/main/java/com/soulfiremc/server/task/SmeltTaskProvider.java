@@ -39,13 +39,10 @@ import com.soulfiremc.server.pathfinding.graph.constraint.PathConstraintImpl;
 import com.soulfiremc.server.recipe.RecipeSupport;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import io.grpc.Status;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.HashedStack;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -732,17 +729,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
     private void sendUnpredictedPickup(AbstractFurnaceMenu menu, int slot) {
       var connection = Objects.requireNonNull(context.bot().minecraft().getConnection());
-      // Report the state we actually know, leaving the server to send the click's
-      // slot and cursor changes. Local prediction cannot confirm a contested pickup.
-      connection.send(new ServerboundContainerClickPacket(
-        menu.containerId,
-        menu.getStateId(),
-        (short) slot,
-        (byte) 0,
-        ContainerInput.PICKUP,
-        Int2ObjectMaps.emptyMap(),
-        HashedStack.create(menu.getCarried(), connection.decoratedHashOpsGenenerator())
-      ));
+      SFInventoryHelpers.sendUnpredictedPickup(connection, menu, slot);
     }
 
     private void awaitOutputConfirmation(String message) {

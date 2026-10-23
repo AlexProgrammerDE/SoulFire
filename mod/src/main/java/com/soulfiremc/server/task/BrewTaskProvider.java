@@ -235,6 +235,7 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     private int operationsCompleted;
     private int activeBatchSize;
     private int outputIndex;
+    private int depositingCount;
     private ItemStack selectedIngredient = ItemStack.EMPTY;
 
     private BrewControl(
@@ -276,7 +277,9 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
           case LOAD_FUEL -> loadFuel();
           case WAIT_FOR_OUTPUT -> waitForOutput();
           case TAKE_OUTPUT -> takeOutput();
+          case AWAIT_OUTPUT_PICKUP -> awaitOutputPickup();
           case DEPOSIT_OUTPUT -> depositOutput();
+          case AWAIT_OUTPUT_DEPOSIT -> awaitOutputDeposit();
         }
       } catch (Throwable throwable) {
         result.completeExceptionally(throwable);
@@ -403,6 +406,13 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
 
     private void loadBottles() {
       var menu = requireBrewingMenu();
+      for (var index = 0; index <= 3; index++) {
+        if (!menu.getSlot(index).getItem().isEmpty()) {
+          throw Status.ABORTED
+            .withDescription("Brewing stand contents changed before loading the batch")
+            .asRuntimeException();
+        }
+      }
       var reagents = requireLevel().recipeAccess().propertySet(RecipePropertySet.BREWING_REAGENTS);
       var maximumBatchSize = Math.min(
         MAX_BATCH_SIZE,
@@ -455,8 +465,9 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     private void loadIngredient() {
       var menu = requireBrewingMenu();
       if (!menu.getSlot(3).getItem().isEmpty()) {
-        transition(Stage.LOAD_FUEL, "Checking brewing fuel");
-        return;
+        throw Status.ABORTED
+          .withDescription("Brewing ingredient changed before loading")
+          .asRuntimeException();
       }
       var reagents = requireLevel().recipeAccess().propertySet(RecipePropertySet.BREWING_REAGENTS);
       var source = playerSlots(menu)
@@ -532,46 +543,40 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
 
     private void takeOutput() {
       var menu = requireBrewingMenu();
-      var stack = menu.getSlot(outputIndex).getItem();
-      if (!ItemStack.isSameItemSameComponents(
-        stack,
-        batchOutputs.get(outputIndex)
-      )) {
-        throw Status.FAILED_PRECONDITION
+      if (!menu.getCarried().isEmpty()
+        || !ItemStack.matches(menu.getSlot(outputIndex).getItem(), batchOutputs.get(outputIndex))) {
+        throw Status.ABORTED
           .withDescription("Brewing output changed before collection")
           .asRuntimeException();
       }
-      outputs.add(stack.copy());
-      Objects.requireNonNull(context.bot().minecraft().gameMode)
-        .handleContainerInput(
-          menu.containerId,
-          outputIndex,
-          0,
-          ContainerInput.PICKUP,
-          requirePlayer()
-        );
-      transition(Stage.DEPOSIT_OUTPUT, "Storing brewed potion");
+      sendUnpredictedPickup(menu, outputIndex);
+      transition(Stage.AWAIT_OUTPUT_PICKUP, "Confirming brewed potion collection");
+    }
+
+    private void awaitOutputPickup() {
+      var carried = requireBrewingMenu().getCarried();
+      if (ItemStack.matches(carried, batchOutputs.get(outputIndex))) {
+        transition(Stage.DEPOSIT_OUTPUT, "Storing brewed potion");
+        return;
+      }
+      if (!carried.isEmpty()) {
+        throw Status.ABORTED
+          .withDescription("Collected brewing output does not match the task batch")
+          .asRuntimeException();
+      }
+      awaitOutputConfirmation("Timed out confirming brewed potion collection");
     }
 
     private void depositOutput() {
       var menu = requireBrewingMenu();
       var carried = menu.getCarried();
-      if (carried.isEmpty()) {
-        outputIndex++;
-        if (outputIndex < activeBatchSize) {
-          transition(Stage.TAKE_OUTPUT, "Collecting brewed potion");
-          return;
-        }
-        operationsCompleted += activeBatchSize;
-        transition(
-          operationsCompleted >= targetCount
-            ? Stage.WAIT_FOR_OUTPUT
-            : Stage.LOAD_BOTTLES,
-          operationsCompleted >= targetCount
-            ? "Brewing complete"
-            : "Loading next potion batch"
-        );
-        return;
+      var expected = batchOutputs.get(outputIndex);
+      if (carried.isEmpty()
+        || !ItemStack.isSameItemSameComponents(carried, expected)
+        || carried.getCount() > expected.getCount()) {
+        throw Status.ABORTED
+          .withDescription("Brewing output cursor changed before storage")
+          .asRuntimeException();
       }
       var target = playerSlots(menu)
         .filter(slot -> canDeposit(menu, slot, carried))
@@ -581,19 +586,48 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
           .withDescription("Inventory has no room for brewed potion")
           .asRuntimeException();
       }
-      Objects.requireNonNull(context.bot().minecraft().gameMode)
-        .handleContainerInput(
-          menu.containerId,
-          target.getAsInt(),
-          0,
-          ContainerInput.PICKUP,
-          requirePlayer()
+      depositingCount = carried.getCount();
+      sendUnpredictedPickup(menu, target.getAsInt());
+      transition(Stage.AWAIT_OUTPUT_DEPOSIT, "Confirming brewed potion storage");
+    }
+
+    private void awaitOutputDeposit() {
+      var carried = requireBrewingMenu().getCarried();
+      if (carried.isEmpty()) {
+        outputs.add(batchOutputs.get(outputIndex));
+        outputIndex++;
+        if (outputIndex < activeBatchSize) {
+          transition(Stage.TAKE_OUTPUT, "Collecting brewed potion");
+          return;
+        }
+        operationsCompleted += activeBatchSize;
+        transition(
+          operationsCompleted >= targetCount ? Stage.WAIT_FOR_OUTPUT : Stage.LOAD_BOTTLES,
+          operationsCompleted >= targetCount ? "Brewing complete" : "Loading next potion batch"
         );
-      stageTicks++;
-      if (stageTicks > MENU_TIMEOUT_TICKS) {
-        throw Status.DEADLINE_EXCEEDED
-          .withDescription("Timed out storing brewed potion")
+        return;
+      }
+      if (!ItemStack.isSameItemSameComponents(carried, batchOutputs.get(outputIndex))
+        || carried.getCount() > depositingCount) {
+        throw Status.ABORTED
+          .withDescription("Brewing output cursor changed during storage")
           .asRuntimeException();
+      }
+      if (carried.getCount() < depositingCount) {
+        transition(Stage.DEPOSIT_OUTPUT, "Storing remaining brewed output");
+        return;
+      }
+      awaitOutputConfirmation("Timed out confirming brewed potion storage");
+    }
+
+    private void sendUnpredictedPickup(BrewingStandMenu menu, int slot) {
+      var connection = Objects.requireNonNull(context.bot().minecraft().getConnection());
+      SFInventoryHelpers.sendUnpredictedPickup(connection, menu, slot);
+    }
+
+    private void awaitOutputConfirmation(String message) {
+      if (++stageTicks > MENU_TIMEOUT_TICKS) {
+        throw Status.DEADLINE_EXCEEDED.withDescription(message).asRuntimeException();
       }
     }
 
@@ -804,6 +838,8 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     LOAD_FUEL,
     WAIT_FOR_OUTPUT,
     TAKE_OUTPUT,
-    DEPOSIT_OUTPUT
+    AWAIT_OUTPUT_PICKUP,
+    DEPOSIT_OUTPUT,
+    AWAIT_OUTPUT_DEPOSIT
   }
 }
