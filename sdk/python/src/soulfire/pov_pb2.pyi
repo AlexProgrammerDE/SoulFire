@@ -140,7 +140,7 @@ class PovInputResponse(_message.Message):
     def __init__(self) -> None: ...
 
 class PovInputEvent(_message.Message):
-    __slots__ = ("kind", "code", "action", "modifiers", "x", "y", "relative")
+    __slots__ = ("kind", "code", "action", "modifiers", "x", "y", "relative", "key")
     class Kind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
         __slots__ = ()
         KEY: _ClassVar[PovInputEvent.Kind]
@@ -160,6 +160,7 @@ class PovInputEvent(_message.Message):
     X_FIELD_NUMBER: _ClassVar[int]
     Y_FIELD_NUMBER: _ClassVar[int]
     RELATIVE_FIELD_NUMBER: _ClassVar[int]
+    KEY_FIELD_NUMBER: _ClassVar[int]
     kind: PovInputEvent.Kind
     code: int
     action: int
@@ -167,4 +168,5 @@ class PovInputEvent(_message.Message):
     x: float
     y: float
     relative: bool
-    def __init__(self, kind: _Optional[_Union[PovInputEvent.Kind, str]] = ..., code: _Optional[int] = ..., action: _Optional[int] = ..., modifiers: _Optional[int] = ..., x: _Optional[float] = ..., y: _Optional[float] = ..., relative: bool = ...) -> None: ...
+    key: str
+    def __init__(self, kind: _Optional[_Union[PovInputEvent.Kind, str]] = ..., code: _Optional[int] = ..., action: _Optional[int] = ..., modifiers: _Optional[int] = ..., x: _Optional[float] = ..., y: _Optional[float] = ..., relative: bool = ..., key: _Optional[str] = ...) -> None: ...

@@ -63,7 +63,7 @@ public final class PovInputController implements ControlTask {
         if (event.getAction() == 0) keys.remove(key);
         else keys.add(key);
         minecraft.keyboardHandler.keyPress(handle, event.getAction() == 2 ? -1 : event.getAction(),
-          new KeyEvent(key, PovInputCodes.keycode(event.getCode()), PovInputCodes.modifiers(event.getModifiers())));
+          new KeyEvent(key, PovInputCodes.keycode(event.getCode(), event.getKey()), PovInputCodes.modifiers(event.getModifiers())));
       }
       case CHARACTER -> minecraft.keyboardHandler.charTyped(handle, new CharacterEvent(event.getCode()));
       case BUTTON -> {

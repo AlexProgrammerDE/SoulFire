@@ -18,9 +18,9 @@ const EDITED_SECOND_PAGE = `X${SECOND_PAGE.slice(1)}`;
 const TITLE = "Book QA";
 const text = (value: string) =>
   Array.from(value, (character) => ({ kind: Kind.CHARACTER, code: character.codePointAt(0)! }));
-const key = (code: number, modifiers = 0) => [
-  { kind: Kind.KEY, code, modifiers, action: 1 },
-  { kind: Kind.KEY, code, modifiers, action: 0 },
+const key = (code: number, modifiers = 0, logicalKey?: string) => [
+  { kind: Kind.KEY, code, modifiers, key: logicalKey, action: 1 },
+  { kind: Kind.KEY, code, modifiers, key: logicalKey, action: 0 },
 ];
 
 export default {
@@ -54,7 +54,12 @@ export default {
               },
               { signal: AbortSignal.any([abort.signal, AbortSignal.timeout(15_000)]) },
             )) {
-              const input = (events: ReturnType<typeof text>, width = 640, height = 480) =>
+              const input = (
+                events: ReturnType<typeof text>,
+                width = 640,
+                height = 480,
+                clipboard?: string,
+              ) =>
                 pov.input({
                   sessionId,
                   sequence: ++sequence,
@@ -63,15 +68,26 @@ export default {
                   height,
                   inputToken: frame.inputToken,
                   events,
+                  clipboard,
                 });
               if (phase === 0 && frame.screenOpen) {
-                await input([
-                  ...text(PAGE),
-                  ...key(267),
-                  ...text(SECOND_PAGE),
-                  ...key(268, 2),
-                  ...key(262, 1),
-                ]);
+                await input(
+                  [
+                    ...text("Replace"),
+                    ...key(81, 2, "a"),
+                    ...text(PAGE.slice(0, -1)),
+                    ...key(268),
+                    ...key(321, 0, "End"),
+                    ...key(75, 2, "v"),
+                    ...key(267),
+                    ...text(SECOND_PAGE),
+                    ...key(268, 2),
+                    ...key(262, 1),
+                  ],
+                  640,
+                  480,
+                  PAGE.slice(-1),
+                );
                 await input([], 320, 240);
                 phase = 1;
               } else if (phase === 1 && frame.width === 320 && frame.height === 240) {

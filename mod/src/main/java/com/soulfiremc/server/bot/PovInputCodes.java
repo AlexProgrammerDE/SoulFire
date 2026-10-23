@@ -20,7 +20,7 @@ package com.soulfiremc.server.bot;
 import com.mojang.blaze3d.platform.InputConstants;
 
 /// Converts the POV protocol's GLFW codes into Minecraft's SDL input values.
-final class PovInputCodes {
+public final class PovInputCodes {
   private PovInputCodes() {}
 
   static int scancode(int key) {
@@ -95,6 +95,30 @@ final class PovInputCodes {
       case 259 -> 8;
       case 261 -> 127;
       default -> scancode(key) == 0 ? 0 : scancode(key) | 1 << 30;
+    };
+  }
+
+  public static int keycode(int key, String logicalKey) {
+    if (logicalKey.length() == 1 && logicalKey.charAt(0) >= 32 && logicalKey.charAt(0) <= 126) {
+      return Character.toLowerCase(logicalKey.charAt(0));
+    }
+    return switch (logicalKey) {
+      case "Backspace" -> 8;
+      case "Tab" -> 9;
+      case "Enter" -> 13;
+      case "Escape" -> 27;
+      case "Delete" -> 127;
+      case "Insert" -> InputConstants.KEY_INSERT | 1 << 30;
+      case "Home" -> InputConstants.KEY_HOME | 1 << 30;
+      case "End" -> InputConstants.KEY_END | 1 << 30;
+      case "PageUp" -> InputConstants.KEY_PAGEUP | 1 << 30;
+      case "PageDown" -> InputConstants.KEY_PAGEDOWN | 1 << 30;
+      case "ArrowLeft" -> InputConstants.KEY_LEFT | 1 << 30;
+      case "ArrowRight" -> InputConstants.KEY_RIGHT | 1 << 30;
+      case "ArrowUp" -> InputConstants.KEY_UP | 1 << 30;
+      case "ArrowDown" -> InputConstants.KEY_DOWN | 1 << 30;
+      // SDL also retains Latin shortcuts for non-Latin keyboard layouts.
+      default -> keycode(key);
     };
   }
 

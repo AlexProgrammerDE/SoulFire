@@ -38,6 +38,7 @@ import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
+import com.soulfiremc.server.bot.PovInputCodes;
 import com.soulfiremc.server.renderer.AdaptivePovQuality;
 import com.soulfiremc.server.renderer.PovAudioStream;
 import com.soulfiremc.server.renderer.PovClientActions;
@@ -244,15 +245,16 @@ public final class PovServiceImpl extends PovServiceGrpc.PovServiceImplBase {
   }
 
   private static boolean isPasteKeyPress(PovInputEvent event) {
-    // The wire format uses GLFW keys and modifier bits, not Minecraft's SDL values.
-    return event.getKind() == PovInputEvent.Kind.KEY && event.getCode() == 86
+    // Resolve the logical shortcut before deciding whether to synthesize paste.
+    return event.getKind() == PovInputEvent.Kind.KEY && PovInputCodes.keycode(event.getCode(), event.getKey()) == 'v'
       && event.getAction() != 0 && (event.getModifiers() & 2) != 0;
   }
 
   static void validate(PovInputEvent event) {
     if (!Double.isFinite(event.getX()) || !Double.isFinite(event.getY())
       || Math.abs(event.getX()) > 10_000 || Math.abs(event.getY()) > 10_000
-      || event.getAction() < 0 || event.getAction() > 2 || event.getModifiers() < 0 || event.getModifiers() > 63) {
+      || event.getAction() < 0 || event.getAction() > 2 || event.getModifiers() < 0 || event.getModifiers() > 63
+      || event.getKey().length() > 64 || event.hasKey() && event.getKind() != PovInputEvent.Kind.KEY) {
       throw new IllegalArgumentException("Invalid input values");
     }
     switch (event.getKind()) {

@@ -31,6 +31,12 @@ class PovInputCodesTest {
     assertEquals(keycode, PovInputCodes.keycode(wireCode));
   }
 
+  @ParameterizedTest
+  @CsvSource({"81,a,97", "65,q,113", "81,A,97", "321,End,1073741901", "322,ArrowDown,1073741905", "330,Delete,127", "335,Enter,13", "65,ф,97", "81,Unidentified,113"})
+  void logicalKeysPreserveLayoutShortcutsAndNumpadNavigation(int physicalKey, String logicalKey, int keycode) {
+    assertEquals(keycode, PovInputCodes.keycode(physicalKey, logicalKey));
+  }
+
   @Test
   void translatesCombinedShortcutModifiersAndMouseButtons() {
     assertEquals(3 | 192 | 768 | 3072 | 8192 | 4096, PovInputCodes.modifiers(63));
