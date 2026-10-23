@@ -44,6 +44,7 @@ public final class PovInputController implements ControlTask {
     if (captured == active) return;
     if (captured) {
       bot.botControl().replace(this);
+      bot.rotationControl().clear();
       active = true;
       bot.minecraft().mouseHandler.mouseGrabbed = bot.minecraft().gui.screen() == null;
     } else {
