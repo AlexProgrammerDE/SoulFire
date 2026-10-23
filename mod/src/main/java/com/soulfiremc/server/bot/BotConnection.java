@@ -158,6 +158,8 @@ public final class BotConnection {
   private final MetadataHolder<JsonElement> persistentMetadata;
   private final Map<Holder.Reference<?>, DataComponentMap> registryComponents = new ConcurrentHashMap<>();
   private final PovFrameTasks povFrameTasks = new PovFrameTasks();
+  @Getter(AccessLevel.PACKAGE)
+  private final BotThreadTasks gameThreadTasks = new BotThreadTasks();
   private final PovInputController povInput = new PovInputController(this);
   private final ControlState controlState = new ControlState();
   private final CreativeInventoryState creativeInventoryState = new CreativeInventoryState();
@@ -655,6 +657,7 @@ public final class BotConnection {
       return Objects.requireNonNull(shutdownFuture.get());
     }
 
+    gameThreadTasks.close();
     instanceManager.scheduler().execute(() -> {
       try {
         disconnectNow(reason);
