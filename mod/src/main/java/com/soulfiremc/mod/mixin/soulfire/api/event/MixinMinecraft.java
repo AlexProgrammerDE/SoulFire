@@ -43,6 +43,9 @@ public class MixinMinecraft {
   @Inject(method = "tick", at = @At("RETURN"))
   private void onTickPost(CallbackInfo ci) {
     BotConnection.currentOptional()
-      .ifPresent(connection -> SoulFireAPI.postEvent(new BotPostTickEvent(connection)));
+      .ifPresent(connection -> {
+        connection.tickDisconnectCleanup();
+        SoulFireAPI.postEvent(new BotPostTickEvent(connection));
+      });
   }
 }

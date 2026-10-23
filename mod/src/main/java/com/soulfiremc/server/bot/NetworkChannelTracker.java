@@ -26,24 +26,25 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /// Tracks every network channel created for a bot and closes late arrivals once shutdown begins.
 final class NetworkChannelTracker {
   private final Set<Channel> channels = ConcurrentHashMap.newKeySet();
   private final AtomicReference<Channel> currentChannel = new AtomicReference<>();
-  private final AtomicBoolean closing = new AtomicBoolean();
+  private boolean closing;
 
-  public void track(Channel channel) {
+  public synchronized void track(Channel channel) {
     channels.add(channel);
-    currentChannel.set(channel);
+    if (!closing) {
+      currentChannel.set(channel);
+    }
     channel.closeFuture().addListener(_ -> {
       channels.remove(channel);
       currentChannel.compareAndSet(channel, null);
     });
 
-    if (closing.get()) {
+    if (closing) {
       channel.close();
     }
   }
@@ -52,8 +53,12 @@ final class NetworkChannelTracker {
     return Optional.ofNullable(currentChannel.get()).filter(Channel::isActive);
   }
 
+  public synchronized void beginShutdown() {
+    closing = true;
+  }
+
   public void closeAll(Duration timeout) throws InterruptedException, TimeoutException {
-    closing.set(true);
+    beginShutdown();
 
     var closeFutures = channels.stream()
       .filter(Channel::isOpen)

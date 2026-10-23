@@ -1034,11 +1034,12 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
           active = false;
           var player = context.bot().minecraft().player;
           try {
-            if (player != null) {
+            if (player != null && !context.bot().isDisconnecting()) {
               recoverCraftingContents(player);
             }
           } finally {
-            if (player != null && !(player.containerMenu instanceof InventoryMenu)) {
+            if (player != null && !context.bot().isDisconnecting()
+              && !(player.containerMenu instanceof InventoryMenu)) {
               player.closeContainer();
             }
           }

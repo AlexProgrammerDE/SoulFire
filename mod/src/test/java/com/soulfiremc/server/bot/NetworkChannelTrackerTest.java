@@ -28,6 +28,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NetworkChannelTrackerTest {
   @Test
+  void keepsTheExistingTransportForCleanupButRejectsLateArrivals() throws Exception {
+    var tracker = new NetworkChannelTracker();
+    var current = new EmbeddedChannel();
+    var late = new EmbeddedChannel();
+    try {
+      tracker.track(current);
+      tracker.beginShutdown();
+      assertSame(current, tracker.activeChannel().orElseThrow());
+      assertTrue(current.isOpen());
+      tracker.track(late);
+      assertFalse(late.isOpen());
+      assertTrue(current.isOpen());
+      assertSame(current, tracker.activeChannel().orElseThrow());
+      tracker.closeAll(Duration.ofSeconds(1));
+      assertFalse(current.isOpen());
+      assertFalse(tracker.hasOpenChannels());
+    } finally {
+      current.finishAndReleaseAll();
+      late.finishAndReleaseAll();
+    }
+  }
+
+  @Test
   void keepsTheNewTransportWhenAnOlderChannelCloses() {
     var tracker = new NetworkChannelTracker();
     var oldChannel = new EmbeddedChannel();

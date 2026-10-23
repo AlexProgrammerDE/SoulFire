@@ -43,6 +43,11 @@ public class MixinClientPacketListener {
   @Unique
   private final HealthDamageTracker soulfire$damageTracker = new HealthDamageTracker();
 
+  @Inject(method = {"handleContainerContent", "handleContainerSetSlot", "handleSetCursorItem", "handleSetPlayerInventory"}, at = @At("RETURN"))
+  private void onInventoryUpdate(CallbackInfo ci) {
+    BotConnection.currentOptional().ifPresent(BotConnection::onInventoryUpdate);
+  }
+
   @Inject(method = "handleLevelChunkWithLight", at = @At("RETURN"))
   private void onLevelChunkWithLight(
     ClientboundLevelChunkWithLightPacket packet,

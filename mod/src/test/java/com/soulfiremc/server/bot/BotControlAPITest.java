@@ -19,11 +19,37 @@ package com.soulfiremc.server.bot;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 final class BotControlAPITest {
+  @Test
+  void shutdownCancelsEveryQueueAndRejectsNewWork() {
+    var control = new BotControlAPI();
+    var suspended = new RecordingTask(ControlPriority.NORMAL, ControlResource.MOVEMENT, 4);
+    var active = new RecordingTask(ControlPriority.HIGH, ControlResource.MOVEMENT, 4);
+    var queued = new RecordingTask(ControlPriority.NORMAL, ControlResource.MOVEMENT, 4);
+    assertTrue(control.tryStart(suspended));
+    assertTrue(control.submit(active));
+    control.enqueue(queued);
+    control.shutdown();
+    for (var task : List.of(suspended, active, queued)) {
+      assertEquals(ControlStopReason.CANCELLED, task.stopReason);
+      assertEquals(0, task.ticks);
+    }
+    for (var start : List.<Consumer<ControlTask>>of(control::tryStart, control::submit, control::enqueue, control::replace)) {
+      var late = new RecordingTask(ControlPriority.HIGH, ControlResource.CHAT, 4);
+      start.accept(late);
+      control.tick();
+      assertEquals(ControlStopReason.CANCELLED, late.stopReason);
+      assertEquals(0, late.ticks);
+      assertFalse(control.hasActiveTask());
+    }
+  }
+
   @Test
   void runsTasksWithDisjointResourcesConcurrently() {
     var control = new BotControlAPI();
