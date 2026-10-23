@@ -389,7 +389,7 @@ public final class RangedAttackTaskProvider
         );
         return;
       }
-      if (player.getProjectile(weapon).isEmpty()) {
+      if (!CrossbowItem.isCharged(weapon) && player.getProjectile(weapon).isEmpty()) {
         stopUsingItem();
         complete(
           RangedAttackCompletionReason
@@ -472,6 +472,7 @@ public final class RangedAttackTaskProvider
       );
       if (!player.isUsingItem()) {
         if (cooldownTicks == 0) {
+          context.bot().minecraft().options.keyUse.setDown(true);
           gameMode.useItem(player, InteractionHand.MAIN_HAND);
         }
         return;
@@ -482,6 +483,7 @@ public final class RangedAttackTaskProvider
       if (!facing) {
         return;
       }
+      context.bot().minecraft().options.keyUse.setDown(false);
       gameMode.releaseUsingItem(player);
       releasedShot();
     }
@@ -492,21 +494,18 @@ public final class RangedAttackTaskProvider
         context.bot().minecraft().gameMode
       );
       if (CrossbowItem.isCharged(weapon)) {
+        stopUsingItem();
         if (cooldownTicks == 0 && facing) {
           gameMode.useItem(player, InteractionHand.MAIN_HAND);
           releasedShot();
         }
         return;
       }
+      // The server loads the projectiles while use is held. Wait for that
+      // inventory update before releasing, including when loading the last arrow.
       if (!player.isUsingItem()) {
+        context.bot().minecraft().options.keyUse.setDown(true);
         gameMode.useItem(player, InteractionHand.MAIN_HAND);
-        return;
-      }
-      if (
-        player.getTicksUsingItem()
-          >= CrossbowItem.getChargeDuration(weapon, player)
-      ) {
-        gameMode.releaseUsingItem(player);
       }
     }
 
@@ -697,6 +696,7 @@ public final class RangedAttackTaskProvider
     }
 
     private void stopUsingItem() {
+      context.bot().minecraft().options.keyUse.setDown(false);
       var player = context.bot().minecraft().player;
       var gameMode = context.bot().minecraft().gameMode;
       if (player != null && gameMode != null && player.isUsingItem()) {
