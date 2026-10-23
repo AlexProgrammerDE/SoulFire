@@ -39,8 +39,10 @@ import com.soulfiremc.server.util.SFEntityHelpers;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import io.grpc.Status;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
@@ -700,7 +702,19 @@ public final class RangedAttackTaskProvider
       var player = context.bot().minecraft().player;
       var gameMode = context.bot().minecraft().gameMode;
       if (player != null && gameMode != null && player.isUsingItem()) {
-        gameMode.releaseUsingItem(player);
+        if (player.getUsedItemHand() == InteractionHand.MAIN_HAND
+          && player.getUseItem().getItem() instanceof BowItem) {
+          // Releasing a drawn bow shoots it. A temporary hotbar switch instead
+          // cancels use on the server without firing or changing our selection.
+          var selectedSlot = player.getInventory().getSelectedSlot();
+          player.connection.send(new ServerboundSetCarriedItemPacket(
+            (selectedSlot + 1) % Inventory.getSelectionSize()
+          ));
+          player.connection.send(new ServerboundSetCarriedItemPacket(selectedSlot));
+          player.stopUsingItem();
+        } else {
+          gameMode.releaseUsingItem(player);
+        }
       }
     }
 
