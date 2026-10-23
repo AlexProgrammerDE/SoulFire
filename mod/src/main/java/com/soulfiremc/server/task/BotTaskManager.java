@@ -166,7 +166,7 @@ public final class BotTaskManager implements AutoCloseable {
         .withDescription("Instance '%s' not found".formatted(instanceId))
         .asRuntimeException());
     var bot = instance.botConnections().get(botId);
-    if (bot == null || bot.isDisconnected()) {
+    if (bot == null || bot.isDisconnected() || bot.isDisconnecting()) {
       throw Status.FAILED_PRECONDITION
         .withDescription("Bot '%s' is not online".formatted(botId))
         .asRuntimeException();
@@ -224,6 +224,11 @@ public final class BotTaskManager implements AutoCloseable {
     );
 
     synchronized (this) {
+      if (bot.isDisconnected() || bot.isDisconnecting()) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("Bot connection is closing")
+          .asRuntimeException();
+      }
       parentTaskId.ifPresent(parentId -> attachParent(record, parentId, owner));
       tasks.put(taskId, record);
       idempotencyKey.ifPresent(value ->
@@ -329,7 +334,7 @@ public final class BotTaskManager implements AutoCloseable {
   private void startExecution(ManagedTask record, BotConnection bot) {
     long generation;
     synchronized (this) {
-      if (isTerminal(record.status)) {
+      if (isTerminal(record.status) || bot.isDisconnecting()) {
         return;
       }
       generation = ++record.generation;
@@ -356,7 +361,10 @@ public final class BotTaskManager implements AutoCloseable {
         () -> record.prepared.start(context)
       );
     } catch (Throwable throwable) {
-      fail(record, "provider_start_failed", unwrap(throwable), false);
+      // The disconnect notification applies this task's reconnect policy.
+      if (!bot.isDisconnecting()) {
+        fail(record, generation, "provider_start_failed", unwrap(throwable), false);
+      }
       return;
     }
 
@@ -383,7 +391,9 @@ public final class BotTaskManager implements AutoCloseable {
         return null;
       });
     } catch (Throwable throwable) {
-      fail(record, "scheduling_failed", unwrap(throwable), true);
+      if (!bot.isDisconnecting()) {
+        fail(record, generation, "scheduling_failed", unwrap(throwable), true);
+      }
       control.discard();
     }
   }
@@ -415,6 +425,7 @@ public final class BotTaskManager implements AutoCloseable {
     if (!accepted) {
       fail(
         record,
+        control.generation,
         "resource_conflict",
         new IllegalStateException("Required bot resources are busy"),
         true
@@ -534,12 +545,13 @@ public final class BotTaskManager implements AutoCloseable {
 
   private void fail(
     ManagedTask task,
+    long generation,
     String code,
     Throwable cause,
     boolean retryable
   ) {
     synchronized (this) {
-      if (isTerminal(task.status)) {
+      if (isTerminal(task.status) || generation != task.generation) {
         return;
       }
       task.status = BotTaskStatus.BOT_TASK_STATUS_FAILED;
@@ -636,6 +648,7 @@ public final class BotTaskManager implements AutoCloseable {
         == BotTaskReconnectPolicy.BOT_TASK_RECONNECT_POLICY_FAIL) {
         fail(
           task,
+          task.generation,
           "connection_lost",
           new IllegalStateException("Bot disconnected while the task was active"),
           true
