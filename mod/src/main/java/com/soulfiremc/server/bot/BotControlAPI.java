@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.bot;
 
+import com.soulfiremc.server.util.GrpcErrors;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -252,11 +253,12 @@ public final class BotControlAPI {
   }
 
   private void logTaskFailure(String action, ControlTask task, Throwable t) {
+    var event = (GrpcErrors.isExpected(t) ? log.atDebug() : log.atError()).setCause(t);
     var description = task.description();
     if (description != null) {
-      log.error("Error while {} control task ({})", action, description, t);
+      event.log("Error while {} control task ({})", action, description);
     } else {
-      log.error("Error while {} control task", action, t);
+      event.log("Error while {} control task", action);
     }
   }
 }
