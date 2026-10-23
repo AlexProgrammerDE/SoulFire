@@ -223,6 +223,7 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     private final List<ItemStack> batchInputs = new ArrayList<>();
     private final List<ItemStack> batchOutputs = new ArrayList<>();
     private @Nullable PathExecutor activePath;
+    private boolean active;
     private Stage stage;
     private int stageTicks;
     private int operationsCompleted;
@@ -709,7 +710,13 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       if (activePath != null) {
         activePath.onSuspended();
       }
@@ -717,6 +724,7 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
 
     @Override
     public void onResumed() {
+      active = true;
       if (activePath != null) {
         activePath.onResumed();
       }
@@ -727,13 +735,19 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      stopPath(reason, cause);
-      var player = context.bot().minecraft().player;
-      if (player != null && !(player.containerMenu instanceof InventoryMenu)) {
-        player.closeContainer();
-      }
-      if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
-        result.cancel(true);
+      try {
+        stopPath(reason, cause);
+        if (active) {
+          active = false;
+          var player = context.bot().minecraft().player;
+          if (player != null && !(player.containerMenu instanceof InventoryMenu)) {
+            player.closeContainer();
+          }
+        }
+      } finally {
+        if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
+          result.cancel(true);
+        }
       }
     }
 

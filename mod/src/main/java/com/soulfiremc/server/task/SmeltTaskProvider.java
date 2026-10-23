@@ -259,6 +259,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private final CompletableFuture<SmeltTaskResult> result;
     private final List<ItemStack> outputs = new ArrayList<>();
     private @Nullable PathExecutor activePath;
+    private boolean active;
     private Stage stage;
     private int stageTicks;
     private int operationsCompleted;
@@ -950,7 +951,13 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       if (activePath != null) {
         activePath.onSuspended();
       }
@@ -958,6 +965,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
     @Override
     public void onResumed() {
+      active = true;
       if (activePath != null) {
         activePath.onResumed();
       }
@@ -968,19 +976,22 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      stopPath(reason, cause);
-      var player = context.bot().minecraft().player;
       try {
-        if (player != null) {
-          recoverFurnaceContents(player);
+        stopPath(reason, cause);
+        if (active) {
+          active = false;
+          var player = context.bot().minecraft().player;
+          try {
+            if (player != null) {
+              recoverFurnaceContents(player);
+            }
+          } finally {
+            if (player != null && !(player.containerMenu instanceof InventoryMenu)) {
+              player.closeContainer();
+            }
+          }
         }
       } finally {
-        if (
-          player != null
-            && !(player.containerMenu instanceof InventoryMenu)
-        ) {
-          player.closeContainer();
-        }
         if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
           result.cancel(true);
         }
