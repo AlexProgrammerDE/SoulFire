@@ -26,6 +26,7 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,9 +41,13 @@ import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.item.crafting.display.StonecutterRecipeDisplay;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -58,6 +63,91 @@ final class CraftTaskProviderTest {
   @BeforeAll
   static void bootstrapMinecraft() {
     TestBootstrap.bootstrapForTest();
+  }
+
+  @Test
+  void reconcilesStoredOutputExactlyOnceAcrossExecutions() {
+    var output = Items.OAK_PLANKS.getDescriptionId();
+    var input = Items.OAK_LOG.getDescriptionId();
+    var state = new CraftTaskProvider.RecoveryState();
+    state.validateOutput(output, 4);
+    var before = new HashMap<>(Map.of(input, 16, output, 12));
+    state.beginPickup(before, Map.of(input, 1));
+    // The execution cannot keep a live view of a mutable inventory snapshot.
+    before.clear();
+    var stored = Map.of(input, 15, output, 16);
+    assertTrue(state.reconcile(stored));
+    assertEquals(1, state.crafted());
+    assertTrue(state.reconcile(stored));
+    assertEquals(1, state.crafted());
+    state.beginPickup(stored, Map.of(input, 1));
+    state.confirmCraft();
+    assertTrue(state.reconcile(Map.of(input, 14, output, 20)));
+    assertEquals(2, state.crafted());
+  }
+
+  @Test
+  void retriesAnUnacceptedPickupWithReturnedIngredients() {
+    var output = Items.OAK_PLANKS.getDescriptionId();
+    var input = Items.OAK_LOG.getDescriptionId();
+    var state = new CraftTaskProvider.RecoveryState();
+    state.validateOutput(output, 4);
+    var before = Map.of(input, 16, output, 12);
+    state.beginPickup(before, Map.of(input, 1));
+    assertTrue(state.reconcile(before));
+    assertEquals(0, state.crafted());
+    state.beginPickup(before, Map.of(input, 1));
+    assertTrue(state.reconcile(Map.of(input, 15, output, 16)));
+    assertEquals(1, state.crafted());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {0, 2, 8})
+  void waitsForAWholePendingOutputBeforeContinuing(int storedCount) {
+    var output = Items.OAK_PLANKS.getDescriptionId();
+    var input = Items.OAK_LOG.getDescriptionId();
+    var state = new CraftTaskProvider.RecoveryState();
+    state.validateOutput(output, 4);
+    state.beginPickup(Map.of(input, 16, output, 12), Map.of(input, 1));
+    assertFalse(state.reconcile(Map.of(input, 15, output, 12 + storedCount)));
+    assertEquals(0, state.crafted());
+    assertTrue(state.reconcile(Map.of(input, 15, output, 16)));
+    assertEquals(1, state.crafted());
+  }
+
+  @Test
+  void rejectsOutputIncreasesWithoutTheIngredientConsumption() {
+    var output = Items.OAK_PLANKS.getDescriptionId();
+    var input = Items.OAK_LOG.getDescriptionId();
+    var state = new CraftTaskProvider.RecoveryState();
+    state.validateOutput(output, 4);
+    state.beginPickup(Map.of(input, 16, output, 12), Map.of(input, 1));
+    assertFalse(state.reconcile(Map.of(input, 16, output, 16)));
+    assertEquals(0, state.crafted());
+  }
+
+  @Test
+  void accountsForAnIngredientThatMatchesTheOutput() {
+    var output = Items.WOOL.pick(DyeColor.RED).getDescriptionId();
+    var input = Items.DYE.pick(DyeColor.RED).getDescriptionId();
+    var state = new CraftTaskProvider.RecoveryState();
+    state.validateOutput(output, 1);
+    state.beginPickup(Map.of(output, 7, input, 3), Map.of(output, 1, input, 1));
+    assertTrue(state.reconcile(Map.of(output, 7, input, 2)));
+    assertEquals(1, state.crafted());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void rejectsChangesToTheRecipeOutputAcrossConnections(boolean componentsChanged) {
+    var output = Items.OAK_PLANKS.getDescriptionId();
+    var state = new CraftTaskProvider.RecoveryState();
+    state.validateOutput(output, 4);
+    var error = assertThrows(StatusRuntimeException.class, () -> state.validateOutput(
+      componentsChanged ? Items.BIRCH_PLANKS.getDescriptionId() : output,
+      componentsChanged ? 4 : 1
+    ));
+    assertEquals(Status.Code.FAILED_PRECONDITION, error.getStatus().getCode());
   }
 
   @Test

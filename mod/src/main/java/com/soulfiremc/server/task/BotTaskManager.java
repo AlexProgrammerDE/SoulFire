@@ -1283,11 +1283,12 @@ public final class BotTaskManager implements AutoCloseable {
           .withCause(exception)
           .asRuntimeException();
       }
+      var factory = provider.prepare(parsed);
       return new PreparedTask(
         provider.summary(parsed),
         Set.copyOf(provider.resources(parsed)),
         progressTypeUrl,
-        context -> validateExecution(provider.start(context, parsed))
+        context -> validateExecution(factory.start(context))
       );
     }
 

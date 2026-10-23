@@ -35,5 +35,16 @@ public interface BotTaskProvider<I extends Message> {
     return ControlResource.all();
   }
 
+  /// Prepares one durable task. The factory is reused across its connections.
+  /// Retain only detached recovery data here, never a bot or an execution.
+  default ExecutionFactory prepare(I input) {
+    return context -> start(context, input);
+  }
+
   BotTaskExecution start(BotTaskContext context, I input) throws Exception;
+
+  @FunctionalInterface
+  interface ExecutionFactory {
+    BotTaskExecution start(BotTaskContext context) throws Exception;
+  }
 }
