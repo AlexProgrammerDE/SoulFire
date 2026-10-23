@@ -42,6 +42,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -107,7 +108,10 @@ public final class AttackEntityTaskProvider
         .asRuntimeException();
     }
     var target = input.getTarget();
-    BotTaskSupport.requireEntity(context.bot(), target);
+    requireAttackTarget(
+      Objects.requireNonNull(context.bot().minecraft().player),
+      BotTaskSupport.requireEntity(context.bot(), target)
+    );
     var attackRange = normalizeAttackRange(input.getAttackRange());
     var resolved = CombatTaskSupport.reachGoal(
       context.bot(),
@@ -143,6 +147,14 @@ public final class AttackEntityTaskProvider
       result
     );
     return new BotTaskExecution(control, result);
+  }
+
+  private static void requireAttackTarget(Entity player, Entity target) {
+    if (!SFEntityHelpers.isValidAttackTarget(player, target)) {
+      throw Status.FAILED_PRECONDITION
+        .withDescription("Target entity cannot be attacked")
+        .asRuntimeException();
+    }
   }
 
   private static float normalizeAttackRange(float value) {
@@ -316,6 +328,8 @@ public final class AttackEntityTaskProvider
         || target.hasUuid()
         && !target.getUuid().equals(entity.getUUID().toString())) {
         stopPath(ControlStopReason.CANCELLED, null);
+        bot.controlState().resetAll();
+        lowerShield(player, gameMode);
         unavailableTicks++;
         reportUnavailable();
         if (unavailableTicks >= unavailableTimeoutTicks) {
@@ -329,6 +343,7 @@ public final class AttackEntityTaskProvider
       }
 
       unavailableTicks = 0;
+      requireAttackTarget(player, entity);
       lastObservedAlive = SFEntityHelpers.isAliveAndTargetable(entity);
       if (!lastObservedAlive) {
         stopPath(ControlStopReason.COMPLETED, null);

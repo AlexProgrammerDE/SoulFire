@@ -47,6 +47,7 @@ import com.soulfiremc.server.pathfinding.PathfindingSupport;
 import com.soulfiremc.server.pathfinding.execution.BlockPlacementSupport;
 import com.soulfiremc.server.user.PermissionContext;
 import com.soulfiremc.server.util.SFBlockHelpers;
+import com.soulfiremc.server.util.SFEntityHelpers;
 import io.grpc.Status;
 import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
@@ -2462,6 +2463,11 @@ public final class BotLiveServiceImpl extends BotLiveServiceGrpc.BotLiveServiceI
         if (target == null) {
           throw Status.NOT_FOUND
             .withDescription("Target entity is not observable")
+            .asRuntimeException();
+        }
+        if (!SFEntityHelpers.isValidAttackTarget(player, target)) {
+          throw Status.FAILED_PRECONDITION
+            .withDescription("Target entity cannot be attacked")
             .asRuntimeException();
         }
         if (target.distanceToSqr(player) > 36.0D) {
