@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
   private static final int MAX_SMELT_OPERATIONS = 4_096;
   private static final int MENU_TIMEOUT_TICKS = 100;
-  private static final int COOK_TIMEOUT_TICKS = 12_000;
+  private static final int MAX_COOK_STALL_TICKS = 12_000;
   private static final Set<ControlResource> RESOURCES = Set.of(
     ControlResource.MOVEMENT,
     ControlResource.ROTATION,
@@ -256,6 +256,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private final @Nullable BlockPos station;
     private final CompletableFuture<SmeltTaskResult> result;
     private final List<ItemStack> outputs = new ArrayList<>();
+    private final CookingProgressWatchdog cookingProgress = new CookingProgressWatchdog(MAX_COOK_STALL_TICKS);
     private @Nullable PathExecutor activePath;
     private boolean active;
     private boolean stationValidated;
@@ -646,12 +647,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
         transition(Stage.LOAD_FUEL, "Refueling smelting station");
         return;
       }
-      stageTicks++;
-      if (stageTicks > COOK_TIMEOUT_TICKS) {
-        throw Status.DEADLINE_EXCEEDED
-          .withDescription("Timed out waiting for smelting output")
-          .asRuntimeException();
-      }
+      cookingProgress.observe(menu.getBurnProgress(), stack.getCount());
     }
 
     private boolean hasUsableFuel(AbstractFurnaceMenu menu) {
@@ -1108,6 +1104,35 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
       0,
       Math.ceilDiv(requiredTicks - availableTicks, fuelTicksPerItem)
     );
+  }
+
+  static final class CookingProgressWatchdog {
+    private final int maximumTicksWithoutProgress;
+    private float previousCookingProgress;
+    private int previousOutputCount;
+    private int ticksWithoutProgress;
+
+    CookingProgressWatchdog(int maximumTicksWithoutProgress) {
+      if (maximumTicksWithoutProgress <= 0) {
+        throw new IllegalArgumentException("maximumTicksWithoutProgress must be positive");
+      }
+      this.maximumTicksWithoutProgress = maximumTicksWithoutProgress;
+    }
+
+    void observe(float cookingProgress, int outputCount) {
+      if (cookingProgress > previousCookingProgress || outputCount > previousOutputCount) {
+        ticksWithoutProgress = 0;
+      } else {
+        ticksWithoutProgress++;
+      }
+      previousCookingProgress = cookingProgress;
+      previousOutputCount = outputCount;
+      if (ticksWithoutProgress > maximumTicksWithoutProgress) {
+        throw Status.DEADLINE_EXCEEDED
+          .withDescription("Timed out waiting for smelting output")
+          .asRuntimeException();
+      }
+    }
   }
 
   private enum Stage {
