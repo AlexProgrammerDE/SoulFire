@@ -224,6 +224,9 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     private final List<ItemStack> batchOutputs = new ArrayList<>();
     private @Nullable PathExecutor activePath;
     private boolean active;
+    private @Nullable BrewingStandMenu openedMenu;
+    private @Nullable Stage resumeStage;
+    private int resumeStageTicks;
     private Stage stage;
     private int stageTicks;
     private int operationsCompleted;
@@ -324,8 +327,17 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
 
     private void openMenu() {
       var player = requirePlayer();
-      if (player.containerMenu instanceof BrewingStandMenu) {
-        transition(Stage.VALIDATE_MENU, "Checking brewing stand");
+      if (player.containerMenu instanceof BrewingStandMenu menu) {
+        openedMenu = menu;
+        var resumed = resumeStage;
+        resumeStage = null;
+        transition(
+          resumed == null ? Stage.VALIDATE_MENU : resumed,
+          resumed == null ? "Checking brewing stand" : "Resuming brewing"
+        );
+        if (resumed != null) {
+          stageTicks = resumeStageTicks;
+        }
         return;
       }
       var stationPosition = Objects.requireNonNull(station);
@@ -725,6 +737,19 @@ public final class BrewTaskProvider implements BotTaskProvider<BrewTask> {
     @Override
     public void onResumed() {
       active = true;
+      var player = requirePlayer();
+      if (station != null && openedMenu != null && player.containerMenu != openedMenu) {
+        if (resumeStage == null) {
+          resumeStage = stage;
+          resumeStageTicks = stageTicks;
+        }
+        if (!(player.containerMenu instanceof InventoryMenu)) {
+          player.closeContainer();
+        }
+        stopPath(ControlStopReason.CANCELLED, null);
+        transition(Stage.NAVIGATE, "Returning to brewing stand");
+        return;
+      }
       if (activePath != null) {
         activePath.onResumed();
       }

@@ -260,6 +260,9 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private final List<ItemStack> outputs = new ArrayList<>();
     private @Nullable PathExecutor activePath;
     private boolean active;
+    private @Nullable AbstractFurnaceMenu openedMenu;
+    private @Nullable Stage resumeStage;
+    private int resumeStageTicks;
     private Stage stage;
     private int stageTicks;
     private int operationsCompleted;
@@ -357,8 +360,17 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
     private void openMenu() {
       var player = requirePlayer();
-      if (player.containerMenu instanceof AbstractFurnaceMenu) {
-        transition(Stage.VALIDATE_MENU, "Checking smelting station");
+      if (player.containerMenu instanceof AbstractFurnaceMenu menu) {
+        openedMenu = menu;
+        var resumed = resumeStage;
+        resumeStage = null;
+        transition(
+          resumed == null ? Stage.VALIDATE_MENU : resumed,
+          resumed == null ? "Checking smelting station" : "Resuming smelting"
+        );
+        if (resumed != null) {
+          stageTicks = resumeStageTicks;
+        }
         return;
       }
       var stationPosition = Objects.requireNonNull(station);
@@ -966,6 +978,19 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     @Override
     public void onResumed() {
       active = true;
+      var player = requirePlayer();
+      if (station != null && openedMenu != null && player.containerMenu != openedMenu) {
+        if (resumeStage == null) {
+          resumeStage = stage;
+          resumeStageTicks = stageTicks;
+        }
+        if (!(player.containerMenu instanceof InventoryMenu)) {
+          player.closeContainer();
+        }
+        stopPath(ControlStopReason.CANCELLED, null);
+        transition(Stage.NAVIGATE, "Returning to smelting station");
+        return;
+      }
       if (activePath != null) {
         activePath.onResumed();
       }
