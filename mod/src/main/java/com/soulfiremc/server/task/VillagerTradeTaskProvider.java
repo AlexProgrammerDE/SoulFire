@@ -34,7 +34,6 @@ import io.grpc.Status;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -127,7 +126,7 @@ public final class VillagerTradeTaskProvider
     return new BotTaskExecution(
       new TradeControl(
         context,
-        menu.containerId,
+        menu,
         offerIndex,
         count,
         input.getCloseWhenDone(),
@@ -140,7 +139,7 @@ public final class VillagerTradeTaskProvider
 
   private static final class TradeControl implements ControlTask {
     private final BotTaskContext context;
-    private final int containerId;
+    private @Nullable MerchantMenu openedMenu;
     private final int offerIndex;
     private final int targetCount;
     private final boolean closeWhenDone;
@@ -150,10 +149,11 @@ public final class VillagerTradeTaskProvider
     private Stage stage = Stage.SELECT_OFFER;
     private int stageTicks;
     private int completedTrades;
+    private boolean active;
 
     private TradeControl(
       BotTaskContext context,
-      int containerId,
+      MerchantMenu openedMenu,
       int offerIndex,
       int targetCount,
       boolean closeWhenDone,
@@ -161,7 +161,7 @@ public final class VillagerTradeTaskProvider
       CompletableFuture<VillagerTradeTaskResult> result
     ) {
       this.context = context;
-      this.containerId = containerId;
+      this.openedMenu = openedMenu;
       this.offerIndex = offerIndex;
       this.targetCount = targetCount;
       this.closeWhenDone = closeWhenDone;
@@ -305,12 +305,9 @@ public final class VillagerTradeTaskProvider
     }
 
     private MerchantMenu requireMenu() {
-      var menu = requirePlayer().containerMenu;
-      if (
-        menu instanceof MerchantMenu merchantMenu
-        && merchantMenu.containerId == containerId
-      ) {
-        return merchantMenu;
+      var menu = openedMenu;
+      if (menu != null && requirePlayer().containerMenu == menu) {
+        return menu;
       }
       throw Status.ABORTED
         .withDescription("The merchant menu changed or was closed")
@@ -426,23 +423,42 @@ public final class VillagerTradeTaskProvider
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
+    public void onSuspended() {
+      active = false;
+    }
+
+    @Override
+    public void onResumed() {
+      active = true;
+    }
+
+    @Override
     public void onStopped(
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      var player = context.bot().minecraft().player;
-      if (
-        player != null
-        && (
-          closeWhenDone
-          || !player.containerMenu.getCarried().isEmpty()
-        )
-        && !(player.containerMenu instanceof InventoryMenu)
-      ) {
-        player.closeContainer();
-      }
-      if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
-        result.cancel(true);
+      try {
+        var menu = openedMenu;
+        openedMenu = null;
+        if (active) {
+          active = false;
+          var player = context.bot().minecraft().player;
+          if (player != null
+            && menu != null
+            && player.containerMenu == menu
+            && (closeWhenDone || !menu.getCarried().isEmpty())) {
+            player.closeContainer();
+          }
+        }
+      } finally {
+        if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
+          result.cancel(true);
+        }
       }
     }
 
