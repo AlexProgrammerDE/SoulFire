@@ -717,7 +717,7 @@ export class SoulFireInstance {
     protocolClient?: Client<typeof BotProtocolService>,
     capabilities?: CapabilitySet,
     instanceLiveClient?: Client<typeof InstanceLiveService>,
-    instanceScopes = new InstanceScopes(),
+    instanceScopes: InstanceScopes = new InstanceScopes(),
   ) {
     this.#botClient = botClient;
     this.#botLiveClient = botLiveClient;
@@ -1382,7 +1382,7 @@ export class SoulFireBot {
     private readonly registryClient?: Client<typeof RegistryService>,
     private readonly worldClient?: Client<typeof WorldService>,
     private readonly protocolClient?: Client<typeof BotProtocolService>,
-    private readonly instanceScopes = new InstanceScopes(),
+    private readonly instanceScopes: InstanceScopes = new InstanceScopes(),
   ) {}
 
   /**
