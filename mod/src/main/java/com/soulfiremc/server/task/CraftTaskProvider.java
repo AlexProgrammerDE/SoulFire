@@ -188,6 +188,7 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     private final MenuSync menuSync = new MenuSync();
     private int crafted;
     private boolean ingredientsChecked;
+    private boolean resumeAfterDeposit;
 
     private CraftControl(
       BotTaskContext context,
@@ -373,7 +374,12 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
         transition(Stage.CLEAR_GRID, "Preparing recipe");
         return;
       }
-      var stationPosition = Objects.requireNonNull(station);
+      if (station == null) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("station is required to reopen the crafting table")
+          .asRuntimeException();
+      }
+      var stationPosition = station;
       var level = Objects.requireNonNull(
         context.bot().minecraft().level,
         "Bot level is not available"
@@ -752,7 +758,9 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
 
     private void depositResult() {
       var player = requirePlayer();
-      var menu = requireCraftingMenu(player.containerMenu);
+      var menu = resumeAfterDeposit
+        ? player.containerMenu
+        : requireCraftingMenu(player.containerMenu);
       if (!menuSync.settled(menu)) {
         stageTicks++;
         if (stageTicks > MENU_TIMEOUT_TICKS) {
@@ -765,8 +773,19 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
       var carried = menu.getCarried();
       if (carried.isEmpty()) {
         crafted++;
-        transition(Stage.CLEAR_GRID, "Preparing next craft");
+        if (resumeAfterDeposit) {
+          resumeAfterDeposit = false;
+          prepareAfterResume();
+        } else {
+          transition(Stage.CLEAR_GRID, "Preparing next craft");
+        }
         return;
+      }
+      if (!ItemStack.isSameItemSameComponents(carried, output)
+        || carried.getCount() > output.getCount()) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("The crafting output cursor changed before storage")
+          .asRuntimeException();
       }
       var target = SFInventoryHelpers.playerInventorySlots(menu)
         .filter(slot -> canDeposit(menu, slot, carried))
@@ -945,9 +964,22 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     @Override
     public void onResumed() {
       active = true;
-      if (activePath != null) {
-        activePath.onResumed();
+      stopPath(ControlStopReason.CANCELLED, null);
+      if (stage == Stage.DEPOSIT_RESULT) {
+        // Closing a table returns its cursor to the inventory. Finish this
+        // operation once before rebuilding the grid for the next one.
+        resumeAfterDeposit = true;
+        menuSync.reset(requirePlayer().containerMenu);
+      } else {
+        prepareAfterResume();
       }
+    }
+
+    private void prepareAfterResume() {
+      transition(
+        inventoryRecipe || station == null ? Stage.OPEN_MENU : Stage.PREPARE_INVENTORY,
+        "Preparing recipe after resuming"
+      );
     }
 
     @Override
@@ -999,6 +1031,12 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     void restart(AbstractContainerMenu menu) {
       stateId = menu.getStateId();
       stableTicks = 0;
+    }
+
+    /// A replacement menu cannot answer a click sent to the previous one.
+    void reset(AbstractContainerMenu menu) {
+      awaitingAnswer = false;
+      restart(menu);
     }
 
     /// Waits for the answer to clicks that changed the crafting grid.

@@ -125,6 +125,21 @@ final class CraftTaskProviderTest {
   }
 
   @Test
+  void resetsAnOutstandingAnswerWhenTheMenuIsReplaced() {
+    var previous = mock(AbstractContainerMenu.class);
+    var replacement = mock(AbstractContainerMenu.class);
+    when(previous.getStateId()).thenReturn(5);
+    when(replacement.getStateId()).thenReturn(5);
+    var sync = new CraftTaskProvider.MenuSync();
+    sync.awaitAnswer(previous);
+
+    sync.reset(replacement);
+
+    assertFalse(sync.settled(replacement));
+    assertTrue(sync.settled(replacement));
+  }
+
+  @Test
   void acceptsAsManyCraftsAsTheIngredientsCover() {
     var cobblestone = Holder.direct(Items.COBBLESTONE, DataComponentMap.EMPTY);
     var available = List.of(new ItemStack(cobblestone, 12));
