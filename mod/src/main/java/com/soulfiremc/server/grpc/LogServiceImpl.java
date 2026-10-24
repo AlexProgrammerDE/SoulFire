@@ -87,13 +87,14 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     try {
       var predicate = eventPredicate(request.getScope());
       responseObserver.onNext(PreviousLogResponse.newBuilder()
-        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
+        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount(), event -> predicate.test(event, false))
           .stream()
-          .filter(log -> predicate.test(log, false))
           .map(e -> fromEvent(e, false))
           .toList())
         .build());
       responseObserver.onCompleted();
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error getting previous logs", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
