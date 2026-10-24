@@ -19,17 +19,35 @@ package com.soulfiremc.mod.mixin.headless.rendering;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.gui.components.Whence;
 import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 /// Match single-line fields by keeping cursor movement and deletion on codepoint boundaries.
 @Mixin(MultilineTextField.class)
 public abstract class MixinMultilineTextField {
   @Shadow private String value;
   @Shadow private int cursor;
+  @Shadow private int selectCursor;
+
+  @ModifyArg(method = "truncateInsertionText", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/StringUtil;truncateStringIfNecessary(Ljava/lang/String;IZ)Ljava/lang/String;"), index = 1)
+  private int includeSelectedTextCapacity(int remaining) {
+    return Math.max(0, remaining + Math.abs(cursor - selectCursor));
+  }
+
+  @WrapOperation(method = {"truncateInsertionText", "truncateFullText"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/StringUtil;truncateStringIfNecessary(Ljava/lang/String;IZ)Ljava/lang/String;"))
+  private String truncateWholeCodepoints(String input, int limit, boolean addEllipsis, Operation<String> original) {
+    var end = Math.min(input.length(), limit);
+    if (end > 0 && end < input.length() && Character.isHighSurrogate(input.charAt(end - 1)) && Character.isLowSurrogate(input.charAt(end))) {
+      end--;
+    }
+    return original.call(input, end, addEllipsis);
+  }
 
   @WrapMethod(method = "deleteText")
   private void deleteWholeCodepoint(int direction, Operation<Void> original) {
