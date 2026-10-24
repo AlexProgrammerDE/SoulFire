@@ -1643,7 +1643,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         for (int i = 0; i < offers.size(); i++) {
           var offer = offers.get(i);
           var result = offer.getResult();
-          var costA = offer.getBaseCostA();
+          var costA = offer.getCostA();
           var costB = offer.getCostB();
 
           var costDesc = costA.getCount() + "x " + costA.getHoverName().getString();
