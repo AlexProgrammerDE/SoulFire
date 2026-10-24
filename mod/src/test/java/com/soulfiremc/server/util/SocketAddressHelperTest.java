@@ -49,6 +49,13 @@ final class SocketAddressHelperTest {
     assertEquals("inet://[2001:db8::5]:1080", SocketAddressHelper.serialize(address));
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"/tmp/sf qa.sock", "/tmp/sf#qa?100%.sock", "/tmp/sf-テスト.sock"})
+  void unixPathsWithReservedCharactersRoundTrip(String path) {
+    var address = UnixDomainSocketAddress.of(path);
+    assertEquals(address, SocketAddressHelper.deserialize(SocketAddressHelper.serialize(address)));
+  }
+
   @Test
   void unixAddressesRoundTrip() {
     var address = UnixDomainSocketAddress.of("/tmp/soulfire-proxy.sock");

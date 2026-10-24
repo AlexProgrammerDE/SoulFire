@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnixDomainSocketAddress;
 
 public final class SocketAddressHelper {
@@ -52,7 +53,13 @@ public final class SocketAddressHelper {
         }
         yield "inet://%s:%d".formatted(host, inet.getPort());
       }
-      case UnixDomainSocketAddress unix -> "unix://%s".formatted(unix.getPath());
+      case UnixDomainSocketAddress unix -> {
+        try {
+          yield new URI("unix", "", unix.getPath().toString(), null, null).toASCIIString();
+        } catch (URISyntaxException e) {
+          throw new IllegalArgumentException("Invalid Unix socket address", e);
+        }
+      }
       default -> throw new IllegalArgumentException("Unsupported address type: " + address.getClass().getName());
     };
   }
