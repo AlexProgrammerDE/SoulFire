@@ -18,6 +18,7 @@
 package com.soulfiremc.server;
 
 import com.soulfiremc.grpc.generated.BotDesiredState;
+import com.soulfiremc.grpc.generated.BotRuntimeState;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.OfflineJavaData;
@@ -25,8 +26,11 @@ import com.soulfiremc.server.bot.BotConnection;
 import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
 import com.soulfiremc.server.database.generated.Tables;
+import com.soulfiremc.server.proxy.ProxyType;
+import com.soulfiremc.server.proxy.SFProxy;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
+import com.soulfiremc.server.settings.instance.ProxySettings;
 import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
@@ -44,6 +48,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.sqlite.SQLiteDataSource;
 
+import java.net.InetSocketAddress;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -390,6 +396,147 @@ final class BotStateManagerTest {
     }
     assertTrue(fixture.manager().desiredBotIdsSnapshot().isEmpty());
     assertTrue(new BotStateManager(fixture.instance()).desiredBotIdsSnapshot().isEmpty());
+  }
+
+  @Test
+  void retiredPreparationFailureCannotReplaceTheNewStartWithARetry(@TempDir Path directory) throws Exception {
+    var fixture = fixture(directory, false);
+    when(fixture.settings().get(BotSettings.CONCURRENT_CONNECTS)).thenReturn(2);
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    Intent.START.apply(fixture.manager(), fixture.user(), fixture.botId());
+    var retiredLaunch = scheduled.get();
+    var preparing = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var pending = workers.submit(() -> {
+        try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+          when(factory.prepareConnection(false)).thenAnswer(_ -> {
+            preparing.countDown();
+            assertTrue(resume.await(5, TimeUnit.SECONDS));
+            throw new IllegalStateException();
+          }))) {
+          retiredLaunch.run();
+        }
+      });
+      try {
+        assertTrue(preparing.await(5, TimeUnit.SECONDS));
+        Intent.RESTART.apply(fixture.manager(), fixture.user(), fixture.botId());
+      } finally {
+        resume.countDown();
+      }
+      pending.get(5, TimeUnit.SECONDS);
+    }
+    assertEquals(BotRuntimeState.BOT_RUNTIME_STATE_STARTING, fixture.manager().status(fixture.botId()).getRuntimeState());
+    verify(fixture.scheduler(), never()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.SECONDS));
+    var current = mock(BotConnection.class);
+    when(current.accountProfileId()).thenReturn(fixture.botId());
+    when(current.connect()).thenReturn(CompletableFuture.completedFuture(null));
+    try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+      when(factory.prepareConnection(false)).thenReturn(current))) {
+      scheduled.get().run();
+    }
+    assertSame(current, fixture.connections().get(fixture.botId()));
+  }
+
+  @Test
+  void aFailureListenerCanStartANewGenerationWithoutTheOldRetryReplacingIt(@TempDir Path directory) {
+    var fixture = fixture(directory, false);
+    when(fixture.settings().get(BotSettings.CONCURRENT_CONNECTS)).thenReturn(2);
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    var restarted = new AtomicBoolean();
+    fixture.manager().addStatusListener(event -> {
+      if (event.status() != null && event.status().getRuntimeState() == BotRuntimeState.BOT_RUNTIME_STATE_FAILED
+        && restarted.compareAndSet(false, true)) Intent.RESTART.apply(fixture.manager(), fixture.user(), fixture.botId());
+    });
+    Intent.START.apply(fixture.manager(), fixture.user(), fixture.botId());
+    try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+      when(factory.prepareConnection(false)).thenThrow(new IllegalStateException()))) {
+      scheduled.get().run();
+    }
+    assertTrue(restarted.get());
+    assertEquals(BotRuntimeState.BOT_RUNTIME_STATE_STARTING, fixture.manager().status(fixture.botId()).getRuntimeState());
+    verify(fixture.scheduler(), never()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.SECONDS));
+    var current = mock(BotConnection.class);
+    when(current.accountProfileId()).thenReturn(fixture.botId());
+    when(current.connect()).thenReturn(CompletableFuture.completedFuture(null));
+    try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+      when(factory.prepareConnection(false)).thenReturn(current))) {
+      scheduled.get().run();
+    }
+    assertSame(current, fixture.connections().get(fixture.botId()));
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = Intent.class, names = {"STOP", "RESTART"})
+  void retiredPreparationCannotReleaseTheReplacementProxyLease(Intent cancellation, @TempDir Path directory) throws Exception {
+    var fixture = fixture(directory, false);
+    var account = fixture.settings().accounts().get(fixture.botId());
+    var other = new MinecraftAccount(AuthType.OFFLINE, UUID.randomUUID(), "OtherBot", new OfflineJavaData(), Map.of(), Map.of());
+    when(fixture.settings().accounts()).thenReturn(Map.of(fixture.botId(), account, other.profileId(), other));
+    when(fixture.settings().get(BotSettings.CONCURRENT_CONNECTS)).thenReturn(2);
+    when(fixture.settings().proxies()).thenReturn(List.of(new SFProxy(ProxyType.SOCKS5, new InetSocketAddress("127.0.0.1", 1080), null, null)));
+    when(fixture.settings().get(ProxySettings.BOTS_PER_PROXY)).thenReturn(1);
+    when(fixture.settings().get(ProxySettings.SHUFFLE_PROXIES)).thenReturn(false);
+    when(fixture.settings().get(ProxySettings.STICKY_PROXIES)).thenReturn(false);
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    Intent.START.apply(fixture.manager(), fixture.user(), fixture.botId());
+    var retiredLaunch = scheduled.get();
+    var preparing = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    var retired = mock(BotConnection.class);
+    when(retired.disconnect(any())).thenReturn(CompletableFuture.completedFuture(null));
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var pending = workers.submit(() -> {
+        try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+          when(factory.prepareConnection(false)).thenAnswer(_ -> {
+            preparing.countDown();
+            assertTrue(resume.await(5, TimeUnit.SECONDS));
+            return retired;
+          }))) {
+          retiredLaunch.run();
+        }
+      });
+      try {
+        assertTrue(preparing.await(5, TimeUnit.SECONDS));
+        cancellation.apply(fixture.manager(), fixture.user(), fixture.botId());
+        if (cancellation == Intent.STOP) Intent.START.apply(fixture.manager(), fixture.user(), fixture.botId());
+        assertNotSame(retiredLaunch, scheduled.get());
+      } finally {
+        resume.countDown();
+      }
+      pending.get(5, TimeUnit.SECONDS);
+    }
+    var currentLaunch = scheduled.get();
+    Intent.START.apply(fixture.manager(), fixture.user(), other.profileId());
+    assertEquals(BotRuntimeState.BOT_RUNTIME_STATE_QUEUED, fixture.manager().status(other.profileId()).getRuntimeState());
+    assertSame(currentLaunch, scheduled.get());
+    var current = mock(BotConnection.class);
+    when(current.accountProfileId()).thenReturn(fixture.botId());
+    when(current.connect()).thenReturn(CompletableFuture.completedFuture(null));
+    when(current.disconnect(any())).thenReturn(CompletableFuture.completedFuture(null));
+    doAnswer(_ -> {
+      if (fixture.connections().remove(fixture.botId(), current)) fixture.manager().connectionRemoved(current);
+      return null;
+    }).when(fixture.instance()).removeBot(current);
+    try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+      when(factory.prepareConnection(false)).thenReturn(current))) {
+      currentLaunch.run();
+    }
+    assertSame(current, fixture.connections().get(fixture.botId()));
+    Intent.STOP.apply(fixture.manager(), fixture.user(), fixture.botId());
+    assertEquals(BotRuntimeState.BOT_RUNTIME_STATE_STARTING, fixture.manager().status(other.profileId()).getRuntimeState());
   }
 
   private enum Removal { EXPLICIT, CONFIGURATION }

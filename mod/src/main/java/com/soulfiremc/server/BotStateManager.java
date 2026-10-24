@@ -156,11 +156,10 @@ public final class BotStateManager {
     return statuses(normalizedBotIds);
   }
 
-  public void scheduleReconnect(UUID botId, long delaySeconds) {
+  private void scheduleReconnect(UUID botId, long expectedGeneration, long delaySeconds) {
     final long generation;
     synchronized (stateLock) {
-      if (shuttingDown
-        || !desiredBotIds.contains(botId)
+      if (!isCurrentAndDesiredLocked(botId, expectedGeneration)
         || hasLiveConnection(botId)
         || queuedBotIds.contains(botId)) {
         return;
@@ -251,7 +250,9 @@ public final class BotStateManager {
   public void connectionRemoved(BotConnection bot) {
     var botId = bot.accountProfileId();
     var shouldReconnect = false;
+    final long disconnectedGeneration;
     synchronized (stateLock) {
+      disconnectedGeneration = generations.getOrDefault(botId, 0L);
       proxyLeases.remove(botId);
       if (!instanceManager.settingsSource().accounts().containsKey(botId)) {
         runtimeEntries.remove(botId);
@@ -268,7 +269,7 @@ public final class BotStateManager {
 
     if (shouldReconnect) {
       AutoReconnect.reconnectDelaySeconds(bot.settingsSource())
-        .ifPresent(delay -> scheduleReconnect(botId, delay));
+        .ifPresent(delay -> scheduleReconnect(botId, disconnectedGeneration, delay));
     }
   }
 
@@ -615,24 +616,26 @@ public final class BotStateManager {
       publishStatus(botId);
     } catch (Throwable throwable) {
       var message = conciseMessage(throwable);
-      log.error("Failed to start bot {}", botId, throwable);
       synchronized (stateLock) {
-        proxyLeases.remove(botId);
-        if (isCurrentAndDesiredLocked(botId, queued.generation())) {
-          setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_FAILED, message);
+        if (!isCurrentAndDesiredLocked(botId, queued.generation())) {
+          log.debug("Ignoring failure from a retired start for bot {}", botId, throwable);
+          return;
         }
+        proxyLeases.remove(botId);
+        setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_FAILED, message);
       }
+      log.error("Failed to start bot {}", botId, throwable);
       publishStatus(botId);
 
       var account = instanceManager.settingsSource().accounts().get(botId);
       if (account != null) {
         AutoReconnect.reconnectDelaySeconds(botSettings(account))
-          .ifPresent(delay -> scheduleReconnect(botId, delay));
+          .ifPresent(delay -> scheduleReconnect(botId, queued.generation(), delay));
       }
     } finally {
       synchronized (stateLock) {
         activeStarts = Math.max(0, activeStarts - 1);
-        if (!hasLiveConnection(botId)) {
+        if (generations.getOrDefault(botId, 0L) == queued.generation() && !hasLiveConnection(botId)) {
           proxyLeases.remove(botId);
         }
       }
@@ -678,6 +681,7 @@ public final class BotStateManager {
       queuedBotIds.remove(botId);
       connectQueue.removeIf(queued -> queued.botId().equals(botId));
       connection = instanceManager.botConnections().get(botId);
+      if (connection == null) proxyLeases.remove(botId);
       setRuntimeLocked(
         botId,
         connection == null
