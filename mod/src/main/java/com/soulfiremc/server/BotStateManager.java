@@ -255,11 +255,14 @@ public final class BotStateManager {
     drainQueue();
   }
 
-  public void connectionRemoved(BotConnection bot) {
+  public boolean removeConnection(BotConnection bot) {
     var botId = bot.accountProfileId();
     var shouldReconnect = false;
     final long disconnectedGeneration;
     synchronized (stateLock) {
+      if (!instanceManager.botConnections().remove(botId, bot)) {
+        return false;
+      }
       disconnectedGeneration = generations.getOrDefault(botId, 0L);
       proxyLeases.remove(botId);
       if (!instanceManager.settingsSource().accounts().containsKey(botId)) {
@@ -279,6 +282,7 @@ public final class BotStateManager {
       AutoReconnect.reconnectDelaySeconds(bot.settingsSource())
         .ifPresent(delay -> scheduleReconnect(botId, disconnectedGeneration, delay));
     }
+    return true;
   }
 
   public BotStatus status(UUID botId) {

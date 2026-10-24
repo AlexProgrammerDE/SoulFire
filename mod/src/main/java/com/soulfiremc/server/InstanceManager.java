@@ -394,9 +394,8 @@ public final class InstanceManager {
   }
 
   void removeBot(BotConnection bot) {
-    if (botConnections.remove(bot.accountProfileId(), bot)) {
+    if (botStateManager().removeConnection(bot)) {
       log.debug("Removing bot {}", bot.accountName());
-      botStateManager.connectionRemoved(bot);
       SoulFireAPI.postEvent(new BotConnectionRemovedEvent(bot));
     }
   }
