@@ -9,6 +9,7 @@ import {
   placeBot,
   rcon,
 } from "../harness.ts";
+import { nativeInput } from "../native-input.ts";
 
 const ANVIL = { x: 4263, y: 64, z: 8 };
 const cases = [
@@ -16,6 +17,9 @@ const cases = [
   { input: "A".repeat(49) + "🙂B", expected: "A".repeat(49) },
   { input: "A".repeat(48) + "🙂B", expected: "A".repeat(48) + "🙂" },
   { input: "雪🙂界", expected: "雪🙂界" },
+  { input: "§cOrange\u0000\t\r\n\u001f\u007f雪🙂", expected: "cOrange雪🙂" },
+  { input: "§".repeat(10) + "A".repeat(50) + "B", expected: "A".repeat(50) },
+  { input: "§".repeat(10) + "A".repeat(49) + "🙂B", expected: "A".repeat(49) },
 ];
 
 export default {
@@ -24,6 +28,7 @@ export default {
     Effect.scoped(
       Effect.gen(function* () {
         const service = client.service(BotService);
+        const run = Effect.runPromiseWith(yield* Effect.context());
         const scope = { instanceId: bot.instanceId, botId: bot.id };
         const setText = (menuId: string, fieldId: string, text: string) =>
           Effect.tryPromise({
@@ -75,6 +80,12 @@ export default {
         );
         yield* check(searchTab !== undefined, "The creative search tab is missing");
         yield* bot.clickContainerButton(searchTab!.buttonId);
+        yield* nativeInput(client, bot, async (input) => {
+          await input.click(298, 36);
+          await input.type("§diamond sword");
+          await run(expectField(creative.menuId, "search", "diamond sword"));
+        });
+        yield* Effect.sleep("2 seconds");
         for (const { input, expected } of cases) {
           yield* setText(creative.menuId, "search", input);
           yield* expectField(creative.menuId, "search", expected);

@@ -72,6 +72,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.inventory.ContainerInput;
@@ -2198,11 +2199,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         }
         var container = player.containerMenu;
         var fieldId = request.getFieldId();
+        var text = StringUtil.filterText(request.getText());
         if (container instanceof CreativeModeInventoryScreen.ItemPickerMenu && "search".equals(fieldId)) {
           if (!(minecraft.gui.screen() instanceof CreativeModeInventoryScreen screen) || screen.getMenu() != container) {
             throw Status.FAILED_PRECONDITION.withDescription("Bot creative inventory screen is not available").asRuntimeException();
           }
-          CreativeInventoryControls.search(screen, request.getText());
+          CreativeInventoryControls.search(screen, text);
           success.set(true);
         } else if (container instanceof AnvilMenu && "item_name".equals(fieldId)) {
           if (minecraft.getConnection() == null) {
@@ -2212,7 +2214,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             throw Status.FAILED_PRECONDITION.withDescription("Bot anvil screen is not available").asRuntimeException();
           }
           // Keep the screen's text and its rename packet responder in sync.
-          ((AnvilScreenAccessor) screen).soulfire$getNameInput().setValue(request.getText());
+          ((AnvilScreenAccessor) screen).soulfire$getNameInput().setValue(text);
           success.set(true);
         } else {
           success.set(false);
