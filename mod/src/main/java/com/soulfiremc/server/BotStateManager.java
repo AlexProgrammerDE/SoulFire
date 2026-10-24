@@ -207,6 +207,7 @@ public final class BotStateManager {
     var configuredIds = Set.copyOf(instanceManager.settingsSource().accounts().keySet());
     var addedIds = new ArrayList<UUID>();
     var removedIds = new ArrayList<UUID>();
+    var removedConnections = new ArrayList<BotConnection>();
     synchronized (stateLock) {
       for (var botId : configuredIds) {
         if (!runtimeEntries.containsKey(botId)) {
@@ -216,7 +217,11 @@ public final class BotStateManager {
           addedIds.add(botId);
         }
       }
-      for (var botId : List.copyOf(runtimeEntries.keySet())) {
+      var knownIds = new HashSet<>(runtimeEntries.keySet());
+      knownIds.addAll(desiredBotIds);
+      knownIds.addAll(generations.keySet());
+      knownIds.addAll(instanceManager.botConnections().keySet());
+      for (var botId : knownIds) {
         if (!configuredIds.contains(botId)) {
           runtimeEntries.remove(botId);
           generations.remove(botId);
@@ -224,12 +229,19 @@ public final class BotStateManager {
           proxyLeases.remove(botId);
           instanceManager.botControlLeaseManager().clear(botId);
           connectQueue.removeIf(queued -> queued.botId().equals(botId));
+          var connection = instanceManager.botConnections().get(botId);
+          if (connection != null) removedConnections.add(connection);
           removedIds.add(botId);
         }
       }
     }
     if (!removedIds.isEmpty()) {
       markStopped(removedIds);
+      var disconnected = removedConnections.stream()
+        .map(bot -> bot.disconnect(Component.text("Bot account was removed"))
+          .thenRun(() -> instanceManager.removeBot(bot)))
+        .toArray(CompletableFuture[]::new);
+      CompletableFuture.allOf(disconnected).join();
       removedIds.forEach(this::publishRemoved);
     }
     addedIds.forEach(this::publishStatus);
@@ -241,7 +253,9 @@ public final class BotStateManager {
     var shouldReconnect = false;
     synchronized (stateLock) {
       proxyLeases.remove(botId);
-      if (shuttingDown || !desiredBotIds.contains(botId)) {
+      if (!instanceManager.settingsSource().accounts().containsKey(botId)) {
+        runtimeEntries.remove(botId);
+      } else if (shuttingDown || !desiredBotIds.contains(botId)) {
         setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_STOPPED, null);
       } else {
         var reason = bot.disconnectReason();
@@ -391,6 +405,8 @@ public final class BotStateManager {
       return;
     }
     synchronized (intentLock) {
+      // An account can be removed while this command waits behind another intent.
+      validateBotIds(botIds);
       var now = LocalDateTime.now(ZoneOffset.UTC);
       instanceManager.dsl().transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -739,6 +755,7 @@ public final class BotStateManager {
   private boolean isCurrentAndDesiredLocked(UUID botId, long generation) {
     return !shuttingDown
       && desiredBotIds.contains(botId)
+      && instanceManager.settingsSource().accounts().containsKey(botId)
       && generations.getOrDefault(botId, 0L) == generation;
   }
 

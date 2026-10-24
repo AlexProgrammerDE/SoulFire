@@ -27,6 +27,7 @@ import com.soulfiremc.server.bot.BotControlLeaseManager;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
+import com.soulfiremc.server.settings.lib.BotSettingsImpl;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.SoulFireUser;
@@ -51,6 +52,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,8 +60,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -289,6 +293,103 @@ final class BotStateManagerTest {
     }
     assertSame(current, fixture.connections().get(fixture.botId()));
     verify(current).connect();
+  }
+
+  @Test
+  void accountRemovalClearsIntentRenewedDuringDisconnect(@TempDir Path directory) {
+    var fixture = fixture(directory, true);
+    var connection = mock(BotConnection.class);
+    when(connection.accountProfileId()).thenReturn(fixture.botId());
+    var settings = new BotSettingsImpl(fixture.settings().accounts().get(fixture.botId()), fixture.settings());
+    when(connection.settingsSource()).thenReturn(settings);
+    var disconnected = new CompletableFuture<Void>();
+    when(connection.disconnect(any())).thenReturn(disconnected);
+    fixture.connections().put(fixture.botId(), connection);
+    doAnswer(_ -> {
+      if (fixture.connections().remove(fixture.botId(), connection)) fixture.manager().connectionRemoved(connection);
+      return null;
+    }).when(fixture.instance()).removeBot(connection);
+
+    var removal = fixture.manager().removeAccounts(List.of(fixture.botId()));
+    fixture.manager().setDesiredState(fixture.user(), List.of(fixture.botId()), BotDesiredState.BOT_DESIRED_STATE_RUNNING);
+    disconnected.complete(null);
+    removal.join();
+    when(fixture.settings().accounts()).thenReturn(Map.of());
+    fixture.manager().syncConfiguredAccounts();
+
+    assertTrue(fixture.manager().desiredBotIdsSnapshot().isEmpty());
+    assertTrue(new BotStateManager(fixture.instance()).desiredBotIdsSnapshot().isEmpty());
+  }
+
+  @Test
+  void configurationRemovalDisconnectsConnectionsStartedAfterTheInitialStop(@TempDir Path directory) {
+    var fixture = fixture(directory, false);
+    fixture.manager().removeAccounts(List.of(fixture.botId())).join();
+    fixture.manager().setDesiredState(fixture.user(), List.of(fixture.botId()), BotDesiredState.BOT_DESIRED_STATE_RUNNING);
+    var connection = mock(BotConnection.class);
+    when(connection.accountProfileId()).thenReturn(fixture.botId());
+    when(connection.disconnect(any())).thenReturn(CompletableFuture.completedFuture(null));
+    fixture.connections().put(fixture.botId(), connection);
+    doAnswer(_ -> {
+      if (fixture.connections().remove(fixture.botId(), connection)) fixture.manager().connectionRemoved(connection);
+      return null;
+    }).when(fixture.instance()).removeBot(connection);
+    when(fixture.settings().accounts()).thenReturn(Map.of());
+
+    fixture.manager().syncConfiguredAccounts();
+
+    assertTrue(fixture.connections().isEmpty());
+    assertTrue(fixture.manager().desiredBotIdsSnapshot().isEmpty());
+    verify(connection).disconnect(any());
+  }
+
+  @Test
+  void aStartWaitingForPersistenceRechecksTheConfiguredAccount(@TempDir Path directory) throws Exception {
+    var fixture = fixture(directory, true);
+    var accounts = fixture.settings().accounts();
+    var stopping = new AtomicReference<Thread>();
+    var starting = new AtomicReference<Thread>();
+    var committed = new CountDownLatch(1);
+    var validated = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    doAnswer(invocation -> {
+      invocation.callRealMethod();
+      if (Thread.currentThread() == stopping.get()) {
+        committed.countDown();
+        assertTrue(resume.await(5, TimeUnit.SECONDS));
+      }
+      return null;
+    }).when(fixture.dsl()).transaction(any(TransactionalRunnable.class));
+    doAnswer(_ -> {
+      if (Thread.currentThread() == starting.get()) validated.countDown();
+      return accounts;
+    }).when(fixture.settings()).accounts();
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var stop = workers.submit(() -> {
+        stopping.set(Thread.currentThread());
+        Intent.STOP.apply(fixture.manager(), fixture.user(), fixture.botId());
+      });
+      try {
+        assertTrue(committed.await(5, TimeUnit.SECONDS));
+        var start = workers.submit(() -> {
+          starting.set(Thread.currentThread());
+          Intent.START.apply(fixture.manager(), fixture.user(), fixture.botId());
+        });
+        try {
+          assertTrue(validated.await(5, TimeUnit.SECONDS));
+          when(fixture.settings().accounts()).thenReturn(Map.of());
+        } finally {
+          resume.countDown();
+        }
+        stop.get(5, TimeUnit.SECONDS);
+        assertInstanceOf(IllegalArgumentException.class,
+          assertThrows(ExecutionException.class, () -> start.get(5, TimeUnit.SECONDS)).getCause());
+      } finally {
+        resume.countDown();
+      }
+    }
+    assertTrue(fixture.manager().desiredBotIdsSnapshot().isEmpty());
+    assertTrue(new BotStateManager(fixture.instance()).desiredBotIdsSnapshot().isEmpty());
   }
 
   private enum Removal { EXPLICIT, CONFIGURATION }
