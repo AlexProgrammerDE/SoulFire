@@ -26,6 +26,10 @@ const CASES = [
   { menu: "inventory", item: "diamond", amount: 3, full: true, dropped: true },
   { menu: "crafting_table", item: "diamond", amount: 3, full: true, dropped: true },
   { menu: "crafting_table", item: "oak_planks", amount: 3, slot: 1, full: true, dropped: true },
+  { menu: "inventory", item: "diamond", amount: 3, creative: true, stop: true },
+  { menu: "inventory", item: "diamond", amount: 3, creative: true, close: true },
+  { menu: "inventory", item: "diamond", amount: 3, creative: true, merge: 61 },
+  { menu: "inventory", item: "diamond", amount: 3, creative: true, full: true, dropped: true },
 ] satisfies {
   menu: string;
   item: string;
@@ -35,6 +39,9 @@ const CASES = [
   stored?: boolean;
   dropped?: boolean;
   full?: boolean;
+  creative?: boolean;
+  close?: boolean;
+  merge?: number;
 }[];
 
 const menuType = (block: string) => {
@@ -89,6 +96,7 @@ export default {
         yield* rcon("fill 4256 63 0 4287 63 15 stone");
         for (const spec of CASES) {
           const { menu, item, amount } = spec;
+          const expectedAmount = amount + ("merge" in spec ? spec.merge : 0);
           const slot = "slot" in spec ? spec.slot : undefined;
           yield* bot.closeContainer();
           yield* placeBot(bot, { x: 4264.5, y: 64, z: 8.5 });
@@ -122,6 +130,8 @@ export default {
               connectionEpoch: reference.connectionEpoch,
               hand: Hand.MAIN,
             });
+          } else if ("creative" in spec) {
+            yield* bot.openInventory();
           } else if (menu !== "inventory") {
             if (menu === "beacon") {
               yield* rcon("fill 4262 63 7 4264 63 9 iron_block");
@@ -135,7 +145,8 @@ export default {
               .pipe(
                 Effect.tap((state) =>
                   check(
-                    state.layout?.containerType === menuType(menu) &&
+                    state.layout?.containerType ===
+                      ("creative" in spec ? "creative" : menuType(menu)) &&
                       state.slots.some((stack) => stack.itemId === `minecraft:${item}`),
                     `${menu} did not open with the fixture item`,
                   ),
@@ -182,6 +193,24 @@ export default {
             yield* rcon(`give ${BOT_NAME} stone 2304`);
             yield* rcon(`item replace entity ${BOT_NAME} weapon.offhand with stone 64`);
           }
+          if ("merge" in spec) {
+            yield* rcon(`give ${BOT_NAME} ${item} ${spec.merge}`);
+            yield* eventually(
+              bot.inventoryState().pipe(
+                Effect.tap((state) =>
+                  check(
+                    state.slots.some(
+                      (slot) => slot.itemId === `minecraft:${item}` && slot.count === spec.merge,
+                    ),
+                    "The merge target did not reach the client",
+                  ),
+                ),
+              ),
+              "5 seconds",
+              "50 millis",
+            );
+          }
+          if ("close" in spec) yield* bot.closeContainer();
           const epoch = (yield* bot.world.player()).connectionEpoch;
           if ("stop" in spec) {
             yield* bot.stop();
@@ -246,13 +275,13 @@ export default {
                   0,
                 );
                 yield* check(
-                  held + dropped === amount,
+                  held + dropped === expectedAmount,
                   `${menu} lost or duplicated dropped ${item}`,
                 );
               } else {
                 yield* check(
-                  held === amount,
-                  `${menu} lost or duplicated ${item} during disconnect`,
+                  held === expectedAmount,
+                  `Inventory return mismatch: ${JSON.stringify(spec)}; held ${held}, expected ${expectedAmount}`,
                 );
               }
             }),

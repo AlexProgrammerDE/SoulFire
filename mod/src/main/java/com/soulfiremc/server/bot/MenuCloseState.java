@@ -74,6 +74,10 @@ final class MenuCloseState {
     return new MenuCloseState(inventoryUpdate, inventoryItems(player), groundItems(player), returning);
   }
 
+  static MenuCloseState captureCreativeCursor(LocalPlayer player, long inventoryUpdate, ItemStack carried) {
+    return new MenuCloseState(inventoryUpdate, inventoryItems(player), groundItems(player), List.of(carried));
+  }
+
   CompletableFuture<Void> completion() {
     return completion;
   }

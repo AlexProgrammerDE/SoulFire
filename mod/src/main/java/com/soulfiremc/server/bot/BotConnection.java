@@ -118,6 +118,7 @@ import net.minecraft.server.network.EventLoopGroupHolder;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiling.ContinuousProfiler;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -191,6 +192,8 @@ public final class BotConnection {
   private volatile boolean isDisconnected;
   @Getter(AccessLevel.NONE)
   private volatile @Nullable MenuCloseState closingMenu;
+  @Getter(AccessLevel.NONE)
+  private volatile @Nullable MenuCloseState creativeCursorReturn;
   @Getter(AccessLevel.NONE)
   private long inventoryUpdates;
 
@@ -708,6 +711,15 @@ public final class BotConnection {
     if (state != null) {
       state.tick(minecraft, inventoryUpdates);
     }
+    var creative = creativeCursorReturn;
+    if (creative != null) {
+      creative.tick(minecraft, inventoryUpdates);
+      if (creative.completion().isDone()) creativeCursorReturn = null;
+    }
+  }
+
+  public void beginCreativeCursorReturn(ItemStack carried) {
+    creativeCursorReturn = MenuCloseState.captureCreativeCursor(minecraft.player, inventoryUpdates, carried);
   }
 
   private void closeMenuAndNotify(Component reason) {
@@ -740,9 +752,11 @@ public final class BotConnection {
         }
       }).get(DISCONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
       var state = closingMenu;
-      if (state != null) {
-        state.completion().get(DISCONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-      }
+      var creative = creativeCursorReturn;
+      CompletableFuture.allOf(
+        state == null ? CompletableFuture.completedFuture(null) : state.completion(),
+        creative == null ? CompletableFuture.completedFuture(null) : creative.completion()
+      ).get(DISCONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       log.warn("Interrupted while returning menu items for {}", accountName, e);
@@ -750,6 +764,7 @@ public final class BotConnection {
       log.warn("Failed to return menu items before disconnecting {}", accountName, e);
     } finally {
       closingMenu = null;
+      creativeCursorReturn = null;
       notify.run();
     }
   }
