@@ -813,4 +813,171 @@ final class ScriptExecutionServiceTest {
     assertEquals(2, outputs.get("vector").getStructValue().getFieldsOrThrow("y").getNumberValue());
     assertEquals(List.of(4.0, 5.0), outputs.get("collection").getListValue().getValuesList().stream().map(Value::getNumberValue).toList());
   }
+
+  private record LayoutGroup(ScriptNode node, ScriptNode input, ScriptNode output) {}
+
+  private CreateScriptRequest.Builder groupRequest() {
+    return CreateScriptRequest.newBuilder().setInstanceId(instanceId).setName("group routing").setPaused(true)
+      .addNodes(ScriptNode.newBuilder().setId(triggerId).setType("trigger.on_chat"));
+  }
+
+  private static ScriptNode.Builder layoutNode(String type) {
+    return ScriptNode.newBuilder().setId(UUID.randomUUID().toString()).setType(type);
+  }
+
+  private static ScriptNode.Builder insideGroup(String type, LayoutGroup group) {
+    return layoutNode(type).putData("parentGroupId", Value.newBuilder().setStringValue(group.node().getId()).build());
+  }
+
+  private static LayoutGroup addLayoutGroup(CreateScriptRequest.Builder request, Optional<LayoutGroup> parent) {
+    var node = layoutNode("layout.group");
+    parent.ifPresent(group -> node.putData("parentGroupId", Value.newBuilder().setStringValue(group.node().getId()).build()));
+    var root = node.build();
+    var parentId = Value.newBuilder().setStringValue(root.getId()).build();
+    var input = layoutNode("layout.group_input").putData("parentGroupId", parentId).build();
+    var output = layoutNode("layout.group_output").putData("parentGroupId", parentId).build();
+    request.addNodes(root).addNodes(input).addNodes(output);
+    return new LayoutGroup(root, input, output);
+  }
+
+  private static ScriptEdge.Builder layoutEdge(ScriptNode source, String sourceHandle, ScriptNode target, String targetHandle, EdgeType type) {
+    return ScriptEdge.newBuilder().setId(UUID.randomUUID().toString()).setSource(source.getId()).setSourceHandle(sourceHandle)
+      .setTarget(target.getId()).setTargetHandle(targetHandle).setEdgeType(type);
+  }
+
+  private void runGroup(CreateScriptRequest.Builder request) throws InterruptedException {
+    var created = this.<CreateScriptResponse>rpcResponse(observer -> service.createScript(request.build(), observer));
+    run(request(created.getScript().getId()).build());
+    awaitCompletion();
+    assertTrue(events.getLast().getScriptCompleted().getSuccess());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void groupInputsReachEveryExecutionTarget(boolean nested) throws InterruptedException {
+    var request = groupRequest();
+    var trigger = request.getNodes(0);
+    var outer = addLayoutGroup(request, Optional.empty());
+    var inner = nested ? addLayoutGroup(request, Optional.of(outer)) : outer;
+    if (nested) request.addEdges(layoutEdge(outer.input(), "input", inner.node(), "input", EdgeType.EDGE_TYPE_EXECUTION));
+    var first = insideGroup("action.print", inner).putData("message", Value.newBuilder().setNumberValue(1).build()).build();
+    var second = insideGroup("action.print", inner).putData("message", Value.newBuilder().setNumberValue(2).build()).build();
+    request.addNodes(first).addNodes(second)
+      .addEdges(layoutEdge(trigger, "out", outer.node(), "input", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(inner.input(), "input", first, "in", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(inner.input(), "input", second, "in", EdgeType.EDGE_TYPE_EXECUTION));
+    runGroup(request);
+    var executed = events.stream().filter(ScriptEvent::hasNodeCompleted).map(event -> event.getNodeCompleted().getNodeId()).toList();
+    assertTrue(executed.contains(first.getId()));
+    assertTrue(executed.contains(second.getId()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void groupPassThroughPreservesExecutionAndData(boolean data) throws InterruptedException {
+    var request = groupRequest();
+    var trigger = request.getNodes(0);
+    var group = addLayoutGroup(request, Optional.empty());
+    var action = layoutNode("action.print").putData("message", Value.newBuilder().setNumberValue(17).build()).build();
+    request.addNodes(action);
+    var type = data ? EdgeType.EDGE_TYPE_DATA : EdgeType.EDGE_TYPE_EXECUTION;
+    request.addEdges(layoutEdge(group.input(), "input", group.output(), "output", type));
+    if (data) {
+      var constant = layoutNode("constant.number").putData("value", Value.newBuilder().setNumberValue(29).build()).build();
+      request.addNodes(constant)
+        .addEdges(layoutEdge(trigger, "out", action, "in", EdgeType.EDGE_TYPE_EXECUTION))
+        .addEdges(layoutEdge(constant, "value", group.node(), "input", type))
+        .addEdges(layoutEdge(group.node(), "output", action, "message", type));
+    } else {
+      request.addEdges(layoutEdge(trigger, "out", group.node(), "input", type))
+        .addEdges(layoutEdge(group.node(), "output", action, "in", type));
+    }
+    runGroup(request);
+    var values = events.stream().filter(ScriptEvent::hasScriptLog)
+      .map(event -> Double.parseDouble(event.getScriptLog().getMessage())).toList();
+    assertEquals(List.of(data ? 29.0 : 17.0), values);
+  }
+
+  @Test
+  void groupOutputsPreserveEveryIncomingExecutionBranch() throws InterruptedException {
+    var request = groupRequest();
+    var trigger = request.getNodes(0);
+    var group = addLayoutGroup(request, Optional.empty());
+    var first = insideGroup("action.print", group).putData("message", Value.newBuilder().setNumberValue(1).build()).build();
+    var second = insideGroup("action.print", group).putData("message", Value.newBuilder().setNumberValue(2).build()).build();
+    var after = layoutNode("action.print").putData("message", Value.newBuilder().setNumberValue(3).build()).build();
+    request.addNodes(first).addNodes(second).addNodes(after)
+      .addEdges(layoutEdge(trigger, "out", group.node(), "first", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(trigger, "out", group.node(), "second", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(group.input(), "first", first, "in", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(group.input(), "second", second, "in", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(first, "out", group.output(), "output", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(second, "out", group.output(), "output", EdgeType.EDGE_TYPE_EXECUTION))
+      .addEdges(layoutEdge(group.node(), "output", after, "in", EdgeType.EDGE_TYPE_EXECUTION));
+    runGroup(request);
+    assertEquals(2, events.stream().filter(ScriptEvent::hasNodeCompleted)
+      .filter(event -> event.getNodeCompleted().getNodeId().equals(after.getId())).count());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void groupInputsReachEveryDataConsumer(boolean nested) throws InterruptedException {
+    var request = groupRequest();
+    var trigger = request.getNodes(0);
+    var outer = addLayoutGroup(request, Optional.empty());
+    var inner = nested ? addLayoutGroup(request, Optional.of(outer)) : outer;
+    if (nested) {
+      request.addEdges(layoutEdge(outer.input(), "input", inner.node(), "input", EdgeType.EDGE_TYPE_DATA));
+      for (var port : List.of("first", "second")) {
+        request.addEdges(layoutEdge(inner.node(), port, outer.output(), port, EdgeType.EDGE_TYPE_DATA));
+      }
+    }
+    var constant = layoutNode("constant.number").putData("value", Value.newBuilder().setNumberValue(17).build()).build();
+    var first = insideGroup("math.add", inner).putData("b", Value.newBuilder().setNumberValue(2).build()).build();
+    var second = insideGroup("math.add", inner).putData("b", Value.newBuilder().setNumberValue(3).build()).build();
+    request.addNodes(constant).addNodes(first).addNodes(second)
+      .addEdges(layoutEdge(constant, "value", outer.node(), "input", EdgeType.EDGE_TYPE_DATA))
+      .addEdges(layoutEdge(inner.input(), "input", first, "a", EdgeType.EDGE_TYPE_DATA))
+      .addEdges(layoutEdge(inner.input(), "input", second, "a", EdgeType.EDGE_TYPE_DATA))
+      .addEdges(layoutEdge(first, "result", inner.output(), "first", EdgeType.EDGE_TYPE_DATA))
+      .addEdges(layoutEdge(second, "result", inner.output(), "second", EdgeType.EDGE_TYPE_DATA));
+    for (var port : List.of("first", "second")) {
+      var print = layoutNode("action.print").build();
+      request.addNodes(print).addEdges(layoutEdge(trigger, "out", print, "in", EdgeType.EDGE_TYPE_EXECUTION))
+        .addEdges(layoutEdge(outer.node(), port, print, "message", EdgeType.EDGE_TYPE_DATA));
+    }
+    runGroup(request);
+    var sums = events.stream().filter(ScriptEvent::hasNodeCompleted).map(ScriptEvent::getNodeCompleted)
+      .filter(event -> event.getNodeId().equals(first.getId()) || event.getNodeId().equals(second.getId()))
+      .map(event -> event.getOutputsOrThrow("result").getNumberValue()).sorted().toList();
+    assertEquals(List.of(19.0, 20.0), sums);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void groupRewiringKeepsTheConsumersMultiInputOrder(boolean nested) throws InterruptedException {
+    var request = groupRequest();
+    var trigger = request.getNodes(0);
+    var outer = addLayoutGroup(request, Optional.empty());
+    var inner = nested ? addLayoutGroup(request, Optional.of(outer)) : outer;
+    var list = insideGroup("list.create", inner).build();
+    var print = layoutNode("action.print").build();
+    request.addNodes(list).addNodes(print).addEdges(layoutEdge(trigger, "out", print, "in", EdgeType.EDGE_TYPE_EXECUTION));
+    for (var value : List.of(1, 2)) {
+      var port = String.valueOf(value);
+      var constant = layoutNode("constant.number").putData("value", Value.newBuilder().setNumberValue(value).build()).build();
+      request.addNodes(constant).addEdges(layoutEdge(constant, "value", outer.node(), port, EdgeType.EDGE_TYPE_DATA).setOrder(value - 1));
+      if (nested) request.addEdges(layoutEdge(outer.input(), port, inner.node(), port, EdgeType.EDGE_TYPE_DATA).setOrder(value - 1));
+      request.addEdges(layoutEdge(inner.input(), port, list, "items", EdgeType.EDGE_TYPE_DATA).setOrder(2 - value));
+    }
+    request.addEdges(layoutEdge(list, "list", inner.output(), "output", EdgeType.EDGE_TYPE_DATA));
+    if (nested) request.addEdges(layoutEdge(inner.node(), "output", outer.output(), "output", EdgeType.EDGE_TYPE_DATA));
+    request.addEdges(layoutEdge(outer.node(), "output", print, "message", EdgeType.EDGE_TYPE_DATA));
+    runGroup(request);
+    var output = events.stream().filter(ScriptEvent::hasNodeCompleted).map(ScriptEvent::getNodeCompleted)
+      .filter(event -> event.getNodeId().equals(list.getId())).findFirst().orElseThrow();
+    assertEquals(List.of(2.0, 1.0), output.getOutputsOrThrow("list").getListValue().getValuesList().stream()
+      .map(Value::getNumberValue).toList());
+  }
+
 }

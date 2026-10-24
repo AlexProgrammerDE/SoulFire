@@ -1309,23 +1309,28 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .toList();
         for (var extEdge : incomingToGroup) {
           var portId = extEdge.targetHandle();
-          // Find the internal edge from groupInput with matching sourceHandle
+          // One exposed input can feed several internal consumers.
           var giId = groupInput.id();
-          var internalEdge = edges.stream()
+          var internalEdges = edges.stream()
             .filter(e -> giId.equals(e.source()) && portId.equals(e.sourceHandle()))
-            .findFirst().orElse(null);
-          if (internalEdge != null) {
+            .toList();
+          for (var internalEdge : internalEdges) {
             edges.add(new ScriptEdgeData(
-              extEdge.id() + "_rewired",
+              extEdge.id() + "_" + internalEdge.id(),
               extEdge.source(), extEdge.sourceHandle(),
               internalEdge.target(), internalEdge.targetHandle(),
               extEdge.edgeType(),
-              extEdge.order()
+              internalEdge.order()
             ));
-          } else {
+          }
+          if (internalEdges.isEmpty()) {
             log.warn("Group {} flattening: could not find internal edge for handle '{}', dropping connection", groupId, portId);
           }
         }
+        // A direct input-to-output wire now has real upstream sources. Remove
+        // the interface's original wires before resolving the output side.
+        var giId = groupInput.id();
+        edges.removeIf(e -> giId.equals(e.source()) || giId.equals(e.target()));
       }
 
       // Rewire outgoing edges (group node -> external becomes internal source -> external)
@@ -1335,20 +1340,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
           .toList();
         for (var extEdge : outgoingFromGroup) {
           var portId = extEdge.sourceHandle();
-          // Find the internal edge to groupOutput with matching targetHandle
+          // Execution branches can converge on the same exposed output.
           var goId = groupOutput.id();
-          var internalEdge = edges.stream()
+          var internalEdges = edges.stream()
             .filter(e -> goId.equals(e.target()) && portId.equals(e.targetHandle()))
-            .findFirst().orElse(null);
-          if (internalEdge != null) {
+            .toList();
+          for (var internalEdge : internalEdges) {
             edges.add(new ScriptEdgeData(
-              extEdge.id() + "_rewired",
+              extEdge.id() + "_" + internalEdge.id(),
               internalEdge.source(), internalEdge.sourceHandle(),
               extEdge.target(), extEdge.targetHandle(),
               extEdge.edgeType(),
               extEdge.order()
             ));
-          } else {
+          }
+          if (internalEdges.isEmpty()) {
             log.warn("Group {} flattening: could not find internal edge for handle '{}', dropping connection", groupId, portId);
           }
         }
