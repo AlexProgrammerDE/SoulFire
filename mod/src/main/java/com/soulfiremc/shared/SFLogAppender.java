@@ -95,11 +95,10 @@ public final class SFLogAppender extends AbstractAppender {
   }
 
   public void publishLogEvent(SFLogEvent event) {
+    logs.add(event);
     for (var consumer : logConsumers) {
       consumer.accept(event);
     }
-
-    logs.add(event);
   }
 
   public record SFLogEvent(
