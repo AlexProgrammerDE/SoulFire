@@ -1268,12 +1268,34 @@ public final class InventoryServiceImpl
       throw wholeOnly(source);
     }
 
-    click(context, source.index, 0, ContainerInput.PICKUP);
-    for (var moved = 0; moved < count; moved++) {
-      click(context, destination.index, 1, ContainerInput.PICKUP);
+    var canReturn = !takenWholeOnly(source);
+    var halfCount = (sourceStack.getCount() + 1) / 2;
+    var takeHalf = canReturn && count <= halfCount
+      && count != Math.min(sourceStack.getCount(), capacity)
+      && (count == Math.min(halfCount, capacity) || halfCount - count < count);
+    click(context, source.index, takeHalf ? 1 : 0, ContainerInput.PICKUP);
+    var carriedCount = context.menu.getCarried().getCount();
+    var excess = carriedCount - count;
+    if (canReturn && count != Math.min(carriedCount, capacity) && excess < count) {
+      for (var returned = 0; returned < excess; returned++) {
+        click(context, source.index, 1, ContainerInput.PICKUP);
+      }
     }
+    placeCarried(context, destination, count);
     if (!context.menu.getCarried().isEmpty()) {
       click(context, source.index, 0, ContainerInput.PICKUP);
+    }
+  }
+
+  private static void placeCarried(Context context, Slot destination, int count) {
+    var carried = context.menu.getCarried();
+    var capacity = destination.getMaxStackSize(carried) - destination.getItem().getCount();
+    if (count == Math.min(carried.getCount(), capacity)) {
+      click(context, destination.index, 0, ContainerInput.PICKUP);
+    } else {
+      for (var placed = 0; placed < count; placed++) {
+        click(context, destination.index, 1, ContainerInput.PICKUP);
+      }
     }
   }
 
@@ -1324,9 +1346,8 @@ public final class InventoryServiceImpl
       }
       click(context, source.index, 0, ContainerInput.PICKUP);
       for (; i < moves.size() && moves.get(i).source == source.index; i++) {
-        for (var placed = 0; placed < moves.get(i).count; placed++) {
-          click(context, moves.get(i).destination, 1, ContainerInput.PICKUP);
-        }
+        var plannedMove = moves.get(i);
+        placeCarried(context, context.menu.getSlot(plannedMove.destination), plannedMove.count);
       }
     }
   }
