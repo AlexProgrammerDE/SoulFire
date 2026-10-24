@@ -1574,20 +1574,18 @@ public final class InventoryServiceImpl
       case OFFHAND -> 45;
       default -> throw new AssertionError("Unexpected equipment slot");
     };
+    var destination = context.menu.getSlot(targetIndex);
     var source = context.menu.slots.stream()
       .filter(value -> value.index != targetIndex)
       .filter(value -> matches(value.getItem(), request.getSelector()))
-      .filter(value -> context.player.isEquippableInSlot(
-        value.getItem(),
-        slot
-      ))
+      .filter(value -> destination.mayPlace(value.getItem()))
       .findFirst()
       .orElseThrow(() -> Status.NOT_FOUND
         .withDescription(
           "No matching item can be equipped in " + slot.getSerializedName()
         )
         .asRuntimeException());
-    equipIntoSlot(context, source, context.menu.getSlot(targetIndex));
+    equipIntoSlot(context, source, destination);
   }
 
   private static void unequip(
@@ -1685,28 +1683,31 @@ public final class InventoryServiceImpl
     var destinationItem = destination.getItem();
     if (!source.mayPickup(context.player)
       || !destination.mayPickup(context.player)
-      || !destination.mayPlace(sourceItem)
-      || !destinationItem.isEmpty() && !source.mayPlace(destinationItem)) {
+      || !destination.mayPlace(sourceItem)) {
       throw Status.FAILED_PRECONDITION
         .withDescription("The requested slots do not allow this swap")
         .asRuntimeException();
     }
     var equippedCount = Math.min(sourceItem.getCount(), destination.getMaxStackSize(sourceItem));
-    if (equippedCount < sourceItem.getCount()) {
-      if (takenWholeOnly(source)) {
-        throw wholeOnly(source);
-      }
-      if (!destinationItem.isEmpty()) {
-        var destinations = context.menu.slots.stream()
-          .filter(slot -> slot.index != source.index)
-          .filter(slot -> matchesArea(
-            InventoryArea.INVENTORY_AREA_PLAYER,
-            area(context.layout, slot.index)
-          ))
-          .toList();
-        var displaced = planMoves(List.of(destination), destinations, destinationItem.getCount());
-        applyMoves(context, displaced);
-      }
+    var splitSource = equippedCount < sourceItem.getCount();
+    if (splitSource && takenWholeOnly(source)) {
+      throw wholeOnly(source);
+    }
+    var displace = !destinationItem.isEmpty()
+      && (splitSource || !source.mayPlace(destinationItem)
+      || destinationItem.getCount() > source.getMaxStackSize(destinationItem));
+    if (displace) {
+      var destinations = context.menu.slots.stream()
+        .filter(slot -> slot.index != source.index)
+        .filter(slot -> matchesArea(
+          InventoryArea.INVENTORY_AREA_PLAYER,
+          area(context.layout, slot.index)
+        ))
+        .toList();
+      var displaced = planMoves(List.of(destination), destinations, destinationItem.getCount());
+      applyMoves(context, displaced);
+    }
+    if (splitSource || displace) {
       moveExact(context, source, destination, equippedCount);
       return;
     }
