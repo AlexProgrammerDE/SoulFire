@@ -60,6 +60,7 @@ public final class SocketAddressHelper {
   public static SocketAddress deserialize(String uriString) {
     var uri = URI.create(uriString);
     return switch (uri.getScheme()) {
+      case null -> throw new IllegalArgumentException("Address must include an inet:// or unix:// scheme");
       case "inet" -> {
         var host = uri.getHost();
         var port = uri.getPort();
@@ -70,6 +71,9 @@ public final class SocketAddressHelper {
       }
       case "unix" -> {
         var path = uri.getPath();
+        if (path == null) {
+          throw new IllegalArgumentException("Invalid unix address, expected format 'unix:///path' but got: " + uriString);
+        }
         yield UnixDomainSocketAddress.of(path);
       }
       default -> throw new IllegalArgumentException("Unsupported scheme: " + uri.getScheme());

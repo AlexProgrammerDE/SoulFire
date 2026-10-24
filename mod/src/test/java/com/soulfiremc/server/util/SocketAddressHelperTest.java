@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.net.UnixDomainSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class SocketAddressHelperTest {
   @ParameterizedTest
@@ -34,6 +35,12 @@ final class SocketAddressHelperTest {
     var serialized = SocketAddressHelper.serialize(address);
     assertEquals(address, SocketAddressHelper.deserialize(serialized));
     assertEquals(serialized, SocketAddressHelper.serialize(SocketAddressHelper.deserialize(serialized)));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"localhost", "unix:relative"})
+  void incompleteUrisReportInvalidArguments(String input) {
+    assertThrows(IllegalArgumentException.class, () -> SocketAddressHelper.deserialize(input));
   }
 
   @Test

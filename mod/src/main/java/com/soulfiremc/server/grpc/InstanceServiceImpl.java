@@ -385,6 +385,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error updating instance config", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -694,6 +696,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
+      var proxy = SFProxy.fromProto(request.getProxy());
       var dsl = soulFireServer.dsl();
       dsl.transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -704,7 +707,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         var currentSettings = parseSettings(record.getSettings());
         var newProxies = new ArrayList<>(currentSettings.proxies());
-        newProxies.add(SFProxy.fromProto(request.getProxy()));
+        newProxies.add(proxy);
         var updatedStem = currentSettings.withProxies(newProxies);
 
         ctx.update(Tables.INSTANCES)
@@ -719,6 +722,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error adding instance proxy", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -773,6 +778,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
+      var proxy = SFProxy.fromProto(request.getProxy());
       var dsl = soulFireServer.dsl();
       dsl.transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -786,7 +792,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
         if (index < 0 || index >= newProxies.size()) {
           throw Status.INVALID_ARGUMENT.withDescription("Proxy index '%d' out of bounds".formatted(index)).asRuntimeException();
         }
-        newProxies.set(index, SFProxy.fromProto(request.getProxy()));
+        newProxies.set(index, proxy);
         var updatedStem = currentSettings.withProxies(newProxies);
 
         ctx.update(Tables.INSTANCES)
@@ -801,6 +807,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error updating instance proxy", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -813,6 +821,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
     ServerRPCConstants.USER_CONTEXT_KEY.get().hasPermissionOrThrow(PermissionContext.instance(InstancePermission.UPDATE_INSTANCE_CONFIG, instanceId));
 
     try {
+      var proxies = request.getProxiesList().stream().map(SFProxy::fromProto).toList();
       var dsl = soulFireServer.dsl();
       dsl.transaction(cfg -> {
         var ctx = DSL.using(cfg);
@@ -823,9 +832,7 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
 
         var currentSettings = parseSettings(record.getSettings());
         var newProxies = new ArrayList<>(currentSettings.proxies());
-        for (var proxyProto : request.getProxiesList()) {
-          newProxies.add(SFProxy.fromProto(proxyProto));
-        }
+        newProxies.addAll(proxies);
         var updatedStem = currentSettings.withProxies(newProxies);
 
         ctx.update(Tables.INSTANCES)
@@ -840,6 +847,8 @@ public final class InstanceServiceImpl extends InstanceServiceGrpc.InstanceServi
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error adding instance proxies batch", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
