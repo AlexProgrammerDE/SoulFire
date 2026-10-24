@@ -1587,7 +1587,7 @@ public final class InventoryServiceImpl
           "No matching item can be equipped in " + slot.getSerializedName()
         )
         .asRuntimeException());
-    swap(context, source, context.menu.getSlot(targetIndex));
+    equipIntoSlot(context, source, context.menu.getSlot(targetIndex));
   }
 
   private static void unequip(
@@ -1680,21 +1680,40 @@ public final class InventoryServiceImpl
     };
   }
 
-  private static void swap(Context context, Slot first, Slot second) {
-    var firstItem = first.getItem();
-    var secondItem = second.getItem();
-    if (!first.mayPickup(context.player)
-      || !second.mayPickup(context.player)
-      || !second.mayPlace(firstItem)
-      || !secondItem.isEmpty() && !first.mayPlace(secondItem)) {
+  private static void equipIntoSlot(Context context, Slot source, Slot destination) {
+    var sourceItem = source.getItem();
+    var destinationItem = destination.getItem();
+    if (!source.mayPickup(context.player)
+      || !destination.mayPickup(context.player)
+      || !destination.mayPlace(sourceItem)
+      || !destinationItem.isEmpty() && !source.mayPlace(destinationItem)) {
       throw Status.FAILED_PRECONDITION
         .withDescription("The requested slots do not allow this swap")
         .asRuntimeException();
     }
-    click(context, first.index, 0, ContainerInput.PICKUP);
-    click(context, second.index, 0, ContainerInput.PICKUP);
+    var equippedCount = Math.min(sourceItem.getCount(), destination.getMaxStackSize(sourceItem));
+    if (equippedCount < sourceItem.getCount()) {
+      if (takenWholeOnly(source)) {
+        throw wholeOnly(source);
+      }
+      if (!destinationItem.isEmpty()) {
+        var destinations = context.menu.slots.stream()
+          .filter(slot -> slot.index != source.index)
+          .filter(slot -> matchesArea(
+            InventoryArea.INVENTORY_AREA_PLAYER,
+            area(context.layout, slot.index)
+          ))
+          .toList();
+        var displaced = planMoves(List.of(destination), destinations, destinationItem.getCount());
+        applyMoves(context, displaced);
+      }
+      moveExact(context, source, destination, equippedCount);
+      return;
+    }
+    click(context, source.index, 0, ContainerInput.PICKUP);
+    click(context, destination.index, 0, ContainerInput.PICKUP);
     if (!context.menu.getCarried().isEmpty()) {
-      click(context, first.index, 0, ContainerInput.PICKUP);
+      click(context, source.index, 0, ContainerInput.PICKUP);
     }
   }
 
