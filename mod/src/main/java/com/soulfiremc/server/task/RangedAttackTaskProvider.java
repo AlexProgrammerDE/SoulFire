@@ -39,8 +39,10 @@ import com.soulfiremc.server.util.SFEntityHelpers;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import io.grpc.Status;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
@@ -218,6 +220,7 @@ public final class RangedAttackTaskProvider
     private int cooldownTicks;
     private boolean strafeRight;
     private boolean lastObservedAlive;
+    private boolean active;
     private final ShotProgressWatchdog shotProgress =
       new ShotProgressWatchdog(MAX_IN_RANGE_TICKS_WITHOUT_SHOT);
 
@@ -389,7 +392,7 @@ public final class RangedAttackTaskProvider
         );
         return;
       }
-      if (player.getProjectile(weapon).isEmpty()) {
+      if (!CrossbowItem.isCharged(weapon) && player.getProjectile(weapon).isEmpty()) {
         stopUsingItem();
         complete(
           RangedAttackCompletionReason
@@ -472,6 +475,7 @@ public final class RangedAttackTaskProvider
       );
       if (!player.isUsingItem()) {
         if (cooldownTicks == 0) {
+          context.bot().minecraft().options.keyUse.setDown(true);
           gameMode.useItem(player, InteractionHand.MAIN_HAND);
         }
         return;
@@ -482,6 +486,7 @@ public final class RangedAttackTaskProvider
       if (!facing) {
         return;
       }
+      context.bot().minecraft().options.keyUse.setDown(false);
       gameMode.releaseUsingItem(player);
       releasedShot();
     }
@@ -492,21 +497,18 @@ public final class RangedAttackTaskProvider
         context.bot().minecraft().gameMode
       );
       if (CrossbowItem.isCharged(weapon)) {
+        stopUsingItem();
         if (cooldownTicks == 0 && facing) {
           gameMode.useItem(player, InteractionHand.MAIN_HAND);
           releasedShot();
         }
         return;
       }
+      // The server loads the projectiles while use is held. Wait for that
+      // inventory update before releasing, including when loading the last arrow.
       if (!player.isUsingItem()) {
+        context.bot().minecraft().options.keyUse.setDown(true);
         gameMode.useItem(player, InteractionHand.MAIN_HAND);
-        return;
-      }
-      if (
-        player.getTicksUsingItem()
-          >= CrossbowItem.getChargeDuration(weapon, player)
-      ) {
-        gameMode.releaseUsingItem(player);
       }
     }
 
@@ -697,10 +699,23 @@ public final class RangedAttackTaskProvider
     }
 
     private void stopUsingItem() {
+      context.bot().minecraft().options.keyUse.setDown(false);
       var player = context.bot().minecraft().player;
       var gameMode = context.bot().minecraft().gameMode;
       if (player != null && gameMode != null && player.isUsingItem()) {
-        gameMode.releaseUsingItem(player);
+        if (player.getUsedItemHand() == InteractionHand.MAIN_HAND
+          && player.getUseItem().getItem() instanceof BowItem) {
+          // Releasing a drawn bow shoots it. A temporary hotbar switch instead
+          // cancels use on the server without firing or changing our selection.
+          var selectedSlot = player.getInventory().getSelectedSlot();
+          player.connection.send(new ServerboundSetCarriedItemPacket(
+            (selectedSlot + 1) % Inventory.getSelectionSize()
+          ));
+          player.connection.send(new ServerboundSetCarriedItemPacket(selectedSlot));
+          player.stopUsingItem();
+        } else {
+          gameMode.releaseUsingItem(player);
+        }
       }
     }
 
@@ -760,8 +775,15 @@ public final class RangedAttackTaskProvider
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       stopUsingItem();
+      context.bot().controlState().resetAll();
       if (path != null) {
         path.onSuspended();
       }
@@ -769,6 +791,7 @@ public final class RangedAttackTaskProvider
 
     @Override
     public void onResumed() {
+      active = true;
       if (path != null) {
         path.onResumed();
       }
@@ -779,12 +802,15 @@ public final class RangedAttackTaskProvider
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      stopUsingItem();
       stopPath(reason, cause);
-      context.bot().controlState().resetAll();
-      var player = context.bot().minecraft().player;
-      if (restoreSelectedSlot && player != null) {
-        player.getInventory().setSelectedSlot(originalSelectedSlot);
+      if (active) {
+        active = false;
+        stopUsingItem();
+        context.bot().controlState().resetAll();
+        var player = context.bot().minecraft().player;
+        if (restoreSelectedSlot && player != null) {
+          player.getInventory().setSelectedSlot(originalSelectedSlot);
+        }
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);

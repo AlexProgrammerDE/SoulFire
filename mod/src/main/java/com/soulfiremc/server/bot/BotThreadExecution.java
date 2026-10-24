@@ -21,7 +21,7 @@ import io.grpc.Status;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -41,16 +41,14 @@ public final class BotThreadExecution {
       return bot.runnableWrapper().wrap(action).call();
     }
 
-    var result = new CompletableFuture<T>();
-    minecraft.execute(bot.runnableWrapper().wrap(() -> {
-      try {
-        result.complete(action.call());
-      } catch (Throwable throwable) {
-        result.completeExceptionally(throwable);
-      }
-    }));
+    var result = bot.gameThreadTasks().submit(minecraft::execute, bot.runnableWrapper().wrap(action));
     try {
       return result.get(DEFAULT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+    } catch (CancellationException exception) {
+      throw Status.UNAVAILABLE
+        .withDescription("Bot connection is closing")
+        .withCause(exception)
+        .asRuntimeException();
     } catch (TimeoutException exception) {
       throw Status.DEADLINE_EXCEEDED
         .withDescription("Timed out waiting for the bot game thread")
@@ -61,6 +59,9 @@ public final class BotThreadExecution {
         throw cause;
       }
       throw exception;
+    } finally {
+      // Timed-out or interrupted callers must not leave mutations queued for a later tick.
+      result.cancel(false);
     }
   }
 }

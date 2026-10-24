@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.net.UnixDomainSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class SocketAddressHelperTest {
   @ParameterizedTest
@@ -36,10 +37,23 @@ final class SocketAddressHelperTest {
     assertEquals(serialized, SocketAddressHelper.serialize(SocketAddressHelper.deserialize(serialized)));
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"localhost", "unix:relative"})
+  void incompleteUrisReportInvalidArguments(String input) {
+    assertThrows(IllegalArgumentException.class, () -> SocketAddressHelper.deserialize(input));
+  }
+
   @Test
   void unresolvedIpv6AddressesRetainTheirBrackets() {
     var address = InetSocketAddress.createUnresolved("[2001:db8::5]", 1080);
     assertEquals("inet://[2001:db8::5]:1080", SocketAddressHelper.serialize(address));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"/tmp/sf qa.sock", "/tmp/sf#qa?100%.sock", "/tmp/sf-テスト.sock"})
+  void unixPathsWithReservedCharactersRoundTrip(String path) {
+    var address = UnixDomainSocketAddress.of(path);
+    assertEquals(address, SocketAddressHelper.deserialize(SocketAddressHelper.serialize(address)));
   }
 
   @Test

@@ -43,6 +43,7 @@ import com.soulfiremc.server.renderer.VulkanRenderer;
 import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.settings.lib.SettingsSource;
 import com.soulfiremc.server.user.PermissionContext;
+import com.soulfiremc.server.util.GrpcErrors;
 import com.soulfiremc.server.util.MouseClickHelper;
 import com.soulfiremc.server.util.SFBlockHelpers;
 import com.soulfiremc.server.util.SocketAddressHelper;
@@ -369,18 +370,6 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
     }
   }
 
-  private static RuntimeException toGrpcError(Throwable throwable) {
-    if (throwable instanceof StatusRuntimeException statusError) {
-      return statusError;
-    }
-    return Status.INTERNAL
-      .withDescription(Objects.requireNonNullElse(
-        throwable.getMessage(),
-        throwable.getClass().getSimpleName()))
-      .withCause(throwable)
-      .asRuntimeException();
-  }
-
   private static void requireBotControl(
     SoulFireServer soulFireServer,
     UUID instanceId,
@@ -582,8 +571,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(BotUpdateConfigEntryResponse.newBuilder().build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error updating bot config entry", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error updating bot config entry", t);
     }
   }
 
@@ -651,8 +639,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting bot list", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error getting bot list", t);
     }
   }
 
@@ -712,8 +699,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(botInfoResponseBuilder.build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting instance info", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error getting instance info", t);
     }
   }
 
@@ -738,8 +724,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(renderPovFrame(activeBot, request));
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error rendering bot POV", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error rendering bot POV", t);
     }
   }
 
@@ -790,8 +775,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(buildWorldMap(bot, request));
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error sampling bot world map", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error sampling bot world map", t);
     }
   }
 
@@ -839,7 +823,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
           if (closed.compareAndSet(false, true)) {
             synchronized (observer) {
               if (!observer.isCancelled()) {
-                observer.onError(toGrpcError(throwable));
+                observer.onError(GrpcErrors.logAndMap(log, "Error streaming bot POV", throwable));
               }
             }
           }
@@ -1656,10 +1640,12 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       case MerchantMenu merchantMenu -> {
         // Villager trading: each trade offer is a button
         var offers = merchantMenu.getOffers();
+        var selectedTrade = minecraft.gui.screen() instanceof MerchantScreen screen && screen.getMenu() == merchantMenu
+          ? ((MerchantScreenAccessor) screen).soulfire$getSelectedTrade() : -1;
         for (int i = 0; i < offers.size(); i++) {
           var offer = offers.get(i);
           var result = offer.getResult();
-          var costA = offer.getBaseCostA();
+          var costA = offer.getCostA();
           var costB = offer.getCostB();
 
           var costDesc = costA.getCount() + "x " + costA.getHoverName().getString();
@@ -1672,6 +1658,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             .setLabel(result.getCount() + "x " + result.getHoverName().getString())
             .setDescription(costDesc)
             .setIconItemId(result.typeHolder().getRegisteredName())
+            .setSelected(i == selectedTrade)
             .setDisabled(offer.isOutOfStock())
             .build());
         }
@@ -1884,8 +1871,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error clicking inventory slot", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error clicking inventory slot", t);
     }
   }
 
@@ -1926,8 +1912,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error closing container", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error closing container", t);
     }
   }
 
@@ -1972,8 +1957,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error opening inventory", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error opening inventory", t);
     }
   }
 
@@ -2031,8 +2015,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error performing mouse click", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error performing mouse click", t);
     }
   }
 
@@ -2067,8 +2050,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error clicking container button", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error clicking container button", t);
     }
   }
 
@@ -2152,8 +2134,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting inventory state", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error getting inventory state", t);
     }
   }
 
@@ -2218,8 +2199,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error setting container text", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error setting container text", t);
     }
   }
 
@@ -2252,8 +2232,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error getting dialog", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error getting dialog", t);
     }
   }
 
@@ -2288,8 +2267,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error submitting dialog", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error submitting dialog", t);
     }
   }
 
@@ -2324,8 +2302,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error clicking dialog button", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error clicking dialog button", t);
     }
   }
 
@@ -2364,8 +2341,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error closing dialog", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error closing dialog", t);
     }
   }
 
@@ -2417,8 +2393,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error setting hotbar slot", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error setting hotbar slot", t);
     }
   }
 
@@ -2472,8 +2447,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error setting movement state", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error setting movement state", t);
     }
   }
 
@@ -2508,8 +2482,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
         .build());
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error resetting movement", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error resetting movement", t);
     }
   }
 
@@ -2561,8 +2534,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       responseObserver.onNext(response);
       responseObserver.onCompleted();
     } catch (Throwable t) {
-      log.error("Error setting rotation", t);
-      throw toGrpcError(t);
+      throw GrpcErrors.logAndMap(log, "Error setting rotation", t);
     }
   }
 }

@@ -31,6 +31,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -87,13 +88,14 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
     try {
       var predicate = eventPredicate(request.getScope());
       responseObserver.onNext(PreviousLogResponse.newBuilder()
-        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount())
+        .addAllMessages(SFLogAppender.INSTANCE.logs().getNewest(request.getCount(), event -> predicate.test(event, false))
           .stream()
-          .filter(log -> predicate.test(log, false))
           .map(e -> fromEvent(e, false))
           .toList())
         .build());
       responseObserver.onCompleted();
+    } catch (IllegalArgumentException e) {
+      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage()).withCause(e).asRuntimeException();
     } catch (Throwable t) {
       log.error("Error getting previous logs", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();
@@ -197,49 +199,122 @@ public final class LogServiceImpl extends LogsServiceGrpc.LogsServiceImplBase {
         null,
         null
       );
-      subscribers.values().stream()
-        .filter(sender -> sender.userId().equals(uuid))
-        .filter(sender -> sender.eventPredicate().test(messageEvent, true))
-        .forEach(sender -> sender.sendMessage(fromEvent(messageEvent, true)));
+      for (var sender : subscribers.values()) {
+        if (sender.userId.equals(uuid)) sender.sendMessage(messageEvent, true);
+      }
     }
 
     public void disconnect(UUID uuid) {
-      subscribers.values().stream()
-        .filter(sender -> sender.userId().equals(uuid))
-        .forEach(sender -> sender.responseObserver().onCompleted());
-
-      subscribers.entrySet().removeIf(entry -> entry.getValue().userId().equals(uuid));
+      for (var sender : subscribers.values()) {
+        if (sender.userId.equals(uuid)) sender.complete();
+      }
     }
 
     public void broadcastLogMessage(SFLogAppender.SFLogEvent message) {
       for (var sender : subscribers.values()) {
-        if (sender.eventPredicate().test(message, false)) {
-          sender.sendMessage(fromEvent(message, false));
-        }
+        sender.sendMessage(message, false);
       }
     }
 
-    private record ConnectionMessageSender(StateHolder stateHolder,
-                                           UUID userId,
-                                           ServerCallStreamObserver<LogResponse> responseObserver,
-                                           EventPredicate eventPredicate) {
-      public ConnectionMessageSender {
-        var responseId = UUID.randomUUID();
-        stateHolder.subscribers.put(responseId, this);
+    private static final class ConnectionMessageSender {
+      private static final int MAX_PENDING_MESSAGES = 300;
+      private final StateHolder stateHolder;
+      private final UUID responseId = UUID.randomUUID();
+      private final UUID userId;
+      private final ServerCallStreamObserver<LogResponse> responseObserver;
+      private final EventPredicate eventPredicate;
+      private final ArrayDeque<PendingLog> pending = new ArrayDeque<>();
+      private boolean open = true;
+      private boolean draining;
+      private Status terminalStatus;
 
-        responseObserver.setOnCancelHandler(() -> stateHolder.subscribers.remove(responseId));
-        responseObserver.setOnCloseHandler(() -> stateHolder.subscribers.remove(responseId));
-      }
-
-      public void sendMessage(LogString message) {
-        if (responseObserver.isCancelled()) {
-          return;
+      private ConnectionMessageSender(StateHolder stateHolder, UUID userId,
+                                      ServerCallStreamObserver<LogResponse> responseObserver, EventPredicate eventPredicate) {
+        this.stateHolder = stateHolder;
+        this.userId = userId;
+        this.responseObserver = responseObserver;
+        this.eventPredicate = eventPredicate;
+        responseObserver.setOnCancelHandler(this::cancel);
+        responseObserver.setOnCloseHandler(this::cancel);
+        responseObserver.setOnReadyHandler(this::drain);
+        synchronized (this) {
+          if (open && !responseObserver.isCancelled()) stateHolder.subscribers.put(responseId, this);
+          else cancel();
         }
-
-        responseObserver.onNext(LogResponse.newBuilder()
-          .setMessage(message)
-          .build());
       }
+
+      private synchronized void sendMessage(SFLogAppender.SFLogEvent event, boolean personal) {
+        if (!open) return;
+        try {
+          if (responseObserver.isCancelled()) { cancel(); return; }
+          if (!eventPredicate.test(event, personal)) return;
+          if (pending.size() >= MAX_PENDING_MESSAGES) {
+            fail(Status.RESOURCE_EXHAUSTED.withDescription("Log stream fell behind. Reconnect to resume.").asRuntimeException());
+            return;
+          }
+          pending.addLast(new PendingLog(event, personal));
+          drain();
+        } catch (RuntimeException error) { fail(error); }
+      }
+
+      private synchronized void drain() {
+        if (!open || draining) return;
+        draining = true;
+        try {
+          while (open && !pending.isEmpty()) {
+            if (responseObserver.isCancelled()) { cancel(); return; }
+            if (!responseObserver.isReady()) return;
+            var next = pending.removeFirst();
+            // Permissions may change while the transport cannot accept messages.
+            if (eventPredicate.test(next.event, next.personal)) {
+              responseObserver.onNext(LogResponse.newBuilder().setMessage(fromEvent(next.event, next.personal)).build());
+            }
+          }
+        } catch (RuntimeException error) { fail(error); }
+        finally {
+          draining = false;
+          deliverTerminal();
+        }
+      }
+
+      private synchronized void cancel() { close(); }
+
+      private boolean close() {
+        if (!open) return false;
+        open = false;
+        pending.clear();
+        stateHolder.subscribers.remove(responseId, this);
+        return true;
+      }
+
+      private synchronized void complete() {
+        if (!close()) return;
+        terminalStatus = Status.OK;
+        deliverTerminal();
+      }
+
+      private void fail(RuntimeException error) {
+        if (!close()) return;
+        var status = Status.fromThrowable(error);
+        terminalStatus = status.getCode() == Status.Code.UNKNOWN
+          ? Status.UNAVAILABLE.withDescription("Log stream ended").withCause(error)
+          : status;
+        deliverTerminal();
+      }
+
+      private void deliverTerminal() {
+        if (draining || terminalStatus == null) return;
+        var status = terminalStatus;
+        terminalStatus = null;
+        try {
+          if (!responseObserver.isCancelled()) {
+            if (status.isOk()) responseObserver.onCompleted();
+            else responseObserver.onError(status.asRuntimeException());
+          }
+        } catch (RuntimeException ignored) { /* A failed observer must not disrupt another viewer. */ }
+      }
+
+      private record PendingLog(SFLogAppender.SFLogEvent event, boolean personal) {}
     }
   }
 }

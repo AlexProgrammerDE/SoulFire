@@ -30,10 +30,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.PiercingWeapon;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.block.Blocks;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -43,6 +46,21 @@ final class SFItemHelpersTest {
   @BeforeAll
   static void bootstrapMinecraft() {
     TestBootstrap.bootstrapForTest();
+  }
+
+  @Test
+  void recognizesPiercingWeaponsWithUnarmedBaseDamage() {
+    var stack = itemStack(Items.STICK);
+    assertTrue(SFItemHelpers.meleeWeaponStats(stack).isEmpty());
+
+    stack.set(DataComponents.PIERCING_WEAPON,
+      new PiercingWeapon(true, false, Optional.empty(), Optional.empty()));
+    var stats = SFItemHelpers.meleeWeaponStats(stack).orElseThrow();
+    assertEquals(1, stats.attackDamage());
+    assertTrue(stats.attackSpeed() > 0);
+
+    stack.remove(DataComponents.PIERCING_WEAPON);
+    assertTrue(SFItemHelpers.meleeWeaponStats(stack).isEmpty());
   }
 
   @Test

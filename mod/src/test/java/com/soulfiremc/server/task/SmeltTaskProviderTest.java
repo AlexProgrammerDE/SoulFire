@@ -17,9 +17,13 @@
  */
 package com.soulfiremc.server.task;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class SmeltTaskProviderTest {
   @Test
@@ -65,4 +69,51 @@ final class SmeltTaskProviderTest {
       SmeltTaskProvider.additionalFuelItems(8, 200, 1_399, 0, 300)
     );
   }
+
+  @Test
+  void productiveFullStackCanExceedTheOriginalWaitingLimit() {
+    var watchdog = new SmeltTaskProvider.CookingProgressWatchdog(12_000);
+    assertDoesNotThrow(() -> {
+      for (var output = 0; output < 64; output++) {
+        for (var cookingTick = 0; cookingTick < 200; cookingTick++) {
+          watchdog.observe(cookingTick / 200.0F, output);
+        }
+      }
+    });
+  }
+
+  @Test
+  void unchangedCookingAndOutputStillTimeOut() {
+    var watchdog = new SmeltTaskProvider.CookingProgressWatchdog(3);
+    watchdog.observe(0.5F, 12);
+    for (var tick = 0; tick < 3; tick++) {
+      watchdog.observe(0.5F, 12);
+    }
+    var error = assertThrows(StatusRuntimeException.class, () -> watchdog.observe(0.5F, 12));
+    assertEquals(Status.Code.DEADLINE_EXCEEDED, error.getStatus().getCode());
+  }
+
+  @Test
+  void newOutputRestartsTheDeadlineWhenTheCookingBarWraps() {
+    var watchdog = new SmeltTaskProvider.CookingProgressWatchdog(2);
+    watchdog.observe(0.75F, 4);
+    watchdog.observe(0.75F, 4);
+    watchdog.observe(0.75F, 4);
+    watchdog.observe(0.0F, 5);
+    watchdog.observe(0.0F, 5);
+    assertDoesNotThrow(() -> watchdog.observe(0.0F, 5));
+    var error = assertThrows(StatusRuntimeException.class, () -> watchdog.observe(0.0F, 5));
+    assertEquals(Status.Code.DEADLINE_EXCEEDED, error.getStatus().getCode());
+  }
+
+  @Test
+  void regressingCookingAndRemovedOutputDoNotHideAStall() {
+    var watchdog = new SmeltTaskProvider.CookingProgressWatchdog(2);
+    watchdog.observe(0.75F, 3);
+    watchdog.observe(0.5F, 2);
+    watchdog.observe(0.25F, 1);
+    var error = assertThrows(StatusRuntimeException.class, () -> watchdog.observe(0.0F, 0));
+    assertEquals(Status.Code.DEADLINE_EXCEEDED, error.getStatus().getCode());
+  }
+
 }

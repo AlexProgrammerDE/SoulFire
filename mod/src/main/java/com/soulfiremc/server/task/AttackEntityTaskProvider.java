@@ -25,6 +25,7 @@ import com.soulfiremc.grpc.generated.EntityReference;
 import com.soulfiremc.grpc.generated.ItemSelector;
 import com.soulfiremc.server.api.BotTaskExecution;
 import com.soulfiremc.server.api.BotTaskProvider;
+import com.soulfiremc.server.bot.BotAttackSupport;
 import com.soulfiremc.server.bot.ControlResource;
 import com.soulfiremc.server.bot.ControlStopReason;
 import com.soulfiremc.server.bot.ControlTask;
@@ -40,8 +41,9 @@ import io.grpc.Status;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -107,7 +109,10 @@ public final class AttackEntityTaskProvider
         .asRuntimeException();
     }
     var target = input.getTarget();
-    BotTaskSupport.requireEntity(context.bot(), target);
+    requireAttackTarget(
+      Objects.requireNonNull(context.bot().minecraft().player),
+      BotTaskSupport.requireEntity(context.bot(), target)
+    );
     var attackRange = normalizeAttackRange(input.getAttackRange());
     var resolved = CombatTaskSupport.reachGoal(
       context.bot(),
@@ -143,6 +148,14 @@ public final class AttackEntityTaskProvider
       result
     );
     return new BotTaskExecution(control, result);
+  }
+
+  private static void requireAttackTarget(Entity player, Entity target) {
+    if (!SFEntityHelpers.isValidAttackTarget(player, target)) {
+      throw Status.FAILED_PRECONDITION
+        .withDescription("Target entity cannot be attacked")
+        .asRuntimeException();
+    }
   }
 
   private static float normalizeAttackRange(float value) {
@@ -246,7 +259,8 @@ public final class AttackEntityTaskProvider
     private final boolean restoreSelectedSlot;
     private final boolean useOffhandShield;
     private final int originalSelectedSlot;
-    private final PathfindingSupport.ResolvedGoal goal;
+    private PathfindingSupport.ResolvedGoal goal;
+    private float approachRange;
     private final List<ResolvedGoal> waitingGoals;
     private final com.soulfiremc.server.pathfinding.graph.constraint.PathConstraint
       constraint;
@@ -259,6 +273,7 @@ public final class AttackEntityTaskProvider
     private int attacks;
     private int ticks;
     private boolean lastObservedAlive;
+    private boolean active;
 
     private AttackControl(
       BotTaskContext context,
@@ -291,6 +306,7 @@ public final class AttackEntityTaskProvider
         context.bot().minecraft().player
       ).getInventory().getSelectedSlot();
       this.goal = goal;
+      this.approachRange = attackRange;
       this.waitingGoals = new ArrayList<>(waitingGoals);
       this.constraint = constraint;
       this.result = result;
@@ -316,6 +332,8 @@ public final class AttackEntityTaskProvider
         || target.hasUuid()
         && !target.getUuid().equals(entity.getUUID().toString())) {
         stopPath(ControlStopReason.CANCELLED, null);
+        bot.controlState().resetAll();
+        lowerShield();
         unavailableTicks++;
         reportUnavailable();
         if (unavailableTicks >= unavailableTimeoutTicks) {
@@ -329,6 +347,7 @@ public final class AttackEntityTaskProvider
       }
 
       unavailableTicks = 0;
+      requireAttackTarget(player, entity);
       lastObservedAlive = SFEntityHelpers.isAliveAndTargetable(entity);
       if (!lastObservedAlive) {
         stopPath(ControlStopReason.COMPLETED, null);
@@ -367,21 +386,52 @@ public final class AttackEntityTaskProvider
         return;
       }
 
+      if (!ensureBestWeapon()) {
+        stopPath(ControlStopReason.CANCELLED, null);
+        bot.controlState().resetAll();
+        return;
+      }
+      var heldItem = player.getMainHandItem();
+      var piercing = heldItem.has(DataComponents.PIERCING_WEAPON);
+      var weaponRange = player.getAttackRangeWith(heldItem);
+      var effectiveRange = piercing
+        ? Math.min(attackRange, weaponRange.effectiveMaxRange(player))
+        : attackRange;
+      if (effectiveRange != approachRange) {
+        stopPath(ControlStopReason.CANCELLED, null);
+        goal = CombatTaskSupport.reachGoal(bot, target, pathfindingApproachRange(effectiveRange));
+        approachRange = effectiveRange;
+      }
       var attackTarget = CombatTaskSupport.preferredTarget(entity);
       var visiblePoint = attackTarget.getEyePosition();
       var distance = distanceToBoundingBox(
         player.getEyePosition(),
         attackTarget.getBoundingBox()
       );
+      if (piercing && distance < weaponRange.effectiveMinRange(player)) {
+        bot.rotationControl().lookAt(visiblePoint);
+        if (!BotAttackSupport.isFacingTarget(bot, attackTarget)
+          || !BotAttackSupport.canPierceTarget(player, attackTarget)) {
+          stopPath(ControlStopReason.CANCELLED, null);
+          bot.controlState().resetAll();
+          if (BotAttackSupport.isFacingTarget(bot, attackTarget)) {
+            var retreatPoint = player.position().scale(2).subtract(attackTarget.position());
+            bot.controlState().down(player.isInWater() || player.isInLava()
+              || hasSafeTerrainAhead(player, retreatPoint));
+          }
+          raiseShield(player, gameMode);
+          return;
+        }
+      }
       if (ticks % 20 == 0) {
         context.reportProgress(BotTaskProgress.newBuilder()
-          .setMessage(distance <= attackRange
+          .setMessage(distance <= effectiveRange
             ? "Attacking entity"
             : "Chasing entity")
           .setCurrent(attacks)
           .build());
       }
-      if (distance > attackRange) {
+      if (distance > effectiveRange) {
         var movingInFluid = player.isInWater() || player.isInLava();
         if (shouldPursueDirectly(
           distance,
@@ -426,24 +476,15 @@ public final class AttackEntityTaskProvider
       consecutivePathFailures = 0;
       stopPath(ControlStopReason.CANCELLED, null);
       bot.controlState().resetAll();
-      if (!ensureBestWeapon()) {
-        return;
-      }
       bot.rotationControl().lookAt(visiblePoint);
       if (player.getAttackStrengthScale(0) < 1.0F
         || !bot.rotationControl().isFacing(visiblePoint)) {
         raiseShield(player, gameMode);
         return;
       }
-      lowerShield(player, gameMode);
-      var wasSprinting = player.isSprinting();
-      player.setSprinting(sprinting);
-      try {
-        gameMode.attack(player, attackTarget);
-        player.swing(InteractionHand.MAIN_HAND, player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(), false);
-        player.connection.send(ServerboundPunchPacket.INSTANCE);
-      } finally {
-        player.setSprinting(wasSprinting);
+      lowerShield();
+      if (!BotAttackSupport.tryAttack(bot, attackTarget, sprinting)) {
+        return;
       }
       attacks++;
       if (maximumAttacks > 0 && attacks >= maximumAttacks) {
@@ -579,11 +620,7 @@ public final class AttackEntityTaskProvider
       AttackEntityCompletionReason reason,
       boolean targetAlive
     ) {
-      var player = context.bot().minecraft().player;
-      var gameMode = context.bot().minecraft().gameMode;
-      if (player != null && gameMode != null) {
-        lowerShield(player, gameMode);
-      }
+      lowerShield();
       result.complete(AttackEntityTaskResult.newBuilder()
         .setFinalPosition(BotTaskSupport.position(context.bot()))
         .setReason(reason)
@@ -596,24 +633,33 @@ public final class AttackEntityTaskProvider
       LocalPlayer player,
       MultiPlayerGameMode gameMode
     ) {
-      if (!useOffhandShield || !player.getOffhandItem().is(Items.SHIELD)) {
+      if (!useOffhandShield) {
         return;
       }
-      if (player.isUsingItem()) {
-        if (player.getUsedItemHand() == InteractionHand.OFF_HAND) {
-          return;
-        }
+      if (!player.getOffhandItem().is(Items.SHIELD)) {
+        lowerShield();
+        return;
+      }
+      if (player.isUsingItem() && player.getUsedItemHand() != InteractionHand.OFF_HAND) {
         gameMode.releaseUsingItem(player);
       }
-      gameMode.useItem(player, InteractionHand.OFF_HAND);
+      if (!player.isUsingItem()) {
+        gameMode.useItem(player, InteractionHand.OFF_HAND);
+      }
+      context.bot().minecraft().options.keyUse.setDown(
+        player.isUsingItem() && player.getUsedItemHand() == InteractionHand.OFF_HAND
+      );
     }
 
-    private void lowerShield(
-      LocalPlayer player,
-      MultiPlayerGameMode gameMode
-    ) {
-      if (useOffhandShield
-        && player.isUsingItem()
+    private void lowerShield() {
+      if (!useOffhandShield) {
+        return;
+      }
+      var minecraft = context.bot().minecraft();
+      minecraft.options.keyUse.setDown(false);
+      var player = minecraft.player;
+      var gameMode = minecraft.gameMode;
+      if (player != null && gameMode != null && player.isUsingItem()
         && player.getUsedItemHand() == InteractionHand.OFF_HAND) {
         gameMode.releaseUsingItem(player);
       }
@@ -657,7 +703,15 @@ public final class AttackEntityTaskProvider
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
+      lowerShield();
+      context.bot().controlState().resetAll();
       if (path != null) {
         path.onSuspended();
       }
@@ -665,6 +719,7 @@ public final class AttackEntityTaskProvider
 
     @Override
     public void onResumed() {
+      active = true;
       if (path != null) {
         path.onResumed();
       }
@@ -676,14 +731,14 @@ public final class AttackEntityTaskProvider
       @Nullable Throwable cause
     ) {
       stopPath(reason, cause);
-      context.bot().controlState().resetAll();
-      var player = context.bot().minecraft().player;
-      var gameMode = context.bot().minecraft().gameMode;
-      if (player != null && gameMode != null) {
-        lowerShield(player, gameMode);
-      }
-      if (restoreSelectedSlot && player != null) {
-        player.getInventory().setSelectedSlot(originalSelectedSlot);
+      if (active) {
+        active = false;
+        context.bot().controlState().resetAll();
+        lowerShield();
+        var player = context.bot().minecraft().player;
+        if (restoreSelectedSlot && player != null) {
+          player.getInventory().setSelectedSlot(originalSelectedSlot);
+        }
       }
       if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
         result.cancel(true);

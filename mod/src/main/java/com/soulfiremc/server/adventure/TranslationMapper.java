@@ -57,6 +57,39 @@ public final class TranslationMapper implements Function<TranslatableComponent, 
         .map(TranslationArgumentLike::asComponent)
         .map(SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER::serialize)
         .toArray(String[]::new);
-    return translation.formatted((Object[]) args);
+    var result = new StringBuilder();
+    var implicitArgument = 0;
+    for (var cursor = 0; cursor < translation.length();) {
+      var start = translation.indexOf('%', cursor);
+      if (start < 0) return result.append(translation, cursor, translation.length()).toString();
+      result.append(translation, cursor, start);
+      var end = start + 1;
+      if (end < translation.length() && translation.charAt(end) == '%') {
+        result.append('%');
+        cursor = end + 1;
+        continue;
+      }
+
+      var digitsStart = end;
+      while (end < translation.length() && translation.charAt(end) >= '0' && translation.charAt(end) <= '9') end++;
+      final int argument;
+      if (end > digitsStart) {
+        if (end >= translation.length() || translation.charAt(end) != '$') return translation;
+        try {
+          argument = Integer.parseInt(translation, digitsStart, end, 10) - 1;
+        } catch (NumberFormatException _) {
+          return translation;
+        }
+        end++;
+      } else {
+        argument = implicitArgument++;
+      }
+      // Minecraft displays the entire template when a placeholder is invalid.
+      if (end >= translation.length() || translation.charAt(end) != 's' || argument < 0 || argument >= args.length)
+        return translation;
+      result.append(args[argument]);
+      cursor = end + 1;
+    }
+    return result.toString();
   }
 }

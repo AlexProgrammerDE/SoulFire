@@ -55,6 +55,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -68,6 +69,8 @@ import java.util.function.Consumer;
 public final class BotStateManager {
   private final InstanceManager instanceManager;
   private final Object stateLock = new Object();
+  // Keep durable intent changes ordered without blocking status reads on database I/O.
+  private final Object intentLock = new Object();
   private final Set<UUID> desiredBotIds = new HashSet<>();
   private final Map<UUID, RuntimeEntry> runtimeEntries = new HashMap<>();
   private final Map<UUID, Long> generations = new HashMap<>();
@@ -77,6 +80,7 @@ public final class BotStateManager {
   private final CopyOnWriteArraySet<Consumer<StatusEvent>> statusListeners = new CopyOnWriteArraySet<>();
   private int activeStarts;
   private long nextStartAtMillis;
+  private long generationSequence;
   private boolean shuttingDown;
 
   public BotStateManager(InstanceManager instanceManager) {
@@ -98,9 +102,8 @@ public final class BotStateManager {
     }
 
     if (!disabledRestores.isEmpty()) {
-      persistStopped(disabledRestores);
+      markStopped(disabledRestores);
       synchronized (stateLock) {
-        desiredBotIds.removeAll(disabledRestores);
         for (var botId : disabledRestores) {
           setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_STOPPED, null);
         }
@@ -117,18 +120,12 @@ public final class BotStateManager {
     var normalizedBotIds = validateBotIds(botIds);
     switch (desiredState) {
       case BOT_DESIRED_STATE_RUNNING -> {
-        persistRunning(normalizedBotIds);
-        synchronized (stateLock) {
-          desiredBotIds.addAll(normalizedBotIds);
-        }
+        markRunning(normalizedBotIds);
         queueBots(normalizedBotIds);
       }
       case BOT_DESIRED_STATE_STOPPED -> {
-        persistStopped(normalizedBotIds);
-        synchronized (stateLock) {
-          desiredBotIds.removeAll(normalizedBotIds);
-        }
-        stopRuntimeBots(normalizedBotIds, false);
+        markStopped(normalizedBotIds);
+        stopRuntimeBots(normalizedBotIds);
       }
       case BOT_DESIRED_STATE_UNSPECIFIED, UNRECOGNIZED ->
         throw new IllegalArgumentException("desired_state must be RUNNING or STOPPED");
@@ -143,10 +140,7 @@ public final class BotStateManager {
 
   public List<BotStatus> restartBots(SoulFireUser initiator, Collection<UUID> botIds) {
     var normalizedBotIds = validateBotIds(botIds);
-    persistRunning(normalizedBotIds);
-    synchronized (stateLock) {
-      desiredBotIds.addAll(normalizedBotIds);
-    }
+    markRunning(normalizedBotIds);
 
     var restartFutures = new ArrayList<CompletableFuture<?>>();
     for (var botId : normalizedBotIds) {
@@ -162,11 +156,10 @@ public final class BotStateManager {
     return statuses(normalizedBotIds);
   }
 
-  public void scheduleReconnect(UUID botId, long delaySeconds) {
+  private void scheduleReconnect(UUID botId, long expectedGeneration, long delaySeconds) {
     final long generation;
     synchronized (stateLock) {
-      if (shuttingDown
-        || !desiredBotIds.contains(botId)
+      if (!isCurrentAndDesiredLocked(botId, expectedGeneration)
         || hasLiveConnection(botId)
         || queuedBotIds.contains(botId)) {
         return;
@@ -194,21 +187,26 @@ public final class BotStateManager {
 
   public CompletableFuture<Void> removeAccounts(Collection<UUID> botIds) {
     var normalizedBotIds = List.copyOf(new LinkedHashSet<>(botIds));
-    persistStopped(normalizedBotIds);
-    synchronized (stateLock) {
-      desiredBotIds.removeAll(normalizedBotIds);
-    }
-    return stopRuntimeBots(normalizedBotIds, false)
+    markStopped(normalizedBotIds);
+    var stops = stopRuntimeBots(normalizedBotIds);
+    return CompletableFuture.allOf(stops.stream().map(PendingStop::completion).toArray(CompletableFuture[]::new))
       .thenRun(() -> {
+        var removedIds = new ArrayList<UUID>();
         synchronized (stateLock) {
-          for (var botId : normalizedBotIds) {
+          for (var stop : stops) {
+            var botId = stop.botId();
+            // A new start can be accepted while the old connection finishes disconnecting.
+            if (generations.getOrDefault(botId, 0L) != stop.generation()) {
+              continue;
+            }
             runtimeEntries.remove(botId);
             generations.remove(botId);
             proxyLeases.remove(botId);
             instanceManager.botControlLeaseManager().clear(botId);
+            removedIds.add(botId);
           }
         }
-        normalizedBotIds.forEach(this::publishRemoved);
+        removedIds.forEach(this::publishRemoved);
       });
   }
 
@@ -216,6 +214,7 @@ public final class BotStateManager {
     var configuredIds = Set.copyOf(instanceManager.settingsSource().accounts().keySet());
     var addedIds = new ArrayList<UUID>();
     var removedIds = new ArrayList<UUID>();
+    var removedConnections = new ArrayList<BotConnection>();
     synchronized (stateLock) {
       for (var botId : configuredIds) {
         if (!runtimeEntries.containsKey(botId)) {
@@ -225,35 +224,52 @@ public final class BotStateManager {
           addedIds.add(botId);
         }
       }
-      for (var botId : List.copyOf(runtimeEntries.keySet())) {
+      var knownIds = new HashSet<>(runtimeEntries.keySet());
+      knownIds.addAll(desiredBotIds);
+      knownIds.addAll(generations.keySet());
+      knownIds.addAll(instanceManager.botConnections().keySet());
+      for (var botId : knownIds) {
         if (!configuredIds.contains(botId)) {
           runtimeEntries.remove(botId);
-          desiredBotIds.remove(botId);
           generations.remove(botId);
           queuedBotIds.remove(botId);
           proxyLeases.remove(botId);
           instanceManager.botControlLeaseManager().clear(botId);
           connectQueue.removeIf(queued -> queued.botId().equals(botId));
+          var connection = instanceManager.botConnections().get(botId);
+          if (connection != null) removedConnections.add(connection);
           removedIds.add(botId);
         }
       }
     }
     if (!removedIds.isEmpty()) {
-      persistStopped(removedIds);
+      markStopped(removedIds);
+      var disconnected = removedConnections.stream()
+        .map(bot -> bot.disconnect(Component.text("Bot account was removed"))
+          .thenRun(() -> instanceManager.removeBot(bot)))
+        .toArray(CompletableFuture[]::new);
+      CompletableFuture.allOf(disconnected).join();
       removedIds.forEach(this::publishRemoved);
     }
     addedIds.forEach(this::publishStatus);
     drainQueue();
   }
 
-  public void connectionRemoved(BotConnection bot) {
+  public boolean removeConnection(BotConnection bot) {
     var botId = bot.accountProfileId();
     var shouldReconnect = false;
+    final long disconnectedGeneration;
     synchronized (stateLock) {
+      if (!instanceManager.botConnections().remove(botId, bot)) {
+        return false;
+      }
+      disconnectedGeneration = generations.getOrDefault(botId, 0L);
       proxyLeases.remove(botId);
-      if (shuttingDown || !desiredBotIds.contains(botId)) {
+      if (!instanceManager.settingsSource().accounts().containsKey(botId)) {
+        runtimeEntries.remove(botId);
+      } else if (shuttingDown || !desiredBotIds.contains(botId)) {
         setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_STOPPED, null);
-      } else {
+      } else if (!queuedBotIds.contains(botId)) {
         var reason = bot.disconnectReason();
         setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_FAILED, reason);
         shouldReconnect = true;
@@ -264,8 +280,9 @@ public final class BotStateManager {
 
     if (shouldReconnect) {
       AutoReconnect.reconnectDelaySeconds(bot.settingsSource())
-        .ifPresent(delay -> scheduleReconnect(botId, delay));
+        .ifPresent(delay -> scheduleReconnect(botId, disconnectedGeneration, delay));
     }
+    return true;
   }
 
   public BotStatus status(UUID botId) {
@@ -396,39 +413,51 @@ public final class BotStateManager {
     return normalized;
   }
 
-  private void persistRunning(Collection<UUID> botIds) {
+  private void markRunning(Collection<UUID> botIds) {
     if (botIds.isEmpty()) {
       return;
     }
-    var now = LocalDateTime.now(ZoneOffset.UTC);
-    instanceManager.dsl().transaction(cfg -> {
-      var ctx = DSL.using(cfg);
-      for (var botId : botIds) {
-        ctx.insertInto(Tables.INSTANCE_DESIRED_BOTS)
-          .set(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID, instanceManager.id().toString())
-          .set(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID, botId.toString())
-          .set(Tables.INSTANCE_DESIRED_BOTS.REQUESTED_AT, now)
-          .onDuplicateKeyIgnore()
-          .execute();
+    synchronized (intentLock) {
+      // An account can be removed while this command waits behind another intent.
+      validateBotIds(botIds);
+      var now = LocalDateTime.now(ZoneOffset.UTC);
+      instanceManager.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        for (var botId : botIds) {
+          ctx.insertInto(Tables.INSTANCE_DESIRED_BOTS)
+            .set(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID, instanceManager.id().toString())
+            .set(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID, botId.toString())
+            .set(Tables.INSTANCE_DESIRED_BOTS.REQUESTED_AT, now)
+            .onDuplicateKeyIgnore()
+            .execute();
+        }
+        touchInstance(ctx, now);
+      });
+      synchronized (stateLock) {
+        desiredBotIds.addAll(botIds);
       }
-      touchInstance(ctx, now);
-    });
+    }
   }
 
-  private void persistStopped(Collection<UUID> botIds) {
+  private void markStopped(Collection<UUID> botIds) {
     if (botIds.isEmpty()) {
       return;
     }
     var ids = botIds.stream().map(UUID::toString).toList();
-    var now = LocalDateTime.now(ZoneOffset.UTC);
-    instanceManager.dsl().transaction(cfg -> {
-      var ctx = DSL.using(cfg);
-      ctx.deleteFrom(Tables.INSTANCE_DESIRED_BOTS)
-        .where(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID.eq(instanceManager.id().toString()))
-        .and(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID.in(ids))
-        .execute();
-      touchInstance(ctx, now);
-    });
+    synchronized (intentLock) {
+      var now = LocalDateTime.now(ZoneOffset.UTC);
+      instanceManager.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        ctx.deleteFrom(Tables.INSTANCE_DESIRED_BOTS)
+          .where(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID.eq(instanceManager.id().toString()))
+          .and(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID.in(ids))
+          .execute();
+        touchInstance(ctx, now);
+      });
+      synchronized (stateLock) {
+        desiredBotIds.removeAll(botIds);
+      }
+    }
   }
 
   private void touchInstance(org.jooq.DSLContext ctx, LocalDateTime now) {
@@ -452,9 +481,12 @@ public final class BotStateManager {
       for (var botId : orderedIds) {
         if (shuttingDown
           || !desiredBotIds.contains(botId)
-          || hasLiveConnection(botId)
           || queuedBotIds.contains(botId)
           || isStartingLocked(botId)) {
+          continue;
+        }
+        var connection = instanceManager.botConnections().get(botId);
+        if (connection != null && !connection.isDisconnected() && !connection.isDisconnecting() && !isStoppingLocked(botId)) {
           continue;
         }
         enqueueLocked(botId, nextGenerationLocked(botId));
@@ -483,8 +515,13 @@ public final class BotStateManager {
       while (activeStarts < maxConcurrent && !connectQueue.isEmpty() && attempts-- > 0) {
         var queued = connectQueue.removeFirst();
         queuedBotIds.remove(queued.botId());
-        if (!isCurrentAndDesiredLocked(queued.botId(), queued.generation())
-          || hasLiveConnection(queued.botId())) {
+        if (!isCurrentAndDesiredLocked(queued.botId(), queued.generation())) {
+          continue;
+        }
+        if (instanceManager.botConnections().containsKey(queued.botId())) {
+          // The retiring connection must leave the registry before a replacement can be stored.
+          connectQueue.addLast(queued);
+          queuedBotIds.add(queued.botId());
           continue;
         }
 
@@ -579,11 +616,17 @@ public final class BotStateManager {
 
       var factory = createFactory(account, proxy);
       var connection = factory.prepareConnection(false);
-      if (!instanceManager.storeNewBot(connection)) {
-        connection.disconnect(Component.text("A connection already exists for this bot"));
+      Optional<CompletableFuture<?>> connecting;
+      synchronized (stateLock) {
+        // Schedule only while this launch still owns the current generation.
+        connecting = isCurrentAndDesiredLocked(botId, queued.generation()) && instanceManager.storeNewBot(connection)
+          ? Optional.of(connection.connect()) : Optional.empty();
+      }
+      if (connecting.isEmpty()) {
+        connection.disconnect(Component.text("Bot start was cancelled or a connection already exists"));
         return;
       }
-      connection.connect().join();
+      connecting.orElseThrow().join();
 
       synchronized (stateLock) {
         if (isCurrentAndDesiredLocked(botId, queued.generation()) && !connection.isDisconnected()) {
@@ -593,24 +636,26 @@ public final class BotStateManager {
       publishStatus(botId);
     } catch (Throwable throwable) {
       var message = conciseMessage(throwable);
-      log.error("Failed to start bot {}", botId, throwable);
       synchronized (stateLock) {
-        proxyLeases.remove(botId);
-        if (isCurrentAndDesiredLocked(botId, queued.generation())) {
-          setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_FAILED, message);
+        if (!isCurrentAndDesiredLocked(botId, queued.generation())) {
+          log.debug("Ignoring failure from a retired start for bot {}", botId, throwable);
+          return;
         }
+        proxyLeases.remove(botId);
+        setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_FAILED, message);
       }
+      log.error("Failed to start bot {}", botId, throwable);
       publishStatus(botId);
 
       var account = instanceManager.settingsSource().accounts().get(botId);
       if (account != null) {
         AutoReconnect.reconnectDelaySeconds(botSettings(account))
-          .ifPresent(delay -> scheduleReconnect(botId, delay));
+          .ifPresent(delay -> scheduleReconnect(botId, queued.generation(), delay));
       }
     } finally {
       synchronized (stateLock) {
         activeStarts = Math.max(0, activeStarts - 1);
-        if (!hasLiveConnection(botId)) {
+        if (generations.getOrDefault(botId, 0L) == queued.generation() && !hasLiveConnection(botId)) {
           proxyLeases.remove(botId);
         }
       }
@@ -656,6 +701,7 @@ public final class BotStateManager {
       queuedBotIds.remove(botId);
       connectQueue.removeIf(queued -> queued.botId().equals(botId));
       connection = instanceManager.botConnections().get(botId);
+      if (connection == null) proxyLeases.remove(botId);
       setRuntimeLocked(
         botId,
         connection == null
@@ -671,17 +717,15 @@ public final class BotStateManager {
       .thenRun(() -> instanceManager.removeBot(connection));
   }
 
-  private CompletableFuture<Void> stopRuntimeBots(Collection<UUID> botIds, boolean preserveDesired) {
-    var futures = new ArrayList<CompletableFuture<?>>();
+  private List<PendingStop> stopRuntimeBots(Collection<UUID> botIds) {
+    var stops = new ArrayList<PendingStop>();
     for (var botId : botIds) {
       BotConnection connection;
+      final long generation;
       synchronized (stateLock) {
-        nextGenerationLocked(botId);
+        generation = nextGenerationLocked(botId);
         queuedBotIds.remove(botId);
         connectQueue.removeIf(queued -> queued.botId().equals(botId));
-        if (!preserveDesired) {
-          desiredBotIds.remove(botId);
-        }
         connection = instanceManager.botConnections().get(botId);
         setRuntimeLocked(
           botId,
@@ -694,12 +738,12 @@ public final class BotStateManager {
         }
       }
       publishStatus(botId);
-      if (connection != null) {
-        futures.add(connection.disconnect(Component.text("Bot stopped"))
-          .thenRun(() -> instanceManager.removeBot(connection)));
-      }
+      var completion = connection == null ? CompletableFuture.completedFuture(null)
+        : connection.disconnect(Component.text("Bot stopped"))
+          .thenRun(() -> instanceManager.removeBot(connection));
+      stops.add(new PendingStop(botId, generation, completion));
     }
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return stops;
   }
 
   private List<BotStatus> statuses(Collection<UUID> botIds) {
@@ -720,8 +764,14 @@ public final class BotStateManager {
     return entry != null && entry.runtimeState() == BotRuntimeState.BOT_RUNTIME_STATE_STARTING;
   }
 
+  private boolean isStoppingLocked(UUID botId) {
+    var entry = runtimeEntries.get(botId);
+    return entry != null && entry.runtimeState() == BotRuntimeState.BOT_RUNTIME_STATE_STOPPING;
+  }
+
   private long nextGenerationLocked(UUID botId) {
-    var generation = generations.getOrDefault(botId, 0L) + 1L;
+    // Removed accounts may be re-added while their old launches are still retiring.
+    var generation = ++generationSequence;
     generations.put(botId, generation);
     return generation;
   }
@@ -735,6 +785,7 @@ public final class BotStateManager {
   private boolean isCurrentAndDesiredLocked(UUID botId, long generation) {
     return !shuttingDown
       && desiredBotIds.contains(botId)
+      && instanceManager.settingsSource().accounts().containsKey(botId)
       && generations.getOrDefault(botId, 0L) == generation;
   }
 
@@ -808,6 +859,9 @@ public final class BotStateManager {
   }
 
   private record QueuedBot(UUID botId, long generation) {
+  }
+
+  private record PendingStop(UUID botId, long generation, CompletableFuture<?> completion) {
   }
 
   private record Launch(QueuedBot queuedBot, @Nullable SFProxy proxy, long delayMillis) {

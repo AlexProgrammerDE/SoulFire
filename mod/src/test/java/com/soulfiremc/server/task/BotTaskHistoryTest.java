@@ -36,6 +36,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +47,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.framework;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,6 +62,63 @@ final class BotTaskHistoryTest {
   @BeforeAll
   static void bootstrapMinecraft() {
     TestBootstrap.bootstrapForTest();
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void keepsTerminalHistoryWithoutRetainingItsBot(boolean schedulingFails) throws InterruptedException {
+    var server = mock(SoulFireServer.class);
+    var owner = mock(SoulFireUser.class);
+    when(owner.getUniqueId()).thenReturn(UUID.randomUUID());
+    when(owner.getUsername()).thenReturn("owner");
+    when(owner.hasPermission(any())).thenReturn(true);
+    var collected = new ReferenceQueue<BotConnection>();
+    try (var manager = new BotTaskManager(server)) {
+      var bot = startRejectedTask(manager, server, owner, collected, schedulingFails);
+      reset(server);
+
+      System.gc();
+      assertSame(bot, collected.remove(5_000));
+
+      var history = manager.list(Optional.empty(), Optional.empty(), Set.of(), true, 50, "", owner);
+      assertEquals(1, history.tasks().size());
+      assertEquals(BotTaskStatus.BOT_TASK_STATUS_FAILED, history.tasks().getFirst().getStatus());
+    }
+  }
+
+  private static WeakReference<BotConnection> startRejectedTask(
+    BotTaskManager manager,
+    SoulFireServer server,
+    SoulFireUser owner,
+    ReferenceQueue<BotConnection> collected,
+    boolean schedulingFails
+  ) {
+    var instanceId = UUID.randomUUID();
+    var botId = UUID.randomUUID();
+    var instance = mock(InstanceManager.class);
+    var bot = mock(BotConnection.class);
+    var minecraft = mock(Minecraft.class);
+    var controls = mock(BotControlAPI.class);
+    when(server.getInstance(instanceId)).thenReturn(Optional.of(instance));
+    when(instance.botConnections()).thenReturn(Map.of(botId, bot));
+    when(bot.minecraft()).thenReturn(minecraft);
+    when(minecraft.isSameThread()).thenReturn(true);
+    when(bot.runnableWrapper()).thenReturn((SoulFireScheduler.RunnableWrapper) runnable -> runnable);
+    when(bot.botControl()).thenReturn(controls);
+    if (schedulingFails) {
+      when(controls.tryStart(any())).thenThrow(new IllegalStateException());
+    }
+    var task = manager.start(StartBotTaskRequest.newBuilder()
+      .setInstanceId(instanceId.toString()).setBotId(botId.toString())
+      .setInput(Any.pack(AutoEatTask.getDefaultInstance()))
+      .setConflictPolicy(BotTaskConflictPolicy.BOT_TASK_CONFLICT_POLICY_REJECT).build(), owner);
+    assertEquals(BotTaskStatus.BOT_TASK_STATUS_FAILED, task.getStatus());
+    assertEquals(schedulingFails ? "scheduling_failed" : "resource_conflict", task.getFailure().getCode());
+
+    var reference = new WeakReference<>(bot, collected);
+    // Mockito's instrumentation must not become another owner of the fixture.
+    List.of(bot, minecraft, instance, controls).forEach(framework()::clearInlineMock);
+    return reference;
   }
 
   @ParameterizedTest

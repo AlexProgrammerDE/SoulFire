@@ -37,9 +37,8 @@ import com.linecorp.armeria.server.prometheus.PrometheusExpositionService;
 import com.linecorp.armeria.server.tomcat.TomcatService;
 import com.soulfiremc.server.SoulFireServer;
 import com.soulfiremc.server.api.SoulFireAPI;
+import com.soulfiremc.server.util.GrpcErrors;
 import io.grpc.ServerInterceptors;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import io.grpc.protobuf.services.ProtoReflectionServiceV1;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -178,8 +177,7 @@ public final class RPCServer {
           .logWriter(LogWriter.builder()
             .logger(log)
             .responseLogLevelMapper(l -> {
-              if (l.responseCause() instanceof StatusRuntimeException e
-                && (e.getStatus().getCode() == Status.Code.CANCELLED || e.getStatus().getCode() == Status.Code.UNAUTHENTICATED)) {
+              if (GrpcErrors.isExpected(l.responseCause())) {
                 return LogLevel.DEBUG;
               }
 

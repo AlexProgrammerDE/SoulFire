@@ -317,6 +317,7 @@ public final class InstanceManager {
       // account already. Read persisted credentials after acquiring its lock.
       var currentAccount = fetchSettingsSource().accounts().get(account.profileId());
       if (currentAccount == null) {
+        invalidateSettingsCache();
         throw new IllegalStateException("Account was removed before authentication");
       }
       var authService = MCAuthService.convertService(currentAccount.authType());
@@ -393,9 +394,8 @@ public final class InstanceManager {
   }
 
   void removeBot(BotConnection bot) {
-    if (botConnections.remove(bot.accountProfileId(), bot)) {
+    if (botStateManager().removeConnection(bot)) {
       log.debug("Removing bot {}", bot.accountName());
-      botStateManager.connectionRemoved(bot);
       SoulFireAPI.postEvent(new BotConnectionRemovedEvent(bot));
     }
   }

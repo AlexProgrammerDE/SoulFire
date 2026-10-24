@@ -73,7 +73,7 @@ import java.util.stream.Stream;
 public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
   private static final int MAX_SMELT_OPERATIONS = 4_096;
   private static final int MENU_TIMEOUT_TICKS = 100;
-  private static final int COOK_TIMEOUT_TICKS = 12_000;
+  private static final int MAX_COOK_STALL_TICKS = 12_000;
   private static final Set<ControlResource> RESOURCES = Set.of(
     ControlResource.MOVEMENT,
     ControlResource.ROTATION,
@@ -120,7 +120,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     }
     BlockPos station = null;
     String stationId;
-    if (player.containerMenu instanceof AbstractFurnaceMenu menu) {
+    if (!input.hasStation() && player.containerMenu instanceof AbstractFurnaceMenu menu) {
       stationId = menuStation(menu);
     } else {
       if (!input.hasStation()) {
@@ -160,7 +160,6 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
       count,
       stationId
     );
-    validateFuel(context, input);
 
     var result = new CompletableFuture<SmeltTaskResult>();
     return new BotTaskExecution(
@@ -223,23 +222,22 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
   private static void validateFuel(
     BotTaskContext context,
-    SmeltTask input
+    @Nullable ItemSelector fuelSelector,
+    AbstractFurnaceMenu menu
   ) {
     var player = Objects.requireNonNull(context.bot().minecraft().player);
     Predicate<ItemStack> matchesFuel = stack -> !stack.isEmpty()
-      && (!input.hasFuel()
-      || InventoryServiceImpl.matches(stack, input.getFuel()))
+      && (fuelSelector == null
+      || InventoryServiceImpl.matches(stack, fuelSelector))
       && stack.has(DataComponents.COOKING_FUEL);
     var inventoryFuel = player.getInventory().getNonEquipmentItems().stream()
       .filter(matchesFuel)
       .findFirst();
     var offhandFuelMatches = matchesFuel.test(player.getOffhandItem());
-    var stationFuel = player.containerMenu instanceof AbstractFurnaceMenu menu
-      ? menu.getSlot(1).getItem()
-      : ItemStack.EMPTY;
-    var stationFuelMatches = matchesFuel.test(stationFuel);
+    var stationFuelMatches = matchesFuel.test(menu.getSlot(1).getItem());
     if (
-      inventoryFuel.isEmpty()
+      !menu.isLit()
+        && inventoryFuel.isEmpty()
         && !offhandFuelMatches
         && !stationFuelMatches
     ) {
@@ -258,7 +256,16 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private final @Nullable BlockPos station;
     private final CompletableFuture<SmeltTaskResult> result;
     private final List<ItemStack> outputs = new ArrayList<>();
+    private final CookingProgressWatchdog cookingProgress = new CookingProgressWatchdog(MAX_COOK_STALL_TICKS);
     private @Nullable PathExecutor activePath;
+    private boolean active;
+    private boolean stationValidated;
+    private boolean stationInterfered;
+    private ItemStack collectingOutput = ItemStack.EMPTY;
+    private int depositingCount;
+    private @Nullable AbstractFurnaceMenu openedMenu;
+    private @Nullable Stage resumeStage;
+    private int resumeStageTicks;
     private Stage stage;
     private int stageTicks;
     private int operationsCompleted;
@@ -302,7 +309,9 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
           case LOAD_FUEL -> loadFuel();
           case WAIT_FOR_OUTPUT -> waitForOutput();
           case TAKE_OUTPUT -> takeOutput();
+          case AWAIT_OUTPUT_PICKUP -> awaitOutputPickup();
           case DEPOSIT_OUTPUT -> depositOutput();
+          case AWAIT_OUTPUT_DEPOSIT -> awaitOutputDeposit();
         }
       } catch (Throwable throwable) {
         result.completeExceptionally(throwable);
@@ -356,8 +365,17 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
     private void openMenu() {
       var player = requirePlayer();
-      if (player.containerMenu instanceof AbstractFurnaceMenu) {
-        transition(Stage.VALIDATE_MENU, "Checking smelting station");
+      if (player.containerMenu instanceof AbstractFurnaceMenu menu) {
+        openedMenu = menu;
+        var resumed = resumeStage;
+        resumeStage = null;
+        transition(
+          resumed == null ? Stage.VALIDATE_MENU : resumed,
+          resumed == null ? "Checking smelting station" : "Resuming smelting"
+        );
+        if (resumed != null) {
+          stageTicks = resumeStageTicks;
+        }
         return;
       }
       var stationPosition = Objects.requireNonNull(station);
@@ -420,6 +438,8 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
           )
           .asRuntimeException();
       }
+      validateFuel(context, fuelSelector, menu);
+      stationValidated = true;
       var existingFuel = menu.getSlot(1).getItem();
       if (!existingFuel.isEmpty()
         && (!existingFuel.has(DataComponents.COOKING_FUEL)
@@ -501,8 +521,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private void loadInput() {
       var menu = requireFurnaceMenu();
       if (!menu.getSlot(0).getItem().isEmpty()) {
-        transition(Stage.LOAD_FUEL, "Checking furnace fuel");
-        return;
+        throw stationInterference("Smelting input changed before the task loaded its batch");
       }
       var source = findSource(
         menu,
@@ -612,18 +631,17 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
             RecipeSupport.displayContext(context.bot())
           )
         )) {
-          throw Status.FAILED_PRECONDITION
-            .withDescription(
-              "Smelting output does not match the selected recipe"
-            )
-            .asRuntimeException();
+          throw stationInterference("Smelting output does not match the selected recipe");
         }
         var expectedCount = Math.multiplyExact(
           batchOperations,
           expectedOutput().getCount()
         );
         if (stack.getCount() >= expectedCount) {
-          outputs.add(stack.copy());
+          if (stack.getCount() != expectedCount) {
+            throw stationInterference("Smelting output exceeds the task batch");
+          }
+          collectingOutput = stack.copy();
           transition(Stage.TAKE_OUTPUT, "Collecting smelted output");
           return;
         }
@@ -632,12 +650,7 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
         transition(Stage.LOAD_FUEL, "Refueling smelting station");
         return;
       }
-      stageTicks++;
-      if (stageTicks > COOK_TIMEOUT_TICKS) {
-        throw Status.DEADLINE_EXCEEDED
-          .withDescription("Timed out waiting for smelting output")
-          .asRuntimeException();
-      }
+      cookingProgress.observe(menu.getBurnProgress(), stack.getCount());
     }
 
     private boolean hasUsableFuel(AbstractFurnaceMenu menu) {
@@ -649,35 +662,33 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
     private void takeOutput() {
       var menu = requireFurnaceMenu();
-      var player = requirePlayer();
-      var gameMode = Objects.requireNonNull(
-        context.bot().minecraft().gameMode
-      );
-      gameMode.handleContainerInput(
-        menu.containerId,
-        2,
-        0,
-        ContainerInput.PICKUP,
-        player
-      );
-      transition(Stage.DEPOSIT_OUTPUT, "Storing smelted output");
+      if (!menu.getCarried().isEmpty()
+        || !ItemStack.matches(menu.getSlot(2).getItem(), collectingOutput)) {
+        throw stationInterference("Smelting output changed before collection");
+      }
+      sendUnpredictedPickup(menu, 2);
+      transition(Stage.AWAIT_OUTPUT_PICKUP, "Confirming smelted output collection");
+    }
+
+    private void awaitOutputPickup() {
+      var carried = requireFurnaceMenu().getCarried();
+      if (ItemStack.matches(carried, collectingOutput)) {
+        transition(Stage.DEPOSIT_OUTPUT, "Storing smelted output");
+        return;
+      }
+      if (!carried.isEmpty()) {
+        throw stationInterference("Collected smelting output does not match the task batch");
+      }
+      awaitOutputConfirmation("Timed out confirming smelting output collection");
     }
 
     private void depositOutput() {
       var menu = requireFurnaceMenu();
       var carried = menu.getCarried();
-      if (carried.isEmpty()) {
-        operationsCompleted += batchOperations;
-        batchOperations = 0;
-        transition(
-          operationsCompleted >= targetCount
-            ? Stage.WAIT_FOR_OUTPUT
-            : Stage.LOAD_INPUT,
-          operationsCompleted >= targetCount
-            ? "Smelting complete"
-            : "Loading next smelting input"
-        );
-        return;
+      if (carried.isEmpty()
+        || !ItemStack.isSameItemSameComponents(carried, collectingOutput)
+        || carried.getCount() > collectingOutput.getCount()) {
+        throw stationInterference("Smelting output cursor changed before storage");
       }
       var target = SFInventoryHelpers.playerInventorySlots(menu)
         .filter(slot -> canDeposit(menu, slot, carried))
@@ -687,20 +698,50 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
           .withDescription("Inventory has no room for smelting output")
           .asRuntimeException();
       }
-      Objects.requireNonNull(context.bot().minecraft().gameMode)
-        .handleContainerInput(
-          menu.containerId,
-          target.getAsInt(),
-          0,
-          ContainerInput.PICKUP,
-          requirePlayer()
+      depositingCount = carried.getCount();
+      sendUnpredictedPickup(menu, target.getAsInt());
+      transition(Stage.AWAIT_OUTPUT_DEPOSIT, "Confirming smelted output storage");
+    }
+
+    private void awaitOutputDeposit() {
+      var carried = requireFurnaceMenu().getCarried();
+      if (carried.isEmpty()) {
+        outputs.add(collectingOutput);
+        collectingOutput = ItemStack.EMPTY;
+        operationsCompleted += batchOperations;
+        batchOperations = 0;
+        transition(
+          operationsCompleted >= targetCount ? Stage.WAIT_FOR_OUTPUT : Stage.LOAD_INPUT,
+          operationsCompleted >= targetCount ? "Smelting complete" : "Loading next smelting input"
         );
-      stageTicks++;
-      if (stageTicks > MENU_TIMEOUT_TICKS) {
-        throw Status.DEADLINE_EXCEEDED
-          .withDescription("Timed out storing smelting output")
-          .asRuntimeException();
+        return;
       }
+      if (!ItemStack.isSameItemSameComponents(carried, collectingOutput)
+        || carried.getCount() > depositingCount) {
+        throw stationInterference("Smelting output cursor changed during storage");
+      }
+      if (carried.getCount() < depositingCount) {
+        transition(Stage.DEPOSIT_OUTPUT, "Storing remaining smelted output");
+        return;
+      }
+      awaitOutputConfirmation("Timed out confirming smelting output storage");
+    }
+
+    private void sendUnpredictedPickup(AbstractFurnaceMenu menu, int slot) {
+      var connection = Objects.requireNonNull(context.bot().minecraft().getConnection());
+      SFInventoryHelpers.sendUnpredictedPickup(connection, menu, slot);
+    }
+
+    private void awaitOutputConfirmation(String message) {
+      if (++stageTicks > MENU_TIMEOUT_TICKS) {
+        stationInterfered = true;
+        throw Status.DEADLINE_EXCEEDED.withDescription(message).asRuntimeException();
+      }
+    }
+
+    private RuntimeException stationInterference(String message) {
+      stationInterfered = true;
+      return Status.ABORTED.withDescription(message).asRuntimeException();
     }
 
     private void moveAmount(
@@ -872,7 +913,8 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     private void recoverFurnaceContents(
       net.minecraft.client.player.LocalPlayer player
     ) {
-      if (!(player.containerMenu instanceof AbstractFurnaceMenu menu)) {
+      var menu = openedMenu;
+      if (!stationValidated || menu == null || player.containerMenu != menu) {
         return;
       }
       var gameMode = context.bot().minecraft().gameMode;
@@ -893,6 +935,9 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
           ));
       }
       if (!menu.getCarried().isEmpty()) {
+        return;
+      }
+      if (operationsCompleted >= targetCount || stationInterfered) {
         return;
       }
       for (var slot : List.of(2, 0, 1)) {
@@ -950,7 +995,19 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+      if (station != null) {
+        var player = requirePlayer();
+        if (!(player.containerMenu instanceof InventoryMenu)) {
+          player.closeContainer();
+        }
+      }
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       if (activePath != null) {
         activePath.onSuspended();
       }
@@ -958,6 +1015,20 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
 
     @Override
     public void onResumed() {
+      active = true;
+      var player = requirePlayer();
+      if (station != null && openedMenu != null && player.containerMenu != openedMenu) {
+        if (resumeStage == null) {
+          resumeStage = stage;
+          resumeStageTicks = stageTicks;
+        }
+        if (!(player.containerMenu instanceof InventoryMenu)) {
+          player.closeContainer();
+        }
+        stopPath(ControlStopReason.CANCELLED, null);
+        transition(Stage.NAVIGATE, "Returning to smelting station");
+        return;
+      }
       if (activePath != null) {
         activePath.onResumed();
       }
@@ -968,19 +1039,22 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      stopPath(reason, cause);
-      var player = context.bot().minecraft().player;
       try {
-        if (player != null) {
-          recoverFurnaceContents(player);
+        stopPath(reason, cause);
+        if (active) {
+          active = false;
+          var player = context.bot().minecraft().player;
+          try {
+            if (player != null) {
+              recoverFurnaceContents(player);
+            }
+          } finally {
+            if (player != null && !(player.containerMenu instanceof InventoryMenu)) {
+              player.closeContainer();
+            }
+          }
         }
       } finally {
-        if (
-          player != null
-            && !(player.containerMenu instanceof InventoryMenu)
-        ) {
-          player.closeContainer();
-        }
         if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
           result.cancel(true);
         }
@@ -1066,6 +1140,35 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     );
   }
 
+  static final class CookingProgressWatchdog {
+    private final int maximumTicksWithoutProgress;
+    private float previousCookingProgress;
+    private int previousOutputCount;
+    private int ticksWithoutProgress;
+
+    CookingProgressWatchdog(int maximumTicksWithoutProgress) {
+      if (maximumTicksWithoutProgress <= 0) {
+        throw new IllegalArgumentException("maximumTicksWithoutProgress must be positive");
+      }
+      this.maximumTicksWithoutProgress = maximumTicksWithoutProgress;
+    }
+
+    void observe(float cookingProgress, int outputCount) {
+      if (cookingProgress > previousCookingProgress || outputCount > previousOutputCount) {
+        ticksWithoutProgress = 0;
+      } else {
+        ticksWithoutProgress++;
+      }
+      previousCookingProgress = cookingProgress;
+      previousOutputCount = outputCount;
+      if (ticksWithoutProgress > maximumTicksWithoutProgress) {
+        throw Status.DEADLINE_EXCEEDED
+          .withDescription("Timed out waiting for smelting output")
+          .asRuntimeException();
+      }
+    }
+  }
+
   private enum Stage {
     NAVIGATE,
     OPEN_MENU,
@@ -1075,6 +1178,8 @@ public final class SmeltTaskProvider implements BotTaskProvider<SmeltTask> {
     LOAD_FUEL,
     WAIT_FOR_OUTPUT,
     TAKE_OUTPUT,
-    DEPOSIT_OUTPUT
+    AWAIT_OUTPUT_PICKUP,
+    DEPOSIT_OUTPUT,
+    AWAIT_OUTPUT_DEPOSIT
   }
 }

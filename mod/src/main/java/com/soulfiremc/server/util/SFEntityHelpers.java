@@ -18,14 +18,25 @@
 package com.soulfiremc.server.util;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 
 /// Entity lifecycle checks used by queries and tasks that need an actionable
 /// target rather than an entity which is still rendering its death animation.
 public final class SFEntityHelpers {
   private SFEntityHelpers() {
+  }
+
+  /// Mirrors vanilla's attack-packet validation to avoid disconnecting the bot.
+  public static boolean isValidAttackTarget(Entity attacker, Entity target) {
+    return target != attacker
+      && !(target instanceof ItemEntity)
+      && !(target instanceof ExperienceOrb)
+      && (!(target instanceof AbstractArrow arrow) || arrow.isAttackable());
   }
 
   public static boolean isAliveAndTargetable(Entity entity) {

@@ -17,11 +17,16 @@
  */
 package com.soulfiremc.server.util;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import lombok.extern.slf4j.Slf4j;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.HashedStack;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
@@ -47,6 +52,24 @@ public final class SFInventoryHelpers {
   /// state id of at least 1, so reading the menu before that sees it empty.
   public static boolean hasReceivedContents(AbstractContainerMenu menu) {
     return menu.getStateId() != 0;
+  }
+
+  public static void sendUnpredictedPickup(
+    ClientPacketListener connection,
+    AbstractContainerMenu menu,
+    int slot
+  ) {
+    // Report the state we actually know, leaving the server to send the click's
+    // slot and cursor changes. Local prediction cannot confirm a contested pickup.
+    connection.send(new ServerboundContainerClickPacket(
+      menu.containerId,
+      menu.getStateId(),
+      (short) slot,
+      (byte) 0,
+      ContainerInput.PICKUP,
+      Int2ObjectMaps.emptyMap(),
+      HashedStack.create(menu.getCarried(), connection.decoratedHashOpsGenenerator())
+    ));
   }
 
   public static boolean isSelectableHotbarSlot(int slot) {

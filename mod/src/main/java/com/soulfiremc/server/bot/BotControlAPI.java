@@ -17,6 +17,7 @@
  */
 package com.soulfiremc.server.bot;
 
+import com.soulfiremc.server.util.GrpcErrors;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -31,6 +32,12 @@ public final class BotControlAPI {
   private final List<ControlTask> activeTasks = new ArrayList<>();
   private final Deque<ControlTask> suspendedTasks = new ArrayDeque<>();
   private final Deque<ControlTask> queuedTasks = new ArrayDeque<>();
+  private boolean shutdown;
+
+  public synchronized void shutdown() {
+    shutdown = true;
+    stopAll();
+  }
 
   public synchronized void tick() {
     for (var task : List.copyOf(activeTasks)) {
@@ -96,6 +103,9 @@ public final class BotControlAPI {
   }
 
   public synchronized void replace(ControlTask task) {
+    if (rejectAfterShutdown(task)) {
+      return;
+    }
     for (var conflict : conflicts(task)) {
       activeTasks.remove(conflict);
       stopTask(conflict, ControlStopReason.REPLACED, null);
@@ -111,6 +121,9 @@ public final class BotControlAPI {
   }
 
   public synchronized boolean tryStart(ControlTask task) {
+    if (rejectAfterShutdown(task)) {
+      return false;
+    }
     if (!conflicts(task).isEmpty()) {
       return false;
     }
@@ -119,6 +132,9 @@ public final class BotControlAPI {
   }
 
   public synchronized void enqueue(ControlTask task) {
+    if (rejectAfterShutdown(task)) {
+      return;
+    }
     if (conflicts(task).isEmpty()) {
       startTask(task);
       return;
@@ -127,6 +143,9 @@ public final class BotControlAPI {
   }
 
   public synchronized boolean submit(ControlTask task) {
+    if (rejectAfterShutdown(task)) {
+      return false;
+    }
     var conflicts = conflicts(task);
     if (conflicts.isEmpty()) {
       startTask(task);
@@ -156,6 +175,14 @@ public final class BotControlAPI {
       }
     }
     return null;
+  }
+
+  private boolean rejectAfterShutdown(ControlTask task) {
+    if (!shutdown) {
+      return false;
+    }
+    stopTask(task, ControlStopReason.CANCELLED, null);
+    return true;
   }
 
   private void startTask(ControlTask task) {
@@ -252,11 +279,12 @@ public final class BotControlAPI {
   }
 
   private void logTaskFailure(String action, ControlTask task, Throwable t) {
+    var event = (GrpcErrors.isExpected(t) ? log.atDebug() : log.atError()).setCause(t);
     var description = task.description();
     if (description != null) {
-      log.error("Error while {} control task ({})", action, description, t);
+      event.log("Error while {} control task ({})", action, description);
     } else {
-      log.error("Error while {} control task", action, t);
+      event.log("Error while {} control task", action);
     }
   }
 }

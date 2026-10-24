@@ -56,7 +56,9 @@ import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -93,6 +95,16 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
 
   @Override
   public BotTaskExecution start(BotTaskContext context, CraftTask input) {
+    return start(context, input, new RecoveryState());
+  }
+
+  @Override
+  public ExecutionFactory prepare(CraftTask input) {
+    var recovery = new RecoveryState();
+    return context -> start(context, input, recovery);
+  }
+
+  private BotTaskExecution start(BotTaskContext context, CraftTask input, RecoveryState recovery) {
     if (input.getRecipeId().isBlank()) {
       throw Status.INVALID_ARGUMENT
         .withDescription("recipe_id is required")
@@ -160,15 +172,18 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
       }
     }
 
+    var output = RecipeSupport.result(context.bot(), entry);
+    recovery.validateOutput(MinecraftDomainMapper.item(output).getFingerprint(), output.getCount());
     var result = new CompletableFuture<CraftTaskResult>();
     var control = new CraftControl(
       context,
       entry,
-      RecipeSupport.result(context.bot(), entry),
+      output,
       count,
       inventoryRecipe,
       station,
-      result
+      result,
+      recovery
     );
     return new BotTaskExecution(control, result);
   }
@@ -181,12 +196,15 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     private final boolean inventoryRecipe;
     private final @Nullable BlockPos station;
     private final CompletableFuture<CraftTaskResult> result;
+    private final RecoveryState recovery;
     private @Nullable PathExecutor activePath;
+    private boolean active;
     private Stage stage;
     private int stageTicks;
     private final MenuSync menuSync = new MenuSync();
-    private int crafted;
     private boolean ingredientsChecked;
+    private boolean recoveryResolved;
+    private boolean resumeAfterDeposit;
 
     private CraftControl(
       BotTaskContext context,
@@ -195,7 +213,8 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
       int targetCount,
       boolean inventoryRecipe,
       @Nullable BlockPos station,
-      CompletableFuture<CraftTaskResult> result
+      CompletableFuture<CraftTaskResult> result,
+      RecoveryState recovery
     ) {
       this.context = context;
       this.recipe = recipe;
@@ -204,6 +223,7 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
       this.inventoryRecipe = inventoryRecipe;
       this.station = station;
       this.result = result;
+      this.recovery = recovery;
       this.stage = inventoryRecipe || station == null
         ? Stage.OPEN_MENU
         : Stage.PREPARE_INVENTORY;
@@ -215,19 +235,34 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
         return;
       }
       try {
+        if (!recoveryResolved) {
+          if (!recovery.reconcile(inventoryCounts(requirePlayer()))) {
+            if (stageTicks++ == 0) {
+              context.reportProgress(progress("Recovering crafting output"));
+            }
+            if (stageTicks > MENU_TIMEOUT_TICKS) {
+              throw Status.ABORTED
+                .withDescription("Cannot confirm storage of the pending crafting output after reconnecting")
+                .asRuntimeException();
+            }
+            return;
+          }
+          recoveryResolved = true;
+          stageTicks = 0;
+        }
+        if (recovery.crafted() >= targetCount) {
+          complete();
+          return;
+        }
         if (!ingredientsChecked) {
           // On the first tick, not in start(): a queued task runs later.
           requireIngredients(
             recipe.craftingRequirements().orElseThrow(),
             availableIngredients(requirePlayer()),
-            targetCount,
+            targetCount - recovery.crafted(),
             "display:" + recipe.id().index()
           );
           ingredientsChecked = true;
-        }
-        if (crafted >= targetCount) {
-          complete();
-          return;
         }
         switch (stage) {
           case PREPARE_INVENTORY -> prepareInventory();
@@ -372,7 +407,12 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
         transition(Stage.CLEAR_GRID, "Preparing recipe");
         return;
       }
-      var stationPosition = Objects.requireNonNull(station);
+      if (station == null) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("station is required to reopen the crafting table")
+          .asRuntimeException();
+      }
+      var stationPosition = station;
       var level = Objects.requireNonNull(
         context.bot().minecraft().level,
         "Bot level is not available"
@@ -738,6 +778,13 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     private void takeResult() {
       var player = requirePlayer();
       var menu = requireCraftingMenu(player.containerMenu);
+      var ingredients = new HashMap<String, Integer>();
+      for (var slot : craftingMenu(menu).getInputGridSlots()) {
+        if (!slot.getItem().isEmpty()) {
+          ingredients.merge(MinecraftDomainMapper.item(slot.getItem()).getFingerprint(), 1, Integer::sum);
+        }
+      }
+      recovery.beginPickup(inventoryCounts(player), ingredients);
       handleContainerInput(
         menu,
         0,
@@ -751,7 +798,9 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
 
     private void depositResult() {
       var player = requirePlayer();
-      var menu = requireCraftingMenu(player.containerMenu);
+      var menu = resumeAfterDeposit
+        ? player.containerMenu
+        : requireCraftingMenu(player.containerMenu);
       if (!menuSync.settled(menu)) {
         stageTicks++;
         if (stageTicks > MENU_TIMEOUT_TICKS) {
@@ -763,9 +812,20 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
       }
       var carried = menu.getCarried();
       if (carried.isEmpty()) {
-        crafted++;
-        transition(Stage.CLEAR_GRID, "Preparing next craft");
+        recovery.confirmCraft();
+        if (resumeAfterDeposit) {
+          resumeAfterDeposit = false;
+          prepareAfterResume();
+        } else {
+          transition(Stage.CLEAR_GRID, "Preparing next craft");
+        }
         return;
+      }
+      if (!ItemStack.isSameItemSameComponents(carried, output)
+        || carried.getCount() > output.getCount()) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("The crafting output cursor changed before storage")
+          .asRuntimeException();
       }
       var target = SFInventoryHelpers.playerInventorySlots(menu)
         .filter(slot -> canDeposit(menu, slot, carried))
@@ -888,16 +948,17 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     private BotTaskProgress progress(String message) {
       return BotTaskProgress.newBuilder()
         .setMessage(message)
-        .setCurrent(crafted)
+        .setCurrent(recovery.crafted())
         .setTotal(targetCount)
-        .setFraction(Math.min(1.0, (double) crafted / targetCount))
+        .setFraction(Math.min(1.0, (double) recovery.crafted() / targetCount))
         .build();
     }
 
     private void complete() {
+      context.reportProgress(progress("Crafting complete"));
       result.complete(CraftTaskResult.newBuilder()
         .setResult(MinecraftDomainMapper.item(output))
-        .setCrafted(crafted)
+        .setCrafted(recovery.crafted())
         .build());
     }
 
@@ -929,7 +990,13 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     }
 
     @Override
+    public void onStarted() {
+      active = true;
+    }
+
+    @Override
     public void onSuspended() {
+      active = false;
       if (activePath != null) {
         activePath.onSuspended();
       }
@@ -937,9 +1004,23 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
 
     @Override
     public void onResumed() {
-      if (activePath != null) {
-        activePath.onResumed();
+      active = true;
+      stopPath(ControlStopReason.CANCELLED, null);
+      if (stage == Stage.DEPOSIT_RESULT) {
+        // Closing a table returns its cursor to the inventory. Finish this
+        // operation once before rebuilding the grid for the next one.
+        resumeAfterDeposit = true;
+        menuSync.reset(requirePlayer().containerMenu);
+      } else {
+        prepareAfterResume();
       }
+    }
+
+    private void prepareAfterResume() {
+      transition(
+        inventoryRecipe || station == null ? Stage.OPEN_MENU : Stage.PREPARE_INVENTORY,
+        "Preparing recipe after resuming"
+      );
     }
 
     @Override
@@ -947,19 +1028,23 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
       ControlStopReason reason,
       @Nullable Throwable cause
     ) {
-      stopPath(reason, cause);
-      var player = context.bot().minecraft().player;
       try {
-        if (player != null) {
-          recoverCraftingContents(player);
+        stopPath(reason, cause);
+        if (active) {
+          active = false;
+          var player = context.bot().minecraft().player;
+          try {
+            if (player != null && !context.bot().isDisconnecting()) {
+              recoverCraftingContents(player);
+            }
+          } finally {
+            if (player != null && !context.bot().isDisconnecting()
+              && !(player.containerMenu instanceof InventoryMenu)) {
+              player.closeContainer();
+            }
+          }
         }
       } finally {
-        if (
-          player != null
-            && !(player.containerMenu instanceof InventoryMenu)
-        ) {
-          player.closeContainer();
-        }
         if (reason != ControlStopReason.COMPLETED && !result.isDone()) {
           result.cancel(true);
         }
@@ -970,6 +1055,82 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     public String description() {
       return "Craft recipe";
     }
+  }
+
+  /// The durable task keeps only values, not a connection's recipe or control.
+  static final class RecoveryState {
+    private int crafted;
+    private @Nullable String outputFingerprint;
+    private int outputCount;
+    private @Nullable PendingPickup pendingPickup;
+
+    synchronized int crafted() {
+      return crafted;
+    }
+
+    synchronized void validateOutput(String fingerprint, int count) {
+      if (outputFingerprint != null && (!outputFingerprint.equals(fingerprint) || outputCount != count)) {
+        throw Status.FAILED_PRECONDITION
+          .withDescription("The crafting recipe output changed after reconnecting")
+          .asRuntimeException();
+      }
+      outputFingerprint = fingerprint;
+      outputCount = count;
+    }
+
+    synchronized void beginPickup(Map<String, Integer> inventory, Map<String, Integer> ingredients) {
+      if (pendingPickup != null) {
+        throw new IllegalStateException("A crafting output pickup is already pending");
+      }
+      pendingPickup = new PendingPickup(Map.copyOf(inventory), Map.copyOf(ingredients));
+    }
+
+    synchronized void confirmCraft() {
+      if (pendingPickup == null) {
+        throw new IllegalStateException("No crafting output pickup is pending");
+      }
+      crafted++;
+      pendingPickup = null;
+    }
+
+    synchronized boolean reconcile(Map<String, Integer> inventory) {
+      if (pendingPickup == null) {
+        return true;
+      }
+      var before = pendingPickup.inventory();
+      var ingredients = pendingPickup.ingredients();
+      if (inventory.equals(before)) {
+        // The pickup was not accepted and the ingredients were returned.
+        pendingPickup = null;
+        return true;
+      }
+      var stored = inventory.getOrDefault(outputFingerprint, 0)
+        - before.getOrDefault(outputFingerprint, 0);
+      var expected = outputCount - ingredients.getOrDefault(outputFingerprint, 0);
+      var consumed = ingredients.entrySet().stream()
+        .filter(entry -> !entry.getKey().equals(outputFingerprint))
+        .allMatch(entry -> before.getOrDefault(entry.getKey(), 0)
+          - inventory.getOrDefault(entry.getKey(), 0) == entry.getValue());
+      if (stored == expected && consumed) {
+        confirmCraft();
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    private record PendingPickup(Map<String, Integer> inventory, Map<String, Integer> ingredients) {
+    }
+  }
+
+  private static Map<String, Integer> inventoryCounts(net.minecraft.client.player.LocalPlayer player) {
+    var counts = new HashMap<String, Integer>();
+    for (var stack : availableIngredients(player)) {
+      if (!stack.isEmpty()) {
+        counts.merge(MinecraftDomainMapper.item(stack).getFingerprint(), stack.getCount(), Integer::sum);
+      }
+    }
+    return counts;
   }
 
   /// Tells when a menu's state id has settled after the bot's clicks.
@@ -988,6 +1149,12 @@ public final class CraftTaskProvider implements BotTaskProvider<CraftTask> {
     void restart(AbstractContainerMenu menu) {
       stateId = menu.getStateId();
       stableTicks = 0;
+    }
+
+    /// A replacement menu cannot answer a click sent to the previous one.
+    void reset(AbstractContainerMenu menu) {
+      awaitingAnswer = false;
+      restart(menu);
     }
 
     /// Waits for the answer to clicks that changed the crafting grid.

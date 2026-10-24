@@ -102,17 +102,18 @@ abstract class GenerateLauncherAssets : DefaultTask() {
       assets += remote(client, cache, "Minecraft client", "mc-downloads/minecraft-${minecraftVersion.get()}-client.jar", "minecraft", clientDownload)
       val indexDownload = version.getAsJsonObject("assetIndex")
       val index = json(client, cache, indexDownload["url"].asString, indexDownload["sha1"].asString)
-      val fonts = JsonObject()
+      val startupAssets = JsonObject()
       index.getAsJsonObject("objects").entrySet().filter {
-        it.key.startsWith("minecraft/font/") || it.key.startsWith("minecraft/textures/font/")
-      }.forEach { fonts.add(it.key, it.value) }
-      for ((hash, value) in fonts.entrySet().map { it.value.asJsonObject }.associateBy { it["hash"].asString }.toSortedMap()) {
+        it.key.startsWith("minecraft/font/") || it.key.startsWith("minecraft/textures/font/") ||
+          it.key.startsWith("icons/")
+      }.forEach { startupAssets.add(it.key, it.value) }
+      for ((hash, value) in startupAssets.entrySet().map { it.value.asJsonObject }.associateBy { it["hash"].asString }.toSortedMap()) {
         val path = "${hash.take(2)}/$hash"
         val download = value.deepCopy().apply {
           addProperty("url", "https://resources.download.minecraft.net/$path")
           addProperty("sha1", hash)
         }
-        assets += remote(client, cache, "Minecraft font $hash", "assets/objects/$path", "asset", download)
+        assets += remote(client, cache, "Minecraft startup asset $hash", "assets/objects/$path", "asset", download)
       }
       val sounds = JsonObject()
       index.getAsJsonObject("objects").entrySet().filter {
@@ -133,11 +134,11 @@ abstract class GenerateLauncherAssets : DefaultTask() {
         "name" to "Minecraft sound index", "path" to "assets/indexes/$soundIndexId.json", "kind" to "asset",
         "resource" to "META-INF/assets/$soundIndexId.json", "size" to soundIndexFile.length(), "sha256" to digest(soundIndexFile, "SHA-256")
       )
-      val indexId = "soulfire-fonts-${minecraftVersion.get()}"
+      val indexId = "soulfire-startup-${minecraftVersion.get()}"
       val indexFile = output.resolve("META-INF/assets/$indexId.json")
-      indexFile.writeText(gson.toJson(JsonObject().apply { add("objects", fonts) }) + "\n")
+      indexFile.writeText(gson.toJson(JsonObject().apply { add("objects", startupAssets) }) + "\n")
       assets += linkedMapOf(
-        "name" to "Minecraft font index", "path" to "assets/indexes/$indexId.json", "kind" to "asset",
+        "name" to "Minecraft startup asset index", "path" to "assets/indexes/$indexId.json", "kind" to "asset",
         "resource" to "META-INF/assets/$indexId.json", "size" to indexFile.length(), "sha256" to digest(indexFile, "SHA-256")
       )
       output.resolve("META-INF/soulfire-assets.json").writeText(gson.toJson(linkedMapOf(

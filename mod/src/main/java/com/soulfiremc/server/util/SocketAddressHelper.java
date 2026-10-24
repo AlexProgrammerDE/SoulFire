@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnixDomainSocketAddress;
 
 public final class SocketAddressHelper {
@@ -52,7 +53,13 @@ public final class SocketAddressHelper {
         }
         yield "inet://%s:%d".formatted(host, inet.getPort());
       }
-      case UnixDomainSocketAddress unix -> "unix://%s".formatted(unix.getPath());
+      case UnixDomainSocketAddress unix -> {
+        try {
+          yield new URI("unix", "", unix.getPath().toString(), null, null).toASCIIString();
+        } catch (URISyntaxException e) {
+          throw new IllegalArgumentException("Invalid Unix socket address", e);
+        }
+      }
       default -> throw new IllegalArgumentException("Unsupported address type: " + address.getClass().getName());
     };
   }
@@ -60,6 +67,7 @@ public final class SocketAddressHelper {
   public static SocketAddress deserialize(String uriString) {
     var uri = URI.create(uriString);
     return switch (uri.getScheme()) {
+      case null -> throw new IllegalArgumentException("Address must include an inet:// or unix:// scheme");
       case "inet" -> {
         var host = uri.getHost();
         var port = uri.getPort();
@@ -70,6 +78,9 @@ public final class SocketAddressHelper {
       }
       case "unix" -> {
         var path = uri.getPath();
+        if (path == null) {
+          throw new IllegalArgumentException("Invalid unix address, expected format 'unix:///path' but got: " + uriString);
+        }
         yield UnixDomainSocketAddress.of(path);
       }
       default -> throw new IllegalArgumentException("Unsupported scheme: " + uri.getScheme());

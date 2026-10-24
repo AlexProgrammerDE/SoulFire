@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Getter
 public final class SFLogAppender extends AbstractAppender {
@@ -94,11 +95,10 @@ public final class SFLogAppender extends AbstractAppender {
   }
 
   public void publishLogEvent(SFLogEvent event) {
+    logs.add(event);
     for (var consumer : logConsumers) {
       consumer.accept(event);
     }
-
-    logs.add(event);
   }
 
   public record SFLogEvent(
@@ -153,24 +153,24 @@ public final class SFLogAppender extends AbstractAppender {
     }
 
     public List<E> getNewest(int amount) {
-      if (amount > maxSize) {
-        throw new IllegalArgumentException("Amount is bigger than max size!");
+      return getNewest(amount, _ -> true);
+    }
+
+    public List<E> getNewest(int amount, Predicate<? super E> predicate) {
+      if (amount < 0 || amount > maxSize) {
+        throw new IllegalArgumentException("Amount must be between 0 and " + maxSize);
       }
 
+      List<E> list;
       lock.readLock().lock();
       try {
-        var list = new ArrayList<>(queue);
-        var size = list.size();
-        var start = size - amount;
-
-        if (start < 0) {
-          start = 0;
-        }
-
-        return list.subList(start, size);
+        list = new ArrayList<>(queue);
       } finally {
         lock.readLock().unlock();
       }
+      list.removeIf(predicate.negate());
+      var size = list.size();
+      return list.subList(Math.max(0, size - amount), size);
     }
   }
 }

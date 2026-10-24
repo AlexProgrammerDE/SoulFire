@@ -42,6 +42,7 @@ import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.server.account.service.TheAlteningJavaData;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
@@ -63,7 +64,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.GameNarrator;
@@ -118,6 +118,7 @@ import net.minecraft.server.network.EventLoopGroupHolder;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiling.ContinuousProfiler;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -144,6 +145,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -157,6 +159,8 @@ public final class BotConnection {
   private final MetadataHolder<JsonElement> persistentMetadata;
   private final Map<Holder.Reference<?>, DataComponentMap> registryComponents = new ConcurrentHashMap<>();
   private final PovFrameTasks povFrameTasks = new PovFrameTasks();
+  @Getter(AccessLevel.PACKAGE)
+  private final BotThreadTasks gameThreadTasks = new BotThreadTasks();
   private final PovInputController povInput = new PovInputController(this);
   private final ControlState controlState = new ControlState();
   private final CreativeInventoryState creativeInventoryState = new CreativeInventoryState();
@@ -186,6 +190,12 @@ public final class BotConnection {
   @Nullable
   private volatile String disconnectReason;
   private volatile boolean isDisconnected;
+  @Getter(AccessLevel.NONE)
+  private volatile @Nullable MenuCloseState closingMenu;
+  @Getter(AccessLevel.NONE)
+  private volatile @Nullable MenuCloseState creativeCursorReturn;
+  @Getter(AccessLevel.NONE)
+  private long inventoryUpdates;
 
   public static BotConnection current() {
     var current = CURRENT.isBound() ? CURRENT.get() : null;
@@ -650,6 +660,7 @@ public final class BotConnection {
       return Objects.requireNonNull(shutdownFuture.get());
     }
 
+    gameThreadTasks.close();
     instanceManager.scheduler().execute(() -> {
       try {
         disconnectNow(reason);
@@ -667,13 +678,16 @@ public final class BotConnection {
   }
 
   private void disconnectNow(Component reason) throws InterruptedException, TimeoutException {
-    disconnectReason = PlainTextComponentSerializer.plainText().serialize(reason);
+    disconnectReason = SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(reason);
     log.debug("Got Disconnected with reason: {}", disconnectReason);
-    SoulFireAPI.postEvent(new BotDisconnectedEvent(this, reason));
-
     try {
-      networkChannelTracker.closeAll(DISCONNECT_TIMEOUT);
-      stopMinecraftClient();
+      networkChannelTracker.beginShutdown();
+      try {
+        closeMenuAndNotify(reason);
+        stopMinecraftClient();
+      } finally {
+        networkChannelTracker.closeAll(DISCONNECT_TIMEOUT);
+      }
       networkChannelTracker.closeAll(DISCONNECT_TIMEOUT);
       if (networkChannelTracker.hasOpenChannels()) {
         throw new IllegalStateException("Bot still has an open network channel after disconnecting");
@@ -682,13 +696,87 @@ public final class BotConnection {
       isDisconnected = true;
     } finally {
       minecraft.stop();
+      botControl.shutdown();
       runShutdownHooks();
       scheduler.shutdown();
     }
   }
 
+  public void onInventoryUpdate() {
+    inventoryUpdates++;
+  }
+
+  public void tickDisconnectCleanup() {
+    var state = closingMenu;
+    if (state != null) {
+      state.tick(minecraft, inventoryUpdates);
+    }
+    var creative = creativeCursorReturn;
+    if (creative != null) {
+      creative.tick(minecraft, inventoryUpdates);
+      if (creative.completion().isDone()) creativeCursorReturn = null;
+    }
+  }
+
+  public void beginCreativeCursorReturn(ItemStack carried) {
+    creativeCursorReturn = MenuCloseState.captureCreativeCursor(minecraft.player, inventoryUpdates, carried);
+  }
+
+  private void closeMenuAndNotify(Component reason) {
+    var notified = new AtomicBoolean();
+    Runnable notify = () -> {
+      if (notified.compareAndSet(false, true)) {
+        SoulFireAPI.postEvent(new BotDisconnectedEvent(this, reason));
+      }
+    };
+    try {
+      if (!hasRunningGameThread()) {
+        return;
+      }
+      minecraft.submit(() -> {
+        var player = minecraft.player;
+        var connection = minecraft.getConnection();
+        if (player != null && connection != null && connection.getConnection().isConnected()) {
+          // Capture before task retirement predicts any inventory recovery clicks.
+          closingMenu = MenuCloseState.capture(player, inventoryUpdates);
+        }
+        notify.run();
+        botControl.shutdown();
+        scheduler.shutdown();
+        if (closingMenu != null) {
+          var hadContainer = player.containerMenu != player.inventoryMenu;
+          player.closeContainer();
+          if (hadContainer) {
+            player.closeContainer();
+          }
+        }
+      }).get(DISCONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+      var state = closingMenu;
+      var creative = creativeCursorReturn;
+      CompletableFuture.allOf(
+        state == null ? CompletableFuture.completedFuture(null) : state.completion(),
+        creative == null ? CompletableFuture.completedFuture(null) : creative.completion()
+      ).get(DISCONNECT_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      log.warn("Interrupted while returning menu items for {}", accountName, e);
+    } catch (ExecutionException | TimeoutException e) {
+      log.warn("Failed to return menu items before disconnecting {}", accountName, e);
+    } finally {
+      closingMenu = null;
+      creativeCursorReturn = null;
+      notify.run();
+    }
+  }
+
+  private boolean hasRunningGameThread() {
+    var gameThread = minecraft.gameThread;
+    return minecraft.isRunning() && gameThread != null && gameThread.isAlive()
+      && minecraft.packetProcessor.runningThread == gameThread;
+  }
+
   private void stopMinecraftClient() {
-    if (!minecraft.isRunning()) {
+    if (!hasRunningGameThread()) {
       return;
     }
 
