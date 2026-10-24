@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.xml.sax.InputSource;
 
@@ -49,9 +50,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -188,6 +191,58 @@ final class SFWebDavServletTest {
   void copyingTheStorageRootIntoItsDescendantIsForbidden() throws Exception {
     assertEquals(403, send("/", "COPY", "", "Destination", baseUri + "/collection/root-copy").statusCode());
     assertFalse(Files.exists(storage.resolve("collection/root-copy")));
+  }
+
+  @ParameterizedTest
+  @CsvSource({"COPY,1", "MOVE,1", "MOVE,0"})
+  void invalidCollectionDepthPreservesTheSourceAndExistingDestination(String method, String depth) throws Exception {
+    var source = storage.resolve("collection/source.txt");
+    var destination = storage.resolve("sibling/destination.txt");
+    var sourceBytes = new byte[]{1, 2, 3};
+    var destinationBytes = new byte[]{4, 5, 6};
+    Files.write(source, sourceBytes);
+    Files.write(destination, destinationBytes);
+
+    var response = send("/collection", method, "", "Destination", baseUri + "/sibling", "Depth", depth);
+
+    assertEquals(400, response.statusCode());
+    assertAll(
+      () -> assertArrayEquals(sourceBytes, Files.readAllBytes(source)),
+      () -> assertArrayEquals(destinationBytes, Files.readAllBytes(destination)));
+  }
+
+  @ParameterizedTest
+  @CsvSource({"COPY,0,false", "COPY,infinity,true", "COPY,,true", "MOVE,infinity,true", "MOVE,,true"})
+  void validCollectionDepthCopiesTheRequestedMembers(String method, String depth, boolean recursive) throws Exception {
+    var source = storage.resolve("collection/nested/source.bin");
+    Files.createDirectory(source.getParent());
+    var bytes = new byte[]{7, 8, 9};
+    Files.write(source, bytes);
+    var destination = storage.resolve("sibling/copied");
+
+    var response = depth == null
+      ? send("/collection", method, "", "Destination", baseUri + "/sibling/copied")
+      : send("/collection", method, "", "Destination", baseUri + "/sibling/copied", "Depth", depth);
+
+    assertEquals(201, response.statusCode());
+    assertTrue(Files.isDirectory(destination));
+    assertEquals(recursive, Files.exists(destination.resolve("nested/source.bin")));
+    if (recursive) assertArrayEquals(bytes, Files.readAllBytes(destination.resolve("nested/source.bin")));
+    assertEquals(!"MOVE".equals(method), Files.exists(source));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"COPY", "MOVE"})
+  void nonCollectionOperationsIgnoreDepth(String method) throws Exception {
+    var source = storage.resolve("collection/source.bin");
+    var bytes = new byte[]{10, 11, 12};
+    Files.write(source, bytes);
+
+    var response = send("/collection/source.bin", method, "", "Destination", baseUri + "/sibling/copied.bin", "Depth", "1");
+
+    assertEquals(201, response.statusCode());
+    assertArrayEquals(bytes, Files.readAllBytes(storage.resolve("sibling/copied.bin")));
+    assertEquals(!"MOVE".equals(method), Files.exists(source));
   }
 
   @Test

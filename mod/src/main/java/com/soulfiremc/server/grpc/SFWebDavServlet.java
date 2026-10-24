@@ -1160,6 +1160,17 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
       return false;
     }
 
+    var infiniteCopy = true;
+    var depthHeader = req.getHeader("Depth");
+    if (source.isDirectory() && depthHeader != null) {
+      if ("0".equals(depthHeader) && METHOD_COPY.equals(req.getMethod())) {
+        infiniteCopy = false;
+      } else if (!"infinity".equals(depthHeader)) {
+        resp.sendError(WebdavStatus.SC_BAD_REQUEST);
+        return false;
+      }
+    }
+
     var overwrite = true;
     var overwriteHeader = req.getHeader("Overwrite");
     if (overwriteHeader != null) {
@@ -1188,19 +1199,6 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     // Copying source to destination
 
     Map<String, Integer> errorList = new LinkedHashMap<>();
-
-    var infiniteCopy = true;
-    var depthHeader = req.getHeader("Depth");
-    if (depthHeader != null) {
-      if ("infinity".equals(depthHeader)) {
-        // NO-OP - this is the default
-      } else if ("0".equals(depthHeader)) {
-        infiniteCopy = false;
-      } else {
-        resp.sendError(WebdavStatus.SC_BAD_REQUEST);
-        return false;
-      }
-    }
 
     var result = copyResource(errorList, path, destinationPath, infiniteCopy);
 
