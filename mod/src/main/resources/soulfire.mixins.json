@@ -47,6 +47,7 @@
     "headless.rendering.MixinClientLevel",
     "headless.rendering.MixinConfirmLinkScreen",
     "headless.rendering.MixinCreativeModeInventoryScreen",
+    "headless.rendering.MixinEditBox",
     "headless.rendering.MixinGuiRenderer",
     "headless.rendering.MixinLevelLoadTrackerWaitingForPlayerChunk",
     "headless.rendering.MixinMouseHandler",
