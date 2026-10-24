@@ -301,6 +301,63 @@ final class BotStateManagerTest {
     verify(current).connect();
   }
 
+  @ParameterizedTest
+  @EnumSource(value = Intent.class, names = {"START", "RESTART"})
+  void completedRemovalCannotRetireANewerStart(Intent intent, @TempDir Path directory) {
+    var fixture = fixture(directory, true);
+    var account = fixture.settings().accounts().get(fixture.botId());
+    var other = new MinecraftAccount(AuthType.OFFLINE, UUID.randomUUID(), "OtherBot", new OfflineJavaData(), Map.of(), Map.of());
+    when(fixture.settings().accounts()).thenReturn(Map.of(fixture.botId(), account, other.profileId(), other));
+    when(fixture.settings().get(BotSettings.CONCURRENT_CONNECTS)).thenReturn(2);
+    when(fixture.settings().proxies()).thenReturn(List.of(new SFProxy(ProxyType.SOCKS5, new InetSocketAddress("127.0.0.1", 1080), null, null)));
+    when(fixture.settings().get(ProxySettings.BOTS_PER_PROXY)).thenReturn(1);
+    when(fixture.settings().get(ProxySettings.SHUFFLE_PROXIES)).thenReturn(false);
+    when(fixture.settings().get(ProxySettings.STICKY_PROXIES)).thenReturn(false);
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    var retired = mock(BotConnection.class);
+    when(retired.accountProfileId()).thenReturn(fixture.botId());
+    var disconnected = new CompletableFuture<Void>();
+    when(retired.disconnect(any())).thenReturn(disconnected);
+    fixture.connections().put(fixture.botId(), retired);
+    doAnswer(_ -> {
+      if (fixture.connections().remove(fixture.botId(), retired)) fixture.manager().connectionRemoved(retired);
+      return null;
+    }).when(fixture.instance()).removeBot(retired);
+    var started = new AtomicBoolean();
+    var events = new CopyOnWriteArrayList<BotStateManager.StatusEvent>();
+    fixture.manager().addStatusListener(event -> {
+      events.add(event);
+      if (event.status() != null && event.status().getRuntimeState() == BotRuntimeState.BOT_RUNTIME_STATE_STOPPED
+        && started.compareAndSet(false, true)) intent.apply(fixture.manager(), fixture.user(), fixture.botId());
+    });
+
+    var removal = fixture.manager().removeAccounts(List.of(fixture.botId()));
+    disconnected.complete(null);
+    removal.join();
+
+    assertTrue(started.get());
+    assertEquals(BotRuntimeState.BOT_RUNTIME_STATE_STARTING, fixture.manager().status(fixture.botId()).getRuntimeState());
+    assertTrue(events.stream().noneMatch(event -> fixture.botId().equals(event.removedBotId())));
+    verify(fixture.instance().botControlLeaseManager(), never()).clear(fixture.botId());
+    var currentLaunch = scheduled.get();
+    Intent.START.apply(fixture.manager(), fixture.user(), other.profileId());
+    assertEquals(BotRuntimeState.BOT_RUNTIME_STATE_QUEUED, fixture.manager().status(other.profileId()).getRuntimeState());
+    assertSame(currentLaunch, scheduled.get());
+    var current = mock(BotConnection.class);
+    when(current.accountProfileId()).thenReturn(fixture.botId());
+    when(current.connect()).thenReturn(CompletableFuture.completedFuture(null));
+    try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+      when(factory.prepareConnection(false)).thenReturn(current))) {
+      currentLaunch.run();
+    }
+    assertSame(current, fixture.connections().get(fixture.botId()));
+    verify(current).connect();
+  }
+
   @Test
   void accountRemovalClearsIntentRenewedDuringDisconnect(@TempDir Path directory) {
     var fixture = fixture(directory, true);

@@ -188,17 +188,25 @@ public final class BotStateManager {
   public CompletableFuture<Void> removeAccounts(Collection<UUID> botIds) {
     var normalizedBotIds = List.copyOf(new LinkedHashSet<>(botIds));
     markStopped(normalizedBotIds);
-    return stopRuntimeBots(normalizedBotIds)
+    var stops = stopRuntimeBots(normalizedBotIds);
+    return CompletableFuture.allOf(stops.stream().map(PendingStop::completion).toArray(CompletableFuture[]::new))
       .thenRun(() -> {
+        var removedIds = new ArrayList<UUID>();
         synchronized (stateLock) {
-          for (var botId : normalizedBotIds) {
+          for (var stop : stops) {
+            var botId = stop.botId();
+            // A new start can be accepted while the old connection finishes disconnecting.
+            if (generations.getOrDefault(botId, 0L) != stop.generation()) {
+              continue;
+            }
             runtimeEntries.remove(botId);
             generations.remove(botId);
             proxyLeases.remove(botId);
             instanceManager.botControlLeaseManager().clear(botId);
+            removedIds.add(botId);
           }
         }
-        normalizedBotIds.forEach(this::publishRemoved);
+        removedIds.forEach(this::publishRemoved);
       });
   }
 
@@ -697,12 +705,13 @@ public final class BotStateManager {
       .thenRun(() -> instanceManager.removeBot(connection));
   }
 
-  private CompletableFuture<Void> stopRuntimeBots(Collection<UUID> botIds) {
-    var futures = new ArrayList<CompletableFuture<?>>();
+  private List<PendingStop> stopRuntimeBots(Collection<UUID> botIds) {
+    var stops = new ArrayList<PendingStop>();
     for (var botId : botIds) {
       BotConnection connection;
+      final long generation;
       synchronized (stateLock) {
-        nextGenerationLocked(botId);
+        generation = nextGenerationLocked(botId);
         queuedBotIds.remove(botId);
         connectQueue.removeIf(queued -> queued.botId().equals(botId));
         connection = instanceManager.botConnections().get(botId);
@@ -717,12 +726,12 @@ public final class BotStateManager {
         }
       }
       publishStatus(botId);
-      if (connection != null) {
-        futures.add(connection.disconnect(Component.text("Bot stopped"))
-          .thenRun(() -> instanceManager.removeBot(connection)));
-      }
+      var completion = connection == null ? CompletableFuture.completedFuture(null)
+        : connection.disconnect(Component.text("Bot stopped"))
+          .thenRun(() -> instanceManager.removeBot(connection));
+      stops.add(new PendingStop(botId, generation, completion));
     }
-    return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
+    return stops;
   }
 
   private List<BotStatus> statuses(Collection<UUID> botIds) {
@@ -833,6 +842,9 @@ public final class BotStateManager {
   }
 
   private record QueuedBot(UUID botId, long generation) {
+  }
+
+  private record PendingStop(UUID botId, long generation, CompletableFuture<?> completion) {
   }
 
   private record Launch(QueuedBot queuedBot, @Nullable SFProxy proxy, long delayMillis) {
