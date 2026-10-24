@@ -98,6 +98,13 @@ export default {
         catch: (cause) => new CheckFailed({ message: `Trade selection failed: ${String(cause)}` }),
       });
       yield* check(selected.success, "Trade selection was rejected");
+      const selection = (yield* bot.inventoryState()).layout?.buttons.filter(
+        (button) => button.selected,
+      );
+      yield* check(
+        selection?.length === 1 && selection[0]?.buttonId === trade.buttonId,
+        "The inventory controls did not reflect the selected trade",
+      );
       yield* eventually(
         bot.inventoryState().pipe(
           Effect.flatMap((state) =>
@@ -168,6 +175,13 @@ export default {
         catch: (cause) => new CheckFailed({ message: String(cause) }),
       });
       yield* check(bread.success, "The discounted offer was rejected");
+      const reopenedSelection = (yield* bot.inventoryState()).layout?.buttons.filter(
+        (button) => button.selected,
+      );
+      yield* check(
+        reopenedSelection?.length === 1 && reopenedSelection[0]?.buttonId === 0,
+        "Reopening the merchant retained a different offer selection",
+      );
       yield* eventually(
         bot.inventoryState().pipe(
           Effect.flatMap((state) =>

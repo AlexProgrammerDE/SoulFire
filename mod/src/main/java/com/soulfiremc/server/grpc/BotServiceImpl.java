@@ -1640,6 +1640,8 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       case MerchantMenu merchantMenu -> {
         // Villager trading: each trade offer is a button
         var offers = merchantMenu.getOffers();
+        var selectedTrade = minecraft.gui.screen() instanceof MerchantScreen screen && screen.getMenu() == merchantMenu
+          ? ((MerchantScreenAccessor) screen).soulfire$getSelectedTrade() : -1;
         for (int i = 0; i < offers.size(); i++) {
           var offer = offers.get(i);
           var result = offer.getResult();
@@ -1656,6 +1658,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
             .setLabel(result.getCount() + "x " + result.getHoverName().getString())
             .setDescription(costDesc)
             .setIconItemId(result.typeHolder().getRegisteredName())
+            .setSelected(i == selectedTrade)
             .setDisabled(offer.isOutOfStock())
             .build());
         }

@@ -17,34 +17,83 @@
  */
 package com.soulfiremc.server.grpc;
 
+import com.soulfiremc.grpc.generated.ContainerButton;
+import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
 import com.soulfiremc.test.utils.TestBootstrap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.Filterable;
+import net.minecraft.world.entity.EntityEquipment;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.trading.Merchant;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 final class ContainerLayoutTest {
   @BeforeAll
   static void bootstrapMinecraft() {
     TestBootstrap.bootstrapForTest();
+  }
+
+  @Test
+  void merchantSelectionTracksOnlyTheMatchingNativeScreen() {
+    var stack = new ItemStack(Holder.direct(Items.EMERALD, DataComponentMap.EMPTY), 1);
+    stack.set(DataComponents.ITEM_NAME, Component.empty());
+    var offer = mock(MerchantOffer.class);
+    when(offer.getResult()).thenReturn(stack);
+    when(offer.getCostA()).thenReturn(stack);
+    when(offer.getCostB()).thenReturn(ItemStack.EMPTY);
+    var offers = new MerchantOffers();
+    offers.add(offer);
+    offers.add(offer);
+    var merchant = mock(Merchant.class);
+    when(merchant.getOffers()).thenReturn(offers);
+    var inventory = new Inventory(mock(LocalPlayer.class), new EntityEquipment());
+    var menu = new MerchantMenu(1, inventory, merchant);
+    var screen = mock(MerchantScreen.class, withSettings().extraInterfaces(MerchantScreenAccessor.class));
+    when(screen.getMenu()).thenReturn(menu);
+    var minecraft = mock(Minecraft.class);
+    minecraft.gui = mock(Gui.class);
+    when(minecraft.gui.screen()).thenReturn(screen);
+
+    for (var selected : new int[]{0, 1, 0}) {
+      when(((MerchantScreenAccessor) screen).soulfire$getSelectedTrade()).thenReturn(selected);
+      var layout = BotServiceImpl.buildContainerLayout(menu, "", minecraft);
+      assertEquals(List.of(selected), layout.getButtonsList().stream()
+        .filter(ContainerButton::getSelected).map(ContainerButton::getButtonId).toList());
+    }
+
+    when(screen.getMenu()).thenReturn(new MerchantMenu(2, inventory, merchant));
+    assertTrue(BotServiceImpl.buildContainerLayout(menu, "", minecraft).getButtonsList().stream()
+      .noneMatch(ContainerButton::getSelected));
+    when(minecraft.gui.screen()).thenReturn(null);
+    assertTrue(BotServiceImpl.buildContainerLayout(menu, "", minecraft).getButtonsList().stream()
+      .noneMatch(ContainerButton::getSelected));
   }
 
   @Test

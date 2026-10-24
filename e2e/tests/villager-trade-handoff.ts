@@ -61,7 +61,7 @@ export default {
               yield* rcon("setblock 4087 64 10 air", { check: false });
               yield* rcon("setblock 4087 64 10 furnace");
               yield* rcon(
-                `summon villager 4087.5 64 8.5 {Tags:["${TAG}"],NoAI:1b,Invulnerable:1b,VillagerData:{profession:"minecraft:farmer",level:2,type:"minecraft:plains"},Offers:{Recipes:[{buy:{id:"minecraft:emerald",count:1},sell:{id:"minecraft:bread",count:1},maxUses:999}]}}`,
+                `summon villager 4087.5 64 8.5 {Tags:["${TAG}"],NoAI:1b,Invulnerable:1b,VillagerData:{profession:"minecraft:farmer",level:2,type:"minecraft:plains"},Offers:{Recipes:[{buy:{id:"minecraft:emerald",count:1},sell:{id:"minecraft:apple",count:1},maxUses:999},{buy:{id:"minecraft:emerald",count:1},sell:{id:"minecraft:bread",count:1},maxUses:999}]}}`,
               );
               for (const item of ["emerald 4", "iron_ore", "coal"]) {
                 yield* rcon(`give ${BOT_NAME} ${item}`);
@@ -91,14 +91,14 @@ export default {
                   Effect.filterOrFail(
                     (state) =>
                       state.layout?.containerType === "merchant" &&
-                      state.layout.buttons.length === 1,
+                      state.layout.buttons.length === 2,
                     () => new CheckFailed({ message: "The merchant menu did not open" }),
                   ),
                 ),
                 "5 seconds",
               );
               if (mode === "keep-open" || mode === "close") {
-                const trade = yield* bot.tasks.villagerTrade(0, 2, {
+                const trade = yield* bot.tasks.villagerTrade(1, 2, {
                   closeWhenDone: mode === "close",
                 });
                 yield* Effect.addFinalizer(() => trade.cancel("test cleanup").pipe(Effect.ignore));
@@ -118,8 +118,15 @@ export default {
                     : state.menuId === merchant.menuId,
                   "An active trade did not respect its close option",
                 );
+                if (mode === "keep-open") {
+                  const selection = state.layout?.buttons.filter((button) => button.selected);
+                  yield* check(
+                    selection?.length === 1 && selection[0]?.buttonId === 1,
+                    "A trade task left the native screen on a different offer",
+                  );
+                }
               } else if (mode === "suspended") {
-                const trade = yield* bot.tasks.villagerTrade(0, 4, { closeWhenDone: true });
+                const trade = yield* bot.tasks.villagerTrade(1, 4, { closeWhenDone: true });
                 yield* Effect.addFinalizer(() => trade.cancel("test cleanup").pipe(Effect.ignore));
                 yield* eventually(
                   bot
@@ -201,7 +208,7 @@ export default {
                   "3 seconds",
                   "10 millis",
                 );
-                const trade = yield* bot.tasks.villagerTrade(0, 4, {
+                const trade = yield* bot.tasks.villagerTrade(1, 4, {
                   closeWhenDone: true,
                   conflictPolicy: BotTaskConflictPolicy.QUEUE,
                 });
@@ -235,7 +242,7 @@ export default {
               // Return any remaining merchant payment before counting vanilla items.
               yield* bot.closeContainer();
               const offer = yield* rcon(
-                `data get entity @e[type=villager,tag=${TAG},limit=1] Offers.Recipes[0]`,
+                `data get entity @e[type=villager,tag=${TAG},limit=1] Offers.Recipes[1]`,
               );
               yield* check(offer.includes("minecraft:bread"), "The vanilla offer disappeared");
               const uses = Number(offer.match(/(?:^|[,{}]\s*)uses: (\d+)/)?.[1] ?? 0);

@@ -21,6 +21,7 @@ import com.soulfiremc.grpc.generated.BotTaskProgress;
 import com.soulfiremc.grpc.generated.ItemSelector;
 import com.soulfiremc.grpc.generated.VillagerTradeTask;
 import com.soulfiremc.grpc.generated.VillagerTradeTaskResult;
+import com.soulfiremc.mod.mixin.soulfire.MerchantScreenAccessor;
 import com.soulfiremc.server.api.BotTaskExecution;
 import com.soulfiremc.server.api.BotTaskProvider;
 import com.soulfiremc.server.bot.ControlPriority;
@@ -31,6 +32,7 @@ import com.soulfiremc.server.grpc.InventoryServiceImpl;
 import com.soulfiremc.server.grpc.MinecraftDomainMapper;
 import com.soulfiremc.server.util.SFInventoryHelpers;
 import io.grpc.Status;
+import net.minecraft.client.gui.screens.inventory.MerchantScreen;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -216,10 +218,14 @@ public final class VillagerTradeTaskProvider
           .withDescription("Inventory has no room for the trade result")
           .asRuntimeException();
       }
+      var minecraft = context.bot().minecraft();
       var connection = Objects.requireNonNull(
-        context.bot().minecraft().getConnection(),
+        minecraft.getConnection(),
         "Bot connection is not available"
       );
+      if (minecraft.gui.screen() instanceof MerchantScreen screen && screen.getMenu() == menu) {
+        ((MerchantScreenAccessor) screen).soulfire$setSelectedTrade(offerIndex);
+      }
       connection.send(new ServerboundSelectTradePacket(offerIndex));
       menu.setSelectionHint(offerIndex);
       menu.tryMoveItems(offerIndex);
