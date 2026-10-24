@@ -58,6 +58,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -230,6 +232,66 @@ final class BotStateManagerTest {
     assertEquals(List.of(ConnectionStep.CONNECT, ConnectionStep.DISCONNECT), calls);
     assertTrue(fixture.connections().isEmpty());
   }
+
+  @ParameterizedTest
+  @EnumSource(Removal.class)
+  void readdingAnAccountCannotReviveItsRetiredPreparation(Removal removal, @TempDir Path directory) throws Exception {
+    var fixture = fixture(directory, false);
+    var accounts = fixture.settings().accounts();
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    fixture.manager().setDesiredState(fixture.user(), List.of(fixture.botId()), BotDesiredState.BOT_DESIRED_STATE_RUNNING);
+    var retiredLaunch = scheduled.get();
+    var prepared = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    var retired = mock(BotConnection.class);
+    when(retired.accountProfileId()).thenReturn(fixture.botId());
+    when(retired.connect()).thenReturn(CompletableFuture.completedFuture(null));
+    when(retired.disconnect(any())).thenReturn(CompletableFuture.completedFuture(null));
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var pending = workers.submit(() -> {
+        try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+          when(factory.prepareConnection(false)).thenAnswer(_ -> {
+            prepared.countDown();
+            assertTrue(resume.await(5, TimeUnit.SECONDS));
+            return retired;
+          }))) {
+          retiredLaunch.run();
+        }
+      });
+      try {
+        assertTrue(prepared.await(5, TimeUnit.SECONDS));
+        if (removal == Removal.EXPLICIT) fixture.manager().removeAccounts(List.of(fixture.botId())).join();
+        when(fixture.settings().accounts()).thenReturn(Map.of());
+        fixture.manager().syncConfiguredAccounts();
+        when(fixture.settings().accounts()).thenReturn(accounts);
+        fixture.manager().syncConfiguredAccounts();
+        fixture.manager().setDesiredState(fixture.user(), List.of(fixture.botId()), BotDesiredState.BOT_DESIRED_STATE_RUNNING);
+      } finally {
+        resume.countDown();
+      }
+      pending.get(5, TimeUnit.SECONDS);
+    }
+    assertTrue(fixture.connections().isEmpty());
+    verify(retired, never()).connect();
+    verify(retired).disconnect(any());
+
+    var current = mock(BotConnection.class);
+    when(current.accountProfileId()).thenReturn(fixture.botId());
+    when(current.connect()).thenReturn(CompletableFuture.completedFuture(null));
+    assertNotSame(retiredLaunch, scheduled.get());
+    try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+      when(factory.prepareConnection(false)).thenReturn(current))) {
+      scheduled.get().run();
+    }
+    assertSame(current, fixture.connections().get(fixture.botId()));
+    verify(current).connect();
+  }
+
+  private enum Removal { EXPLICIT, CONFIGURATION }
 
   private enum ConnectionStep { CONNECT, DISCONNECT }
 

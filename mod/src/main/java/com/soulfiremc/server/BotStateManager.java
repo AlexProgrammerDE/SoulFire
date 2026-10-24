@@ -80,6 +80,7 @@ public final class BotStateManager {
   private final CopyOnWriteArraySet<Consumer<StatusEvent>> statusListeners = new CopyOnWriteArraySet<>();
   private int activeStarts;
   private long nextStartAtMillis;
+  private long generationSequence;
   private boolean shuttingDown;
 
   public BotStateManager(InstanceManager instanceManager) {
@@ -723,7 +724,8 @@ public final class BotStateManager {
   }
 
   private long nextGenerationLocked(UUID botId) {
-    var generation = generations.getOrDefault(botId, 0L) + 1L;
+    // Removed accounts may be re-added while their old launches are still retiring.
+    var generation = ++generationSequence;
     generations.put(botId, generation);
     return generation;
   }
