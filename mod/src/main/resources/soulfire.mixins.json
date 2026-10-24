@@ -74,6 +74,7 @@
     "soulfire.AbstractFurnaceMenuAccessor",
     "soulfire.AnvilScreenAccessor",
     "soulfire.EditBoxAccessor",
+    "soulfire.GameRendererAccessor",
     "soulfire.MultiLineEditBoxAccessor",
     "soulfire.MultilineTextFieldAccessor",
     "soulfire.MerchantScreenAccessor",
