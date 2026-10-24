@@ -21,19 +21,25 @@ import com.soulfiremc.grpc.generated.BotDesiredState;
 import com.soulfiremc.server.account.AuthType;
 import com.soulfiremc.server.account.MinecraftAccount;
 import com.soulfiremc.server.account.service.OfflineJavaData;
+import com.soulfiremc.server.bot.BotConnection;
+import com.soulfiremc.server.bot.BotConnectionFactory;
 import com.soulfiremc.server.bot.BotControlLeaseManager;
 import com.soulfiremc.server.database.generated.Tables;
 import com.soulfiremc.server.settings.instance.AccountSettings;
 import com.soulfiremc.server.settings.instance.BotSettings;
 import com.soulfiremc.server.settings.lib.InstanceSettingsDelegate;
+import com.soulfiremc.server.settings.lib.InstanceSettingsImpl;
 import com.soulfiremc.server.user.SoulFireUser;
 import org.flywaydb.core.Flyway;
+import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.TransactionalRunnable;
 import org.jooq.impl.DSL;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.sqlite.SQLiteDataSource;
 
@@ -41,7 +47,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -52,9 +60,14 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 final class BotStateManagerTest {
@@ -71,43 +84,12 @@ final class BotStateManagerTest {
   @MethodSource("overlappingIntents")
   void overlappingCommandsKeepSavedAndReportedIntentConsistent(
     Intent first, Intent second, @TempDir Path directory) throws Exception {
-    var source = new SQLiteDataSource();
-    source.setUrl("jdbc:sqlite:" + directory.resolve("intent.sqlite"));
-    Flyway.configure().dataSource(source).locations("classpath:db/migration").load().migrate();
-    var stored = DSL.using(source, SQLDialect.SQLITE);
-    var instanceId = UUID.randomUUID();
-    var ownerId = UUID.randomUUID().toString();
-    stored.execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, 'owner', 'owner@example.com', 'ADMIN', CURRENT_TIMESTAMP)", ownerId);
-    stored.insertInto(Tables.INSTANCES)
-      .set(Tables.INSTANCES.ID, instanceId.toString())
-      .set(Tables.INSTANCES.FRIENDLY_NAME, "intent")
-      .set(Tables.INSTANCES.ICON, "pickaxe")
-      .set(Tables.INSTANCES.OWNER_ID, ownerId)
-      .set(Tables.INSTANCES.SETTINGS, "{}")
-      .execute();
-    var account = new MinecraftAccount(AuthType.OFFLINE, UUID.randomUUID(), "IntentBot", new OfflineJavaData(), Map.of(), Map.of());
-    var botId = account.profileId();
-    if (first == Intent.STOP || first == Intent.REMOVE) {
-      stored.insertInto(Tables.INSTANCE_DESIRED_BOTS)
-        .set(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID, instanceId.toString())
-        .set(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID, botId.toString()).execute();
-    }
-    var settings = mock(InstanceSettingsDelegate.class);
-    when(settings.accounts()).thenReturn(Map.of(botId, account));
-    when(settings.proxies()).thenReturn(List.of());
-    when(settings.get(AccountSettings.SHUFFLE_ACCOUNTS)).thenReturn(false);
-    when(settings.get(BotSettings.CONCURRENT_CONNECTS)).thenReturn(1);
-    when(settings.getRandom(BotSettings.JOIN_DELAY)).thenReturn(() -> 0);
-    var instance = mock(InstanceManager.class);
-    when(instance.id()).thenReturn(instanceId);
-    when(instance.settingsSource()).thenReturn(settings);
-    when(instance.botConnections()).thenReturn(new ConcurrentHashMap<>());
-    when(instance.scheduler()).thenReturn(mock(SoulFireScheduler.class));
-    when(instance.botControlLeaseManager()).thenReturn(mock(BotControlLeaseManager.class));
-    var intercepted = spy(stored);
-    when(instance.dsl()).thenReturn(intercepted);
-    var manager = new BotStateManager(instance);
-    var initiator = mock(SoulFireUser.class);
+    var fixture = fixture(directory, first == Intent.STOP || first == Intent.REMOVE);
+    var manager = fixture.manager();
+    var instance = fixture.instance();
+    var intercepted = fixture.dsl();
+    var initiator = fixture.user();
+    var botId = fixture.botId();
     var firstThread = new AtomicReference<Thread>();
     var committed = new CountDownLatch(1);
     var resume = new CountDownLatch(1);
@@ -145,6 +127,162 @@ final class BotStateManagerTest {
 
     assertEquals(new BotStateManager(instance).desiredBotIdsSnapshot(), manager.desiredBotIdsSnapshot());
   }
+
+  @ParameterizedTest
+  @EnumSource(value = Intent.class, names = {"STOP", "RESTART", "REMOVE"})
+  void retiredPreparationNeverRegistersOrConnects(Intent cancellation, @TempDir Path directory) throws Exception {
+    var fixture = fixture(directory, false);
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    fixture.manager().setDesiredState(fixture.user(), List.of(fixture.botId()), BotDesiredState.BOT_DESIRED_STATE_RUNNING);
+    var launch = scheduled.get();
+    var prepared = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    var connection = mock(BotConnection.class);
+    when(connection.accountProfileId()).thenReturn(fixture.botId());
+    when(connection.connect()).thenAnswer(_ -> CompletableFuture.completedFuture(null));
+    when(connection.disconnect(any())).thenReturn(CompletableFuture.completedFuture(null));
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var pending = workers.submit(() -> {
+        try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+          when(factory.prepareConnection(false)).thenAnswer(_ -> {
+            prepared.countDown();
+            assertTrue(resume.await(5, TimeUnit.SECONDS));
+            return connection;
+          }))) {
+          launch.run();
+        }
+      });
+      try {
+        assertTrue(prepared.await(5, TimeUnit.SECONDS));
+        cancellation.apply(fixture.manager(), fixture.user(), fixture.botId());
+        if (cancellation == Intent.REMOVE) when(fixture.settings().accounts()).thenReturn(Map.of());
+      } finally {
+        resume.countDown();
+      }
+      pending.get(5, TimeUnit.SECONDS);
+    }
+    assertTrue(fixture.connections().isEmpty());
+    verify(connection, never()).connect();
+    verify(connection).disconnect(any());
+  }
+
+  @Test
+  void cancellationCannotRetireARegisteredConnectionBeforeItsStartIsScheduled(@TempDir Path directory) throws Exception {
+    var fixture = fixture(directory, false);
+    var scheduled = new AtomicReference<Runnable>();
+    doAnswer(invocation -> {
+      scheduled.set(invocation.getArgument(0));
+      return null;
+    }).when(fixture.scheduler()).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+    fixture.manager().setDesiredState(fixture.user(), List.of(fixture.botId()), BotDesiredState.BOT_DESIRED_STATE_RUNNING);
+    var launch = scheduled.get();
+    var registered = new CountDownLatch(1);
+    var resume = new CountDownLatch(1);
+    var calls = new CopyOnWriteArrayList<ConnectionStep>();
+    var connection = mock(BotConnection.class);
+    when(connection.accountProfileId()).thenReturn(fixture.botId());
+    when(connection.connect()).thenAnswer(_ -> {
+      calls.add(ConnectionStep.CONNECT);
+      return CompletableFuture.completedFuture(null);
+    });
+    when(connection.disconnect(any())).thenAnswer(_ -> {
+      calls.add(ConnectionStep.DISCONNECT);
+      return CompletableFuture.completedFuture(null);
+    });
+    doAnswer(_ -> {
+      fixture.connections().put(fixture.botId(), connection);
+      registered.countDown();
+      assertTrue(resume.await(5, TimeUnit.SECONDS));
+      return true;
+    }).when(fixture.instance()).storeNewBot(connection);
+    doAnswer(_ -> {
+      if (fixture.connections().remove(fixture.botId(), connection)) fixture.manager().connectionRemoved(connection);
+      return null;
+    }).when(fixture.instance()).removeBot(connection);
+
+    try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+      var pending = workers.submit(() -> {
+        try (var factories = mockConstruction(BotConnectionFactory.class, (factory, _) ->
+          when(factory.prepareConnection(false)).thenReturn(connection))) {
+          launch.run();
+        }
+      });
+      try {
+        assertTrue(registered.await(5, TimeUnit.SECONDS));
+        var stop = workers.submit(() -> Intent.STOP.apply(fixture.manager(), fixture.user(), fixture.botId()));
+        try {
+          stop.get(500, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException _) {
+          // Registration must finish scheduling before cancellation can retire it.
+        } finally {
+          resume.countDown();
+        }
+        pending.get(5, TimeUnit.SECONDS);
+        stop.get(5, TimeUnit.SECONDS);
+      } finally {
+        resume.countDown();
+      }
+    }
+    assertEquals(List.of(ConnectionStep.CONNECT, ConnectionStep.DISCONNECT), calls);
+    assertTrue(fixture.connections().isEmpty());
+  }
+
+  private enum ConnectionStep { CONNECT, DISCONNECT }
+
+  private static Fixture fixture(Path directory, boolean initiallyRunning) {
+    var source = new SQLiteDataSource();
+    source.setUrl("jdbc:sqlite:" + directory.resolve("intent.sqlite"));
+    Flyway.configure().dataSource(source).locations("classpath:db/migration").load().migrate();
+    var stored = DSL.using(source, SQLDialect.SQLITE);
+    var instanceId = UUID.randomUUID();
+    var ownerId = UUID.randomUUID().toString();
+    stored.execute("INSERT INTO users (id, username, email, role, min_issued_at) VALUES (?, 'owner', 'owner@example.com', 'ADMIN', CURRENT_TIMESTAMP)", ownerId);
+    stored.insertInto(Tables.INSTANCES)
+      .set(Tables.INSTANCES.ID, instanceId.toString())
+      .set(Tables.INSTANCES.FRIENDLY_NAME, "intent")
+      .set(Tables.INSTANCES.ICON, "pickaxe")
+      .set(Tables.INSTANCES.OWNER_ID, ownerId)
+      .set(Tables.INSTANCES.SETTINGS, "{}")
+      .execute();
+    var account = new MinecraftAccount(AuthType.OFFLINE, UUID.randomUUID(), "IntentBot", new OfflineJavaData(), Map.of(), Map.of());
+    var botId = account.profileId();
+    if (initiallyRunning) {
+      stored.insertInto(Tables.INSTANCE_DESIRED_BOTS)
+        .set(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID, instanceId.toString())
+        .set(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID, botId.toString()).execute();
+    }
+    var settings = mock(InstanceSettingsDelegate.class);
+    when(settings.stem()).thenReturn(InstanceSettingsImpl.Stem.EMPTY);
+    when(settings.accounts()).thenReturn(Map.of(botId, account));
+    when(settings.proxies()).thenReturn(List.of());
+    when(settings.get(AccountSettings.SHUFFLE_ACCOUNTS)).thenReturn(false);
+    when(settings.get(BotSettings.CONCURRENT_CONNECTS)).thenReturn(1);
+    when(settings.get(BotSettings.ADDRESS)).thenReturn("127.0.0.1:25565");
+    when(settings.getRandom(BotSettings.JOIN_DELAY)).thenReturn(() -> 0);
+    var instance = mock(InstanceManager.class);
+    when(instance.id()).thenReturn(instanceId);
+    when(instance.settingsSource()).thenReturn(settings);
+    var connections = new ConcurrentHashMap<UUID, BotConnection>();
+    when(instance.botConnections()).thenReturn(connections);
+    var scheduler = mock(SoulFireScheduler.class);
+    when(instance.scheduler()).thenReturn(scheduler);
+    when(instance.refreshAccount(account)).thenReturn(account);
+    when(instance.storeNewBot(any())).thenAnswer(invocation -> connections.putIfAbsent(botId, invocation.getArgument(0)) == null);
+    when(instance.botControlLeaseManager()).thenReturn(mock(BotControlLeaseManager.class));
+    var intercepted = spy(stored);
+    when(instance.dsl()).thenReturn(intercepted);
+    var manager = new BotStateManager(instance);
+    var initiator = mock(SoulFireUser.class);
+    return new Fixture(instance, settings, intercepted, manager, initiator, botId, connections, scheduler);
+  }
+
+  private record Fixture(InstanceManager instance, InstanceSettingsDelegate settings, DSLContext dsl,
+                         BotStateManager manager, SoulFireUser user, UUID botId,
+                         ConcurrentHashMap<UUID, BotConnection> connections, SoulFireScheduler scheduler) {}
 
   private enum Intent {
     START, STOP, RESTART, REMOVE;

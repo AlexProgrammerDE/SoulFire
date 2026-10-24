@@ -55,6 +55,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -577,11 +578,17 @@ public final class BotStateManager {
 
       var factory = createFactory(account, proxy);
       var connection = factory.prepareConnection(false);
-      if (!instanceManager.storeNewBot(connection)) {
-        connection.disconnect(Component.text("A connection already exists for this bot"));
+      Optional<CompletableFuture<?>> connecting;
+      synchronized (stateLock) {
+        // Schedule only while this launch still owns the current generation.
+        connecting = isCurrentAndDesiredLocked(botId, queued.generation()) && instanceManager.storeNewBot(connection)
+          ? Optional.of(connection.connect()) : Optional.empty();
+      }
+      if (connecting.isEmpty()) {
+        connection.disconnect(Component.text("Bot start was cancelled or a connection already exists"));
         return;
       }
-      connection.connect().join();
+      connecting.orElseThrow().join();
 
       synchronized (stateLock) {
         if (isCurrentAndDesiredLocked(botId, queued.generation()) && !connection.isDisconnected()) {
