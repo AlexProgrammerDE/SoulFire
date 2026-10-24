@@ -663,15 +663,19 @@ public final class InventoryServiceImpl
   }
 
   private static long revision(Context context) {
-    var hash = 0xcbf29ce484222325L;
-    hash = mix(hash, context.menu.containerId);
-    hash = mix(hash, context.menu.getStateId());
-    hash = mix(hash, context.player.getInventory().getSelectedSlot());
-    for (var slot : context.menu.slots) {
+    return revision(context.menu, context.player.getInventory().getSelectedSlot());
+  }
+
+  static long revision(AbstractContainerMenu menu, int selectedHotbarSlot) {
+    var hash = 0xcbf29ce484222325L ^ menuId(menu);
+    hash = mix(hash, menu.containerId);
+    hash = mix(hash, menu.getStateId());
+    hash = mix(hash, selectedHotbarSlot);
+    for (var slot : menu.slots) {
       hash = mix(hash, slot.index);
       hash = mix(hash, stackIdentity(slot.getItem()));
     }
-    return mix(hash, stackIdentity(context.menu.getCarried()));
+    return mix(hash, stackIdentity(menu.getCarried()));
   }
 
   private static long mix(long hash, int value) {
