@@ -42,6 +42,7 @@ import com.soulfiremc.server.account.service.OfflineJavaData;
 import com.soulfiremc.server.account.service.OnlineChainJavaData;
 import com.soulfiremc.server.account.service.OnlineSimpleJavaData;
 import com.soulfiremc.server.account.service.TheAlteningJavaData;
+import com.soulfiremc.server.adventure.SoulFireAdventure;
 import com.soulfiremc.server.api.SoulFireAPI;
 import com.soulfiremc.server.api.event.bot.BotDisconnectedEvent;
 import com.soulfiremc.server.api.event.bot.PreBotConnectEvent;
@@ -63,7 +64,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.GameNarrator;
@@ -675,7 +675,7 @@ public final class BotConnection {
   }
 
   private void disconnectNow(Component reason) throws InterruptedException, TimeoutException {
-    disconnectReason = PlainTextComponentSerializer.plainText().serialize(reason);
+    disconnectReason = SoulFireAdventure.PLAIN_MESSAGE_SERIALIZER.serialize(reason);
     log.debug("Got Disconnected with reason: {}", disconnectReason);
     try {
       networkChannelTracker.beginShutdown();
