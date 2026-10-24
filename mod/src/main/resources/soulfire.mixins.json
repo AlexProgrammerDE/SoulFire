@@ -50,6 +50,7 @@
     "headless.rendering.MixinGuiRenderer",
     "headless.rendering.MixinLevelLoadTrackerWaitingForPlayerChunk",
     "headless.rendering.MixinMouseHandler",
+    "headless.rendering.MixinMultilineTextField",
     "headless.rendering.MixinPovKeyMapping",
     "headless.rendering.MixinPovInputConstants",
     "headless.rendering.MixinPovClipboard",
