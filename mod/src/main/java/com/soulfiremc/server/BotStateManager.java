@@ -266,7 +266,7 @@ public final class BotStateManager {
         runtimeEntries.remove(botId);
       } else if (shuttingDown || !desiredBotIds.contains(botId)) {
         setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_STOPPED, null);
-      } else {
+      } else if (!queuedBotIds.contains(botId)) {
         var reason = bot.disconnectReason();
         setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_FAILED, reason);
         shouldReconnect = true;
@@ -477,9 +477,12 @@ public final class BotStateManager {
       for (var botId : orderedIds) {
         if (shuttingDown
           || !desiredBotIds.contains(botId)
-          || hasLiveConnection(botId)
           || queuedBotIds.contains(botId)
           || isStartingLocked(botId)) {
+          continue;
+        }
+        var connection = instanceManager.botConnections().get(botId);
+        if (connection != null && !connection.isDisconnected() && !connection.isDisconnecting() && !isStoppingLocked(botId)) {
           continue;
         }
         enqueueLocked(botId, nextGenerationLocked(botId));
@@ -508,8 +511,13 @@ public final class BotStateManager {
       while (activeStarts < maxConcurrent && !connectQueue.isEmpty() && attempts-- > 0) {
         var queued = connectQueue.removeFirst();
         queuedBotIds.remove(queued.botId());
-        if (!isCurrentAndDesiredLocked(queued.botId(), queued.generation())
-          || hasLiveConnection(queued.botId())) {
+        if (!isCurrentAndDesiredLocked(queued.botId(), queued.generation())) {
+          continue;
+        }
+        if (instanceManager.botConnections().containsKey(queued.botId())) {
+          // The retiring connection must leave the registry before a replacement can be stored.
+          connectQueue.addLast(queued);
+          queuedBotIds.add(queued.botId());
           continue;
         }
 
@@ -750,6 +758,11 @@ public final class BotStateManager {
   private boolean isStartingLocked(UUID botId) {
     var entry = runtimeEntries.get(botId);
     return entry != null && entry.runtimeState() == BotRuntimeState.BOT_RUNTIME_STATE_STARTING;
+  }
+
+  private boolean isStoppingLocked(UUID botId) {
+    var entry = runtimeEntries.get(botId);
+    return entry != null && entry.runtimeState() == BotRuntimeState.BOT_RUNTIME_STATE_STOPPING;
   }
 
   private long nextGenerationLocked(UUID botId) {
