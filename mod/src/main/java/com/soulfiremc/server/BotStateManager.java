@@ -68,6 +68,8 @@ import java.util.function.Consumer;
 public final class BotStateManager {
   private final InstanceManager instanceManager;
   private final Object stateLock = new Object();
+  // Keep durable intent changes ordered without blocking status reads on database I/O.
+  private final Object intentLock = new Object();
   private final Set<UUID> desiredBotIds = new HashSet<>();
   private final Map<UUID, RuntimeEntry> runtimeEntries = new HashMap<>();
   private final Map<UUID, Long> generations = new HashMap<>();
@@ -98,9 +100,8 @@ public final class BotStateManager {
     }
 
     if (!disabledRestores.isEmpty()) {
-      persistStopped(disabledRestores);
+      markStopped(disabledRestores);
       synchronized (stateLock) {
-        desiredBotIds.removeAll(disabledRestores);
         for (var botId : disabledRestores) {
           setRuntimeLocked(botId, BotRuntimeState.BOT_RUNTIME_STATE_STOPPED, null);
         }
@@ -117,18 +118,12 @@ public final class BotStateManager {
     var normalizedBotIds = validateBotIds(botIds);
     switch (desiredState) {
       case BOT_DESIRED_STATE_RUNNING -> {
-        persistRunning(normalizedBotIds);
-        synchronized (stateLock) {
-          desiredBotIds.addAll(normalizedBotIds);
-        }
+        markRunning(normalizedBotIds);
         queueBots(normalizedBotIds);
       }
       case BOT_DESIRED_STATE_STOPPED -> {
-        persistStopped(normalizedBotIds);
-        synchronized (stateLock) {
-          desiredBotIds.removeAll(normalizedBotIds);
-        }
-        stopRuntimeBots(normalizedBotIds, false);
+        markStopped(normalizedBotIds);
+        stopRuntimeBots(normalizedBotIds);
       }
       case BOT_DESIRED_STATE_UNSPECIFIED, UNRECOGNIZED ->
         throw new IllegalArgumentException("desired_state must be RUNNING or STOPPED");
@@ -143,10 +138,7 @@ public final class BotStateManager {
 
   public List<BotStatus> restartBots(SoulFireUser initiator, Collection<UUID> botIds) {
     var normalizedBotIds = validateBotIds(botIds);
-    persistRunning(normalizedBotIds);
-    synchronized (stateLock) {
-      desiredBotIds.addAll(normalizedBotIds);
-    }
+    markRunning(normalizedBotIds);
 
     var restartFutures = new ArrayList<CompletableFuture<?>>();
     for (var botId : normalizedBotIds) {
@@ -194,11 +186,8 @@ public final class BotStateManager {
 
   public CompletableFuture<Void> removeAccounts(Collection<UUID> botIds) {
     var normalizedBotIds = List.copyOf(new LinkedHashSet<>(botIds));
-    persistStopped(normalizedBotIds);
-    synchronized (stateLock) {
-      desiredBotIds.removeAll(normalizedBotIds);
-    }
-    return stopRuntimeBots(normalizedBotIds, false)
+    markStopped(normalizedBotIds);
+    return stopRuntimeBots(normalizedBotIds)
       .thenRun(() -> {
         synchronized (stateLock) {
           for (var botId : normalizedBotIds) {
@@ -228,7 +217,6 @@ public final class BotStateManager {
       for (var botId : List.copyOf(runtimeEntries.keySet())) {
         if (!configuredIds.contains(botId)) {
           runtimeEntries.remove(botId);
-          desiredBotIds.remove(botId);
           generations.remove(botId);
           queuedBotIds.remove(botId);
           proxyLeases.remove(botId);
@@ -239,7 +227,7 @@ public final class BotStateManager {
       }
     }
     if (!removedIds.isEmpty()) {
-      persistStopped(removedIds);
+      markStopped(removedIds);
       removedIds.forEach(this::publishRemoved);
     }
     addedIds.forEach(this::publishStatus);
@@ -396,39 +384,49 @@ public final class BotStateManager {
     return normalized;
   }
 
-  private void persistRunning(Collection<UUID> botIds) {
+  private void markRunning(Collection<UUID> botIds) {
     if (botIds.isEmpty()) {
       return;
     }
-    var now = LocalDateTime.now(ZoneOffset.UTC);
-    instanceManager.dsl().transaction(cfg -> {
-      var ctx = DSL.using(cfg);
-      for (var botId : botIds) {
-        ctx.insertInto(Tables.INSTANCE_DESIRED_BOTS)
-          .set(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID, instanceManager.id().toString())
-          .set(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID, botId.toString())
-          .set(Tables.INSTANCE_DESIRED_BOTS.REQUESTED_AT, now)
-          .onDuplicateKeyIgnore()
-          .execute();
+    synchronized (intentLock) {
+      var now = LocalDateTime.now(ZoneOffset.UTC);
+      instanceManager.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        for (var botId : botIds) {
+          ctx.insertInto(Tables.INSTANCE_DESIRED_BOTS)
+            .set(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID, instanceManager.id().toString())
+            .set(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID, botId.toString())
+            .set(Tables.INSTANCE_DESIRED_BOTS.REQUESTED_AT, now)
+            .onDuplicateKeyIgnore()
+            .execute();
+        }
+        touchInstance(ctx, now);
+      });
+      synchronized (stateLock) {
+        desiredBotIds.addAll(botIds);
       }
-      touchInstance(ctx, now);
-    });
+    }
   }
 
-  private void persistStopped(Collection<UUID> botIds) {
+  private void markStopped(Collection<UUID> botIds) {
     if (botIds.isEmpty()) {
       return;
     }
     var ids = botIds.stream().map(UUID::toString).toList();
-    var now = LocalDateTime.now(ZoneOffset.UTC);
-    instanceManager.dsl().transaction(cfg -> {
-      var ctx = DSL.using(cfg);
-      ctx.deleteFrom(Tables.INSTANCE_DESIRED_BOTS)
-        .where(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID.eq(instanceManager.id().toString()))
-        .and(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID.in(ids))
-        .execute();
-      touchInstance(ctx, now);
-    });
+    synchronized (intentLock) {
+      var now = LocalDateTime.now(ZoneOffset.UTC);
+      instanceManager.dsl().transaction(cfg -> {
+        var ctx = DSL.using(cfg);
+        ctx.deleteFrom(Tables.INSTANCE_DESIRED_BOTS)
+          .where(Tables.INSTANCE_DESIRED_BOTS.INSTANCE_ID.eq(instanceManager.id().toString()))
+          .and(Tables.INSTANCE_DESIRED_BOTS.PROFILE_ID.in(ids))
+          .execute();
+        touchInstance(ctx, now);
+      });
+      synchronized (stateLock) {
+        desiredBotIds.removeAll(botIds);
+      }
+    }
   }
 
   private void touchInstance(org.jooq.DSLContext ctx, LocalDateTime now) {
@@ -671,7 +669,7 @@ public final class BotStateManager {
       .thenRun(() -> instanceManager.removeBot(connection));
   }
 
-  private CompletableFuture<Void> stopRuntimeBots(Collection<UUID> botIds, boolean preserveDesired) {
+  private CompletableFuture<Void> stopRuntimeBots(Collection<UUID> botIds) {
     var futures = new ArrayList<CompletableFuture<?>>();
     for (var botId : botIds) {
       BotConnection connection;
@@ -679,9 +677,6 @@ public final class BotStateManager {
         nextGenerationLocked(botId);
         queuedBotIds.remove(botId);
         connectQueue.removeIf(queued -> queued.botId().equals(botId));
-        if (!preserveDesired) {
-          desiredBotIds.remove(botId);
-        }
         connection = instanceManager.botConnections().get(botId);
         setRuntimeLocked(
           botId,
