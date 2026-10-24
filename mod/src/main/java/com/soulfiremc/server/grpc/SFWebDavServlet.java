@@ -1106,7 +1106,7 @@ public class SFWebDavServlet extends DefaultServlet implements PeriodicEventList
     var destinationPath = destinationUri.getPath();
 
     // Destination isn't allowed to use '.' or '..' segments
-    if (!destinationPath.equals(RequestUtil.normalize(destinationPath))) {
+    if (destinationPath == null || !destinationPath.equals(RequestUtil.normalize(destinationPath))) {
       resp.sendError(WebdavStatus.SC_BAD_REQUEST);
       return false;
     }

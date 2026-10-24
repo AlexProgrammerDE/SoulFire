@@ -245,6 +245,19 @@ final class SFWebDavServletTest {
     assertEquals(!"MOVE".equals(method), Files.exists(source));
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"COPY", "MOVE"})
+  void opaqueDestinationsAreRejectedWithoutRemovingTheSource(String method) throws Exception {
+    var source = storage.resolve("collection/source.bin");
+    var bytes = new byte[]{13, 14, 15};
+    Files.write(source, bytes);
+
+    var response = send("/collection/source.bin", method, "", "Destination", "urn:storage:destination");
+
+    assertEquals(400, response.statusCode());
+    assertArrayEquals(bytes, Files.readAllBytes(source));
+  }
+
   @Test
   void instancePermissionDoesNotGrantAccessToPrefixSiblingDirectories() throws Exception {
     var instanceId = UUID.randomUUID();
