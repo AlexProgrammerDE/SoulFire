@@ -1215,7 +1215,12 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
   private static int computeGroupDepth(String groupId, Map<String, String> groupParentMap) {
     var depth = 0;
     var current = groupId;
+    var visited = new HashSet<String>();
     while (true) {
+      if (!visited.add(current)) {
+        throw new ScriptGraphValidationException(List.of(new ScriptGraph.ValidationDiagnostic(
+          current, null, "Group parent hierarchy contains a cycle", ScriptGraph.Severity.ERROR)));
+      }
       var parent = groupParentMap.get(current);
       if (parent == null) {
         break;
@@ -1280,10 +1285,16 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
       }
     }
 
+    // Validate every hierarchy, including a single self-parented group, before sorting.
+    var groupDepths = new HashMap<String, Integer>();
+    for (var group : groupNodes) {
+      groupDepths.put(group.id(), computeGroupDepth(group.id(), groupParentMap));
+    }
+
     // Sort by depth descending (innermost first)
     var sortedGroups = new ArrayList<>(groupNodes);
     sortedGroups.sort(Comparator.comparingInt(
-      (ScriptNodeData g) -> computeGroupDepth(g.id(), groupParentMap)).reversed());
+      (ScriptNodeData g) -> groupDepths.get(g.id())).reversed());
 
     for (var group : sortedGroups) {
       var groupId = group.id();
@@ -1727,22 +1738,21 @@ public final class ScriptServiceImpl extends ScriptServiceGrpc.ScriptServiceImpl
         }
       }
 
-      try {
-        var graph = builder.build();
-        // Build succeeded, return warnings only
-        for (var warning : graph.warnings()) {
-          responseBuilder.addDiagnostics(diagnosticToProto(warning));
-        }
-      } catch (ScriptGraphValidationException e) {
-        for (var diagnostic : e.diagnostics()) {
-          responseBuilder.addDiagnostics(diagnosticToProto(diagnostic));
-        }
+      var graph = builder.build();
+      // Build succeeded, return warnings only
+      for (var warning : graph.warnings()) {
+        responseBuilder.addDiagnostics(diagnosticToProto(warning));
       }
 
       responseObserver.onNext(responseBuilder.build());
       responseObserver.onCompleted();
     } catch (StatusRuntimeException e) {
       throw e;
+    } catch (ScriptGraphValidationException e) {
+      responseObserver.onNext(ValidateScriptResponse.newBuilder()
+        .addAllDiagnostics(e.diagnostics().stream().map(ScriptServiceImpl::diagnosticToProto).toList())
+        .build());
+      responseObserver.onCompleted();
     } catch (Throwable t) {
       log.error("Error validating script", t);
       throw Status.INTERNAL.withDescription(t.getMessage()).withCause(t).asRuntimeException();

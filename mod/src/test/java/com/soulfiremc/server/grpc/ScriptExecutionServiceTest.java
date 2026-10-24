@@ -29,6 +29,7 @@ import com.soulfiremc.grpc.generated.CreateScriptRequest;
 import com.soulfiremc.grpc.generated.CreateScriptResponse;
 import com.soulfiremc.grpc.generated.DeactivateScriptRequest;
 import com.soulfiremc.grpc.generated.DeleteScriptRequest;
+import com.soulfiremc.grpc.generated.DiagnosticSeverity;
 import com.soulfiremc.grpc.generated.DryRunScriptRequest;
 import com.soulfiremc.grpc.generated.EdgeType;
 import com.soulfiremc.grpc.generated.GetScriptRequest;
@@ -43,6 +44,8 @@ import com.soulfiremc.grpc.generated.ScriptNode;
 import com.soulfiremc.grpc.generated.ScriptQuotas;
 import com.soulfiremc.grpc.generated.UpdateScriptRequest;
 import com.soulfiremc.grpc.generated.UpdateScriptResponse;
+import com.soulfiremc.grpc.generated.ValidateScriptRequest;
+import com.soulfiremc.grpc.generated.ValidateScriptResponse;
 import com.soulfiremc.server.InstanceManager;
 import com.soulfiremc.server.SoulFireScheduler;
 import com.soulfiremc.server.SoulFireServer;
@@ -86,6 +89,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.net.http.HttpRequest;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -978,6 +982,33 @@ final class ScriptExecutionServiceTest {
       .filter(event -> event.getNodeId().equals(list.getId())).findFirst().orElseThrow();
     assertEquals(List.of(2.0, 1.0), output.getOutputsOrThrow("list").getListValue().getValuesList().stream()
       .map(Value::getNumberValue).toList());
+  }
+
+  @ParameterizedTest
+  @ValueSource(ints = {1, 2, 3})
+  void cyclicGroupParentsReturnDiagnosticsAndRejectExecution(int size) {
+    var nodes = new ArrayList<ScriptNode>();
+    for (var index = 0; index < size; index++) {
+      var parent = size == 3 && index == size - 1 ? 1 : (index + 1) % size;
+      nodes.add(ScriptNode.newBuilder().setId("group-" + index).setType("layout.group")
+        .putData("parentGroupId", Value.newBuilder().setStringValue("group-" + parent).build()).build());
+    }
+    ValidateScriptResponse validation = rpcResponse(observer -> service.validateScript(ValidateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).addAllNodes(nodes).build(), observer));
+    assertEquals(1, validation.getDiagnosticsCount());
+    var diagnostic = validation.getDiagnostics(0);
+    assertEquals(DiagnosticSeverity.DIAGNOSTIC_ERROR, diagnostic.getSeverity());
+    assertTrue(nodes.stream().anyMatch(node -> node.getId().equals(diagnostic.getNodeId())));
+
+    CreateScriptResponse created = rpcResponse(observer -> service.createScript(CreateScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setName("cyclic groups").setPaused(true).addAllNodes(nodes).build(), observer));
+    var failure = assertThrows(StatusRuntimeException.class,
+      () -> run(request(created.getScript().getId()).build()));
+    assertEquals(Status.Code.INVALID_ARGUMENT, failure.getStatus().getCode());
+    assertTrue(events.isEmpty());
+    GetScriptResponse saved = rpcResponse(observer -> service.getScript(GetScriptRequest.newBuilder()
+      .setInstanceId(instanceId).setScriptId(created.getScript().getId()).build(), observer));
+    assertTrue(saved.getScript().getPaused());
   }
 
 }
