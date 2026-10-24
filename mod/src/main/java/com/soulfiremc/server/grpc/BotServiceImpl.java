@@ -1113,6 +1113,32 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
       playerInvStart = 9;
       hotbarStart = 36;
 
+    } else if (menu instanceof AbstractMountInventoryMenu) {
+      for (var index = 0; index < 2; index++) {
+        if (!menu.getSlot(index).isActive()) continue;
+        layoutBuilder.addRegions(SlotRegion.newBuilder()
+          .setId(index == 0 ? "saddle" : "equipment")
+          .setLabel(index == 0 ? "Saddle" : "Equipment")
+          .setStartIndex(index)
+          .setSlotCount(1)
+          .setColumns(1)
+          .setType(index == 0 ? SlotRegionType.SLOT_REGION_NORMAL : SlotRegionType.SLOT_REGION_ARMOR)
+          .build());
+      }
+      var storageSlots = menu.slots.size() - 38;
+      if (storageSlots > 0) {
+        layoutBuilder.addRegions(SlotRegion.newBuilder()
+          .setId("container")
+          .setLabel("Storage")
+          .setStartIndex(2)
+          .setSlotCount(storageSlots)
+          .setColumns(storageSlots / 3)
+          .setType(SlotRegionType.SLOT_REGION_NORMAL)
+          .build());
+      }
+      playerInvStart = 2 + storageSlots;
+      hotbarStart = playerInvStart + 27;
+
     } else if (menu instanceof ChestMenu chestMenu) {
       // Chest layout: container slots first, then player inventory
       int containerSize = chestMenu.getRowCount() * 9;
@@ -1734,6 +1760,7 @@ public final class BotServiceImpl extends BotServiceGrpc.BotServiceImplBase {
   private static String getContainerTypeId(AbstractContainerMenu menu) {
     return switch (menu) {
       case InventoryMenu ignored -> "inventory";
+      case AbstractMountInventoryMenu ignored -> "mount";
       case ChestMenu ignored -> "chest";
       case DispenserMenu ignored -> "dispenser";
       case HopperMenu ignored -> "hopper";
