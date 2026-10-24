@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -161,8 +162,9 @@ final class Socks5UdpRelayHandlerIT {
     }
   }
 
-  @Test
-  void establishesRakNetSessionAndExchangesReliableDataThroughRelay() throws Exception {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void establishesRakNetSessionAndExchangesReliableDataThroughRelay(boolean malformedReplies) throws Exception {
     var group = new MultiThreadIoEventLoopGroup(1, NioIoHandler.newFactory());
     var request = new byte[]{(byte) 0xfe, 7, 13, 29};
     var response = new byte[]{(byte) 0xfe, 31, 17, 11};
@@ -189,6 +191,7 @@ final class Socks5UdpRelayHandlerIT {
         session.readAssociationRequest("proxy-user", null);
         var running = new AtomicBoolean(true);
         var client = new AtomicReference<SocketAddress>();
+        var injected = new AtomicBoolean();
         var outbound = session.worker.submit(() -> {
           pump(session.relay, running, packet -> {
             client.set(packet.getSocketAddress());
@@ -208,6 +211,15 @@ final class Socks5UdpRelayHandlerIT {
             bytes[8] = (byte) (port >> 8);
             bytes[9] = (byte) port;
             System.arraycopy(packet.getData(), packet.getOffset(), bytes, 10, packet.getLength());
+            if (malformedReplies && injected.compareAndSet(false, true)) {
+              session.relay.send(new DatagramPacket(new byte[]{0, 0, 0, 1}, 4, client.get()));
+              var fragment = bytes.clone();
+              fragment[2] = 1;
+              session.relay.send(new DatagramPacket(fragment, fragment.length, client.get()));
+              var reserved = bytes.clone();
+              reserved[0] = 1;
+              session.relay.send(new DatagramPacket(reserved, reserved.length, client.get()));
+            }
             session.relay.send(new DatagramPacket(bytes, bytes.length, client.get()));
           });
           return null;

@@ -131,12 +131,18 @@ public class Socks5UdpRelayHandler extends ChannelDuplexHandler {
   public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     switch (msg) {
       case ByteBuf buf -> {
-        skipSocks5UdpHeader(buf);
-        ctx.fireChannelRead(buf);
+        if (skipSocks5UdpHeader(buf)) {
+          ctx.fireChannelRead(buf);
+        } else {
+          buf.release();
+        }
       }
       case DatagramPacket packet -> {
-        skipSocks5UdpHeader(packet.content());
-        ctx.fireChannelRead(packet);
+        if (skipSocks5UdpHeader(packet.content())) {
+          ctx.fireChannelRead(packet);
+        } else {
+          packet.release();
+        }
       }
       case null, default -> super.channelRead(ctx, msg);
     }
@@ -159,17 +165,31 @@ public class Socks5UdpRelayHandler extends ChannelDuplexHandler {
     return buf;
   }
 
-  private static void skipSocks5UdpHeader(ByteBuf buf) {
-    buf.skipBytes(2); // RSV
-    buf.skipBytes(1); // FRAG
-    var atyp = buf.readByte();
-    switch (atyp) {
-      case 0x01 -> buf.skipBytes(4); // IPv4
-      case 0x03 -> buf.skipBytes(buf.readUnsignedByte()); // Domain name
-      case 0x04 -> buf.skipBytes(16); // IPv6
-      default -> throw new IllegalStateException("Unknown SOCKS5 address type: " + atyp);
+  private static boolean skipSocks5UdpHeader(ByteBuf buf) {
+    var start = buf.readerIndex();
+    var readable = buf.readableBytes();
+    // Fragment reassembly is unsupported, so only standalone datagrams are accepted.
+    if (readable < 4 || buf.getUnsignedShort(start) != 0 || buf.getUnsignedByte(start + 2) != 0) {
+      return false;
     }
-    buf.skipBytes(2); // DST.PORT
+
+    var headerLength = switch (buf.getUnsignedByte(start + 3)) {
+      case 0x01 -> 10; // IPv4
+      case 0x03 -> {
+        if (readable < 5) {
+          yield -1;
+        }
+        var length = buf.getUnsignedByte(start + 4);
+        yield length == 0 ? -1 : 7 + length;
+      }
+      case 0x04 -> 22; // IPv6
+      default -> -1;
+    };
+    if (headerLength < 0 || readable < headerLength) {
+      return false;
+    }
+    buf.skipBytes(headerLength);
+    return true;
   }
 
   /// Handles the SOCKS5 handshake over the TCP control connection
